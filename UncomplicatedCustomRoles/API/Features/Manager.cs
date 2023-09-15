@@ -44,7 +44,7 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             return Plugin.CustomRoles[Id];
         }
-        public static void SummonRole(Player Player, int Id)
+        public static void Summon(Player Player, int Id)
         {
             EventHandler.DoSpawnPlayer(Player, Id);
         }

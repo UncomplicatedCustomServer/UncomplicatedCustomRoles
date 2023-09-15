@@ -1,6 +1,8 @@
 ﻿using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
+using Exiled.API.Features.Roles;
+using Exiled.API.Features.Spawn;
 using Exiled.CustomItems.API.Features;
 using Exiled.CustomRoles.API;
 using System;
@@ -9,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UncomplicatedCustomRoles.Structures;
+using UnityEngine.Android;
 using UnityEngine.Rendering.HighDefinition;
 
 namespace UncomplicatedCustomRoles.Manager

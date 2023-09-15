@@ -2,5 +2,6 @@
 {
     CompleteRandomSpawn,
     ZoneSpawn,
-    RoomsSpawn
+    RoomsSpawn,
+    SpawnZoneSpawn
 }

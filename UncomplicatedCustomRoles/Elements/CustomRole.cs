@@ -15,6 +15,7 @@ namespace UncomplicatedCustomRoles.Elements
         public int Id { get; set; } = 1;
         public string Name { get; set; } = "Janitor";
         public SpawnCondition SpawnCondition { get; set; } = SpawnCondition.RoundStart;
+        public int MaxPlayers { get; set; } = 5;
         public int SpawnChance { get; set; } = 60;
         public RoleTypeId Role { get; set; } = RoleTypeId.ClassD;
         public List<RoleTypeId> CanReplaceRoles { get; set; } = new()

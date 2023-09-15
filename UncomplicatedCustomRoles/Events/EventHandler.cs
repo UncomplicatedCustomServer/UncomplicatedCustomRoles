@@ -22,7 +22,7 @@ namespace UncomplicatedCustomRoles.Events
             Dictionary<RoleTypeId, List<ICustomRole>> RolePercentage = new();
             foreach (KeyValuePair<int, ICustomRole> Role in Plugin.CustomRoles)
             {
-                if (!Role.Value.IgnoreSpawnSystem)
+                if (!Role.Value.IgnoreSpawnSystem && Role.Value.SpawnCondition == SpawnCondition.RoundStart)
                 {
                     foreach (RoleTypeId RoleType in Role.Value.CanReplaceRoles)
                     {
@@ -44,8 +44,17 @@ namespace UncomplicatedCustomRoles.Events
                     if (Chance < RolePercentage[Player.Role.Type].Count())
                     {
                         // The role exists, good, let's give the player a role
-                        Timing.RunCoroutine(DoSpawnPlayer(Player, RolePercentage[Player.Role.Type].RandomItem().Id));
-                        Log.Debug($"Player {Player.Nickname} spawned as CustomRole");
+                        int RoleId = RolePercentage[Player.Role.Type].RandomItem().Id;
+                        if (Plugin.RolesCount[RoleId] < Plugin.CustomRoles[RoleId].MaxPlayers)
+                        {
+                            Timing.RunCoroutine(DoSpawnPlayer(Player, RoleId));
+                            Plugin.RolesCount[RoleId]++;
+                            Log.Debug($"Player {Player.Nickname} spawned as CustomRole {Player.Id}");
+                        }
+                        else
+                        {
+                            Log.Debug($"Player {Player.Nickname} won't be spawned as CustomRole {Player.Id} because it has reached the maximus number");
+                        }
                     }
                 }
             }
@@ -53,9 +62,18 @@ namespace UncomplicatedCustomRoles.Events
         public void OnRespawningTeam(RespawningTeamEventArgs Respawn)
         {
             Dictionary<RoleTypeId, List<ICustomRole>> RolePercentage = new();
+            SpawnCondition SC = SpawnCondition.RoundStart;
+            if (Respawn.NextKnownTeam == Respawning.SpawnableTeamType.NineTailedFox)
+            {
+                SC = SpawnCondition.NtfSpawn;
+            } else if (Respawn.NextKnownTeam == Respawning.SpawnableTeamType.ChaosInsurgency)
+            {
+                SC = SpawnCondition.ChaosSpawn;
+            }
+
             foreach (KeyValuePair<int, ICustomRole> Role in Plugin.CustomRoles)
             {
-                if (!Role.Value.IgnoreSpawnSystem)
+                if (!Role.Value.IgnoreSpawnSystem && Role.Value.SpawnCondition == SC)
                 {
                     foreach (RoleTypeId RoleType in Role.Value.CanReplaceRoles)
                     {
@@ -77,8 +95,16 @@ namespace UncomplicatedCustomRoles.Events
                     if (Chance < RolePercentage[Player.Role.Type].Count())
                     {
                         // The role exists, good, let's give the player a role
-                        Timing.RunCoroutine(DoSpawnPlayer(Player, RolePercentage[Player.Role.Type].RandomItem().Id));
-                        Log.Debug($"Player {Player.Nickname} spawned as CustomRole");
+                        int RoleId = RolePercentage[Player.Role.Type].RandomItem().Id;
+                        if (Plugin.RolesCount[RoleId] < Plugin.CustomRoles[RoleId].MaxPlayers)
+                        {
+                            Timing.RunCoroutine(DoSpawnPlayer(Player, RoleId));
+                            Plugin.RolesCount[RoleId]++;
+                            Log.Debug($"Player {Player.Nickname} spawned as CustomRole {Player.Id}");
+                        } else
+                        {
+                            Log.Debug($"Player {Player.Nickname} won't be spawned as CustomRole {Player.Id} because it has reached the maximus number");
+                        }
                     }
                 }
             }
@@ -87,6 +113,7 @@ namespace UncomplicatedCustomRoles.Events
         {
             if (Plugin.PlayerRegistry.ContainsKey(Died.Player.Id))
             {
+                Plugin.RolesCount[Plugin.PlayerRegistry[Died.Player.Id]]--;
                 Plugin.PlayerRegistry.Remove(Died.Player.Id);
             }
         }

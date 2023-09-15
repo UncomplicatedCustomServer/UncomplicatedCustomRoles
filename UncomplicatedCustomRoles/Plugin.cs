@@ -18,12 +18,13 @@ namespace UncomplicatedCustomRoles
         public override string Name => "UncomplicatedCustomRoles";
         public override string Prefix => "UncomplicatedCustomRoles";
         public override string Author => "FoxWorn3365, Dr.Agenda";
-        public override Version Version { get; } = new(0, 8, 2);
+        public override Version Version { get; } = new(0, 9, 0);
         public override Version RequiredExiledVersion { get; } = new(8, 2, 0);
         public static Plugin Instance;
         internal Handler Handler;
         public static Dictionary<int, ICustomRole> CustomRoles;
         public static Dictionary<int, int> PlayerRegistry = new();
+        public static Dictionary<int, int> RolesCount = new();
         public override void OnEnabled()
         {
             Instance = this;

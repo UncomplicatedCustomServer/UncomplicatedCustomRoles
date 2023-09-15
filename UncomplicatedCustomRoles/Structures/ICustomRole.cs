@@ -12,6 +12,7 @@ namespace UncomplicatedCustomRoles.Structures
         public abstract int Id { get; set; }
         public abstract string Name { get; set; }
         public abstract SpawnCondition SpawnCondition { get; set; }
+        public abstract int MaxPlayers { get; set; }
         public abstract int SpawnChance { get; set; }
         public abstract RoleTypeId Role { get; set; }
         public abstract List<RoleTypeId> CanReplaceRoles { get; set; }
@@ -22,6 +23,6 @@ namespace UncomplicatedCustomRoles.Structures
         public abstract SpawnType Spawn { get; set; }
         public abstract List<ZoneType> SpawnZones { get; set; }
         public abstract List<RoomType> SpawnRooms { get; set; }
-        public bool IgnoreSpawnSystem { get; set; }
+        public abstract bool IgnoreSpawnSystem { get; set; }
     }
 }
