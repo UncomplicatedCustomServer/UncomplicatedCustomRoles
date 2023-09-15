@@ -36,13 +36,17 @@ namespace UncomplicatedCustomRoles.Manager
                 return false;
             } else
             {
-                if (Role.Spawn == SpawnType.ZoneSpawn && Role.SpawnZones.Count() < 1)
+                if (Role.Spawn == SpawnLocationType.ZoneSpawn && Role.SpawnZones.Count() < 1)
                 {
                     Log.Debug($"The UCR custom role with the ID {Role.Id} falied the check: if you select the ZoneSpawn as SpawnType the List SpawnZones can't be empty!");
                     return false;
-                } else if (Role.Spawn == SpawnType.RoomsSpawn && Role.SpawnRooms.Count() < 1)
+                } else if (Role.Spawn == SpawnLocationType.RoomsSpawn && Role.SpawnRooms.Count() < 1)
                 {
                     Log.Debug($"The UCR custom role with the ID {Role.Id} falied the check: if you select the RoomSpawn as SpawnType the List SpawnRooms can't be empty!");
+                    return false;
+                } else if (Role.Spawn == SpawnLocationType.PositionSpawn && Role.SpawnPosition == null)
+                {
+                    Log.Debug($"The UCR custom role with the ID {Role.Id} falied the check: if you select the PositionSpawn as SpawnType the Vector3 SpawnPosition can't be empty!");
                     return false;
                 }
                 return true;
@@ -69,14 +73,17 @@ namespace UncomplicatedCustomRoles.Manager
             Player.Role.Set(Role.Role, PlayerRoles.RoleSpawnFlags.None);
             switch (Role.Spawn)
             {
-                case SpawnType.ZoneSpawn:
+                case SpawnLocationType.ZoneSpawn:
                     Player.Position = Factory.AdjustRoomPosition(Factory.RoomsInZone(Role.SpawnZones.RandomItem()).RandomItem());
                     break;
-                case SpawnType.CompleteRandomSpawn:
+                case SpawnLocationType.CompleteRandomSpawn:
                     Player.Position = Factory.AdjustRoomPosition(Factory.GetRoomList().RandomItem());
                     break;
-                case SpawnType.RoomsSpawn:
+                case SpawnLocationType.RoomsSpawn:
                     Player.Position = Factory.AdjustRoomPosition(Room.Get(Role.SpawnRooms.RandomItem()));
+                    break;
+                case SpawnLocationType.PositionSpawn:
+                    Player.Position = Role.SpawnPosition;
                     break;
             };
             Player.ResetInventory(Role.Inventory);

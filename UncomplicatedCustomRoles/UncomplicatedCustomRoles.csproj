@@ -398,7 +398,7 @@
     <Compile Include="Config.cs" />
     <Compile Include="Elements\CustomRole.cs" />
     <Compile Include="Enums\SpawnCondition.cs" />
-    <Compile Include="Enums\SpawnType.cs" />
+    <Compile Include="Enums\SpawnLocationType.cs" />
     <Compile Include="Events\EventHandler.cs" />
     <Compile Include="Manager\Factory.cs" />
     <Compile Include="Manager\SpawnManager.cs" />

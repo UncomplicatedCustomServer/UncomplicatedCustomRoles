@@ -4,6 +4,7 @@ using Exiled.API.Enums;
 using MapEditorReborn.Commands.UtilityCommands;
 using PlayerRoles;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Structures
 {
@@ -20,9 +21,10 @@ namespace UncomplicatedCustomRoles.Structures
         public abstract ushort SpawnBroadcastDuration { get; set; }
         public abstract List<ItemType> Inventory { get; set; }
         public abstract List<uint> CustomItemsInventory { get; set; }
-        public abstract SpawnType Spawn { get; set; }
+        public abstract SpawnLocationType Spawn { get; set; }
         public abstract List<ZoneType> SpawnZones { get; set; }
         public abstract List<RoomType> SpawnRooms { get; set; }
+        public Vector3 SpawnPosition { get; set; }
         public abstract bool IgnoreSpawnSystem { get; set; }
     }
 }

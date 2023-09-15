@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using UncomplicatedCustomRoles.Structures;
+using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Elements
 {
@@ -30,12 +31,13 @@ namespace UncomplicatedCustomRoles.Elements
             ItemType.KeycardJanitor
         };
         public List<uint> CustomItemsInventory { get; set; } = new();
-        public SpawnType Spawn { get; set; } = SpawnType.RoomsSpawn;
+        public SpawnLocationType Spawn { get; set; } = SpawnLocationType.RoomsSpawn;
         public List<ZoneType> SpawnZones { get; set; } = new();
         public List<RoomType> SpawnRooms { get; set; } = new()
         {
             RoomType.LczToilets
         };
+        public Vector3 SpawnPosition { get; set; } = new();
         public bool IgnoreSpawnSystem { get; set; } = false;
     }
 }
