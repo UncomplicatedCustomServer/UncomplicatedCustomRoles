@@ -19,7 +19,7 @@ namespace UncomplicatedCustomRoles.Events
         public void OnRoundStarted()
         {
             // Check for all subclasses and all spawn percentage
-            Dictionary<RoleTypeId, List<ICustomRole>> RolePercentage = new();
+            Dictionary<RoleTypeId, List<ICustomRole>> RolePercentage = Factory.RoleIstance();
             foreach (KeyValuePair<int, ICustomRole> Role in Plugin.CustomRoles)
             {
                 if (!Role.Value.IgnoreSpawnSystem && Role.Value.SpawnCondition == SpawnCondition.RoundStart)
@@ -61,7 +61,7 @@ namespace UncomplicatedCustomRoles.Events
         }
         public void OnRespawningTeam(RespawningTeamEventArgs Respawn)
         {
-            Dictionary<RoleTypeId, List<ICustomRole>> RolePercentage = new();
+            Dictionary<RoleTypeId, List<ICustomRole>> RolePercentage = Factory.RoleIstance();
             SpawnCondition SC = SpawnCondition.RoundStart;
             if (Respawn.NextKnownTeam == Respawning.SpawnableTeamType.NineTailedFox)
             {

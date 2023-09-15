@@ -1,11 +1,13 @@
 ﻿using Exiled.API.Enums;
 using Exiled.API.Features;
+using PlayerRoles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using UncomplicatedCustomRoles.Structures;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -23,7 +25,6 @@ namespace UncomplicatedCustomRoles.Manager
             }
             return Rooms;
         }
-
         public static List<Room> GetRoomList()
         {
             List<Room> Rooms = new();
@@ -32,6 +33,30 @@ namespace UncomplicatedCustomRoles.Manager
                 Rooms.Add(Room);
             }
             return Rooms;
+        }
+        public static Dictionary<RoleTypeId, List<ICustomRole>> RoleIstance()
+        {
+            return new Dictionary<RoleTypeId, List<ICustomRole>>()
+            {
+                { RoleTypeId.ClassD, new List<ICustomRole>() },
+                { RoleTypeId.Scientist, new List<ICustomRole>() },
+                { RoleTypeId.NtfSergeant, new List<ICustomRole>() },
+                { RoleTypeId.NtfCaptain, new List<ICustomRole>() },
+                { RoleTypeId.NtfSpecialist, new List<ICustomRole>() },
+                { RoleTypeId.NtfCaptain, new List<ICustomRole>() },
+                { RoleTypeId.ChaosConscript, new List<ICustomRole>() },
+                { RoleTypeId.ChaosMarauder, new List<ICustomRole>() },
+                { RoleTypeId.ChaosRepressor, new List<ICustomRole>() },
+                { RoleTypeId.ChaosRifleman, new List<ICustomRole>() },
+                { RoleTypeId.Tutorial, new List<ICustomRole>() },
+                { RoleTypeId.Scp049, new List<ICustomRole>() },
+                { RoleTypeId.Scp0492, new List<ICustomRole>() },
+                { RoleTypeId.Scp079, new List<ICustomRole>() },
+                { RoleTypeId.Scp173, new List<ICustomRole>() },
+                { RoleTypeId.Scp939, new List<ICustomRole>() },
+                { RoleTypeId.Scp096, new List<ICustomRole>() },
+                { RoleTypeId.Scp106, new List<ICustomRole>() }
+            };
         }
     }
 }

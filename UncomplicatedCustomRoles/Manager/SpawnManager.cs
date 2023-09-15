@@ -23,6 +23,7 @@ namespace UncomplicatedCustomRoles.Manager
             if (SubclassValidator(Role))
             {
                 Plugin.CustomRoles.Add(Role.Id, Role);
+                Plugin.RolesCount.Add(Role.Id, 0);
                 Log.Debug($"Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
                 return;
             }
