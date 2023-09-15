@@ -395,6 +395,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\Features\Manager.cs" />
+    <Compile Include="Commands\UCRList\UCRList.cs" />
     <Compile Include="Commands\UCRSpawn\UCRSpawn.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Elements\CustomRole.cs" />

@@ -113,6 +113,7 @@ namespace UncomplicatedCustomRoles.Events
         {
             if (Plugin.PlayerRegistry.ContainsKey(Died.Player.Id))
             {
+                Died.Player.CustomInfo = "";
                 Plugin.RolesCount[Plugin.PlayerRegistry[Died.Player.Id]]--;
                 Plugin.PlayerRegistry.Remove(Died.Player.Id);
             }

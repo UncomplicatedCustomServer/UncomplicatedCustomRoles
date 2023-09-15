@@ -31,7 +31,7 @@ namespace UncomplicatedCustomRoles.Commands.UCRSpawn
                 return false;
             }
 
-            if (arguments.Count != 1)
+            if (arguments.Count != 2)
             {
                 response = "Usage: ucrspawn (Player Id / name) (Role Id)";
                 return false;
@@ -46,6 +46,7 @@ namespace UncomplicatedCustomRoles.Commands.UCRSpawn
 
             if (arguments.At(1) != null)
             {
+                Log.Debug("Selected role Id as Int32: " + Int32.Parse(arguments.At(1)));
                 if (!Plugin.CustomRoles.ContainsKey(Int32.Parse(arguments.At(1))))
                 {
                     response = $"Role with the Id {arguments.At(1)} was not found!";
