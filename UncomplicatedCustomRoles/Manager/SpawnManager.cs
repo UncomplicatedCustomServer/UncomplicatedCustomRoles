@@ -27,7 +27,7 @@ namespace UncomplicatedCustomRoles.Manager
                 Log.Debug($"Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
                 return;
             }
-            Log.Debug($"Falied to register the UCR role with the ID {Role.Id}!");
+            Log.Debug($"Failed to register the UCR role with the ID {Role.Id}!");
         }
         public static bool SubclassValidator(ICustomRole Role)
         {
@@ -38,7 +38,7 @@ namespace UncomplicatedCustomRoles.Manager
             {
                 if (Role.Spawn == SpawnLocationType.ZoneSpawn && Role.SpawnZones.Count() < 1)
                 {
-                    Log.Debug($"The UCR custom role with the ID {Role.Id} falied the check: if you select the ZoneSpawn as SpawnType the List SpawnZones can't be empty!");
+                    Log.Debug($"The UCR custom role with the ID {Role.Id} failed the check: if you select the ZoneSpawn as SpawnType the List SpawnZones can't be empty!");
                     return false;
                 } else if (Role.Spawn == SpawnLocationType.RoomsSpawn && Role.SpawnRooms.Count() < 1)
                 {
@@ -46,7 +46,7 @@ namespace UncomplicatedCustomRoles.Manager
                     return false;
                 } else if (Role.Spawn == SpawnLocationType.PositionSpawn && Role.SpawnPosition == null)
                 {
-                    Log.Debug($"The UCR custom role with the ID {Role.Id} falied the check: if you select the PositionSpawn as SpawnType the Vector3 SpawnPosition can't be empty!");
+                    Log.Debug($"The UCR custom role with the ID {Role.Id} failed the check: if you select the PositionSpawn as SpawnType the Vector3 SpawnPosition can't be empty!");
                     return false;
                 }
                 return true;
