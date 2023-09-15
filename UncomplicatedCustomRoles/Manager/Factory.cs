@@ -8,6 +8,7 @@ using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using UncomplicatedCustomRoles.Structures;
+using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -43,7 +44,6 @@ namespace UncomplicatedCustomRoles.Manager
                 { RoleTypeId.NtfSergeant, new List<ICustomRole>() },
                 { RoleTypeId.NtfCaptain, new List<ICustomRole>() },
                 { RoleTypeId.NtfSpecialist, new List<ICustomRole>() },
-                { RoleTypeId.NtfCaptain, new List<ICustomRole>() },
                 { RoleTypeId.ChaosConscript, new List<ICustomRole>() },
                 { RoleTypeId.ChaosMarauder, new List<ICustomRole>() },
                 { RoleTypeId.ChaosRepressor, new List<ICustomRole>() },
@@ -57,6 +57,12 @@ namespace UncomplicatedCustomRoles.Manager
                 { RoleTypeId.Scp096, new List<ICustomRole>() },
                 { RoleTypeId.Scp106, new List<ICustomRole>() }
             };
+        }
+        public static Vector3 AdjustRoomPosition(Room Room)
+        {
+            Vector3 Position = Room.Position;
+            Position.y += 1;
+            return Position;
         }
     }
 }

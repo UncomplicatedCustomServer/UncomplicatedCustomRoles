@@ -70,13 +70,13 @@ namespace UncomplicatedCustomRoles.Manager
             switch (Role.Spawn)
             {
                 case SpawnType.ZoneSpawn:
-                    Player.Position = Factory.RoomsInZone(Role.SpawnZones.RandomItem()).RandomItem().Position;
+                    Player.Position = Factory.AdjustRoomPosition(Factory.RoomsInZone(Role.SpawnZones.RandomItem()).RandomItem());
                     break;
                 case SpawnType.CompleteRandomSpawn:
-                    Player.Position = Factory.GetRoomList().RandomItem().Position;
+                    Player.Position = Factory.AdjustRoomPosition(Factory.GetRoomList().RandomItem());
                     break;
                 case SpawnType.RoomsSpawn:
-                    Player.Position = Room.Get(Role.SpawnRooms.RandomItem()).Position;
+                    Player.Position = Factory.AdjustRoomPosition(Room.Get(Role.SpawnRooms.RandomItem()));
                     break;
             };
             Player.ResetInventory(Role.Inventory);
