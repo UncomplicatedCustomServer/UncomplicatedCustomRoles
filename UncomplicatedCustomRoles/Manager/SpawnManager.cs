@@ -42,7 +42,7 @@ namespace UncomplicatedCustomRoles.Manager
                     return false;
                 } else if (Role.Spawn == SpawnLocationType.RoomsSpawn && Role.SpawnRooms.Count() < 1)
                 {
-                    Log.Debug($"The UCR custom role with the ID {Role.Id} falied the check: if you select the RoomSpawn as SpawnType the List SpawnRooms can't be empty!");
+                    Log.Debug($"The UCR custom role with the ID {Role.Id} failed the check: if you select the RoomSpawn as SpawnType the List SpawnRooms can't be empty!");
                     return false;
                 } else if (Role.Spawn == SpawnLocationType.PositionSpawn && Role.SpawnPosition == null)
                 {
@@ -97,7 +97,15 @@ namespace UncomplicatedCustomRoles.Manager
                     }
                 }
             }
+            // Now add all ammos
+            foreach (KeyValuePair<AmmoType, ushort> Ammo in Role.Ammo)
+            {
+                Player.AddAmmo(Ammo.Key, Ammo.Value);
+            }
             Player.CustomInfo = Role.Name;
+            Player.MaxHealth = Role.MaxHealt;
+            Player.Health = Role.Healt;
+            Player.ArtificialHealth = Role.Ahp;
             Player.Broadcast(Role.SpawnBroadcastDuration, Role.SpawnBroadcast);
             // Add the player to the player classes list
             Plugin.PlayerRegistry.Add(Player.Id, Role.Id);

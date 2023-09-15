@@ -23,6 +23,9 @@ namespace UncomplicatedCustomRoles.Elements
         {
             RoleTypeId.ClassD
         };
+        public float Healt { get; set; } = 100f;
+        public float MaxHealt { get; set; } = 100f;
+        public float Ahp { get; set; } = 0f;
         public string SpawnBroadcast { get; set; } = "You are a <color=orange><b>Janitor</b></color>!\nClean the Light Containment Zone!";
         public ushort SpawnBroadcastDuration { get; set; } = 5;
         public List<ItemType> Inventory { get; set; } = new()
@@ -31,6 +34,10 @@ namespace UncomplicatedCustomRoles.Elements
             ItemType.KeycardJanitor
         };
         public List<uint> CustomItemsInventory { get; set; } = new();
+        public Dictionary<AmmoType, ushort> Ammo { get; set; } = new()
+        {
+            {AmmoType.Nato9, 5 }
+        };
         public SpawnLocationType Spawn { get; set; } = SpawnLocationType.RoomsSpawn;
         public List<ZoneType> SpawnZones { get; set; } = new();
         public List<RoomType> SpawnRooms { get; set; } = new()

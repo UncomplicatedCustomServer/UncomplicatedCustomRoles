@@ -17,10 +17,14 @@ namespace UncomplicatedCustomRoles.Structures
         public abstract int SpawnChance { get; set; }
         public abstract RoleTypeId Role { get; set; }
         public abstract List<RoleTypeId> CanReplaceRoles { get; set; }
+        public abstract float Healt { get; set; }
+        public abstract float MaxHealt { get; set; }
+        public abstract float Ahp { get; set; }
         public abstract string SpawnBroadcast { get; set; }
         public abstract ushort SpawnBroadcastDuration { get; set; }
         public abstract List<ItemType> Inventory { get; set; }
         public abstract List<uint> CustomItemsInventory { get; set; }
+        public abstract Dictionary<AmmoType, ushort> Ammo { get; set; }
         public abstract SpawnLocationType Spawn { get; set; }
         public abstract List<ZoneType> SpawnZones { get; set; }
         public abstract List<RoomType> SpawnRooms { get; set; }
