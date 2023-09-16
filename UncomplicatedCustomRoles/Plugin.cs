@@ -18,7 +18,7 @@ namespace UncomplicatedCustomRoles
         public override string Name => "UncomplicatedCustomRoles";
         public override string Prefix => "UncomplicatedCustomRoles";
         public override string Author => "FoxWorn3365, Dr.Agenda";
-        public override Version Version { get; } = new(1, 0, 1);
+        public override Version Version { get; } = new(1, 0, 5);
         public override Version RequiredExiledVersion { get; } = new(8, 2, 0);
         public static Plugin Instance;
         internal Handler Handler;
