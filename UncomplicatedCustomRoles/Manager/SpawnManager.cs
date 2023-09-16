@@ -94,9 +94,6 @@ namespace UncomplicatedCustomRoles.Manager
                     case SpawnLocationType.PositionSpawn:
                         Player.Position = Role.SpawnPosition;
                         break;
-                    case SpawnLocationType.SpawnWave:
-                        Player.Position = Role.Role.GetRandomSpawnLocation().Position;
-                        break;
                 };
             }
             Player.ResetInventory(Role.Inventory);
