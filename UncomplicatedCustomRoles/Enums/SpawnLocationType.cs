@@ -4,6 +4,5 @@
     ZoneSpawn,
     RoomsSpawn,
     PositionSpawn,
-    SpawnWave,
     KeepRoleSpawn
 }

@@ -73,13 +73,17 @@ namespace UncomplicatedCustomRoles.Events
         public void OnPlayerSpawned(SpawnedEventArgs Spawned)
         {
             Log.Debug($"Player {Spawned.Player.Nickname} spawned, going to assign a role if needed!");
-            if (Plugin.RoleSpawnQueue.Contains(Spawned.Player.Id))
+            Timing.CallDelayed(0.2f, () =>
             {
-                Log.Debug($"Assigning a role to {Spawned.Player.Nickname}");
-                Plugin.RoleSpawnQueue.Remove(Spawned.Player.Id);
-                Timing.RunCoroutine(DoElaborateSpawnPlayerFromWave(Spawned.Player, false));
-                Log.Debug($"Player {Spawned.Player.Nickname} successfully spawned as CustomRole {Plugin.RoleSpawnQueue[Spawned.Player.Id]}");
-            }
+                if (Plugin.RoleSpawnQueue.Contains(Spawned.Player.Id))
+                {
+                    Log.Debug($"Assigning a role to {Spawned.Player.Nickname}");
+                    Plugin.RoleSpawnQueue.Remove(Spawned.Player.Id);
+                    Timing.RunCoroutine(DoElaborateSpawnPlayerFromWave(Spawned.Player, false));
+                    Log.Debug($"Player {Spawned.Player.Nickname} successfully spawned as CustomRole {Plugin.RoleSpawnQueue[Spawned.Player.Id]}");
+                }
+                Log.Debug(Plugin.RoleSpawnQueue.Count().ToString());
+            });
         }
         public void OnDied(DiedEventArgs Died)
         {

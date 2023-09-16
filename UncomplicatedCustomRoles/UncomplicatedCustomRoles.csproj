@@ -67,9 +67,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>..\..\..\..\Downloads\ecsiledd\ecsiledd\0Harmony.dll</HintPath>
-    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\packages\EXILED.8.2.0\lib\net48\Assembly-CSharp-Publicized.dll</HintPath>
       <Private>True</Private>
@@ -85,9 +82,6 @@
     </Reference>
     <Reference Include="CommandSystem.Core, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\EXILED.8.2.0\lib\net48\CommandSystem.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="DnsClient">
-      <HintPath>..\..\..\..\Downloads\ecsiledd\ecsiledd\DnsClient.dll</HintPath>
     </Reference>
     <Reference Include="Exiled.API, Version=8.2.0.0, Culture=neutral, processorArchitecture=AMD64">
       <HintPath>..\packages\EXILED.8.2.0\lib\net48\Exiled.API.dll</HintPath>
@@ -116,9 +110,6 @@
     <Reference Include="Facepunch.Steamworks.Posix">
       <HintPath>..\..\..\..\Downloads\ecsiledd\ecsiledd\Facepunch.Steamworks.Posix.dll</HintPath>
     </Reference>
-    <Reference Include="MapEditorReborn">
-      <HintPath>..\..\..\..\Downloads\ecsiledd\ecsiledd\MapEditorReborn.dll</HintPath>
-    </Reference>
     <Reference Include="Mirror">
       <HintPath>..\..\..\..\Downloads\ecsiledd\ecsiledd\Mirror.dll</HintPath>
     </Reference>
@@ -142,9 +133,6 @@
     </Reference>
     <Reference Include="Pooling">
       <HintPath>..\..\..\..\Downloads\ecsiledd\ecsiledd\Pooling.dll</HintPath>
-    </Reference>
-    <Reference Include="SemanticVersioning">
-      <HintPath>..\..\..\..\Downloads\ecsiledd\ecsiledd\SemanticVersioning.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
