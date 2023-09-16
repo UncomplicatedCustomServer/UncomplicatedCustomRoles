@@ -22,7 +22,7 @@ namespace UncomplicatedCustomRoles.Manager
     {
         public static void RegisterCustomSubclass(ICustomRole Role)
         {
-            if (SubclassValidator(Role))
+            if (SubclassValidator(Role) && !Plugin.CustomRoles.ContainsKey(Role.Id))
             {
                 Plugin.CustomRoles.Add(Role.Id, Role);
                 Plugin.RolesCount.Add(Role.Id, 0);
