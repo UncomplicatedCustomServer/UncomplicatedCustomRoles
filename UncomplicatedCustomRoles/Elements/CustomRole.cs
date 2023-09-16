@@ -15,7 +15,6 @@ namespace UncomplicatedCustomRoles.Elements
     {
         public int Id { get; set; } = 1;
         public string Name { get; set; } = "Janitor";
-        public string Badge { get; set; } = null;
         public SpawnCondition SpawnCondition { get; set; } = SpawnCondition.RoundStart;
         public int MaxPlayers { get; set; } = 5;
         public int SpawnChance { get; set; } = 60;

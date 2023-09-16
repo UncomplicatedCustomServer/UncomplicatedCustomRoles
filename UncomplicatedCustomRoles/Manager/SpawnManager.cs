@@ -6,6 +6,7 @@ using Exiled.API.Features.Spawn;
 using Exiled.CustomItems.API.Features;
 using Exiled.CustomRoles.API;
 using MEC;
+using PlayerRoles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,7 +54,7 @@ namespace UncomplicatedCustomRoles.Manager
                 return true;
             }
         }
-        public static void SummonCustomSubclass(Player Player, int Id)
+        public static void SummonCustomSubclass(Player Player, int Id, bool DoBypassRoleOverwrite = true)
         {
             // Does the role exists?
             if (!Plugin.CustomRoles.ContainsKey(Id))
@@ -64,16 +65,21 @@ namespace UncomplicatedCustomRoles.Manager
 
             ICustomRole Role = Plugin.CustomRoles[Id];
 
-            if (!Role.CanReplaceRoles.Contains(Player.Role.Type))
+            if (!DoBypassRoleOverwrite && !Role.CanReplaceRoles.Contains(Player.Role.Type))
             {
                 Log.Debug($"Can't spawn the player {Player.Nickname} as UCR custom role {Role.Name} because it's role is not in the overwrittable list of custom role!\nStrange because this should be managed correctly by the plugin!");
                 return;
             }
 
-            // Ok, it's all OK so we can start to elaborate the spawn
-            Timing.CallDelayed(0.1f, () =>
+            RoleSpawnFlags SpawnFlag = RoleSpawnFlags.None;
+            if (Role.Spawn == SpawnLocationType.KeepRoleSpawn)
             {
-                Player.Role.Set(Role.Role, PlayerRoles.RoleSpawnFlags.None);
+                SpawnFlag = RoleSpawnFlags.UseSpawnpoint;
+            }
+            // Ok, it's all OK so we can start to elaborate the spawn
+            Player.Role.Set(Role.Role, SpawnFlag);
+            if (SpawnFlag == RoleSpawnFlags.None)
+            {
                 switch (Role.Spawn)
                 {
                     case SpawnLocationType.ZoneSpawn:
@@ -92,7 +98,7 @@ namespace UncomplicatedCustomRoles.Manager
                         Player.Position = Role.Role.GetRandomSpawnLocation().Position;
                         break;
                 };
-            });
+            }
             Player.ResetInventory(Role.Inventory);
             if (Role.CustomItemsInventory.Count() > 0)
             {
@@ -109,7 +115,9 @@ namespace UncomplicatedCustomRoles.Manager
             {
                 Player.AddAmmo(Ammo.Key, Ammo.Value);
             }
-            Player.GroupName = Role.Badge;
+            // Player.Group.BadgeColor = Role.Badge.Color;
+            // Player.Group.BadgeText = Role.Badge.Name;
+            // Player.Group.Permissions = Player.Group.Permissions;
             Player.CustomInfo = Role.Name;
             Player.MaxHealth = Role.MaxHealt;
             Player.Health = Role.Healt;

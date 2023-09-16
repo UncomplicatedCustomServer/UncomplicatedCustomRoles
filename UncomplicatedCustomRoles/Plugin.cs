@@ -25,6 +25,7 @@ namespace UncomplicatedCustomRoles
         public static Dictionary<int, ICustomRole> CustomRoles;
         public static Dictionary<int, int> PlayerRegistry = new();
         public static Dictionary<int, int> RolesCount = new();
+        public static List<int> RoleSpawnQueue = new();
         public override void OnEnabled()
         {
             Instance = this;
@@ -36,6 +37,7 @@ namespace UncomplicatedCustomRoles
             ServerHandler.RespawningTeam += Handler.OnRespawningTeam;
             PlayerHandler.Died += Handler.OnDied;
             PlayerHandler.Spawning += Handler.OnSpawning;
+            PlayerHandler.Spawned += Handler.OnPlayerSpawned;
 
             foreach (ICustomRole CustomRole in Config.CustomRoles)
             {
@@ -52,6 +54,7 @@ namespace UncomplicatedCustomRoles
             ServerHandler.RespawningTeam -= Handler.OnRespawningTeam;
             PlayerHandler.Died -= Handler.OnDied;
             PlayerHandler.Spawning -= Handler.OnSpawning;
+            PlayerHandler.Spawned -= Handler.OnPlayerSpawned;
 
             Handler = null;
             CustomRoles = null;
