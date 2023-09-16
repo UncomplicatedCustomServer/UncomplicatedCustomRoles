@@ -102,6 +102,7 @@ namespace UncomplicatedCustomRoles.Manager
             {
                 Player.AddAmmo(Ammo.Key, Ammo.Value);
             }
+            Player.GroupName = Role.Badge;
             Player.CustomInfo = Role.Name;
             Player.MaxHealth = Role.MaxHealt;
             Player.Health = Role.Healt;

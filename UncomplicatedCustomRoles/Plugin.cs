@@ -35,6 +35,7 @@ namespace UncomplicatedCustomRoles
             ServerHandler.RoundStarted += Handler.OnRoundStarted;
             ServerHandler.RespawningTeam += Handler.OnRespawningTeam;
             PlayerHandler.Died += Handler.OnDied;
+            PlayerHandler.Spawning += Handler.OnSpawning;
 
             foreach (ICustomRole CustomRole in Config.CustomRoles)
             {
@@ -50,6 +51,7 @@ namespace UncomplicatedCustomRoles
             ServerHandler.RoundStarted -= Handler.OnRoundStarted;
             ServerHandler.RespawningTeam -= Handler.OnRespawningTeam;
             PlayerHandler.Died -= Handler.OnDied;
+            PlayerHandler.Spawning -= Handler.OnSpawning;
 
             Handler = null;
             CustomRoles = null;

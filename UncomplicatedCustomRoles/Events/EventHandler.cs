@@ -113,9 +113,20 @@ namespace UncomplicatedCustomRoles.Events
         {
             if (Plugin.PlayerRegistry.ContainsKey(Died.Player.Id))
             {
-                Died.Player.CustomInfo = "";
                 Plugin.RolesCount[Plugin.PlayerRegistry[Died.Player.Id]]--;
                 Plugin.PlayerRegistry.Remove(Died.Player.Id);
+                Died.Player.CustomInfo = "";
+                Died.Player.GroupName = "";
+            }
+        }
+        public void OnSpawning(SpawningEventArgs Spawning)
+        {
+            if (Plugin.PlayerRegistry.ContainsKey(Spawning.Player.Id))
+            {
+                Plugin.RolesCount[Plugin.PlayerRegistry[Spawning.Player.Id]]--;
+                Plugin.PlayerRegistry.Remove(Spawning.Player.Id);
+                Spawning.Player.CustomInfo = "";
+                Spawning.Player.GroupName = "";
             }
         }
         public static IEnumerator<float> DoSpawnPlayer(Player Player, int Id)
