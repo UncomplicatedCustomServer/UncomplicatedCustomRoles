@@ -71,22 +71,26 @@ namespace UncomplicatedCustomRoles.Events
                 SC = SpawnCondition.ChaosSpawn;
             }
 
-            foreach (KeyValuePair<int, ICustomRole> Role in Plugin.CustomRoles)
+            Timing.CallDelayed(0.1f, () =>
             {
-                if (!Role.Value.IgnoreSpawnSystem && Role.Value.SpawnCondition == SC)
+                foreach (KeyValuePair<int, ICustomRole> Role in Plugin.CustomRoles)
                 {
-                    foreach (RoleTypeId RoleType in Role.Value.CanReplaceRoles)
+                    if (!Role.Value.IgnoreSpawnSystem && Role.Value.SpawnCondition == SC)
                     {
-                        for (int a = 0; a < Role.Value.SpawnChance; a++)
+                        foreach (RoleTypeId RoleType in Role.Value.CanReplaceRoles)
                         {
-                            RolePercentage[RoleType].Add(Role.Value);
+                            Log.Debug(RoleType.ToString());
+                            for (int a = 0; a < Role.Value.SpawnChance; a++)
+                            {
+                                RolePercentage[RoleType].Add(Role.Value);
+                            }
                         }
                     }
                 }
-            }
+            });
 
             // Now check all the player list and assign a custom subclasses for every role
-            foreach (Player Player in Respawn.Players)
+            foreach (Player Player in Respawn.Players.ToList())
             {
                 if (RolePercentage.ContainsKey(Player.Role.Type))
                 {
@@ -100,15 +104,16 @@ namespace UncomplicatedCustomRoles.Events
                         {
                             Timing.RunCoroutine(DoSpawnPlayer(Player, RoleId));
                             Plugin.RolesCount[RoleId]++;
-                            Log.Debug($"Player {Player.Nickname} spawned as CustomRole {Player.Id}");
+                            Log.Debug($"Player {Player.Nickname} spawned as CustomRole {RoleId}");
                         } else
                         {
-                            Log.Debug($"Player {Player.Nickname} won't be spawned as CustomRole {Player.Id} because it has reached the maximus number");
+                            Log.Debug($"Player {Player.Nickname} won't be spawned as CustomRole {RoleId} because it has reached the maximus number");
                         }
                     }
                 }
             }
         }
+
         public void OnDied(DiedEventArgs Died)
         {
             if (Plugin.PlayerRegistry.ContainsKey(Died.Player.Id))

@@ -41,6 +41,7 @@ namespace UncomplicatedCustomRoles.Manager
             {
                 { RoleTypeId.ClassD, new List<ICustomRole>() },
                 { RoleTypeId.Scientist, new List<ICustomRole>() },
+                { RoleTypeId.NtfPrivate, new List<ICustomRole>() },
                 { RoleTypeId.NtfSergeant, new List<ICustomRole>() },
                 { RoleTypeId.NtfCaptain, new List<ICustomRole>() },
                 { RoleTypeId.NtfSpecialist, new List<ICustomRole>() },

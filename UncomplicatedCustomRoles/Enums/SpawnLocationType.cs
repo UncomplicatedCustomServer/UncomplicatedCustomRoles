@@ -3,5 +3,6 @@
     CompleteRandomSpawn,
     ZoneSpawn,
     RoomsSpawn,
-    PositionSpawn
+    PositionSpawn,
+    SpawnWave
 }
