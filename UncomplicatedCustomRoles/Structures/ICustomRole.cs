@@ -10,6 +10,7 @@ namespace UncomplicatedCustomRoles.Structures
     {
         public abstract int Id { get; set; }
         public abstract string Name { get; set; }
+        public abstract string CustomInfo { get; set; }
         public abstract SpawnCondition SpawnCondition { get; set; }
         public abstract int MaxPlayers { get; set; }
         public abstract int SpawnChance { get; set; }

@@ -115,7 +115,7 @@ namespace UncomplicatedCustomRoles.Manager
             // Player.Group.BadgeColor = Role.Badge.Color;
             // Player.Group.BadgeText = Role.Badge.Name;
             // Player.Group.Permissions = Player.Group.Permissions;
-            Player.CustomInfo = Role.Name;
+            Player.CustomInfo = Role.Name + ("\n" + Role.CustomInfo ?? string.Empty);
             Player.MaxHealth = Role.MaxHealt;
             Player.Health = Role.Healt;
             Player.ArtificialHealth = Role.Ahp;
