@@ -1,4 +1,4 @@
-﻿using Exiled.API.Enums;
+using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Roles;
@@ -26,10 +26,10 @@ namespace UncomplicatedCustomRoles.Manager
             {
                 Plugin.CustomRoles.Add(Role.Id, Role);
                 Plugin.RolesCount.Add(Role.Id, 0);
-                Log.Debug($"Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
+                Log.Info($"Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
                 return;
             }
-            Log.Debug($"Failed to register the UCR role with the ID {Role.Id}!");
+            Log.Warn($"Failed to register the UCR role with the ID {Role.Id}!");
         }
         public static bool SubclassValidator(ICustomRole Role)
         {
@@ -40,15 +40,15 @@ namespace UncomplicatedCustomRoles.Manager
             {
                 if (Role.Spawn == SpawnLocationType.ZoneSpawn && Role.SpawnZones.Count() < 1)
                 {
-                    Log.Debug($"The UCR custom role with the ID {Role.Id} failed the check: if you select the ZoneSpawn as SpawnType the List SpawnZones can't be empty!");
+                    Log.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the ZoneSpawn as SpawnType the List SpawnZones can't be empty!");
                     return false;
                 } else if (Role.Spawn == SpawnLocationType.RoomsSpawn && Role.SpawnRooms.Count() < 1)
                 {
-                    Log.Debug($"The UCR custom role with the ID {Role.Id} failed the check: if you select the RoomSpawn as SpawnType the List SpawnRooms can't be empty!");
+                    Log.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the RoomSpawn as SpawnType the List SpawnRooms can't be empty!");
                     return false;
-                } else if (Role.Spawn == SpawnLocationType.PositionSpawn && Role.SpawnPosition == null)
+                } else if (Role.Spawn == SpawnLocationType.PositionSpawn && Role.SpawnPosition == new UnityEngine.Vector3(0, 0, 0))
                 {
-                    Log.Debug($"The UCR custom role with the ID {Role.Id} failed the check: if you select the PositionSpawn as SpawnType the Vector3 SpawnPosition can't be empty!");
+                    Log.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the PositionSpawn as SpawnType the Vector3 SpawnPosition can't be empty!");
                     return false;
                 }
                 return true;
@@ -59,7 +59,7 @@ namespace UncomplicatedCustomRoles.Manager
             // Does the role exists?
             if (!Plugin.CustomRoles.ContainsKey(Id))
             {
-                Log.Debug($"Sorry but the role with the Id {Id} is not registered inside UncomplicatedCustomRoles!");
+                Log.Warn($"Sorry but the role with the Id {Id} is not registered inside UncomplicatedCustomRoles!");
                 return;
             }
 
@@ -108,9 +108,12 @@ namespace UncomplicatedCustomRoles.Manager
                 }
             }
             // Now add all ammos
-            foreach (KeyValuePair<AmmoType, ushort> Ammo in Role.Ammo)
+            if (Role.Ammo.Count() > 0)
             {
-                Player.AddAmmo(Ammo.Key, Ammo.Value);
+                foreach (KeyValuePair<AmmoType, ushort> Ammo in Role.Ammo)
+                {
+                    Player.AddAmmo(Ammo.Key, Ammo.Value);
+                }
             }
             // Player.Group.BadgeColor = Role.Badge.Color;
             // Player.Group.BadgeText = Role.Badge.Name;
