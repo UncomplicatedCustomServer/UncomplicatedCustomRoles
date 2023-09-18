@@ -23,5 +23,5 @@ Unlike **CustomRoles**, **UCR** also provides a system that allows you to define
 ## Bug or questions?
 For any bugs please open an issue so that we can keep track of all problems.
 
-For questions you can contact me on Discord, I will reply as soon as possible!
-**Discord:** `@foxworn`
+For questions you can contact us on Discord, we will reply as soon as possible!
+**Discord:** `@foxworn`, `@dr.agenda`.
