@@ -1,4 +1,4 @@
-using Exiled.API.Enums;
+﻿using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Roles;
@@ -122,6 +122,14 @@ namespace UncomplicatedCustomRoles.Manager
             Player.MaxHealth = Role.MaxHealt;
             Player.Health = Role.Healt;
             Player.ArtificialHealth = Role.Ahp;
+            if (Role.HumeShield > 0)
+            {
+                Player.HumeShield = Role.HumeShield;
+            }
+            if (Role.Scale != new UnityEngine.Vector3(0, 0, 0))
+            {
+                Player.Scale = Role.Scale;
+            }
             Player.Broadcast(Role.SpawnBroadcastDuration, Role.SpawnBroadcast);
             // Add the player to the player classes list
             Plugin.PlayerRegistry.Add(Player.Id, Role.Id);

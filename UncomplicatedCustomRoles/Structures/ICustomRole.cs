@@ -19,6 +19,8 @@ namespace UncomplicatedCustomRoles.Structures
         public abstract float Healt { get; set; }
         public abstract float MaxHealt { get; set; }
         public abstract float Ahp { get; set; }
+        public abstract float HumeShield { get; set; }
+        public abstract Vector3 Scale { get; set; }
         public abstract string SpawnBroadcast { get; set; }
         public abstract ushort SpawnBroadcastDuration { get; set; }
         public abstract List<ItemType> Inventory { get; set; }

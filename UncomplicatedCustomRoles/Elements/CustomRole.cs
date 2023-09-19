@@ -27,6 +27,8 @@ namespace UncomplicatedCustomRoles.Elements
         public float Healt { get; set; } = 100f;
         public float MaxHealt { get; set; } = 100f;
         public float Ahp { get; set; } = 0f;
+        public float HumeShield { get; set; } = 0f;
+        public Vector3 Scale { get; set; } = new();
         public string SpawnBroadcast { get; set; } = "You are a <color=orange><b>Janitor</b></color>!\nClean the Light Containment Zone!";
         public ushort SpawnBroadcastDuration { get; set; } = 5;
         public List<ItemType> Inventory { get; set; } = new()
