@@ -7,9 +7,11 @@ using System.Threading.Tasks;
 using UncomplicatedCustomRoles.Manager;
 using UncomplicatedCustomRoles.Structures;
 using UncomplicatedCustomRoles.Events;
+using Org.BouncyCastle.Tls;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
+#nullable enable
     public partial class Manager
     {
         public static Dictionary<int, ICustomRole> GetList()
@@ -32,14 +34,6 @@ namespace UncomplicatedCustomRoles.API.Features
             }
             return false;
         }
-        public static int? Get(Player Player)
-        {
-            if (HasCustomRole(Player))
-            {
-                return Plugin.PlayerRegistry[Player.Id];
-            }
-            return null;
-        }
         public static ICustomRole Get(int Id)
         {
             return Plugin.CustomRoles[Id];
@@ -48,9 +42,49 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             EventHandler.DoSpawnPlayer(Player, Id);
         }
+        public static void Summon(Player Player, ICustomRole Role)
+        {
+            Summon(Player, Role.Id);
+        }
         public static void Register(ICustomRole Role)
         {
             SpawnManager.RegisterCustomSubclass(Role);
+        }
+        public static ICustomRole? Get(Player Player)
+        {
+            if (HasCustomRole(Player))
+            {
+                return Get(Plugin.PlayerRegistry[Player.Id]);
+            }
+            return null;
+        }
+        public static int Count(ICustomRole Role)
+        {
+            return Plugin.RolesCount[Role.Id];
+        }
+        public static int Count(int Role)
+        {
+            return Plugin.RolesCount[Role];
+        }
+        public static int Count()
+        {
+            int total = 0;
+            foreach (KeyValuePair<int, int> Count in Plugin.RolesCount)
+            {
+                total += Count.Value;
+            }
+            return total;
+        }
+        public static void Unregister(int Role)
+        {
+            if (IsRegistered(Role))
+            {
+                Plugin.CustomRoles.Remove(Role);
+            }
+        }
+        public static void Unregister(ICustomRole Role)
+        {
+            Unregister(Role.Id);
         }
     }
 }

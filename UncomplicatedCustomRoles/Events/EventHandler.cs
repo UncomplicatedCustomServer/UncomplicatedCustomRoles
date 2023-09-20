@@ -22,7 +22,7 @@ namespace UncomplicatedCustomRoles.Events
             Dictionary<RoleTypeId, List<ICustomRole>> RolePercentage = Factory.RoleIstance();
             foreach (KeyValuePair<int, ICustomRole> Role in Plugin.CustomRoles)
             {
-                if (!Role.Value.IgnoreSpawnSystem && Role.Value.SpawnCondition == SpawnCondition.RoundStart)
+                if (!Role.Value.IgnoreSpawnSystem && Role.Value.SpawnCondition == SpawnCondition.RoundStart && Player.List.Count() >= Role.Value.MinPlayers)
                 {
                     foreach (RoleTypeId RoleType in Role.Value.CanReplaceRoles)
                     {
@@ -116,7 +116,7 @@ namespace UncomplicatedCustomRoles.Events
 
             foreach (KeyValuePair<int, ICustomRole> Role in Plugin.CustomRoles)
             {
-                if (!Role.Value.IgnoreSpawnSystem && Role.Value.CanReplaceRoles.Contains(Player.Role.Type))
+                if (!Role.Value.IgnoreSpawnSystem && Role.Value.CanReplaceRoles.Contains(Player.Role.Type) && Role.Value.MaxPlayers < Plugin.RolesCount[Role.Value.Id] && Role.Value.MinPlayers < Player.List.Count())
                 {
                     foreach (RoleTypeId RoleType in Role.Value.CanReplaceRoles)
                     {

@@ -13,11 +13,12 @@ namespace UncomplicatedCustomRoles.Structures
         public abstract string CustomInfo { get; set; }
         public abstract SpawnCondition SpawnCondition { get; set; }
         public abstract int MaxPlayers { get; set; }
+        public abstract int MinPlayers { get; set; }
         public abstract int SpawnChance { get; set; }
         public abstract RoleTypeId Role { get; set; }
         public abstract List<RoleTypeId> CanReplaceRoles { get; set; }
-        public abstract float Healt { get; set; }
-        public abstract float MaxHealt { get; set; }
+        public abstract float Health { get; set; }
+        public abstract float MaxHealth { get; set; }
         public abstract float Ahp { get; set; }
         public abstract float HumeShield { get; set; }
         public abstract Vector3 Scale { get; set; }

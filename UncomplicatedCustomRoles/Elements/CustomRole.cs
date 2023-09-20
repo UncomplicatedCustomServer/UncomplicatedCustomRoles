@@ -18,14 +18,15 @@ namespace UncomplicatedCustomRoles.Elements
         public string CustomInfo { get; set; } = "Clean the Light Containment Zone.";
         public SpawnCondition SpawnCondition { get; set; } = SpawnCondition.RoundStart;
         public int MaxPlayers { get; set; } = 5;
+        public int MinPlayers { get; set; } = 0;
         public int SpawnChance { get; set; } = 60;
         public RoleTypeId Role { get; set; } = RoleTypeId.ClassD;
         public List<RoleTypeId> CanReplaceRoles { get; set; } = new()
         {
             RoleTypeId.ClassD
         };
-        public float Healt { get; set; } = 100f;
-        public float MaxHealt { get; set; } = 100f;
+        public float Health { get; set; } = 100f;
+        public float MaxHealth { get; set; } = 100f;
         public float Ahp { get; set; } = 0f;
         public float HumeShield { get; set; } = 0f;
         public Vector3 Scale { get; set; } = new();

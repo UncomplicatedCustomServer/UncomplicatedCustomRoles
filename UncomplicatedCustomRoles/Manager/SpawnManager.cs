@@ -119,8 +119,8 @@ namespace UncomplicatedCustomRoles.Manager
             // Player.Group.BadgeText = Role.Badge.Name;
             // Player.Group.Permissions = Player.Group.Permissions;
             Player.CustomInfo = Role.Name + ("\n" + Role.CustomInfo ?? string.Empty);
-            Player.MaxHealth = Role.MaxHealt;
-            Player.Health = Role.Healt;
+            Player.MaxHealth = Role.MaxHealth;
+            Player.Health = Role.Health;
             Player.ArtificialHealth = Role.Ahp;
             if (Role.HumeShield > 0)
             {
