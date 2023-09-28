@@ -22,5 +22,7 @@ namespace UncomplicatedCustomRoles
         {
             new CustomRole()
         };
+        [Description("Display player role info when looked at?")]
+        public bool DisplayRoleInfo { get; set; } = true;
     }
 }

@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using UncomplicatedCustomRoles.Manager;
 using UncomplicatedCustomRoles.Structures;
 using UncomplicatedCustomRoles.Events;
-using Org.BouncyCastle.Tls;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
