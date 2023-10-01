@@ -11,6 +11,7 @@ using MEC;
 using Exiled.Events.EventArgs.Server;
 using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
+using static UnityEngine.Rendering.DebugUI;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -73,7 +74,7 @@ namespace UncomplicatedCustomRoles.Events
         public void OnPlayerSpawned(SpawnedEventArgs Spawned)
         {
             Log.Debug($"Player {Spawned.Player.Nickname} spawned, going to assign a role if needed!");
-            Timing.CallDelayed(0.2f, () =>
+            Timing.CallDelayed(0.1f, () =>
             {
                 if (Plugin.RoleSpawnQueue.Contains(Spawned.Player.Id))
                 {
@@ -82,8 +83,8 @@ namespace UncomplicatedCustomRoles.Events
                     Timing.RunCoroutine(DoElaborateSpawnPlayerFromWave(Spawned.Player, false));
                     Log.Debug($"Player {Spawned.Player.Nickname} successfully spawned as CustomRole {Plugin.RoleSpawnQueue[Spawned.Player.Id]}");
                 }
-                Log.Debug(Plugin.RoleSpawnQueue.Count().ToString());
             });
+            Log.Debug(Plugin.RoleSpawnQueue.Count().ToString());
         }
         public void OnDied(DiedEventArgs Died)
         {
@@ -116,7 +117,7 @@ namespace UncomplicatedCustomRoles.Events
 
             foreach (KeyValuePair<int, ICustomRole> Role in Plugin.CustomRoles)
             {
-                if (!Role.Value.IgnoreSpawnSystem && Role.Value.CanReplaceRoles.Contains(Player.Role.Type) && Role.Value.MaxPlayers < Plugin.RolesCount[Role.Value.Id] && Role.Value.MinPlayers < Player.List.Count())
+                if (!Role.Value.IgnoreSpawnSystem && Role.Value.CanReplaceRoles.Contains(Player.Role.Type) && Role.Value.MaxPlayers < Plugin.RolesCount[Role.Value.Id] && Role.Value.MinPlayers >= Player.List.Count())
                 {
                     foreach (RoleTypeId RoleType in Role.Value.CanReplaceRoles)
                     {
@@ -128,13 +129,17 @@ namespace UncomplicatedCustomRoles.Events
                 }
             }
             int Chance = new Random().Next(0, 100);
-            if (Chance >= RolePercentage.Count())
+            if (Chance <= RolePercentage.Count())
             {
                 yield break;
             }
-            int RoleId = RolePercentage[Player.Role.Type].RandomItem().Id;
-            Plugin.RolesCount[RoleId]++;
-            Timing.RunCoroutine(DoSpawnPlayer(Player, RoleId, false));
+            if (RolePercentage[Player.Role.Type].Count() > 0)
+            {
+                int RoleId = RolePercentage[Player.Role.Type].RandomItem().Id;
+                Plugin.RolesCount[RoleId]++;
+                Timing.RunCoroutine(DoSpawnPlayer(Player, RoleId, false));
+                yield break;
+            }
             yield break;
         }
     }

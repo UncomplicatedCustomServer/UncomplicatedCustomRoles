@@ -1,7 +1,10 @@
-﻿using Exiled.API.Enums;
+﻿using CustomPlayerEffects;
+using Exiled.API.Enums;
+using Exiled.API.Features;
 using PlayerRoles;
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.Elements;
+using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Structures
@@ -16,11 +19,13 @@ namespace UncomplicatedCustomRoles.Structures
         public abstract int MinPlayers { get; set; }
         public abstract int SpawnChance { get; set; }
         public abstract RoleTypeId Role { get; set; }
+        public abstract RoleTypeId RoleAppearance { get; set; }
         public abstract List<RoleTypeId> CanReplaceRoles { get; set; }
         public abstract float Health { get; set; }
         public abstract float MaxHealth { get; set; }
         public abstract float Ahp { get; set; }
         public abstract float HumeShield { get; set; }
+        public abstract List<UCREffect> Effects { get; set; }
         public abstract Vector3 Scale { get; set; }
         public abstract string SpawnBroadcast { get; set; }
         public abstract ushort SpawnBroadcastDuration { get; set; }

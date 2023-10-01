@@ -1,4 +1,5 @@
-﻿using Exiled.API.Enums;
+﻿using CommandSystem;
+using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Roles;
@@ -122,6 +123,15 @@ namespace UncomplicatedCustomRoles.Manager
             Player.MaxHealth = Role.MaxHealth;
             Player.Health = Role.Health;
             Player.ArtificialHealth = Role.Ahp;
+            Player.ChangeAppearance(Role.RoleAppearance);
+            if (Role.Effects.Count() > 0)
+            {
+                foreach (IEffect effect in Role.Effects)
+                {
+                    Player.EnableEffect(effect.EffectType, effect.Duration);
+                    Player.ChangeEffectIntensity(effect.EffectType, effect.Intensity);
+                }
+            }
             if (Role.HumeShield > 0)
             {
                 Player.HumeShield = Role.HumeShield;
@@ -134,5 +144,5 @@ namespace UncomplicatedCustomRoles.Manager
             // Add the player to the player classes list
             Plugin.PlayerRegistry.Add(Player.Id, Role.Id);
         }
-    }
+    }   
 }

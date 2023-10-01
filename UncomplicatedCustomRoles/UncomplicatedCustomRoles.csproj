@@ -57,10 +57,12 @@
     <Compile Include="Enums\SpawnCondition.cs" />
     <Compile Include="Enums\SpawnLocationType.cs" />
     <Compile Include="Events\EventHandler.cs" />
+    <Compile Include="Manager\UCREffect.cs" />
     <Compile Include="Manager\Factory.cs" />
     <Compile Include="Manager\SpawnManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Structures\ICustomRole.cs" />
+    <Compile Include="Structures\IEffect.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

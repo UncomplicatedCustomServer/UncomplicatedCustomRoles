@@ -1,11 +1,14 @@
-﻿using Exiled.API.Enums;
+﻿using CustomPlayerEffects;
+using Exiled.API.Enums;
+using Exiled.API.Features;
 using PlayerRoles;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using UncomplicatedCustomRoles.Manager;
 using UncomplicatedCustomRoles.Structures;
 using UnityEngine;
 
@@ -21,6 +24,7 @@ namespace UncomplicatedCustomRoles.Elements
         public int MinPlayers { get; set; } = 0;
         public int SpawnChance { get; set; } = 60;
         public RoleTypeId Role { get; set; } = RoleTypeId.ClassD;
+        public RoleTypeId RoleAppearance { get; set; } = RoleTypeId.ClassD;
         public List<RoleTypeId> CanReplaceRoles { get; set; } = new()
         {
             RoleTypeId.ClassD
@@ -29,6 +33,10 @@ namespace UncomplicatedCustomRoles.Elements
         public float MaxHealth { get; set; } = 100f;
         public float Ahp { get; set; } = 0f;
         public float HumeShield { get; set; } = 0f;
+        public List<UCREffect> Effects { get; set; } = new()
+        {
+            new UCREffect()
+        };
         public Vector3 Scale { get; set; } = new();
         public string SpawnBroadcast { get; set; } = "You are a <color=orange><b>Janitor</b></color>!\nClean the Light Containment Zone!";
         public ushort SpawnBroadcastDuration { get; set; } = 5;
