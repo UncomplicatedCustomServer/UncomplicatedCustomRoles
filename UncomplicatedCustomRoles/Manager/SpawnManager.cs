@@ -65,7 +65,7 @@ namespace UncomplicatedCustomRoles.Manager
             {
                 SpawnFlag = RoleSpawnFlags.UseSpawnpoint;
             }
-            // Ok, it's all OK so we can start to elaborate the spawn
+            // It's all OK so we can start to elaborate the spawn
             Player.Role.Set(Role.Role, SpawnFlag);
             Vector3 BasicPosition = Player.Position;
             Player.ChangeAppearance(Role.RoleAppearance);
