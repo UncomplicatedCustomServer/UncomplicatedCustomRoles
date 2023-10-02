@@ -1,9 +1,6 @@
-﻿using CustomPlayerEffects;
-using Exiled.API.Enums;
-using Exiled.API.Features;
+﻿using Exiled.API.Enums;
 using PlayerRoles;
 using System.Collections.Generic;
-using UncomplicatedCustomRoles.Elements;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 
@@ -35,7 +32,8 @@ namespace UncomplicatedCustomRoles.Structures
         public abstract SpawnLocationType Spawn { get; set; }
         public abstract List<ZoneType> SpawnZones { get; set; }
         public abstract List<RoomType> SpawnRooms { get; set; }
-        public Vector3 SpawnPosition { get; set; }
+        public abstract Vector3 SpawnPosition { get; set; }
+        public abstract Vector3 SpawnOffset { get; set; }
         public abstract bool IgnoreSpawnSystem { get; set; }
     }
 }

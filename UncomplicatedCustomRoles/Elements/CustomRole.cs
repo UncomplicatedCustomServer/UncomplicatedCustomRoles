@@ -57,6 +57,7 @@ namespace UncomplicatedCustomRoles.Elements
             RoomType.LczToilets
         };
         public Vector3 SpawnPosition { get; set; } = new();
+        public Vector3 SpawnOffset { get; set; } = new();
         public bool IgnoreSpawnSystem { get; set; } = false;
     }
 }

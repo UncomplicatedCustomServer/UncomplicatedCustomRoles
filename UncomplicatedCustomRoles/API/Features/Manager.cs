@@ -1,13 +1,8 @@
 ﻿using Exiled.API.Features;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text;
-using System.Threading.Tasks;
 using UncomplicatedCustomRoles.Manager;
 using UncomplicatedCustomRoles.Structures;
 using UncomplicatedCustomRoles.Events;
-using Org.BouncyCastle.Tls;
 
 namespace UncomplicatedCustomRoles.API.Features
 {

@@ -1,9 +1,6 @@
 ﻿using Exiled.API.Features;
 using System.Collections.Generic;
-using System.Linq;
 using System;
-using System.Text;
-using System.Threading.Tasks;
 using UncomplicatedCustomRoles.Manager;
 using UncomplicatedCustomRoles.Structures;
 using Handler = UncomplicatedCustomRoles.Events.EventHandler;

@@ -1,21 +1,12 @@
-﻿using CommandSystem;
-using Exiled.API.Enums;
+﻿using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
-using Exiled.API.Features.Roles;
-using Exiled.API.Features.Spawn;
 using Exiled.CustomItems.API.Features;
-using Exiled.CustomRoles.API;
-using MEC;
 using PlayerRoles;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UncomplicatedCustomRoles.Structures;
-using UnityEngine.Android;
-using UnityEngine.Rendering.HighDefinition;
+using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -63,15 +54,12 @@ namespace UncomplicatedCustomRoles.Manager
                 Log.Warn($"Sorry but the role with the Id {Id} is not registered inside UncomplicatedCustomRoles!");
                 return;
             }
-
             ICustomRole Role = Plugin.CustomRoles[Id];
-
             if (!DoBypassRoleOverwrite && !Role.CanReplaceRoles.Contains(Player.Role.Type))
             {
                 Log.Debug($"Can't spawn the player {Player.Nickname} as UCR custom role {Role.Name} because it's role is not in the overwrittable list of custom role!\nStrange because this should be managed correctly by the plugin!");
                 return;
             }
-
             RoleSpawnFlags SpawnFlag = RoleSpawnFlags.None;
             if (Role.Spawn == SpawnLocationType.KeepRoleSpawn)
             {
@@ -79,6 +67,12 @@ namespace UncomplicatedCustomRoles.Manager
             }
             // Ok, it's all OK so we can start to elaborate the spawn
             Player.Role.Set(Role.Role, SpawnFlag);
+            Vector3 BasicPosition = Player.Position;
+            Player.ChangeAppearance(Role.RoleAppearance);
+            if (Role.Spawn == SpawnLocationType.KeepRoleSpawn)
+            {
+                Player.Position = BasicPosition;
+            }
             if (SpawnFlag == RoleSpawnFlags.None)
             {
                 switch (Role.Spawn)
@@ -91,6 +85,14 @@ namespace UncomplicatedCustomRoles.Manager
                         break;
                     case SpawnLocationType.RoomsSpawn:
                         Player.Position = Factory.AdjustRoomPosition(Room.Get(Role.SpawnRooms.RandomItem()));
+                        if (Role.SpawnOffset != new Vector3())
+                        {
+                            Vector3 OldPosition = Player.Position;
+                            OldPosition.x += Role.SpawnOffset.x;
+                            OldPosition.y += Role.SpawnOffset.y;
+                            OldPosition.z += Role.SpawnOffset.z;
+                            Player.Position = OldPosition;
+                        }
                         break;
                     case SpawnLocationType.PositionSpawn:
                         Player.Position = Role.SpawnPosition;
@@ -109,7 +111,7 @@ namespace UncomplicatedCustomRoles.Manager
                 }
             }
             // Now add all ammos
-            if (Role.Ammo.Count() > 0)
+            if (Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
             {
                 foreach (KeyValuePair<AmmoType, ushort> Ammo in Role.Ammo)
                 {
@@ -123,7 +125,6 @@ namespace UncomplicatedCustomRoles.Manager
             Player.MaxHealth = Role.MaxHealth;
             Player.Health = Role.Health;
             Player.ArtificialHealth = Role.Ahp;
-            Player.ChangeAppearance(Role.RoleAppearance);
             if (Role.Effects.Count() > 0)
             {
                 foreach (IEffect effect in Role.Effects)
@@ -136,7 +137,7 @@ namespace UncomplicatedCustomRoles.Manager
             {
                 Player.HumeShield = Role.HumeShield;
             }
-            if (Role.Scale != new UnityEngine.Vector3(0, 0, 0))
+            if (Role.Scale != new Vector3(0, 0, 0))
             {
                 Player.Scale = Role.Scale;
             }

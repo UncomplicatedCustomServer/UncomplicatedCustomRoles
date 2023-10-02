@@ -2,16 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UncomplicatedCustomRoles.Elements;
 using UncomplicatedCustomRoles.Manager;
 using UncomplicatedCustomRoles.Structures;
 using MEC;
 using Exiled.Events.EventArgs.Server;
 using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
-using static UnityEngine.Rendering.DebugUI;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -114,10 +110,9 @@ namespace UncomplicatedCustomRoles.Events
         {
             yield return Timing.WaitForSeconds(0.1f);
             Dictionary<RoleTypeId, List<ICustomRole>> RolePercentage = Factory.RoleIstance();
-
             foreach (KeyValuePair<int, ICustomRole> Role in Plugin.CustomRoles)
             {
-                if (!Role.Value.IgnoreSpawnSystem && Role.Value.CanReplaceRoles.Contains(Player.Role.Type) && Role.Value.MaxPlayers < Plugin.RolesCount[Role.Value.Id] && Role.Value.MinPlayers >= Player.List.Count())
+                if (!Role.Value.IgnoreSpawnSystem && Role.Value.CanReplaceRoles.Contains(Player.Role.Type) && Role.Value.MaxPlayers > Plugin.RolesCount[Role.Value.Id] && Role.Value.MinPlayers >= Player.List.Count())
                 {
                     foreach (RoleTypeId RoleType in Role.Value.CanReplaceRoles)
                     {
