@@ -50,7 +50,7 @@ namespace UncomplicatedCustomRoles.Events
                         }
                         else
                         {
-                            Log.Debug($"Player {Player.Nickname} won't be spawned as CustomRole {Player.Id} because it has reached the maximus number");
+                            Log.Debug($"Player {Player.Nickname} won't be spawned as CustomRole {RoleId} because it has reached the maximus number");
                         }
                     }
                 }
@@ -64,7 +64,7 @@ namespace UncomplicatedCustomRoles.Events
             foreach (Player Player in Respawn.Players.ToList())
             {
                 Plugin.RoleSpawnQueue.Add(Player.Id);
-                Log.Debug($"Player {Player.Nickname} queued for spawning as CustomRole, will be define when spawned");
+                Log.Debug($"Player {Player.Nickname} queued for spawning as CustomRole, will be defined when spawned");
             }
         }
         public void OnPlayerSpawned(SpawnedEventArgs Spawned)
@@ -80,7 +80,6 @@ namespace UncomplicatedCustomRoles.Events
                     Log.Debug($"Player {Spawned.Player.Nickname} successfully spawned as CustomRole {Plugin.RoleSpawnQueue[Spawned.Player.Id]}");
                 }
             });
-            Log.Debug(Plugin.RoleSpawnQueue.Count().ToString());
         }
         public void OnDied(DiedEventArgs Died)
         {
@@ -112,10 +111,13 @@ namespace UncomplicatedCustomRoles.Events
             Dictionary<RoleTypeId, List<ICustomRole>> RolePercentage = Factory.RoleIstance();
             foreach (KeyValuePair<int, ICustomRole> Role in Plugin.CustomRoles)
             {
-                if (!Role.Value.IgnoreSpawnSystem && Role.Value.CanReplaceRoles.Contains(Player.Role.Type) && Role.Value.MaxPlayers > Plugin.RolesCount[Role.Value.Id] && Role.Value.MinPlayers >= Player.List.Count())
+                Log.Debug($"PRE CRITICAL - {Role.Value.Name}");
+                if (!Role.Value.IgnoreSpawnSystem/* && Role.Value.CanReplaceRoles.Contains(Player.Role.Type) && Role.Value.MaxPlayers > Plugin.RolesCount[Role.Value.Id] && Role.Value.MinPlayers >= Player.List.Count()*/)
                 {
+                    Log.Debug($"CRITICAL HIT - {Role.Value.Name}");
                     foreach (RoleTypeId RoleType in Role.Value.CanReplaceRoles)
                     {
+                        Log.Debug($"MAGIC HIT - {Role.Value.Name}");
                         for (int a = 0; a < Role.Value.SpawnChance; a++)
                         {
                             RolePercentage[RoleType].Add(Role.Value);
@@ -130,11 +132,13 @@ namespace UncomplicatedCustomRoles.Events
             }
             if (RolePercentage[Player.Role.Type].Count() > 0)
             {
+                Log.Debug("MAGIC");
                 int RoleId = RolePercentage[Player.Role.Type].RandomItem().Id;
                 Plugin.RolesCount[RoleId]++;
                 Timing.RunCoroutine(DoSpawnPlayer(Player, RoleId, false));
                 yield break;
             }
+            Log.Debug("NOT MANGIC");
             yield break;
         }
     }
