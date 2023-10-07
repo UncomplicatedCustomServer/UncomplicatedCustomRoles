@@ -21,7 +21,7 @@ namespace UncomplicatedCustomRoles.Elements
         public string CustomInfo { get; set; } = "Clean the Light Containment Zone.";
         public SpawnCondition SpawnCondition { get; set; } = SpawnCondition.RoundStart;
         public int MaxPlayers { get; set; } = 5;
-        public int MinPlayers { get; set; } = 0;
+        public int MinPlayers { get; set; } = 1;
         public int SpawnChance { get; set; } = 60;
         public RoleTypeId Role { get; set; } = RoleTypeId.ClassD;
         public RoleTypeId RoleAppearance { get; set; } = RoleTypeId.ClassD;
