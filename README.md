@@ -1,7 +1,7 @@
 # UncomplicatedCustomRoles
 Add custom roles to your server in a more efficient, easy and fast way!
 
-## ℹ This plugin will support [UncomplicatedCustomRoles](https://github.com/DrAgenda/UncomplicatedCustomAbilities)
+## ℹ This plugin will support [UncomplicatedCustomAbilities](https://github.com/DrAgenda/UncomplicatedCustomAbilities)
 
 **EXILED >= 8.2.0**
 ## Installation
