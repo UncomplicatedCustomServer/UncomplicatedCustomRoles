@@ -1,4 +1,5 @@
-﻿using Exiled.API.Enums;
+﻿using CustomPlayerEffects;
+using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.CustomItems.API.Features;
@@ -45,7 +46,12 @@ namespace UncomplicatedCustomRoles.Manager
                 }
                 else if (Role.MinPlayers == 0)
                 {
-                    Log.Warn($"The UCR custom role with the ID {Role.Id} failed the check: The value of MinPlayers field must be greater than or equals to 1!");
+                    Log.Warn($"The UCR custom role with the ID {Role.Id} failed the check: the value of MinPlayers field must be greater than or equals to 1!");
+                    return false;
+                }
+                else if (Role.MovementBoost > 255)
+                {
+                    Log.Warn($"The UCR custom role with the ID {Role.Id} failed the check: the value of MovementBoost field must be a number between 0 and 255.");
                     return false;
                 }
                 return true;
@@ -130,6 +136,7 @@ namespace UncomplicatedCustomRoles.Manager
             Player.MaxHealth = Role.MaxHealth;
             Player.Health = Role.Health;
             Player.ArtificialHealth = Role.Ahp;
+            Player.EnableEffect<MovementBoost>(Role.MovementBoost);
             if (Role.Effects.Count() > 0)
             {
                 foreach (IEffect effect in Role.Effects)

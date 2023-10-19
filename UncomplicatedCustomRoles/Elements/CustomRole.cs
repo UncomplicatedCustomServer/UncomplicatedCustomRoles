@@ -33,6 +33,7 @@ namespace UncomplicatedCustomRoles.Elements
         public float MaxHealth { get; set; } = 100f;
         public float Ahp { get; set; } = 0f;
         public float HumeShield { get; set; } = 0f;
+        public float MovementBoost { get; set; } = 0f;
         public List<UCREffect> Effects { get; set; } = new()
         {
             new UCREffect()

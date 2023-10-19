@@ -8,6 +8,8 @@ using MEC;
 using Exiled.Events.EventArgs.Server;
 using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
+using Utf8Json.Formatters;
+using CustomPlayerEffects;
 
 namespace UncomplicatedCustomRoles.Events
 {
