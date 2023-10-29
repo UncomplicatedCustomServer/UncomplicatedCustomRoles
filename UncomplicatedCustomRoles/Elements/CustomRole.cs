@@ -38,6 +38,7 @@ namespace UncomplicatedCustomRoles.Elements
         {
             new UCREffect()
         };
+        public bool CanEscape { get; set; } = true;
         public Vector3 Scale { get; set; } = new();
         public string SpawnBroadcast { get; set; } = "You are a <color=orange><b>Janitor</b></color>!\nClean the Light Containment Zone!";
         public ushort SpawnBroadcastDuration { get; set; } = 5;

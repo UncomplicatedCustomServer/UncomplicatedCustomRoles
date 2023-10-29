@@ -10,6 +10,8 @@ using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
 using Utf8Json.Formatters;
 using CustomPlayerEffects;
+using Exiled.CustomRoles.API.Features;
+using Org.BouncyCastle.Tls.Crypto.Impl.BC;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -100,6 +102,18 @@ namespace UncomplicatedCustomRoles.Events
                 Plugin.PlayerRegistry.Remove(Spawning.Player.Id);
                 Spawning.Player.CustomInfo = "";
                 // Spawning.Player.Group = new UserGroup();
+            }
+        }
+        public void OnEscaping(EscapingEventArgs Escaping)
+        {
+            if (Plugin.PlayerRegistry.ContainsKey(Escaping.Player.Id))
+            {
+                int RoleId = Plugin.PlayerRegistry[Escaping.Player.Id];
+                ICustomRole Role = Plugin.CustomRoles[RoleId];
+                if (!Role.CanEscape)
+                {
+                    Escaping.IsAllowed = false;
+                }
             }
         }
         public static IEnumerator<float> DoSpawnPlayer(Player Player, int Id, bool DoBypassRoleOverwrite = true)

@@ -15,8 +15,8 @@ namespace UncomplicatedCustomRoles
         public override string Name => "UncomplicatedCustomRoles";
         public override string Prefix => "UncomplicatedCustomRoles";
         public override string Author => "FoxWorn3365, Dr.Agenda";
-        public override Version Version { get; } = new(1, 2, 0);
-        public override Version RequiredExiledVersion { get; } = new(8, 2, 1);
+        public override Version Version { get; } = new(1, 3, 0);
+        public override Version RequiredExiledVersion { get; } = new(8, 3, 4);
         public static Plugin Instance;
         internal Handler Handler;
         public static Dictionary<int, ICustomRole> CustomRoles;
@@ -35,6 +35,7 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Died += Handler.OnDied;
             PlayerHandler.Spawning += Handler.OnSpawning;
             PlayerHandler.Spawned += Handler.OnPlayerSpawned;
+            PlayerHandler.Escaping += Handler.OnEscaping;
 
             foreach (ICustomRole CustomRole in Config.CustomRoles)
             {
@@ -52,6 +53,7 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Died -= Handler.OnDied;
             PlayerHandler.Spawning -= Handler.OnSpawning;
             PlayerHandler.Spawned -= Handler.OnPlayerSpawned;
+            PlayerHandler.Escaping -= Handler.OnEscaping;
 
             Handler = null;
             CustomRoles = null;
