@@ -23,12 +23,15 @@ namespace UncomplicatedCustomRoles
         public static Dictionary<int, int> PlayerRegistry = new();
         public static Dictionary<int, int> RolesCount = new();
         public static List<int> RoleSpawnQueue = new();
+        internal FileConfigs FileConfigs;
         public override void OnEnabled()
         {
             Instance = this;
 
             Handler = new();
             CustomRoles = new();
+
+            FileConfigs = new();
 
             ServerHandler.RoundStarted += Handler.OnRoundStarted;
             ServerHandler.RespawningTeam += Handler.OnRespawningTeam;
@@ -41,6 +44,9 @@ namespace UncomplicatedCustomRoles
             {
                 SpawnManager.RegisterCustomSubclass(CustomRole);
             }
+
+            FileConfigs.Welcome();
+            FileConfigs.LoadAll();
 
             base.OnEnabled();
         }

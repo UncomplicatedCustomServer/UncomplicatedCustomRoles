@@ -57,6 +57,7 @@
     <Compile Include="Enums\SpawnCondition.cs" />
     <Compile Include="Enums\SpawnLocationType.cs" />
     <Compile Include="Events\EventHandler.cs" />
+    <Compile Include="Manager\FileConfigs.cs" />
     <Compile Include="Manager\UCREffect.cs" />
     <Compile Include="Manager\Factory.cs" />
     <Compile Include="Manager\SpawnManager.cs" />
@@ -69,12 +70,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\..\..\Downloads\ecsiledd\ecsiledd\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\..\Downloads\ecsiledd\ecsiledd\Assembly-CSharp.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\..\..\..\Downloads\ecsiledd\ecsiledd\Assembly-CSharp-firstpass.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp-Publicized, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Downloads\Dev\Assembly-CSharp-Publicized.dll</HintPath>
     </Reference>
     <Reference Include="BouncyCastle.Cryptography">
       <HintPath>..\..\..\..\Downloads\ecsiledd\ecsiledd\BouncyCastle.Cryptography.dll</HintPath>
@@ -82,32 +85,29 @@
     <Reference Include="Caress">
       <HintPath>..\..\..\..\Downloads\ecsiledd\ecsiledd\Caress.dll</HintPath>
     </Reference>
-    <Reference Include="CommandPermissions">
-      <HintPath>..\..\..\..\source\repos\CommandPermissions\CommandPermissions\bin\x64\Debug\CommandPermissions.dll</HintPath>
-    </Reference>
     <Reference Include="CommandSystem.Core, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\EXILED.8.3.5\lib\net48\CommandSystem.Core.dll</HintPath>
+      <HintPath>..\packages\EXILED.8.3.9\lib\net48\CommandSystem.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Exiled.API, Version=8.3.5.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\EXILED.8.3.5\lib\net48\Exiled.API.dll</HintPath>
+    <Reference Include="Exiled.API, Version=8.3.9.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\EXILED.8.3.9\lib\net48\Exiled.API.dll</HintPath>
     </Reference>
-    <Reference Include="Exiled.CreditTags, Version=8.3.5.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\EXILED.8.3.5\lib\net48\Exiled.CreditTags.dll</HintPath>
+    <Reference Include="Exiled.CreditTags, Version=8.3.9.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\EXILED.8.3.9\lib\net48\Exiled.CreditTags.dll</HintPath>
     </Reference>
-    <Reference Include="Exiled.CustomItems, Version=8.3.5.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\EXILED.8.3.5\lib\net48\Exiled.CustomItems.dll</HintPath>
+    <Reference Include="Exiled.CustomItems, Version=8.3.9.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\EXILED.8.3.9\lib\net48\Exiled.CustomItems.dll</HintPath>
     </Reference>
-    <Reference Include="Exiled.CustomRoles, Version=8.3.5.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\EXILED.8.3.5\lib\net48\Exiled.CustomRoles.dll</HintPath>
+    <Reference Include="Exiled.CustomRoles, Version=8.3.9.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\EXILED.8.3.9\lib\net48\Exiled.CustomRoles.dll</HintPath>
     </Reference>
-    <Reference Include="Exiled.Events, Version=8.3.5.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\EXILED.8.3.5\lib\net48\Exiled.Events.dll</HintPath>
+    <Reference Include="Exiled.Events, Version=8.3.9.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\EXILED.8.3.9\lib\net48\Exiled.Events.dll</HintPath>
     </Reference>
-    <Reference Include="Exiled.Loader, Version=8.3.5.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\EXILED.8.3.5\lib\net48\Exiled.Loader.dll</HintPath>
+    <Reference Include="Exiled.Loader, Version=8.3.9.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\EXILED.8.3.9\lib\net48\Exiled.Loader.dll</HintPath>
     </Reference>
-    <Reference Include="Exiled.Permissions, Version=8.3.5.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\EXILED.8.3.5\lib\net48\Exiled.Permissions.dll</HintPath>
+    <Reference Include="Exiled.Permissions, Version=8.3.9.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\EXILED.8.3.9\lib\net48\Exiled.Permissions.dll</HintPath>
     </Reference>
     <Reference Include="Facepunch.Steamworks.Posix">
       <HintPath>..\..\..\..\Downloads\ecsiledd\ecsiledd\Facepunch.Steamworks.Posix.dll</HintPath>
@@ -131,10 +131,10 @@
       <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NorthwoodLib, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\EXILED.8.3.5\lib\net48\NorthwoodLib.dll</HintPath>
+      <HintPath>..\packages\EXILED.8.3.9\lib\net48\NorthwoodLib.dll</HintPath>
     </Reference>
     <Reference Include="PluginAPI, Version=13.1.2.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\EXILED.8.3.5\lib\net48\PluginAPI.dll</HintPath>
+      <HintPath>..\packages\EXILED.8.3.9\lib\net48\PluginAPI.dll</HintPath>
     </Reference>
     <Reference Include="Pooling">
       <HintPath>..\..\..\..\Downloads\ecsiledd\ecsiledd\Pooling.dll</HintPath>
@@ -391,7 +391,7 @@
       <HintPath>..\..\..\..\Downloads\ecsiledd\ecsiledd\UnityEngine.XRModule.dll</HintPath>
     </Reference>
     <Reference Include="YamlDotNet, Version=11.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
-      <HintPath>..\packages\EXILED.8.3.5\lib\net48\YamlDotNet.dll</HintPath>
+      <HintPath>..\packages\EXILED.8.3.9\lib\net48\YamlDotNet.dll</HintPath>
     </Reference>
     <Reference Include="zxing">
       <HintPath>..\..\..\..\Downloads\ecsiledd\ecsiledd\zxing.dll</HintPath>
