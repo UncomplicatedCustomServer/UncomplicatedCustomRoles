@@ -15,19 +15,11 @@ namespace UncomplicatedCustomRoles.API.Features
         }
         public static bool HasCustomRole(Player Player)
         {
-            if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
-            {
-                return true;
-            }
-            return false;
+            return Plugin.PlayerRegistry.ContainsKey(Player.Id);
         }
        public static bool IsRegistered(int Id)
         {
-            if (Plugin.CustomRoles.ContainsKey(Id))
-            {
-                return true;
-            }
-            return false;
+            return Plugin.CustomRoles.ContainsKey(Id);
         }
         public static ICustomRole Get(int Id)
         {

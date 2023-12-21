@@ -14,12 +14,13 @@ using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Elements
 {
+#nullable enable
     public class CustomRole : ICustomRole
     {
         public int Id { get; set; } = 1;
         public string Name { get; set; } = "Janitor";
         public string CustomInfo { get; set; } = "Clean the Light Containment Zone.";
-        public SpawnCondition SpawnCondition { get; set; } = SpawnCondition.RoundStart;
+        public string DisplayNickname { get; set; } = "D-%name%";
         public int MaxPlayers { get; set; } = 5;
         public int MinPlayers { get; set; } = 1;
         public int SpawnChance { get; set; } = 60;
@@ -34,14 +35,13 @@ namespace UncomplicatedCustomRoles.Elements
         public float Ahp { get; set; } = 0f;
         public float HumeShield { get; set; } = 0f;
         public float MovementBoost { get; set; } = 0f;
-        public List<UCREffect> Effects { get; set; } = new()
-        {
-            new UCREffect()
-        };
+        public List<UCREffect>? Effects { get; set; } = new();
         public bool CanEscape { get; set; } = true;
         public Vector3 Scale { get; set; } = new();
         public string SpawnBroadcast { get; set; } = "You are a <color=orange><b>Janitor</b></color>!\nClean the Light Containment Zone!";
         public ushort SpawnBroadcastDuration { get; set; } = 5;
+        public string SpawnHint { get; set; } = "This is an hint shown when you spawn as a Janitor!";
+        public float SpawnHintDuration { get; set; } = 3;
         public List<ItemType> Inventory { get; set; } = new()
         {
             ItemType.Flashlight,
@@ -60,6 +60,7 @@ namespace UncomplicatedCustomRoles.Elements
         };
         public Vector3 SpawnPosition { get; set; } = new();
         public Vector3 SpawnOffset { get; set; } = new();
+        public string? RequiredPermission { get; set; } = null;
         public bool IgnoreSpawnSystem { get; set; } = false;
     }
 }

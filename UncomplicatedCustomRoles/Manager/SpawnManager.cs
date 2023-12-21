@@ -2,12 +2,15 @@
 using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
-using Exiled.CustomItems.API.Features;
 using PlayerRoles;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.Structures;
 using UnityEngine;
+using System;
+using Exiled.Loader.Features.Configs.CustomConverters;
+using UncomplicatedCustomRoles.Elements;
+using Exiled.CustomItems.API.Features;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -23,6 +26,44 @@ namespace UncomplicatedCustomRoles.Manager
                 return;
             }
             Log.Warn($"Failed to register the UCR role with the ID {Role.Id}!");
+        }
+        public static ICustomRole RenderExportMethodToInternal(IExternalCustomRole Role)
+        {
+            return new CustomRole()
+            {
+                Name = Role.Name,
+                Id = Role.Id,
+                CustomInfo = Role.CustomInfo,
+                DisplayNickname = Role.DisplayNickname,
+                MaxHealth = Role.MaxHealth,
+                MaxPlayers = Role.MaxPlayers,
+                MinPlayers = Role.MinPlayers,
+                Role = Role.Role,
+                RoleAppearance = Role.RoleAppearance,
+                CanReplaceRoles = Role.CanReplaceRoles,
+                Ahp = Role.Ahp,
+                HumeShield = Role.HumeShield,
+                MovementBoost = Role.MovementBoost,
+                Effects = Role.Effects,
+                CanEscape = Role.CanEscape,
+                Scale = VectorConvertor(Role.Scale),
+                SpawnBroadcast = Role.SpawnBroadcast,
+                SpawnBroadcastDuration = Role.SpawnBroadcastDuration,
+                SpawnHint = Role.SpawnHint,
+                SpawnHintDuration = Role.SpawnHintDuration,
+                Inventory = Role.Inventory,
+                CustomItemsInventory = Role.CustomItemsInventory,
+                Ammo = Role.Ammo,
+                Spawn = Role.Spawn,
+                SpawnRooms = Role.SpawnRooms,
+                SpawnZones = Role.SpawnZones,
+                SpawnPosition = VectorConvertor(Role.SpawnPosition),
+                SpawnOffset = VectorConvertor(Role.SpawnOffset),
+                RequiredPermission = Role.RequiredPermission,
+                IgnoreSpawnSystem = Role.IgnoreSpawnSystem,
+                Health = Role.Health,
+                SpawnChance = Role.SpawnChance
+            };
         }
         public static bool SubclassValidator(ICustomRole Role)
         {
@@ -57,6 +98,16 @@ namespace UncomplicatedCustomRoles.Manager
                 return true;
             }
         }
+        public static void ClearCustomTypes(Player Player)
+        {
+            if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
+            {
+                Plugin.PlayerRegistry.Remove(Player.Id);
+                Player.CustomInfo = string.Empty;
+                Player.DisplayNickname = string.Empty;
+                Player.Scale = new Vector3(1, 1, 1);
+            }
+        }
         public static void SummonCustomSubclass(Player Player, int Id, bool DoBypassRoleOverwrite = true)
         {
             // Does the role exists?
@@ -79,7 +130,11 @@ namespace UncomplicatedCustomRoles.Manager
             // It's all OK so we can start to elaborate the spawn
             Player.Role.Set(Role.Role, SpawnFlag);
             Vector3 BasicPosition = Player.Position;
-            Player.ChangeAppearance(Role.RoleAppearance);
+            if (Role.RoleAppearance != Role.Role)
+            {
+                Log.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
+                Player.ChangeAppearance(Role.RoleAppearance);
+            }
             if (Role.Spawn == SpawnLocationType.KeepRoleSpawn)
             {
                 Player.Position = BasicPosition;
@@ -133,11 +188,14 @@ namespace UncomplicatedCustomRoles.Manager
             // Player.Group.BadgeText = Role.Badge.Name;
             // Player.Group.Permissions = Player.Group.Permissions;
             Player.CustomInfo = Role.Name + ("\n" + Role.CustomInfo ?? string.Empty);
+            if (Role.DisplayNickname != string.Empty)
+            {
+                Player.DisplayNickname = Role.DisplayNickname.Replace("%name%", Player.Nickname).Replace("%dnumber%", new System.Random().Next(1000, 9999).ToString()).Replace("%o5number%", new System.Random().Next(01, 10).ToString());
+            }
             Player.MaxHealth = Role.MaxHealth;
             Player.Health = Role.Health;
             Player.ArtificialHealth = Role.Ahp;
-            Player.EnableEffect<MovementBoost>(Role.MovementBoost);
-            if (Role.Effects.Count() > 0)
+            if (Role.Effects.Count() > 0 && Role.Effects != null)
             {
                 foreach (IEffect effect in Role.Effects)
                 {
@@ -153,9 +211,21 @@ namespace UncomplicatedCustomRoles.Manager
             {
                 Player.Scale = Role.Scale;
             }
-            Player.Broadcast(Role.SpawnBroadcastDuration, Role.SpawnBroadcast);
+            if (Role.SpawnBroadcast != string.Empty)
+            {
+                Player.Broadcast(Role.SpawnBroadcastDuration, Role.SpawnBroadcast);
+            }
+            if (Role.SpawnHint != string.Empty)
+            {
+                Player.ShowHint(Role.SpawnHint, Role.SpawnHintDuration);
+            }
             // Add the player to the player classes list
             Plugin.PlayerRegistry.Add(Player.Id, Role.Id);
         }
-    }   
+        public static Vector3 VectorConvertor(string Vector)
+        {
+            string[] Data = Vector.Replace(" ", "").Split(',');
+            return new Vector3(float.Parse(Data.ElementAt(0)), float.Parse(Data.ElementAt(1)), float.Parse(Data.ElementAt(2)));
+        }
+    }  
 }

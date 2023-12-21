@@ -6,8 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Exiled.API.Features;
 using Exiled.API.Interfaces;
+using MapEditorReborn.Commands.ModifyingCommands.Scale;
 using UncomplicatedCustomRoles.Elements;
-using UncomplicatedCustomRoles.Structures;
+using UnityEngine;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -29,11 +30,11 @@ namespace UncomplicatedCustomRoles.Manager
             IDeserializer Deserializer = new DeserializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build();
             foreach (string FileName in List())
             {
-                List<CustomRole> Deserialized = Deserializer.Deserialize<List<CustomRole>>(File.ReadAllText(FileName));
-                foreach (CustomRole Role in Deserialized)
+                Dictionary<string, List<ExternalCustomRole>> Deserialized = Deserializer.Deserialize<Dictionary<string, List<ExternalCustomRole>>>(File.ReadAllText(FileName));
+                foreach (ExternalCustomRole Role in Deserialized["custom_roles"])
                 {
-                    SpawnManager.RegisterCustomSubclass(Role);
-                    Log.Debug($"Registered external role {Role.Id} from file:\n{FileName}");
+                    SpawnManager.RegisterCustomSubclass(SpawnManager.RenderExportMethodToInternal(Role));
+                    Log.Debug($"Registered external role {Role.Id} [{Role.Name}] from file:\n{FileName}");
                 }
             }
         }
@@ -43,12 +44,13 @@ namespace UncomplicatedCustomRoles.Manager
             {
                 ISerializer Serializer = new SerializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build();
                 Directory.CreateDirectory(Dir);
-                File.WriteAllText(Path.Combine(Dir, "example-role.yml"), Serializer.Serialize(new List<CustomRole>()
-                {
-                    new CustomRole()
+                File.WriteAllText(Path.Combine(Dir, "example-role.yml"), Serializer.Serialize(new Dictionary<string, List<ExternalCustomRole>>() {
+                  {
+                    "custom_roles", new List<ExternalCustomRole>()
                     {
-                        Id = 10
+                        new ExternalCustomRole()
                     }
+                  }
                 }));
                 Log.Debug("Plugin does not have a role folder, generated one in configDir/UncomplicatedCustomRoles/");
             }
