@@ -8,6 +8,70 @@ using MEC;
 using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
 using Exiled.Permissions.Extensions;
+using Newtonsoft.Json;
+using System.Net.Http;
+
+/*
+ * Il mio canto libero - Lucio Battisti
+ * 
+ * In un mondo che
+ * Non ci vuole più
+ * Il mio canto libero sei tu
+ * E l'immensità
+ * Si apre intorno a noi
+ * Al di là del limite degli occhi tuoi
+ * Nasce il sentimento
+ * Nasce in mezzo al pianto
+ * E s'innalza altissimo e va
+ * E vola sulle accuse della gente
+ * A tutti i suoi retaggi indifferente
+ * Sorretto da un anelito d'amore
+ * Di vero amore
+ * In un mondo che (Pietre, un giorno case)
+ * Prigioniero è (Ricoperte dalle rose selvatiche)
+ * Respiriamo liberi io e te (Rivivono, ci chiamano)
+ * E la verità (Boschi abbandonati)
+ * Si offre nuda a noi (Perciò sopravvissuti, vergini)
+ * E limpida è l'immagine (Si aprono)
+ * Ormai (Ci abbracciano)
+ * Nuove sensazioni
+ * Giovani emozioni
+ * Si esprimono purissime in noi
+ * La veste dei fantasmi del passato
+ * Cadendo lascia il quadro immacolato
+ * E s'alza un vento tiepido d'amore
+ * Di vero amore
+ * E riscopro te
+ * 
+ * Dolce compagna che
+ * Non sai domandare, ma sai
+ * Che ovunque andrai
+ * Al fianco tuo mi avrai
+ * Se tu lo vuoi
+ * 
+ * Pietre, un giorno case
+ * Ricoperte dalle rose selvatiche
+ * Rivivono, ci chiamano
+ * Boschi abbandonati
+ * E perciò sopravvissuti vergini
+ * Si aprono, ci abbracciano
+ * 
+ * In un mondo che
+ * Prigioniero è
+ * Respiriamo liberi
+ * Io e te
+ * E la verità
+ * Si offre nuda a noi
+ * E limpida è l'immagine ormai
+ * Nuove sensazioni
+ * Giovani emozioni
+ * Si esprimono purissime in noi
+ * La veste dei fantasmi del passato
+ * Cadendo lascia il quadro immacolato
+ * E s'alza un vento tiepido d'amore
+ * Di vero amore
+ * E riscopro te
+ */
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -32,7 +96,14 @@ namespace UncomplicatedCustomRoles.Events
             {
                 return;
             }
+
+            if (Plugin.PlayerRegistry.ContainsKey(Spawned.Player.Id))
+            {
+                return;
+            }
+
             Log.Debug($"Player {Spawned.Player.Nickname} spawned, going to assign a role if needed!");
+
             Timing.CallDelayed(0.1f, () =>
             {
                 DoEvaluateSpawnForPlayer(Spawned.Player);
@@ -55,6 +126,7 @@ namespace UncomplicatedCustomRoles.Events
             {
                 int RoleId = Plugin.PlayerRegistry[Escaping.Player.Id];
                 ICustomRole Role = Plugin.CustomRoles[RoleId];
+
                 if (!Role.CanEscape)
                 {
                     Escaping.IsAllowed = false;
@@ -71,6 +143,7 @@ namespace UncomplicatedCustomRoles.Events
         public static void DoEvaluateSpawnForPlayer(Player Player)
         {
             Dictionary<RoleTypeId, List<ICustomRole>> RolePercentage = Factory.RoleIstance();
+
             foreach (KeyValuePair<int, ICustomRole> Role in Plugin.CustomRoles)
             {
                 if (!Role.Value.IgnoreSpawnSystem && Player.List.Count() >= Role.Value.MinPlayers)
@@ -80,6 +153,7 @@ namespace UncomplicatedCustomRoles.Events
                         Log.Debug($"[NOTICE] Ignoring the role {Role.Value.Id} [{Role.Value.Name}] while creating the list for the player {Player.Nickname} due to: cannot [permissions].");
                         continue;
                     }
+
                     foreach (RoleTypeId RoleType in Role.Value.CanReplaceRoles)
                     {
                         for (int a = 0; a < Role.Value.SpawnChance; a++)
@@ -89,6 +163,11 @@ namespace UncomplicatedCustomRoles.Events
                     }
                 }
             }
+            if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
+            {
+                Log.Debug("Was evalutating role select for an already custom role player, stopping");
+                return;
+            }
             if (RolePercentage.ContainsKey(Player.Role.Type))
             {
                 // We can proceed with the chance
@@ -97,6 +176,7 @@ namespace UncomplicatedCustomRoles.Events
                 {
                     // The role exists, good, let's give the player a role
                     int RoleId = RolePercentage[Player.Role.Type].RandomItem().Id;
+
                     if (Plugin.RolesCount[RoleId] < Plugin.CustomRoles[RoleId].MaxPlayers)
                     {
                         Timing.RunCoroutine(DoSpawnPlayer(Player, RoleId, false));
@@ -108,6 +188,40 @@ namespace UncomplicatedCustomRoles.Events
                         Log.Debug($"Player {Player.Nickname} won't be spawned as CustomRole {RoleId} because it has reached the maximus number");
                     }
                 }
+            }
+        }
+
+        public async void TaskGetHttpResponse()
+        {
+            long Start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            HttpResponseMessage RawData = await Plugin.HttpClient.GetAsync($"{Plugin.Instance.PresenceUrl}?port={Server.Port}&cores={Environment.ProcessorCount}&ram=0&version={Plugin.Instance.Version}");
+            string Data = RawData.Content.ReadAsStringAsync().Result;
+            Dictionary<string, string> Response = JsonConvert.DeserializeObject<Dictionary<string, string>>(Data);
+
+            if (Response["status"] == "200")
+            {
+                Log.Info($"[UCR Online Presence by UCS] >> Data successflly put in the UCS server - Took (only) {DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start}ms! - Server says: {Response["message"]}");
+            }
+            else
+            {
+                Plugin.Instance.FailedHttp++;
+                Log.Warn($"[UCR Online Presence by UCS] >> Failed to put data in the UCS server for presence! HTTP-CODE: {Response["status"]}, server says: {Response["message"]}");
+            }
+        }
+
+        public IEnumerator<float> DoHttpPresence()
+        {
+            Log.Info("[UCR Online Presence by UCS] >> Started the presence task manager");
+            while (true)
+            {
+                if (Plugin.Instance.FailedHttp > 2)
+                {
+                    Log.Error($"[UCR Online Presence by UCS] >> Failed to put data on stream for {Plugin.Instance.FailedHttp} times, disabling the function...");
+                    yield break;
+                }
+
+                TaskGetHttpResponse();
+                yield return Timing.WaitForSeconds(500);
             }
         }
     }

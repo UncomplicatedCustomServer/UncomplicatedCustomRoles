@@ -1,14 +1,8 @@
 ﻿using CommandSystem;
-using Exiled.API.Features;
 using Exiled.Permissions.Extensions;
-using MEC;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using UncomplicatedCustomRoles;
-using UncomplicatedCustomRoles.Manager;
 using UncomplicatedCustomRoles.Structures;
-using Handler = UncomplicatedCustomRoles.Events.EventHandler;
 
 namespace UncomplicatedCustomRoles.Commands.UCRList
 {

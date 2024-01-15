@@ -1,13 +1,6 @@
-﻿using CustomPlayerEffects;
-using Exiled.API.Enums;
-using Exiled.API.Features;
+﻿using Exiled.API.Enums;
 using PlayerRoles;
-using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UncomplicatedCustomRoles.Manager;
 using UncomplicatedCustomRoles.Structures;
 using UnityEngine;
@@ -34,7 +27,6 @@ namespace UncomplicatedCustomRoles.Elements
         public float MaxHealth { get; set; } = 100f;
         public float Ahp { get; set; } = 0f;
         public float HumeShield { get; set; } = 0f;
-        public float MovementBoost { get; set; } = 0f;
         public List<UCREffect>? Effects { get; set; } = new();
         public bool CanEscape { get; set; } = true;
         public Vector3 Scale { get; set; } = new();

@@ -1,9 +1,4 @@
-﻿using Exiled.API.Enums;
-using Exiled.API.Features;
-using Exiled.API.Features.Doors;
-using Exiled.API.Interfaces;
-using MapGeneration;
-using System;
+﻿using Exiled.API.Interfaces;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -17,6 +12,8 @@ namespace UncomplicatedCustomRoles
         public bool IsEnabled { get; set; } = true;
         [Description("Is the debug mode enabled?")]
         public bool Debug { get; set; } = false;
+        [Description("Enable the HTTP request for the presence update? Please, this thing is important for us (UCS)!")]
+        public bool EnableHttp { get; set; } = true;
         [Description("A list of custom roles")]
         public List<CustomRole> CustomRoles { get; set; } = new()
         {

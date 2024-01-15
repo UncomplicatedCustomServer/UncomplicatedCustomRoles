@@ -2,7 +2,7 @@
 
 namespace UncomplicatedCustomRoles.Structures
 {
-    public interface IEffect
+    public interface IUCREffect
     {
         public abstract EffectType EffectType { get; set; }
         public abstract float Duration { get; set; }

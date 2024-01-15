@@ -1,12 +1,7 @@
 ﻿using Exiled.API.Enums;
 using PlayerRoles;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UncomplicatedCustomRoles.Manager;
-using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Structures
 {
@@ -27,7 +22,6 @@ namespace UncomplicatedCustomRoles.Structures
         public abstract float MaxHealth { get; set; }
         public abstract float Ahp { get; set; }
         public abstract float HumeShield { get; set; }
-        public abstract float MovementBoost { get; set; }
         public abstract List<UCREffect>? Effects { get; set; }
         public abstract bool CanEscape { get; set; }
         public abstract string Scale { get; set; }

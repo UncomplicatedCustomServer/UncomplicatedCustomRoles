@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-public enum SpawnLocationType
+﻿public enum SpawnLocationType
 {
     CompleteRandomSpawn,
     ZoneSpawn,

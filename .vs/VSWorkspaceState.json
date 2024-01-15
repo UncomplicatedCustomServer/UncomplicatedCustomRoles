@@ -1,7 +1,8 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\UncomplicatedCustomRoles"
   ],
-  "SelectedNode": "\\UncomplicatedCustomRoles.sln",
+  "SelectedNode": "\\UncomplicatedCustomRoles\\Plugin.cs",
   "PreviewInSolutionExplorer": false
 }

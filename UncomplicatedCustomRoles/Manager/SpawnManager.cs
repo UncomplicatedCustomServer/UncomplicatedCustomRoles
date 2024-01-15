@@ -1,5 +1,4 @@
-﻿using CustomPlayerEffects;
-using Exiled.API.Enums;
+﻿using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
 using PlayerRoles;
@@ -7,8 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.Structures;
 using UnityEngine;
-using System;
-using Exiled.Loader.Features.Configs.CustomConverters;
 using UncomplicatedCustomRoles.Elements;
 using Exiled.CustomItems.API.Features;
 
@@ -25,8 +22,13 @@ namespace UncomplicatedCustomRoles.Manager
                 Log.Info($"Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
                 return;
             }
-            Log.Warn($"Failed to register the UCR role with the ID {Role.Id}!");
+            Log.Warn($"Failed to register the UCR role with the ID {Role.Id}: The problem can be the following: ERR_VALIDATOR or ERR_ID_ALREADY_HERE!\nTrying to assign a new one...");
+            int NewId = GetFirstFreeID(Role.Id);
+            Log.Info($"Custom Role {Role.Name} with the old Id {Role.Id} will be registered with the following Id: {NewId}");
+            Role.Id = NewId;
+            RegisterCustomSubclass(Role);
         }
+
         public static ICustomRole RenderExportMethodToInternal(IExternalCustomRole Role)
         {
             return new CustomRole()
@@ -43,7 +45,6 @@ namespace UncomplicatedCustomRoles.Manager
                 CanReplaceRoles = Role.CanReplaceRoles,
                 Ahp = Role.Ahp,
                 HumeShield = Role.HumeShield,
-                MovementBoost = Role.MovementBoost,
                 Effects = Role.Effects,
                 CanEscape = Role.CanEscape,
                 Scale = VectorConvertor(Role.Scale),
@@ -65,6 +66,7 @@ namespace UncomplicatedCustomRoles.Manager
                 SpawnChance = Role.SpawnChance
             };
         }
+
         public static bool SubclassValidator(ICustomRole Role)
         {
             if (Role == null)
@@ -90,14 +92,10 @@ namespace UncomplicatedCustomRoles.Manager
                     Log.Warn($"The UCR custom role with the ID {Role.Id} failed the check: the value of MinPlayers field must be greater than or equals to 1!");
                     return false;
                 }
-                else if (Role.MovementBoost > 255)
-                {
-                    Log.Warn($"The UCR custom role with the ID {Role.Id} failed the check: the value of MovementBoost field must be a number between 0 and 255.");
-                    return false;
-                }
                 return true;
             }
         }
+
         public static void ClearCustomTypes(Player Player)
         {
             if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
@@ -108,6 +106,7 @@ namespace UncomplicatedCustomRoles.Manager
                 Player.Scale = new Vector3(1, 1, 1);
             }
         }
+
         public static void SummonCustomSubclass(Player Player, int Id, bool DoBypassRoleOverwrite = true)
         {
             // Does the role exists?
@@ -116,13 +115,17 @@ namespace UncomplicatedCustomRoles.Manager
                 Log.Warn($"Sorry but the role with the Id {Id} is not registered inside UncomplicatedCustomRoles!");
                 return;
             }
+
             ICustomRole Role = Plugin.CustomRoles[Id];
+
             if (!DoBypassRoleOverwrite && !Role.CanReplaceRoles.Contains(Player.Role.Type))
             {
                 Log.Debug($"Can't spawn the player {Player.Nickname} as UCR custom role {Role.Name} because it's role is not in the overwrittable list of custom role!\nStrange because this should be managed correctly by the plugin!");
                 return;
             }
+
             RoleSpawnFlags SpawnFlag = RoleSpawnFlags.None;
+
             if (Role.Spawn == SpawnLocationType.KeepRoleSpawn)
             {
                 SpawnFlag = RoleSpawnFlags.UseSpawnpoint;
@@ -130,15 +133,18 @@ namespace UncomplicatedCustomRoles.Manager
             // It's all OK so we can start to elaborate the spawn
             Player.Role.Set(Role.Role, SpawnFlag);
             Vector3 BasicPosition = Player.Position;
+
             if (Role.RoleAppearance != Role.Role)
             {
                 Log.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
-                Player.ChangeAppearance(Role.RoleAppearance);
+                Player.ChangeAppearance(Role.RoleAppearance, true);
             }
+
             if (Role.Spawn == SpawnLocationType.KeepRoleSpawn)
             {
                 Player.Position = BasicPosition;
             }
+
             if (SpawnFlag == RoleSpawnFlags.None)
             {
                 switch (Role.Spawn)
@@ -153,11 +159,7 @@ namespace UncomplicatedCustomRoles.Manager
                         Player.Position = Factory.AdjustRoomPosition(Room.Get(Role.SpawnRooms.RandomItem()));
                         if (Role.SpawnOffset != new Vector3())
                         {
-                            Vector3 OldPosition = Player.Position;
-                            OldPosition.x += Role.SpawnOffset.x;
-                            OldPosition.y += Role.SpawnOffset.y;
-                            OldPosition.z += Role.SpawnOffset.z;
-                            Player.Position = OldPosition;
+                            Player.Position += Role.SpawnOffset;
                         }
                         break;
                     case SpawnLocationType.PositionSpawn:
@@ -165,7 +167,9 @@ namespace UncomplicatedCustomRoles.Manager
                         break;
                 };
             }
+
             Player.ResetInventory(Role.Inventory);
+
             if (Role.CustomItemsInventory.Count() > 0)
             {
                 foreach (uint ItemId in Role.CustomItemsInventory)
@@ -188,44 +192,61 @@ namespace UncomplicatedCustomRoles.Manager
             // Player.Group.BadgeText = Role.Badge.Name;
             // Player.Group.Permissions = Player.Group.Permissions;
             Player.CustomInfo = Role.Name + ("\n" + Role.CustomInfo ?? string.Empty);
-            if (Role.DisplayNickname != string.Empty)
+            if (Role.DisplayNickname != string.Empty && Role.DisplayNickname != null)
             {
                 Player.DisplayNickname = Role.DisplayNickname.Replace("%name%", Player.Nickname).Replace("%dnumber%", new System.Random().Next(1000, 9999).ToString()).Replace("%o5number%", new System.Random().Next(01, 10).ToString());
             }
+
             Player.MaxHealth = Role.MaxHealth;
             Player.Health = Role.Health;
             Player.ArtificialHealth = Role.Ahp;
+
             if (Role.Effects.Count() > 0 && Role.Effects != null)
             {
-                foreach (IEffect effect in Role.Effects)
+                foreach (IUCREffect effect in Role.Effects)
                 {
                     Player.EnableEffect(effect.EffectType, effect.Duration);
                     Player.ChangeEffectIntensity(effect.EffectType, effect.Intensity);
                 }
             }
+
+            // Add the player to the player classes list
+            Plugin.PlayerRegistry.Add(Player.Id, Role.Id);
+
             if (Role.HumeShield > 0)
             {
                 Player.HumeShield = Role.HumeShield;
             }
+
             if (Role.Scale != new Vector3(0, 0, 0))
             {
                 Player.Scale = Role.Scale;
             }
+
             if (Role.SpawnBroadcast != string.Empty)
             {
                 Player.Broadcast(Role.SpawnBroadcastDuration, Role.SpawnBroadcast);
             }
+
             if (Role.SpawnHint != string.Empty)
             {
                 Player.ShowHint(Role.SpawnHint, Role.SpawnHintDuration);
             }
-            // Add the player to the player classes list
-            Plugin.PlayerRegistry.Add(Player.Id, Role.Id);
         }
+
         public static Vector3 VectorConvertor(string Vector)
         {
             string[] Data = Vector.Replace(" ", "").Split(',');
             return new Vector3(float.Parse(Data.ElementAt(0)), float.Parse(Data.ElementAt(1)), float.Parse(Data.ElementAt(2)));
+        }
+        
+        public static int GetFirstFreeID(int Id)
+        {
+            while (Plugin.CustomRoles.ContainsKey(Id))
+            {
+                Id++;
+            }
+            return Id;
         }
     }  
 }
