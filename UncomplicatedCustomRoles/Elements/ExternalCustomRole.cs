@@ -52,6 +52,7 @@ namespace UncomplicatedCustomRoles.Elements
         public string SpawnPosition { get; set; } = "0, 0, 0";
         public string SpawnOffset { get; set; } = "0, 0, 0";
         public string? RequiredPermission { get; set; } = null;
+        public List<string>? PowerYamlScripts { get; set; } = null;
         public bool IgnoreSpawnSystem { get; set; } = false;
     }
 }

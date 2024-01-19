@@ -10,6 +10,8 @@ using PlayerRoles;
 using Exiled.Permissions.Extensions;
 using Newtonsoft.Json;
 using System.Net.Http;
+using Exiled.Events.EventArgs.Server;
+using Exiled.CustomRoles;
 
 /*
  * Il mio canto libero - Lucio Battisti
@@ -80,7 +82,7 @@ namespace UncomplicatedCustomRoles.Events
         public void OnRoundStarted()
         {
             Plugin.Instance.DoSpawnBasicRoles = false;
-            Timing.CallDelayed(2, () =>
+            Timing.CallDelayed(5, () =>
             {
                 Plugin.Instance.DoSpawnBasicRoles = true;
             });
@@ -102,7 +104,19 @@ namespace UncomplicatedCustomRoles.Events
                 return;
             }
 
-            Log.Debug($"Player {Spawned.Player.Nickname} spawned, going to assign a role if needed!");
+            string LogReason = string.Empty;
+            if (Plugin.Instance.Config.AllowOnlyNaturalSpawns && !Plugin.RoleSpawnQueue.Contains(Spawned.Player.Id))
+            {
+                Log.Debug("The player is not in the queue for respawning!");
+                return;
+            }
+            else if (Plugin.RoleSpawnQueue.Contains(Spawned.Player.Id))
+            {
+                Plugin.RoleSpawnQueue.Remove(Spawned.Player.Id);
+                LogReason = "[going with a respawn wave] ";
+            }
+
+            Log.Debug($"Player {Spawned.Player.Nickname} spawned {LogReason}, going to assign a role if needed!");
 
             Timing.CallDelayed(0.1f, () =>
             {
@@ -112,7 +126,99 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnDied(DiedEventArgs Died)
         {
+            int? CustomRole = SpawnManager.TryGetCustomRole(Died.Player);
             SpawnManager.ClearCustomTypes(Died.Player);
+            SpawnManager.TriggerNpcEvent(CustomRole, PlayerEvent.Died, Died);
+        }
+
+        public void OnDying(DyingEventArgs Dying)
+        {
+            SpawnManager.TriggerNpcEvent(PlayerEvent.Dying, Dying);
+        }
+
+        public void OnInteractingDoor(InteractingDoorEventArgs InteractingDoor)
+        {
+            SpawnManager.TriggerNpcEvent(PlayerEvent.InteractingDoor, InteractingDoor);
+        }
+
+        public void OnInteractingElevator(InteractingElevatorEventArgs InteractingElevator)
+        {
+            SpawnManager.TriggerNpcEvent(PlayerEvent.InteractingElevator, InteractingElevator);
+        }
+
+        public void OnInteractingLocker(InteractingLockerEventArgs InteractingLocker)
+        {
+            SpawnManager.TriggerNpcEvent(PlayerEvent.InteractingLocker, InteractingLocker);
+        }
+
+        public void OnUsingItem(UsingItemEventArgs UsingItem)
+        {
+            SpawnManager.TriggerNpcEvent(PlayerEvent.UsingItem, UsingItem);
+        }
+
+        public void OnUsedItem(UsedItemEventArgs UsedItem)
+        {
+            SpawnManager.TriggerNpcEvent(PlayerEvent.UsedItem, UsedItem);
+        }
+
+        public void OnHurting(HurtingEventArgs Hurting)
+        {
+            SpawnManager.TriggerNpcEvent(PlayerEvent.Hurting, Hurting);
+        }
+
+        public void OnHurt(HurtEventArgs Hurt)
+        {
+            SpawnManager.TriggerNpcEvent(PlayerEvent.Hurt, Hurt);
+        }
+
+        public void OnShooting(ShootingEventArgs Shooting)
+        {
+            SpawnManager.TriggerNpcEvent(PlayerEvent.Shooting, Shooting);
+        }
+
+        public void OnShot(ShotEventArgs Shot)
+        {
+            SpawnManager.TriggerNpcEvent(PlayerEvent.Shot, Shot);
+        }
+
+        public void OnChangingItem(ChangingItemEventArgs ChangingItem)
+        {
+            SpawnManager.TriggerNpcEvent(PlayerEvent.ChangingItem, ChangingItem);
+        }
+
+        public void OnTriggeringTesla(TriggeringTeslaEventArgs TriggeringTesla)
+        {
+            SpawnManager.TriggerNpcEvent(PlayerEvent.TriggeringTesla, TriggeringTesla);
+        }
+
+        public void OnUsingRadioBattery(UsingRadioBatteryEventArgs UseRadioBattery)
+        {
+            SpawnManager.TriggerNpcEvent(PlayerEvent.UsingRadioBattery, UseRadioBattery);
+        }
+
+        public void OnFlippingCoin(FlippingCoinEventArgs FlippingCoin)
+        {
+            SpawnManager.TriggerNpcEvent(PlayerEvent.FlippingCoin, FlippingCoin);
+        }
+
+        public void OnMakingNoise(MakingNoiseEventArgs MakingNoise)
+        {
+            SpawnManager.TriggerNpcEvent(PlayerEvent.MakingNoise, MakingNoise);
+        }
+
+        public void OnJumping(JumpingEventArgs Jumping)
+        {
+            SpawnManager.TriggerNpcEvent(PlayerEvent.Jumping, Jumping);
+        }
+
+        public void OnTransmitting(TransmittingEventArgs Transmitting)
+        {
+            SpawnManager.TriggerNpcEvent(PlayerEvent.Transmitting, Transmitting);
+        }
+
+        public void OnKilling(KillingPlayerEventArgs KillingPlayer)
+        {
+            SpawnManager.TriggerNpcEvent(PlayerEvent.KillPlayer, KillingPlayer);
         }
 
         public void OnSpawning(SpawningEventArgs Spawning)
@@ -131,6 +237,14 @@ namespace UncomplicatedCustomRoles.Events
                 {
                     Escaping.IsAllowed = false;
                 }
+            }
+        }
+
+        public void OnRespawningWave(RespawningTeamEventArgs Respawn)
+        {
+            foreach (Player Player in Respawn.Players)
+            {
+                Plugin.RoleSpawnQueue.Add(Player.Id);
             }
         }
 
@@ -214,7 +328,7 @@ namespace UncomplicatedCustomRoles.Events
             Log.Info("[UCR Online Presence by UCS] >> Started the presence task manager");
             while (true)
             {
-                if (Plugin.Instance.FailedHttp > 2)
+                if (Plugin.Instance.FailedHttp > 5)
                 {
                     Log.Error($"[UCR Online Presence by UCS] >> Failed to put data on stream for {Plugin.Instance.FailedHttp} times, disabling the function...");
                     yield break;

@@ -38,6 +38,7 @@ namespace UncomplicatedCustomRoles.Structures
         public abstract string SpawnPosition { get; set; }
         public abstract string SpawnOffset { get; set; }
         public abstract string? RequiredPermission { get; set; }
+        public abstract List<string>? PowerYamlScripts { get; set; }
         public abstract bool IgnoreSpawnSystem { get; set; }
     }
 }

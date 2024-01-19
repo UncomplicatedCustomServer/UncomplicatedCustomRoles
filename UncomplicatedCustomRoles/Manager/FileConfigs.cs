@@ -2,6 +2,7 @@
 using System.IO;
 using Exiled.API.Features;
 using UncomplicatedCustomRoles.Elements;
+using UnityEngine.Playables;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -26,6 +27,10 @@ namespace UncomplicatedCustomRoles.Manager
             IDeserializer Deserializer = new DeserializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build();
             foreach (string FileName in List())
             {
+                if (Directory.Exists(FileName))
+                {
+                    continue;
+                }
                 Dictionary<string, List<ExternalCustomRole>> Deserialized = Deserializer.Deserialize<Dictionary<string, List<ExternalCustomRole>>>(File.ReadAllText(FileName));
                 foreach (ExternalCustomRole Role in Deserialized["custom_roles"])
                 {

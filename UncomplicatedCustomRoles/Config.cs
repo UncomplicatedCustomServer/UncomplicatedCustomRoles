@@ -14,6 +14,10 @@ namespace UncomplicatedCustomRoles
         public bool Debug { get; set; } = false;
         [Description("Enable the HTTP request for the presence update? Please, this thing is important for us (UCS)!")]
         public bool EnableHttp { get; set; } = true;
+        [Description("Ignore spawns that are not included in waves and initial spawn? So when you do a forcelass an UCR role won't spawn in any case")]
+        public bool AllowOnlyNaturalSpawns { get; set; } = true;
+        [Description("Load all PowerYaml script selected for each role?")]
+        public bool EnablePowerYamlScripts { get; set; } = true;
         [Description("A list of custom roles")]
         public List<CustomRole> CustomRoles { get; set; } = new()
         {

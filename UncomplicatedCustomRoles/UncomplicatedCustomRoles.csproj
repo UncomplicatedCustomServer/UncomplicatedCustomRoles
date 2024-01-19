@@ -61,6 +61,7 @@
     <Compile Include="Manager\FileConfigs.cs" />
     <Compile Include="Elements\UCREffect.cs" />
     <Compile Include="Manager\Factory.cs" />
+    <Compile Include="Manager\ScriptConfig.cs" />
     <Compile Include="Manager\SpawnManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Structures\ICustomRole.cs" />
@@ -88,35 +89,36 @@
       <HintPath>..\..\..\..\Downloads\Master\Caress.dll</HintPath>
     </Reference>
     <Reference Include="CommandSystem.Core, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\EXILED.8.6.0\lib\net48\CommandSystem.Core.dll</HintPath>
+      <HintPath>..\packages\EXILED.8.7.0\lib\net48\CommandSystem.Core.dll</HintPath>
     </Reference>
     <Reference Include="DnsClient">
       <HintPath>..\..\..\..\Downloads\Master\DnsClient.dll</HintPath>
     </Reference>
-    <Reference Include="Exiled.API, Version=8.6.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\EXILED.8.6.0\lib\net48\Exiled.API.dll</HintPath>
+    <Reference Include="Exiled.API, Version=8.7.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\EXILED.8.7.0\lib\net48\Exiled.API.dll</HintPath>
     </Reference>
-    <Reference Include="Exiled.CreditTags, Version=8.6.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\EXILED.8.6.0\lib\net48\Exiled.CreditTags.dll</HintPath>
+    <Reference Include="Exiled.CreditTags, Version=8.7.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\EXILED.8.7.0\lib\net48\Exiled.CreditTags.dll</HintPath>
     </Reference>
-    <Reference Include="Exiled.CustomItems, Version=8.6.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\EXILED.8.6.0\lib\net48\Exiled.CustomItems.dll</HintPath>
+    <Reference Include="Exiled.CustomItems, Version=8.7.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\EXILED.8.7.0\lib\net48\Exiled.CustomItems.dll</HintPath>
     </Reference>
-    <Reference Include="Exiled.CustomRoles, Version=8.6.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\EXILED.8.6.0\lib\net48\Exiled.CustomRoles.dll</HintPath>
+    <Reference Include="Exiled.CustomRoles, Version=8.7.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\EXILED.8.7.0\lib\net48\Exiled.CustomRoles.dll</HintPath>
     </Reference>
-    <Reference Include="Exiled.Events, Version=8.6.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\EXILED.8.6.0\lib\net48\Exiled.Events.dll</HintPath>
+    <Reference Include="Exiled.Events, Version=8.7.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\EXILED.8.7.0\lib\net48\Exiled.Events.dll</HintPath>
     </Reference>
-    <Reference Include="Exiled.Loader, Version=8.6.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\EXILED.8.6.0\lib\net48\Exiled.Loader.dll</HintPath>
+    <Reference Include="Exiled.Loader, Version=8.7.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\EXILED.8.7.0\lib\net48\Exiled.Loader.dll</HintPath>
     </Reference>
-    <Reference Include="Exiled.Permissions, Version=8.6.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\EXILED.8.6.0\lib\net48\Exiled.Permissions.dll</HintPath>
+    <Reference Include="Exiled.Permissions, Version=8.7.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\EXILED.8.7.0\lib\net48\Exiled.Permissions.dll</HintPath>
     </Reference>
     <Reference Include="Facepunch.Steamworks.Win64">
       <HintPath>..\..\..\..\Downloads\Master\Facepunch.Steamworks.Win64.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Mirror">
       <HintPath>..\..\..\..\Downloads\Master\Mirror.dll</HintPath>
     </Reference>
@@ -136,13 +138,17 @@
       <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NorthwoodLib, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\EXILED.8.6.0\lib\net48\NorthwoodLib.dll</HintPath>
+      <HintPath>..\packages\EXILED.8.7.0\lib\net48\NorthwoodLib.dll</HintPath>
     </Reference>
     <Reference Include="PluginAPI, Version=13.1.2.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\EXILED.8.6.0\lib\net48\PluginAPI.dll</HintPath>
+      <HintPath>..\packages\EXILED.8.7.0\lib\net48\PluginAPI.dll</HintPath>
     </Reference>
     <Reference Include="Pooling">
       <HintPath>..\..\..\..\Downloads\Master\Pooling.dll</HintPath>
+    </Reference>
+    <Reference Include="PowerYaml, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Downloads\PowerYaml.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Net.Http" />
@@ -402,7 +408,10 @@
       <HintPath>..\..\..\..\Downloads\Master\UnityEngine.XRModule.dll</HintPath>
     </Reference>
     <Reference Include="YamlDotNet, Version=11.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
-      <HintPath>..\packages\EXILED.8.6.0\lib\net48\YamlDotNet.dll</HintPath>
+      <HintPath>..\packages\EXILED.8.7.0\lib\net48\YamlDotNet.dll</HintPath>
+    </Reference>
+    <Reference Include="zxing">
+      <HintPath>..\..\..\..\Downloads\Master\zxing.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

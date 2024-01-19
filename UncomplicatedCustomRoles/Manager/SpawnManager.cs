@@ -8,6 +8,9 @@ using UncomplicatedCustomRoles.Structures;
 using UnityEngine;
 using UncomplicatedCustomRoles.Elements;
 using Exiled.CustomItems.API.Features;
+using UnityEngine.UIElements;
+using Exiled.Events.EventArgs.Interfaces;
+using PowerYaml;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -63,7 +66,8 @@ namespace UncomplicatedCustomRoles.Manager
                 RequiredPermission = Role.RequiredPermission,
                 IgnoreSpawnSystem = Role.IgnoreSpawnSystem,
                 Health = Role.Health,
-                SpawnChance = Role.SpawnChance
+                SpawnChance = Role.SpawnChance,
+                PowerYamlScripts = Role.PowerYamlScripts
             };
         }
 
@@ -98,12 +102,12 @@ namespace UncomplicatedCustomRoles.Manager
 
         public static void ClearCustomTypes(Player Player)
         {
+            Player.CustomInfo = string.Empty;
+            Player.DisplayNickname = string.Empty;
+            Player.Scale = new Vector3(1, 1, 1);
             if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
             {
                 Plugin.PlayerRegistry.Remove(Player.Id);
-                Player.CustomInfo = string.Empty;
-                Player.DisplayNickname = string.Empty;
-                Player.Scale = new Vector3(1, 1, 1);
             }
         }
 
@@ -236,8 +240,19 @@ namespace UncomplicatedCustomRoles.Manager
 
         public static Vector3 VectorConvertor(string Vector)
         {
+            if (Vector.Length - Vector.Replace(",", "").Length != 2)
+            {
+                Log.Warn($"Error while parsing StringVector '{Vector}', found {Vector.Length - Vector.Replace(",", "").Length} commas instead of 2!\nSyntax: x, y, z");
+                return new();
+            }
             string[] Data = Vector.Replace(" ", "").Split(',');
-            return new Vector3(float.Parse(Data.ElementAt(0)), float.Parse(Data.ElementAt(1)), float.Parse(Data.ElementAt(2)));
+            if (Data.Length != 3) 
+            {
+                Log.Warn($"Error while parsing StringVector '{Vector}', found {Data.Length} elements instead of 3!\nSyntax: x, y, z");
+                return new();
+            }
+            Log.Debug($"Parsed StringVector '{Vector}' with success!");
+            return new Vector3(float.Parse(Data[0]), float.Parse(Data[1]), float.Parse(Data[2]));
         }
         
         public static int GetFirstFreeID(int Id)
@@ -247,6 +262,47 @@ namespace UncomplicatedCustomRoles.Manager
                 Id++;
             }
             return Id;
+        }
+
+        public static void TriggerNpcEvent(ICustomRole Role, PlayerEvent Event, IPlayerEvent EventArgs)
+        {
+            TriggerNpcEvent(Role.Id, Event, EventArgs);
+        }
+
+        public static void TriggerNpcEvent(int RoleId, PlayerEvent Event, IPlayerEvent EventArgs)
+        {
+            if (Plugin.RoleActions.ContainsKey(RoleId))
+            {
+                Power Power = Plugin.RoleActions[RoleId];
+                if (Power.Events.ContainsKey(Event))
+                {
+                    Power.Execute(Event, EventArgs);
+                }
+            }
+        }
+
+        public static void TriggerNpcEvent(int? RoleId, PlayerEvent Event, IPlayerEvent EventArgs)
+        {
+            if (RoleId is null)
+            {
+                return;
+            }
+            TriggerNpcEvent(RoleId, Event, EventArgs);
+        }
+
+        public static int? TryGetCustomRole(Player Player)
+        {
+            if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
+            {
+                return Plugin.PlayerRegistry[Player.Id];
+            }
+            return null;
+        }
+
+        public static void TriggerNpcEvent(PlayerEvent Event, IPlayerEvent EventArgs)
+        {
+
+            TriggerNpcEvent(TryGetCustomRole(EventArgs.Player), Event, EventArgs);
         }
     }  
 }

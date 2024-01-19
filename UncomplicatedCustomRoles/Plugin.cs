@@ -30,11 +30,13 @@ namespace UncomplicatedCustomRoles
         public static Dictionary<int, int> PlayerRegistry = new();
         public static Dictionary<int, int> RolesCount = new();
         public static List<int> RoleSpawnQueue = new();
+        public static Dictionary<int, PowerYaml.Power> RoleActions = new();
         public static HttpClient HttpClient;
         public bool DoSpawnBasicRoles = false;
         public string PresenceUrl = "https://tbbt.fcosma.it/api/ucs/presence";
         public int FailedHttp;
         internal FileConfigs FileConfigs;
+        internal ScriptConfig ScriptConfig;
         public override void OnEnabled()
         {
             Instance = this;
@@ -45,12 +47,35 @@ namespace UncomplicatedCustomRoles
 
             FailedHttp = 0;
             FileConfigs = new();
+            ScriptConfig = new();
 
+            ServerHandler.RespawningTeam += Handler.OnRespawningWave;
             ServerHandler.RoundStarted += Handler.OnRoundStarted;
             PlayerHandler.Died += Handler.OnDied;
             PlayerHandler.Spawning += Handler.OnSpawning;
             PlayerHandler.Spawned += Handler.OnPlayerSpawned;
             PlayerHandler.Escaping += Handler.OnEscaping;
+
+            // Events for the PowerYaml implementation
+            PlayerHandler.UsingItem += Handler.OnUsingItem;
+            PlayerHandler.InteractingDoor += Handler.OnInteractingDoor;
+            PlayerHandler.InteractingElevator += Handler.OnInteractingElevator;
+            PlayerHandler.InteractingLocker += Handler.OnInteractingLocker;
+            PlayerHandler.Dying += Handler.OnDying;
+            PlayerHandler.UsingItem += Handler.OnUsingItem;
+            PlayerHandler.UsedItem += Handler.OnUsedItem;
+            PlayerHandler.Hurting += Handler.OnHurting;
+            PlayerHandler.Hurt += Handler.OnHurt;
+            PlayerHandler.Shooting += Handler.OnShooting;
+            PlayerHandler.Shot += Handler.OnShot;
+            PlayerHandler.ChangingItem += Handler.OnChangingItem;
+            PlayerHandler.TriggeringTesla += Handler.OnTriggeringTesla;
+            PlayerHandler.UsingRadioBattery += Handler.OnUsingRadioBattery;
+            PlayerHandler.FlippingCoin += Handler.OnFlippingCoin;
+            PlayerHandler.MakingNoise += Handler.OnMakingNoise;
+            PlayerHandler.Jumping += Handler.OnJumping;
+            PlayerHandler.Transmitting += Handler.OnTransmitting;
+            PlayerHandler.KillingPlayer += Handler.OnKilling;
 
             foreach (ICustomRole CustomRole in Config.CustomRoles)
             {
@@ -72,17 +97,41 @@ namespace UncomplicatedCustomRoles
             FileConfigs.Welcome();
             FileConfigs.LoadAll();
 
+            ScriptConfig.Init();
+
             base.OnEnabled();
         }
         public override void OnDisabled()
         {
             Instance = null;
 
+            ServerHandler.RespawningTeam -= Handler.OnRespawningWave;
             ServerHandler.RoundStarted -= Handler.OnRoundStarted;
             PlayerHandler.Died -= Handler.OnDied;
             PlayerHandler.Spawning -= Handler.OnSpawning;
             PlayerHandler.Spawned -= Handler.OnPlayerSpawned;
             PlayerHandler.Escaping -= Handler.OnEscaping;
+
+            // Events for the PowerYaml implementation
+            PlayerHandler.UsingItem -= Handler.OnUsingItem;
+            PlayerHandler.InteractingDoor -= Handler.OnInteractingDoor;
+            PlayerHandler.InteractingElevator -= Handler.OnInteractingElevator;
+            PlayerHandler.InteractingLocker -= Handler.OnInteractingLocker;
+            PlayerHandler.Dying -= Handler.OnDying;
+            PlayerHandler.UsingItem -= Handler.OnUsingItem;
+            PlayerHandler.UsedItem -= Handler.OnUsedItem;
+            PlayerHandler.Hurting -= Handler.OnHurting;
+            PlayerHandler.Hurt -= Handler.OnHurt;
+            PlayerHandler.Shooting -= Handler.OnShooting;
+            PlayerHandler.Shot -= Handler.OnShot;
+            PlayerHandler.ChangingItem -= Handler.OnChangingItem;
+            PlayerHandler.TriggeringTesla -= Handler.OnTriggeringTesla;
+            PlayerHandler.UsingRadioBattery -= Handler.OnUsingRadioBattery;
+            PlayerHandler.FlippingCoin -= Handler.OnFlippingCoin;
+            PlayerHandler.MakingNoise -= Handler.OnMakingNoise;
+            PlayerHandler.Jumping -= Handler.OnJumping;
+            PlayerHandler.Transmitting -= Handler.OnTransmitting;
+            PlayerHandler.KillingPlayer -= Handler.OnKilling;
 
             Handler = null;
             CustomRoles = null;
