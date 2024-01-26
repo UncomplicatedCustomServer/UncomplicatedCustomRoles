@@ -8,9 +8,6 @@ using UncomplicatedCustomRoles.Structures;
 using UnityEngine;
 using UncomplicatedCustomRoles.Elements;
 using Exiled.CustomItems.API.Features;
-using UnityEngine.UIElements;
-using Exiled.Events.EventArgs.Interfaces;
-using PowerYaml;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -21,7 +18,6 @@ namespace UncomplicatedCustomRoles.Manager
             if (SubclassValidator(Role) && !Plugin.CustomRoles.ContainsKey(Role.Id))
             {
                 Plugin.CustomRoles.Add(Role.Id, Role);
-                Plugin.RolesCount.Add(Role.Id, 0);
                 Log.Info($"Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
                 return;
             }
@@ -66,8 +62,7 @@ namespace UncomplicatedCustomRoles.Manager
                 RequiredPermission = Role.RequiredPermission,
                 IgnoreSpawnSystem = Role.IgnoreSpawnSystem,
                 Health = Role.Health,
-                SpawnChance = Role.SpawnChance,
-                PowerYamlScripts = Role.PowerYamlScripts
+                SpawnChance = Role.SpawnChance
             };
         }
 
@@ -107,6 +102,18 @@ namespace UncomplicatedCustomRoles.Manager
             Player.Scale = new Vector3(1, 1, 1);
             if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
             {
+                int Role = Plugin.PlayerRegistry[Player.Id];
+                Plugin.RolesCount[Role].Remove(Player.Id);
+                Plugin.PlayerRegistry.Remove(Player.Id);
+            }
+        }
+
+        public static void LimitedClearCustomTypes(Player Player)
+        {
+            if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
+            {
+                int Role = Plugin.PlayerRegistry[Player.Id];
+                Plugin.RolesCount[Role].Remove(Player.Id);
                 Plugin.PlayerRegistry.Remove(Player.Id);
             }
         }
@@ -195,7 +202,11 @@ namespace UncomplicatedCustomRoles.Manager
             // Player.Group.BadgeColor = Role.Badge.Color;
             // Player.Group.BadgeText = Role.Badge.Name;
             // Player.Group.Permissions = Player.Group.Permissions;
-            Player.CustomInfo = Role.Name + ("\n" + Role.CustomInfo ?? string.Empty);
+            Player.CustomInfo = Role.Name;
+            if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
+            {
+                Player.CustomInfo += $"\n{Role.CustomInfo}";
+            }
             if (Role.DisplayNickname != string.Empty && Role.DisplayNickname != null)
             {
                 Player.DisplayNickname = Role.DisplayNickname.Replace("%name%", Player.Nickname).Replace("%dnumber%", new System.Random().Next(1000, 9999).ToString()).Replace("%o5number%", new System.Random().Next(01, 10).ToString());
@@ -264,32 +275,6 @@ namespace UncomplicatedCustomRoles.Manager
             return Id;
         }
 
-        public static void TriggerNpcEvent(ICustomRole Role, PlayerEvent Event, IPlayerEvent EventArgs)
-        {
-            TriggerNpcEvent(Role.Id, Event, EventArgs);
-        }
-
-        public static void TriggerNpcEvent(int RoleId, PlayerEvent Event, IPlayerEvent EventArgs)
-        {
-            if (Plugin.RoleActions.ContainsKey(RoleId))
-            {
-                Power Power = Plugin.RoleActions[RoleId];
-                if (Power.Events.ContainsKey(Event))
-                {
-                    Power.Execute(Event, EventArgs);
-                }
-            }
-        }
-
-        public static void TriggerNpcEvent(int? RoleId, PlayerEvent Event, IPlayerEvent EventArgs)
-        {
-            if (RoleId is null)
-            {
-                return;
-            }
-            TriggerNpcEvent(RoleId, Event, EventArgs);
-        }
-
         public static int? TryGetCustomRole(Player Player)
         {
             if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
@@ -297,12 +282,6 @@ namespace UncomplicatedCustomRoles.Manager
                 return Plugin.PlayerRegistry[Player.Id];
             }
             return null;
-        }
-
-        public static void TriggerNpcEvent(PlayerEvent Event, IPlayerEvent EventArgs)
-        {
-
-            TriggerNpcEvent(TryGetCustomRole(EventArgs.Player), Event, EventArgs);
         }
     }  
 }

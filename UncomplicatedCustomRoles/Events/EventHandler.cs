@@ -11,7 +11,6 @@ using Exiled.Permissions.Extensions;
 using Newtonsoft.Json;
 using System.Net.Http;
 using Exiled.Events.EventArgs.Server;
-using Exiled.CustomRoles;
 
 /*
  * Il mio canto libero - Lucio Battisti
@@ -81,6 +80,12 @@ namespace UncomplicatedCustomRoles.Events
     {
         public void OnRoundStarted()
         {
+            Plugin.PlayerRegistry = new();
+            Plugin.RolesCount = new();
+            foreach (KeyValuePair<int, ICustomRole> Data in Plugin.CustomRoles)
+            {
+                Plugin.RolesCount[Data.Key] = new();
+            }
             Plugin.Instance.DoSpawnBasicRoles = false;
             Timing.CallDelayed(5, () =>
             {
@@ -94,6 +99,7 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnPlayerSpawned(SpawnedEventArgs Spawned)
         {
+            SpawnManager.LimitedClearCustomTypes(Spawned.Player);
             if (!Plugin.Instance.DoSpawnBasicRoles)
             {
                 return;
@@ -126,99 +132,7 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnDied(DiedEventArgs Died)
         {
-            int? CustomRole = SpawnManager.TryGetCustomRole(Died.Player);
             SpawnManager.ClearCustomTypes(Died.Player);
-            SpawnManager.TriggerNpcEvent(CustomRole, PlayerEvent.Died, Died);
-        }
-
-        public void OnDying(DyingEventArgs Dying)
-        {
-            SpawnManager.TriggerNpcEvent(PlayerEvent.Dying, Dying);
-        }
-
-        public void OnInteractingDoor(InteractingDoorEventArgs InteractingDoor)
-        {
-            SpawnManager.TriggerNpcEvent(PlayerEvent.InteractingDoor, InteractingDoor);
-        }
-
-        public void OnInteractingElevator(InteractingElevatorEventArgs InteractingElevator)
-        {
-            SpawnManager.TriggerNpcEvent(PlayerEvent.InteractingElevator, InteractingElevator);
-        }
-
-        public void OnInteractingLocker(InteractingLockerEventArgs InteractingLocker)
-        {
-            SpawnManager.TriggerNpcEvent(PlayerEvent.InteractingLocker, InteractingLocker);
-        }
-
-        public void OnUsingItem(UsingItemEventArgs UsingItem)
-        {
-            SpawnManager.TriggerNpcEvent(PlayerEvent.UsingItem, UsingItem);
-        }
-
-        public void OnUsedItem(UsedItemEventArgs UsedItem)
-        {
-            SpawnManager.TriggerNpcEvent(PlayerEvent.UsedItem, UsedItem);
-        }
-
-        public void OnHurting(HurtingEventArgs Hurting)
-        {
-            SpawnManager.TriggerNpcEvent(PlayerEvent.Hurting, Hurting);
-        }
-
-        public void OnHurt(HurtEventArgs Hurt)
-        {
-            SpawnManager.TriggerNpcEvent(PlayerEvent.Hurt, Hurt);
-        }
-
-        public void OnShooting(ShootingEventArgs Shooting)
-        {
-            SpawnManager.TriggerNpcEvent(PlayerEvent.Shooting, Shooting);
-        }
-
-        public void OnShot(ShotEventArgs Shot)
-        {
-            SpawnManager.TriggerNpcEvent(PlayerEvent.Shot, Shot);
-        }
-
-        public void OnChangingItem(ChangingItemEventArgs ChangingItem)
-        {
-            SpawnManager.TriggerNpcEvent(PlayerEvent.ChangingItem, ChangingItem);
-        }
-
-        public void OnTriggeringTesla(TriggeringTeslaEventArgs TriggeringTesla)
-        {
-            SpawnManager.TriggerNpcEvent(PlayerEvent.TriggeringTesla, TriggeringTesla);
-        }
-
-        public void OnUsingRadioBattery(UsingRadioBatteryEventArgs UseRadioBattery)
-        {
-            SpawnManager.TriggerNpcEvent(PlayerEvent.UsingRadioBattery, UseRadioBattery);
-        }
-
-        public void OnFlippingCoin(FlippingCoinEventArgs FlippingCoin)
-        {
-            SpawnManager.TriggerNpcEvent(PlayerEvent.FlippingCoin, FlippingCoin);
-        }
-
-        public void OnMakingNoise(MakingNoiseEventArgs MakingNoise)
-        {
-            SpawnManager.TriggerNpcEvent(PlayerEvent.MakingNoise, MakingNoise);
-        }
-
-        public void OnJumping(JumpingEventArgs Jumping)
-        {
-            SpawnManager.TriggerNpcEvent(PlayerEvent.Jumping, Jumping);
-        }
-
-        public void OnTransmitting(TransmittingEventArgs Transmitting)
-        {
-            SpawnManager.TriggerNpcEvent(PlayerEvent.Transmitting, Transmitting);
-        }
-
-        public void OnKilling(KillingPlayerEventArgs KillingPlayer)
-        {
-            SpawnManager.TriggerNpcEvent(PlayerEvent.KillPlayer, KillingPlayer);
         }
 
         public void OnSpawning(SpawningEventArgs Spawning)
@@ -291,10 +205,10 @@ namespace UncomplicatedCustomRoles.Events
                     // The role exists, good, let's give the player a role
                     int RoleId = RolePercentage[Player.Role.Type].RandomItem().Id;
 
-                    if (Plugin.RolesCount[RoleId] < Plugin.CustomRoles[RoleId].MaxPlayers)
+                    if (Plugin.RolesCount[RoleId].Count() < Plugin.CustomRoles[RoleId].MaxPlayers)
                     {
                         Timing.RunCoroutine(DoSpawnPlayer(Player, RoleId, false));
-                        Plugin.RolesCount[RoleId]++;
+                        Plugin.RolesCount[RoleId].Add(Player.Id);
                         Log.Debug($"Player {Player.Nickname} spawned as CustomRole {RoleId}");
                     }
                     else

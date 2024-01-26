@@ -53,7 +53,6 @@ namespace UncomplicatedCustomRoles.Elements
         public Vector3 SpawnPosition { get; set; } = new();
         public Vector3 SpawnOffset { get; set; } = new();
         public string? RequiredPermission { get; set; } = null;
-        public List<string>? PowerYamlScripts { get; set; } = null;
         public bool IgnoreSpawnSystem { get; set; } = false;
     }
 }

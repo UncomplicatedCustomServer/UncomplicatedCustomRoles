@@ -47,18 +47,18 @@ namespace UncomplicatedCustomRoles.API.Features
         }
         public static int Count(ICustomRole Role)
         {
-            return Plugin.RolesCount[Role.Id];
+            return Plugin.RolesCount[Role.Id].Count;
         }
         public static int Count(int Role)
         {
-            return Plugin.RolesCount[Role];
+            return Plugin.RolesCount[Role].Count;
         }
         public static int Count()
         {
             int total = 0;
-            foreach (KeyValuePair<int, int> Count in Plugin.RolesCount)
+            foreach (KeyValuePair<int, List<int>> Count in Plugin.RolesCount)
             {
-                total += Count.Value;
+                total += Count.Value.Count;
             }
             return total;
         }
