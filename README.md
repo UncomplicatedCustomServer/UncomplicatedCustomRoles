@@ -1,7 +1,7 @@
 # UncomplicatedCustomRoles
 With **UncomplicatedCustomRoles** you can create custom roles in a way that is convenient, fast, and most importantly, fully customizable!
 
-**EXILED >= 8.4.3**
+**EXILED >= 8.7.0**
 
 ## [Please read the official documentation here!](https://github.com/FoxWorn3365/UncomplicatedCustomRoles/wiki)
 
