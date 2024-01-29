@@ -16,7 +16,7 @@ namespace UncomplicatedCustomRoles
         public override string Name => "UncomplicatedCustomRoles";
         public override string Prefix => "UncomplicatedCustomRoles";
         public override string Author => "FoxWorn3365, Dr.Agenda";
-        public override Version Version { get; } = new(1, 6, 1);
+        public override Version Version { get; } = new(1, 6, 5);
         public override Version RequiredExiledVersion { get; } = new(8, 7, 0);
         public static Plugin Instance;
         internal Handler Handler;
@@ -24,6 +24,7 @@ namespace UncomplicatedCustomRoles
         public static Dictionary<int, int> PlayerRegistry = new();
         // RolesCount: RoleId => [PlayerId, PlayerId]
         public static Dictionary<int, List<int>> RolesCount = new();
+        public static Dictionary<int, List<IUCREffect>> PermanentEffectStatus = new();
         public static List<int> RoleSpawnQueue = new();
         public static HttpClient HttpClient;
         public bool DoSpawnBasicRoles = false;
@@ -47,6 +48,7 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Spawning += Handler.OnSpawning;
             PlayerHandler.Spawned += Handler.OnPlayerSpawned;
             PlayerHandler.Escaping += Handler.OnEscaping;
+            PlayerHandler.UsedItem += Handler.OnItemUsed;
 
             foreach (ICustomRole CustomRole in Config.CustomRoles)
             {
@@ -80,6 +82,7 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Spawning -= Handler.OnSpawning;
             PlayerHandler.Spawned -= Handler.OnPlayerSpawned;
             PlayerHandler.Escaping -= Handler.OnEscaping;
+            PlayerHandler.UsedItem -= Handler.OnItemUsed;
 
             Handler = null;
             CustomRoles = null;

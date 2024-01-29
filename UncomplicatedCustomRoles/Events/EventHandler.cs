@@ -11,6 +11,7 @@ using Exiled.Permissions.Extensions;
 using Newtonsoft.Json;
 using System.Net.Http;
 using Exiled.Events.EventArgs.Server;
+using UnityEngine.UI;
 
 /*
  * Il mio canto libero - Lucio Battisti
@@ -78,6 +79,7 @@ namespace UncomplicatedCustomRoles.Events
 {
     public class EventHandler
     {
+        protected CoroutineHandle EffectCoroutine;
         public void OnRoundStarted()
         {
             Plugin.PlayerRegistry = new();
@@ -87,6 +89,11 @@ namespace UncomplicatedCustomRoles.Events
                 Plugin.RolesCount[Data.Key] = new();
             }
             Plugin.Instance.DoSpawnBasicRoles = false;
+            if (EffectCoroutine.IsRunning)
+            {
+                Timing.KillCoroutines(EffectCoroutine);
+            }
+            EffectCoroutine = Timing.RunCoroutine(DoSetInfiniteEffectToPlayers());
             Timing.CallDelayed(5, () =>
             {
                 Plugin.Instance.DoSpawnBasicRoles = true;
@@ -159,6 +166,33 @@ namespace UncomplicatedCustomRoles.Events
             foreach (Player Player in Respawn.Players)
             {
                 Plugin.RoleSpawnQueue.Add(Player.Id);
+            }
+        }
+
+        public void OnItemUsed(UsedItemEventArgs UsedItem)
+        {
+            if (SpawnManager.TryGetCustomRole(UsedItem.Player) is not null && Plugin.PermanentEffectStatus.ContainsKey(UsedItem.Player.Id)  && UsedItem.Item.Type == ItemType.SCP500)
+            {
+                foreach (IUCREffect Effect in Plugin.PermanentEffectStatus[UsedItem.Player.Id])
+                {
+                    if (Effect.Removable)
+                    {
+                        Plugin.PermanentEffectStatus[UsedItem.Player.Id].Remove(Effect);
+                    }
+                }
+                SpawnManager.SetAllActiveEffect(UsedItem.Player);
+            }
+        }
+
+        public IEnumerator<float> DoSetInfiniteEffectToPlayers()
+        {
+            while (Round.InProgress)
+            {
+                foreach (Player Player in Player.List.Where(player => Plugin.PermanentEffectStatus.ContainsKey(player.Id) && player.IsAlive))
+                {
+                    SpawnManager.SetAllActiveEffect(Player);
+                }
+                yield return Timing.WaitForSeconds(10f);
             }
         }
 

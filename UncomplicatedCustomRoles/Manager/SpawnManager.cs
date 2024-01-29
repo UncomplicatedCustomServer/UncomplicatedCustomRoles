@@ -22,10 +22,13 @@ namespace UncomplicatedCustomRoles.Manager
                 return;
             }
             Log.Warn($"Failed to register the UCR role with the ID {Role.Id}: The problem can be the following: ERR_VALIDATOR or ERR_ID_ALREADY_HERE!\nTrying to assign a new one...");
-            int NewId = GetFirstFreeID(Role.Id);
-            Log.Info($"Custom Role {Role.Name} with the old Id {Role.Id} will be registered with the following Id: {NewId}");
-            Role.Id = NewId;
-            RegisterCustomSubclass(Role);
+            if (Plugin.CustomRoles.ContainsKey(Role.Id))
+            {
+                int NewId = GetFirstFreeID(Role.Id);
+                Log.Info($"Custom Role {Role.Name} with the old Id {Role.Id} will be registered with the following Id: {NewId}");
+                Role.Id = NewId;
+                RegisterCustomSubclass(Role);
+            }
         }
 
         public static ICustomRole RenderExportMethodToInternal(IExternalCustomRole Role)
@@ -81,7 +84,7 @@ namespace UncomplicatedCustomRoles.Manager
                 {
                     Log.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the RoomSpawn as SpawnType the List SpawnRooms can't be empty!");
                     return false;
-                } else if (Role.Spawn == SpawnLocationType.PositionSpawn && Role.SpawnPosition == new UnityEngine.Vector3(0, 0, 0))
+                } else if (Role.Spawn == SpawnLocationType.PositionSpawn && Role.SpawnPosition == new Vector3(0, 0, 0))
                 {
                     Log.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the PositionSpawn as SpawnType the Vector3 SpawnPosition can't be empty!");
                     return false;
@@ -102,6 +105,7 @@ namespace UncomplicatedCustomRoles.Manager
             Player.Scale = new Vector3(1, 1, 1);
             if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
             {
+                Plugin.PermanentEffectStatus.Remove(Player.Id);
                 int Role = Plugin.PlayerRegistry[Player.Id];
                 Plugin.RolesCount[Role].Remove(Player.Id);
                 Plugin.PlayerRegistry.Remove(Player.Id);
@@ -112,6 +116,7 @@ namespace UncomplicatedCustomRoles.Manager
         {
             if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
             {
+                Plugin.PermanentEffectStatus.Remove(Player.Id);
                 int Role = Plugin.PlayerRegistry[Player.Id];
                 Plugin.RolesCount[Role].Remove(Player.Id);
                 Plugin.PlayerRegistry.Remove(Player.Id);
@@ -191,7 +196,7 @@ namespace UncomplicatedCustomRoles.Manager
                     }
                 }
             }
-            // Now add all ammos
+            
             if (Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
             {
                 foreach (KeyValuePair<AmmoType, ushort> Ammo in Role.Ammo)
@@ -199,9 +204,7 @@ namespace UncomplicatedCustomRoles.Manager
                     Player.AddAmmo(Ammo.Key, Ammo.Value);
                 }
             }
-            // Player.Group.BadgeColor = Role.Badge.Color;
-            // Player.Group.BadgeText = Role.Badge.Name;
-            // Player.Group.Permissions = Player.Group.Permissions;
+
             Player.CustomInfo = Role.Name;
             if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
             {
@@ -216,12 +219,20 @@ namespace UncomplicatedCustomRoles.Manager
             Player.Health = Role.Health;
             Player.ArtificialHealth = Role.Ahp;
 
+            Plugin.PermanentEffectStatus.Add(Player.Id, new());
+
             if (Role.Effects.Count() > 0 && Role.Effects != null)
             {
                 foreach (IUCREffect effect in Role.Effects)
                 {
-                    Player.EnableEffect(effect.EffectType, effect.Duration);
-                    Player.ChangeEffectIntensity(effect.EffectType, effect.Intensity);
+                    float Duration = effect.Duration;
+                    if (Duration < 0)
+                    {
+                        Duration = 15f;
+                        Plugin.PermanentEffectStatus[Player.Id].Add(effect);
+                    }
+                    Player.EnableEffect(effect.EffectType, Duration);
+                    Player.ChangeEffectIntensity(effect.EffectType, effect.Intensity, Duration);
                 }
             }
 
@@ -282,6 +293,15 @@ namespace UncomplicatedCustomRoles.Manager
                 return Plugin.PlayerRegistry[Player.Id];
             }
             return null;
+        }
+
+        public static void SetAllActiveEffect(Player Player)
+        {
+            foreach (IUCREffect Effect in Plugin.PermanentEffectStatus[Player.Id])
+            {
+                Player.EnableEffect(Effect.EffectType, 15f);
+                Player.ChangeEffectIntensity(Effect.EffectType, Effect.Intensity, 15f);
+            }
         }
     }  
 }

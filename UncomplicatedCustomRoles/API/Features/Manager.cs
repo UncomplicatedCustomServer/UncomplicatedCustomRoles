@@ -73,5 +73,30 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             Unregister(Role.Id);
         }
+        public static List<IUCREffect>? InfiniteEffects(int Id)
+        {
+            if (Plugin.PermanentEffectStatus.ContainsKey(Id))
+            {
+                return Plugin.PermanentEffectStatus[Id];
+            }
+            return null;
+        }
+        public static List<IUCREffect>? InfiniteEffects(Player Player)
+        {
+            return InfiniteEffects(Player.Id);
+        }
+        public static bool AddInfiniteEffect(IUCREffect Effect, int Id)
+        {
+            if (Plugin.PlayerRegistry.ContainsKey(Id) && Plugin.PermanentEffectStatus.ContainsKey(Id))
+            {
+                Plugin.PermanentEffectStatus[Id].Add(Effect);
+                return true;
+            }
+            return false;
+        }
+        public static bool AddInfiniteEffect(IUCREffect Effect, Player Player)
+        {
+            return AddInfiniteEffect(Effect, Player.Id);
+        }
     }
 }
