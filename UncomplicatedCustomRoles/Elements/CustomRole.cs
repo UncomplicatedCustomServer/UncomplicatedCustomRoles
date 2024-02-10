@@ -27,7 +27,10 @@ namespace UncomplicatedCustomRoles.Elements
         public float MaxHealth { get; set; } = 100f;
         public float Ahp { get; set; } = 0f;
         public float HumeShield { get; set; } = 0f;
-        public List<UCREffect>? Effects { get; set; } = new();
+        public List<UCREffect>? Effects { get; set; } = new()
+        {
+            new()
+        };
         public bool CanEscape { get; set; } = true;
         public Vector3 Scale { get; set; } = new();
         public string SpawnBroadcast { get; set; } = "You are a <color=orange><b>Janitor</b></color>!\nClean the Light Containment Zone!";

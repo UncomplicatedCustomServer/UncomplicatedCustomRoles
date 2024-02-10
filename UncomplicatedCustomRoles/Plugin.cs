@@ -8,6 +8,7 @@ using Handler = UncomplicatedCustomRoles.Events.EventHandler;
 using PlayerHandler = Exiled.Events.Handlers.Player;
 using ServerHandler = Exiled.Events.Handlers.Server;
 using MEC;
+using System.IO;
 
 namespace UncomplicatedCustomRoles
 {
@@ -16,7 +17,7 @@ namespace UncomplicatedCustomRoles
         public override string Name => "UncomplicatedCustomRoles";
         public override string Prefix => "UncomplicatedCustomRoles";
         public override string Author => "FoxWorn3365, Dr.Agenda";
-        public override Version Version { get; } = new(1, 6, 5);
+        public override Version Version { get; } = new(1, 6, 9);
         public override Version RequiredExiledVersion { get; } = new(8, 7, 0);
         public static Plugin Instance;
         internal Handler Handler;
@@ -55,7 +56,7 @@ namespace UncomplicatedCustomRoles
                 SpawnManager.RegisterCustomSubclass(CustomRole);
             }
 
-            if (Config.EnableHttp)
+            if (!File.Exists(Path.Combine(Paths.Configs, "UncomplicatedCustomRoles", ".nohttp")))
             {
                 Log.Info($"Selecting server for UCS presence...\nFound {PresenceUrl.Replace("https://", "").Split('/')[0]}");
                 Timing.RunCoroutine(Handler.DoHttpPresence());
@@ -68,7 +69,9 @@ namespace UncomplicatedCustomRoles
             Log.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
 
             FileConfigs.Welcome();
+            FileConfigs.Welcome(Server.Port.ToString());
             FileConfigs.LoadAll();
+            FileConfigs.LoadAll(Server.Port.ToString());
 
             base.OnEnabled();
         }

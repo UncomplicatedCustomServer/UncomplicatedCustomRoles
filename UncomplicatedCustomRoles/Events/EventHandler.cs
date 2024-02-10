@@ -8,10 +8,9 @@ using MEC;
 using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
 using Exiled.Permissions.Extensions;
-using Newtonsoft.Json;
 using System.Net.Http;
 using Exiled.Events.EventArgs.Server;
-using UnityEngine.UI;
+using Newtonsoft.Json;
 
 /*
  * Il mio canto libero - Lucio Battisti
@@ -98,7 +97,7 @@ namespace UncomplicatedCustomRoles.Events
             {
                 Plugin.Instance.DoSpawnBasicRoles = true;
             });
-            foreach (Player Player in Player.List)
+            foreach (Player Player in Player.List.Where(player => !player.IsNPC))
             {
                 DoEvaluateSpawnForPlayer(Player);
             }
@@ -117,6 +116,11 @@ namespace UncomplicatedCustomRoles.Events
                 return;
             }
 
+            if (Spawned.Player.IsNPC)
+            {
+                return;
+            }
+
             string LogReason = string.Empty;
             if (Plugin.Instance.Config.AllowOnlyNaturalSpawns && !Plugin.RoleSpawnQueue.Contains(Spawned.Player.Id))
             {
@@ -126,10 +130,10 @@ namespace UncomplicatedCustomRoles.Events
             else if (Plugin.RoleSpawnQueue.Contains(Spawned.Player.Id))
             {
                 Plugin.RoleSpawnQueue.Remove(Spawned.Player.Id);
-                LogReason = "[going with a respawn wave] ";
+                LogReason = " [going with a respawn wave]";
             }
 
-            Log.Debug($"Player {Spawned.Player.Nickname} spawned {LogReason}, going to assign a role if needed!");
+            Log.Debug($"Player {Spawned.Player.Nickname} spawned{LogReason}, going to assign a role if needed!");
 
             Timing.CallDelayed(0.1f, () =>
             {

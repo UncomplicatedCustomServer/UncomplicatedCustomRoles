@@ -8,6 +8,8 @@ using UncomplicatedCustomRoles.Structures;
 using UnityEngine;
 using UncomplicatedCustomRoles.Elements;
 using Exiled.CustomItems.API.Features;
+using System.Net.Http;
+using System.Security.Policy;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -273,8 +275,9 @@ namespace UncomplicatedCustomRoles.Manager
                 Log.Warn($"Error while parsing StringVector '{Vector}', found {Data.Length} elements instead of 3!\nSyntax: x, y, z");
                 return new();
             }
-            Log.Debug($"Parsed StringVector '{Vector}' with success!");
-            return new Vector3(float.Parse(Data[0]), float.Parse(Data[1]), float.Parse(Data[2]));
+            Vector3 Vector3 = new(float.Parse(Data[0].Replace(".", ",")), float.Parse(Data[1].Replace(".", ",")), float.Parse(Data[2].Replace(".", ",")));
+            Log.Debug($"Parsed StringVector '{Vector}' with success -- Results: {Vector3}!");
+            return Vector3;
         }
         
         public static int GetFirstFreeID(int Id)
@@ -301,6 +304,15 @@ namespace UncomplicatedCustomRoles.Manager
             {
                 Player.EnableEffect(Effect.EffectType, 15f);
                 Player.ChangeEffectIntensity(Effect.EffectType, Effect.Intensity, 15f);
+            }
+        }
+
+        async public static void CheckForLatestVersion()
+        {
+            int Version = int.Parse(await Plugin.HttpClient.GetStringAsync("https://ucs.fcosma.it/api/plugin/latest_raw"));
+            if (Version > int.Parse(Plugin.Instance.Version.ToString().Remove('.')))
+            {
+                Log.Warn("Found a new version of UncomplicatedCustomRoles!\nPlease update the plugin: https://github.com/FoxWorn3365/UncomplicatedCustomRoles");
             }
         }
     }  
