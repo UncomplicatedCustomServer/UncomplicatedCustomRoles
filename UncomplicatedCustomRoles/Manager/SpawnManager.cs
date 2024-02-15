@@ -103,7 +103,6 @@ namespace UncomplicatedCustomRoles.Manager
         public static void ClearCustomTypes(Player Player)
         {
             Player.CustomInfo = string.Empty;
-            Player.DisplayNickname = string.Empty;
             Player.Scale = new Vector3(1, 1, 1);
             if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
             {
