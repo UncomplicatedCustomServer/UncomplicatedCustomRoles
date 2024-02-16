@@ -2,6 +2,7 @@
 using Exiled.API.Features;
 using PlayerRoles;
 using System.Collections.Generic;
+using System.Linq;
 using UncomplicatedCustomRoles.Structures;
 using UnityEngine;
 
@@ -24,12 +25,7 @@ namespace UncomplicatedCustomRoles.Manager
 
         public static List<Room> GetRoomList()
         {
-            List<Room> Rooms = new();
-            foreach (Room Room in Room.List)
-            {
-                Rooms.Add(Room);
-            }
-            return Rooms;
+            return Room.List.ToList();
         }
 
         public static Dictionary<RoleTypeId, List<ICustomRole>> RoleIstance()
@@ -60,7 +56,7 @@ namespace UncomplicatedCustomRoles.Manager
         public static Vector3 AdjustRoomPosition(Room Room)
         {
             Vector3 Position = Room.Position;
-            Position.y += 2;
+            Position.y += 1.5f;
             return Position;
         }
     }

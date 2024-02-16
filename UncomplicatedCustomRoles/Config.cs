@@ -1,4 +1,5 @@
-﻿using Exiled.API.Interfaces;
+﻿using Exiled.API.Enums;
+using Exiled.API.Interfaces;
 using System.Collections.Generic;
 using System.ComponentModel;
 

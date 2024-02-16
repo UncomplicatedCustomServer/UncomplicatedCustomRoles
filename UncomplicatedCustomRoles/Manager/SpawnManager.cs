@@ -17,20 +17,22 @@ namespace UncomplicatedCustomRoles.Manager
     {
         public static void RegisterCustomSubclass(ICustomRole Role)
         {
-            if (SubclassValidator(Role) && !Plugin.CustomRoles.ContainsKey(Role.Id))
+            if (!SubclassValidator(Role))
+            {
+                Log.Warn($"Failed to register the UCR role with the ID {Role.Id} due to the validator check!");
+                return;
+            }
+            if (!Plugin.CustomRoles.ContainsKey(Role.Id))
             {
                 Plugin.CustomRoles.Add(Role.Id, Role);
                 Log.Info($"Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
                 return;
             }
-            Log.Warn($"Failed to register the UCR role with the ID {Role.Id}: The problem can be the following: ERR_VALIDATOR or ERR_ID_ALREADY_HERE!\nTrying to assign a new one...");
-            if (Plugin.CustomRoles.ContainsKey(Role.Id))
-            {
-                int NewId = GetFirstFreeID(Role.Id);
-                Log.Info($"Custom Role {Role.Name} with the old Id {Role.Id} will be registered with the following Id: {NewId}");
-                Role.Id = NewId;
-                RegisterCustomSubclass(Role);
-            }
+            Log.Warn($"Failed to register the UCR role with the ID {Role.Id}: The problem can be the following: ERR_ID_ALREADY_HERE!\nTrying to assign a new one...");
+            int NewId = GetFirstFreeID(Role.Id);
+            Log.Info($"Custom Role {Role.Name} with the old Id {Role.Id} will be registered with the following Id: {NewId}");
+            Role.Id = NewId;
+            RegisterCustomSubclass(Role);
         }
 
         public static ICustomRole RenderExportMethodToInternal(IExternalCustomRole Role)
@@ -103,7 +105,7 @@ namespace UncomplicatedCustomRoles.Manager
         public static void ClearCustomTypes(Player Player)
         {
             Player.CustomInfo = string.Empty;
-            Player.Scale = new Vector3(1, 1, 1);
+            Player.Scale = new(1, 1, 1);
             if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
             {
                 Plugin.PermanentEffectStatus.Remove(Player.Id);
