@@ -45,6 +45,15 @@ namespace UncomplicatedCustomRoles.API.Features
             }
             return null;
         }
+        public static bool TryGet(Player Player, out ICustomRole? Role)
+        {
+            Role = Get(Player);
+            if (Role is null)
+            {
+                return false;
+            }
+            return true;
+        }
         public static int Count(ICustomRole Role)
         {
             return Plugin.RolesCount[Role.Id].Count;

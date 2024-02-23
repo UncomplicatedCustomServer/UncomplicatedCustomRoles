@@ -10,6 +10,7 @@ using UncomplicatedCustomRoles.Elements;
 using Exiled.CustomItems.API.Features;
 using System.Net.Http;
 using System.Security.Policy;
+using Exiled.Events.EventArgs.Player;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -150,6 +151,8 @@ namespace UncomplicatedCustomRoles.Manager
                 SpawnFlag = RoleSpawnFlags.UseSpawnpoint;
             }
             // It's all OK so we can start to elaborate the spawn
+            PlayerRoleBase OldRole = Player.Role.Base; // That's for the event system, don't worry!;
+
             Player.Role.Set(Role.Role, SpawnFlag);
             Vector3 BasicPosition = Player.Position;
 
@@ -261,6 +264,9 @@ namespace UncomplicatedCustomRoles.Manager
             {
                 Player.ShowHint(Role.SpawnHint, Role.SpawnHintDuration);
             }
+
+            // Call the event for the spawn of the player
+            API.Features.Events.__CallEvent(UCREvents.Spawned, new SpawnedEventArgs(Player, OldRole));
         }
 
         public static Vector3 VectorConvertor(string Vector)

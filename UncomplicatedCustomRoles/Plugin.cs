@@ -9,6 +9,7 @@ using PlayerHandler = Exiled.Events.Handlers.Player;
 using ServerHandler = Exiled.Events.Handlers.Server;
 using MEC;
 using System.IO;
+using UncomplicatedCustomRoles.Events;
 
 namespace UncomplicatedCustomRoles
 {
@@ -17,10 +18,11 @@ namespace UncomplicatedCustomRoles
         public override string Name => "UncomplicatedCustomRoles";
         public override string Prefix => "UncomplicatedCustomRoles";
         public override string Author => "FoxWorn3365, Dr.Agenda";
-        public override Version Version { get; } = new(1, 6, 9);
+        public override Version Version { get; } = new(1, 7, 1);
         public override Version RequiredExiledVersion { get; } = new(8, 8, 0);
         public static Plugin Instance;
         internal Handler Handler;
+        internal ExternalPlayerEventHandler ExternalHandler;
         public static Dictionary<int, ICustomRole> CustomRoles;
         public static Dictionary<int, int> PlayerRegistry = new();
         // RolesCount: RoleId => [PlayerId, PlayerId]
@@ -38,6 +40,7 @@ namespace UncomplicatedCustomRoles
 
             HttpClient = new();
             Handler = new();
+            ExternalHandler = new();
             CustomRoles = new();
 
             FailedHttp = 0;
@@ -50,6 +53,51 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Spawned += Handler.OnPlayerSpawned;
             PlayerHandler.Escaping += Handler.OnEscaping;
             PlayerHandler.UsedItem += Handler.OnItemUsed;
+
+            // Player Events for the external handler
+            PlayerHandler.Dying += ExternalHandler.OnDying;
+            PlayerHandler.UsingItem += ExternalHandler.OnUsingItem;
+            PlayerHandler.CancellingItemUse += ExternalHandler.OnCancellingUsingItem;
+            PlayerHandler.SpawningRagdoll += ExternalHandler.OnSpawningRagdoll;
+            PlayerHandler.ActivatingWarheadPanel += ExternalHandler.OnActivatingWarheadPanel;
+            PlayerHandler.ActivatingGenerator += ExternalHandler.OnActivatingGenerator;
+            PlayerHandler.ActivatingWorkstation += ExternalHandler.OnActivatingWorkstation;
+            PlayerHandler.DeactivatingWorkstation += ExternalHandler.OnDeactivatingWorkstation;
+            PlayerHandler.Hurting += ExternalHandler.OnHurting;
+            PlayerHandler.DroppingItem += ExternalHandler.OnDroppingItem;
+            PlayerHandler.PickingUpItem += ExternalHandler.OnPickingUpItem;
+            PlayerHandler.Handcuffing += ExternalHandler.OnHandcuffing;
+            PlayerHandler.RemovingHandcuffs += ExternalHandler.OnRemovingHandcuffs;
+            PlayerHandler.IntercomSpeaking += ExternalHandler.OnIntercomSpeaking;
+            PlayerHandler.Shooting += ExternalHandler.OnShooting;
+            PlayerHandler.EnteringPocketDimension += ExternalHandler.OnEnteringPocketDimension;
+            PlayerHandler.EscapingPocketDimension += ExternalHandler.OnEscapingPocketDimension;
+            PlayerHandler.EnteringKillerCollision += ExternalHandler.OnEnteringKillerCollision;
+            PlayerHandler.ReloadingWeapon += ExternalHandler.OnReloadingWeapon;
+            PlayerHandler.ChangingItem += ExternalHandler.OnChangingItem;
+            PlayerHandler.InteractingDoor += ExternalHandler.OnInteractingDoor;
+            PlayerHandler.InteractingElevator += ExternalHandler.OnInteractingElevator;
+            PlayerHandler.InteractingLocker += ExternalHandler.OnInteractingLocker;
+            PlayerHandler.TriggeringTesla += ExternalHandler.OnTriggeringTesla;
+            PlayerHandler.OpeningGenerator += ExternalHandler.OnOpeningGenerator;
+            PlayerHandler.ClosingGenerator += ExternalHandler.OnClosingGenerator;
+            PlayerHandler.StoppingGenerator += ExternalHandler.OnStoppingGenerator;
+            PlayerHandler.UsingRadioBattery += ExternalHandler.OnUsingRadioBattery;
+            PlayerHandler.UsingMicroHIDEnergy += ExternalHandler.OnUsingMicroHIDEnergy;
+            PlayerHandler.DroppingAmmo += ExternalHandler.OnDroppingAmmo;
+            PlayerHandler.FlippingCoin += ExternalHandler.OnFlippingCoin;
+            PlayerHandler.VoiceChatting += ExternalHandler.OnVoiceChatting;
+            PlayerHandler.MakingNoise += ExternalHandler.OnMakingNoise;
+            PlayerHandler.Jumping += ExternalHandler.OnJumping;
+            PlayerHandler.Transmitting += ExternalHandler.OnTransmitting;
+            PlayerHandler.TogglingRadio += ExternalHandler.OnTogglingRadio;
+            PlayerHandler.SearchingPickup += ExternalHandler.OnSearchingPickup;
+            PlayerHandler.PlayerDamageWindow += ExternalHandler.OnDamagingWindow;
+            PlayerHandler.KillingPlayer += ExternalHandler.OnKillingPlayer;
+            PlayerHandler.EnteringEnvironmentalHazard += ExternalHandler.OnEnteringEnvHazard;
+            PlayerHandler.StayingOnEnvironmentalHazard += ExternalHandler.OnStayingOnEnvHazard;
+            PlayerHandler.ExitingEnvironmentalHazard += ExternalHandler.OnExitingEnvHazard;
+
 
             foreach (ICustomRole CustomRole in Config.CustomRoles)
             {
@@ -87,7 +135,52 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Escaping -= Handler.OnEscaping;
             PlayerHandler.UsedItem -= Handler.OnItemUsed;
 
+            // Player Events for the external handler
+            PlayerHandler.Dying -= ExternalHandler.OnDying;
+            PlayerHandler.UsingItem -= ExternalHandler.OnUsingItem;
+            PlayerHandler.CancellingItemUse -= ExternalHandler.OnCancellingUsingItem;
+            PlayerHandler.SpawningRagdoll -= ExternalHandler.OnSpawningRagdoll;
+            PlayerHandler.ActivatingWarheadPanel -= ExternalHandler.OnActivatingWarheadPanel;
+            PlayerHandler.ActivatingGenerator -= ExternalHandler.OnActivatingGenerator;
+            PlayerHandler.ActivatingWorkstation -= ExternalHandler.OnActivatingWorkstation;
+            PlayerHandler.DeactivatingWorkstation -= ExternalHandler.OnDeactivatingWorkstation;
+            PlayerHandler.Hurting -= ExternalHandler.OnHurting;
+            PlayerHandler.DroppingItem -= ExternalHandler.OnDroppingItem;
+            PlayerHandler.PickingUpItem -= ExternalHandler.OnPickingUpItem;
+            PlayerHandler.Handcuffing -= ExternalHandler.OnHandcuffing;
+            PlayerHandler.RemovingHandcuffs -= ExternalHandler.OnRemovingHandcuffs;
+            PlayerHandler.IntercomSpeaking -= ExternalHandler.OnIntercomSpeaking;
+            PlayerHandler.Shooting -= ExternalHandler.OnShooting;
+            PlayerHandler.EnteringPocketDimension -= ExternalHandler.OnEnteringPocketDimension;
+            PlayerHandler.EscapingPocketDimension -= ExternalHandler.OnEscapingPocketDimension;
+            PlayerHandler.EnteringKillerCollision -= ExternalHandler.OnEnteringKillerCollision;
+            PlayerHandler.ReloadingWeapon -= ExternalHandler.OnReloadingWeapon;
+            PlayerHandler.ChangingItem -= ExternalHandler.OnChangingItem;
+            PlayerHandler.InteractingDoor -= ExternalHandler.OnInteractingDoor;
+            PlayerHandler.InteractingElevator -= ExternalHandler.OnInteractingElevator;
+            PlayerHandler.InteractingLocker -= ExternalHandler.OnInteractingLocker;
+            PlayerHandler.TriggeringTesla -= ExternalHandler.OnTriggeringTesla;
+            PlayerHandler.OpeningGenerator -= ExternalHandler.OnOpeningGenerator;
+            PlayerHandler.ClosingGenerator -= ExternalHandler.OnClosingGenerator;
+            PlayerHandler.StoppingGenerator -= ExternalHandler.OnStoppingGenerator;
+            PlayerHandler.UsingRadioBattery -= ExternalHandler.OnUsingRadioBattery;
+            PlayerHandler.UsingMicroHIDEnergy -= ExternalHandler.OnUsingMicroHIDEnergy;
+            PlayerHandler.DroppingAmmo -= ExternalHandler.OnDroppingAmmo;
+            PlayerHandler.FlippingCoin -= ExternalHandler.OnFlippingCoin;
+            PlayerHandler.VoiceChatting -= ExternalHandler.OnVoiceChatting;
+            PlayerHandler.MakingNoise -= ExternalHandler.OnMakingNoise;
+            PlayerHandler.Jumping -= ExternalHandler.OnJumping;
+            PlayerHandler.Transmitting -= ExternalHandler.OnTransmitting;
+            PlayerHandler.TogglingRadio -= ExternalHandler.OnTogglingRadio;
+            PlayerHandler.SearchingPickup -= ExternalHandler.OnSearchingPickup;
+            PlayerHandler.PlayerDamageWindow -= ExternalHandler.OnDamagingWindow;
+            PlayerHandler.KillingPlayer -= ExternalHandler.OnKillingPlayer;
+            PlayerHandler.EnteringEnvironmentalHazard -= ExternalHandler.OnEnteringEnvHazard;
+            PlayerHandler.StayingOnEnvironmentalHazard -= ExternalHandler.OnStayingOnEnvHazard;
+            PlayerHandler.ExitingEnvironmentalHazard -= ExternalHandler.OnExitingEnvHazard;
+
             Handler = null;
+            ExternalHandler = null;
             CustomRoles = null;
 
             base.OnDisabled();

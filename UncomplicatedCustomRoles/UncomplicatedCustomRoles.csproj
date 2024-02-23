@@ -50,21 +50,26 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="API\Features\Events.cs" />
     <Compile Include="API\Features\Manager.cs" />
     <Compile Include="Commands\UCRList\UCRList.cs" />
     <Compile Include="Commands\UCRRole\UCRRole.cs" />
     <Compile Include="Commands\UCRSpawn\UCRSpawn.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Elements\CustomRole.cs" />
+    <Compile Include="Elements\CustomRoleEvent.cs" />
     <Compile Include="Elements\ExternalCustomRole.cs" />
     <Compile Include="Enums\SpawnLocationType.cs" />
+    <Compile Include="Enums\UCREvents.cs" />
     <Compile Include="Events\EventHandler.cs" />
+    <Compile Include="Events\ExternalPlayerEventHandler.cs" />
     <Compile Include="Manager\FileConfigs.cs" />
     <Compile Include="Elements\UCREffect.cs" />
     <Compile Include="Manager\Factory.cs" />
     <Compile Include="Manager\SpawnManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Structures\ICustomRole.cs" />
+    <Compile Include="Structures\ICustomRoleEvent.cs" />
     <Compile Include="Structures\IUCREffect.cs" />
     <Compile Include="Structures\IExternalCustomRole.cs" />
   </ItemGroup>
@@ -78,9 +83,6 @@
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>..\..\..\..\Downloads\Master(1)\0Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\Downloads\Master(1)\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\..\..\..\Downloads\Master(1)\Assembly-CSharp-firstpass.dll</HintPath>

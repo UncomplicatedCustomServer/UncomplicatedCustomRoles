@@ -162,8 +162,12 @@ namespace UncomplicatedCustomRoles.Events
                 if (!Role.CanEscape)
                 {
                     Escaping.IsAllowed = false;
+                    return;
                 }
             }
+
+            // If we are still here let's send the event
+            API.Features.Events.__CallEvent(UCREvents.Escaping, Escaping);
         }
 
         public void OnRespawningWave(RespawningTeamEventArgs Respawn)
