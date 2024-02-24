@@ -48,7 +48,8 @@ namespace UncomplicatedCustomRoles.Commands.UCRSpawn
                 {
                     response = $"Role with the Id {arguments.At(1)} was not found!";
                     return false;
-                } else
+                } 
+                else
                 {
                     int Role = Int32.Parse(arguments.At(1));
                     // Summon the player to the role
@@ -56,7 +57,8 @@ namespace UncomplicatedCustomRoles.Commands.UCRSpawn
                     Timing.RunCoroutine(Handler.DoSpawnPlayer(Player, Role));
                     return true;
                 }
-            } else
+            } 
+            else
             {
                 response = $"You must define a role Id!";
                 return false;

@@ -11,6 +11,7 @@ using Exiled.CustomItems.API.Features;
 using System.Net.Http;
 using System.Security.Policy;
 using Exiled.Events.EventArgs.Player;
+using Exiled.API.Features.Roles;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -311,15 +312,6 @@ namespace UncomplicatedCustomRoles.Manager
             {
                 Player.EnableEffect(Effect.EffectType, 15f);
                 Player.ChangeEffectIntensity(Effect.EffectType, Effect.Intensity, 15f);
-            }
-        }
-
-        async public static void CheckForLatestVersion()
-        {
-            int Version = int.Parse(await Plugin.HttpClient.GetStringAsync("https://ucs.fcosma.it/api/plugin/latest_raw"));
-            if (Version > int.Parse(Plugin.Instance.Version.ToString().Remove('.')))
-            {
-                Log.Warn("Found a new version of UncomplicatedCustomRoles!\nPlease update the plugin: https://github.com/FoxWorn3365/UncomplicatedCustomRoles");
             }
         }
     }  

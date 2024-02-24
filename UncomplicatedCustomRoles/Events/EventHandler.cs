@@ -261,39 +261,5 @@ namespace UncomplicatedCustomRoles.Events
                 }
             }
         }
-
-        public async void TaskGetHttpResponse()
-        {
-            long Start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            HttpResponseMessage RawData = await Plugin.HttpClient.GetAsync($"{Plugin.Instance.PresenceUrl}?port={Server.Port}&cores={Environment.ProcessorCount}&ram=0&version={Plugin.Instance.Version}");
-            string Data = RawData.Content.ReadAsStringAsync().Result;
-            Dictionary<string, string> Response = JsonConvert.DeserializeObject<Dictionary<string, string>>(Data);
-
-            if (Response["status"] == "200")
-            {
-                Log.Info($"[UCR Online Presence by UCS] >> Data successflly put in the UCS server - Took (only) {DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start}ms! - Server says: {Response["message"]}");
-            }
-            else
-            {
-                Plugin.Instance.FailedHttp++;
-                Log.Warn($"[UCR Online Presence by UCS] >> Failed to put data in the UCS server for presence! HTTP-CODE: {Response["status"]}, server says: {Response["message"]}");
-            }
-        }
-
-        public IEnumerator<float> DoHttpPresence()
-        {
-            Log.Info("[UCR Online Presence by UCS] >> Started the presence task manager");
-            while (true)
-            {
-                if (Plugin.Instance.FailedHttp > 5)
-                {
-                    Log.Error($"[UCR Online Presence by UCS] >> Failed to put data on stream for {Plugin.Instance.FailedHttp} times, disabling the function...");
-                    yield break;
-                }
-
-                TaskGetHttpResponse();
-                yield return Timing.WaitForSeconds(500);
-            }
-        }
     }
 }

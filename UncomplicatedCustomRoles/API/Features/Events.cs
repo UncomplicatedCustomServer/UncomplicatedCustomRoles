@@ -13,7 +13,7 @@ namespace UncomplicatedCustomRoles.API.Features
     {
         public static Dictionary<UCREvents, List<Func<ICustomRoleEvent, ICustomRoleEvent>>> Handlers { get; set; } = new();
 
-        public static void AddLitener(UCREvents Event, Func<ICustomRoleEvent, ICustomRoleEvent> Handler, bool Prioritize = false)
+        public static void AddListener(UCREvents Event, Func<ICustomRoleEvent, ICustomRoleEvent> Handler, bool Prioritize = false)
         {
             Listen(Event, Handler, Prioritize);
         }
@@ -85,7 +85,7 @@ namespace UncomplicatedCustomRoles.API.Features
         internal static IPlayerEvent? __CallEvent(UCREvents Event, IPlayerEvent Base)
         {
             // Let's see if the player is a custom role
-            if (Plugin.PlayerRegistry.ContainsKey(Base.Player.Id))
+            if (!Plugin.PlayerRegistry.ContainsKey(Base.Player.Id))
             {
                 return null;
             }

@@ -18,7 +18,7 @@ namespace UncomplicatedCustomRoles
         public override string Name => "UncomplicatedCustomRoles";
         public override string Prefix => "UncomplicatedCustomRoles";
         public override string Author => "FoxWorn3365, Dr.Agenda";
-        public override Version Version { get; } = new(1, 7, 1);
+        public override Version Version { get; } = new(1, 7, 5);
         public override Version RequiredExiledVersion { get; } = new(8, 8, 0);
         public static Plugin Instance;
         internal Handler Handler;
@@ -29,21 +29,17 @@ namespace UncomplicatedCustomRoles
         public static Dictionary<int, List<int>> RolesCount = new();
         public static Dictionary<int, List<IUCREffect>> PermanentEffectStatus = new();
         public static List<int> RoleSpawnQueue = new();
-        public static HttpClient HttpClient;
         public bool DoSpawnBasicRoles = false;
         public string PresenceUrl = "https://ucs.fcosma.it/api/plugin/presence";
-        public int FailedHttp;
         internal FileConfigs FileConfigs;
         public override void OnEnabled()
         {
             Instance = this;
 
-            HttpClient = new();
             Handler = new();
             ExternalHandler = new();
             CustomRoles = new();
 
-            FailedHttp = 0;
             FileConfigs = new();
 
             ServerHandler.RespawningTeam += Handler.OnRespawningWave;
@@ -104,11 +100,7 @@ namespace UncomplicatedCustomRoles
                 SpawnManager.RegisterCustomSubclass(CustomRole);
             }
 
-            if (!File.Exists(Path.Combine(Paths.Configs, "UncomplicatedCustomRoles", ".nohttp")))
-            {
-                Log.Info($"Selecting server for UCS presence...\nFound {PresenceUrl.Replace("https://", "").Split('/')[0]}");
-                Timing.RunCoroutine(Handler.DoHttpPresence());
-            }
+            HttpManager.StartAll();
 
             Log.Info("===========================================");
             Log.Info(" Thanks for using UncomplicatedCustomRoles");
