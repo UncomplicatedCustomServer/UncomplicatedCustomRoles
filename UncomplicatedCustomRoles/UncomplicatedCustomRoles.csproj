@@ -51,6 +51,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="API\Features\Events.cs" />
+    <Compile Include="API\Features\InfiniteEffect.cs" />
     <Compile Include="API\Features\Manager.cs" />
     <Compile Include="Commands\UCRList\UCRList.cs" />
     <Compile Include="Commands\UCROwner\UCROwner.cs" />

@@ -1,6 +1,7 @@
 ﻿using Exiled.Events.EventArgs.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UncomplicatedCustomRoles.Elements;
 using UncomplicatedCustomRoles.Structures;
 
@@ -13,19 +14,28 @@ namespace UncomplicatedCustomRoles.API.Features
     {
         public static Dictionary<UCREvents, List<Func<ICustomRoleEvent, ICustomRoleEvent>>> Handlers { get; set; } = new();
 
+        /// <summary>
+        /// Register a new <see cref="Func{ICustomRoleEvent, ICustomRoleEvent}">Event Handler</see> for a <see cref="UCREvents"/>.
+        /// </summary>
         public static void AddListener(UCREvents Event, Func<ICustomRoleEvent, ICustomRoleEvent> Handler, bool Prioritize = false)
         {
             Listen(Event, Handler, Prioritize);
         }
 
+        /// <summary>
+        /// Register a new <see cref="Func{ICustomRoleEvent, ICustomRoleEvent}">Event Handler</see> for a <see cref="UCREvents"/>.
+        /// </summary>
         public static void RegisterListener(UCREvents Event, Func<ICustomRoleEvent, ICustomRoleEvent> Handler, bool Prioritize = false)
         {
             Listen(Event, Handler, Prioritize);
         }
 
+        /// <summary>
+        /// Register a new <see cref="Func{ICustomRoleEvent, ICustomRoleEvent}">Event Handler</see> for a <see cref="UCREvents"/>.
+        /// </summary>
         public static void Listen(UCREvents Event, Func<ICustomRoleEvent, ICustomRoleEvent> Handler, bool Prioritize = false)
         {
-            if (Handlers.ContainsKey(Event))
+            if (!Handlers.ContainsKey(Event))
             {
                 Handlers.Add(Event, new() {
                     Handler
@@ -51,16 +61,25 @@ namespace UncomplicatedCustomRoles.API.Features
             }
         }
 
+        /// <summary>
+        /// Unregister a <see cref="Func{ICustomRoleEvent, ICustomRoleEvent}">Event Handler</see> of a <see cref="UCREvents"/>.
+        /// </summary>
         public static void Unlisten(UCREvents Event, Func<ICustomRoleEvent, ICustomRoleEvent> Handler)
         {
             RemoveListener(Event, Handler);
         }
 
+        /// <summary>
+        /// Unregister a <see cref="Func{ICustomRoleEvent, ICustomRoleEvent}">Event Handler</see> of a <see cref="UCREvents"/>.
+        /// </summary>
         public static void UnregisterListener(UCREvents Event, Func<ICustomRoleEvent, ICustomRoleEvent> Handler)
         {
             RemoveListener(Event, Handler);
         }
 
+        /// <summary>
+        /// Unregister a <see cref="Func{ICustomRoleEvent, ICustomRoleEvent}">Event Handler</see> of a <see cref="UCREvents"/>.
+        /// </summary>
         public static void RemoveListener(UCREvents Event, Func<ICustomRoleEvent, ICustomRoleEvent> Handler)
         {
             if (Handlers.ContainsKey(Event) && Handlers[Event].Contains(Handler))
@@ -69,11 +88,17 @@ namespace UncomplicatedCustomRoles.API.Features
             }
         }
 
+        /// <summary>
+        /// Unregister all of the <see cref="Func{ICustomRoleEvent, ICustomRoleEvent}">Event Handler</see> of every <see cref="UCREvents"/>.
+        /// </summary>
         public static void ClearAllListeners()
         {
             Handlers = new();
         }
 
+        /// <summary>
+        /// Unregister all of the <see cref="Func{ICustomRoleEvent, ICustomRoleEvent}">Event Handler</see> of a specific <see cref="UCREvents"/>.
+        /// </summary>
         public static void ClearAllListeners(UCREvents Event)
         {
             if (Handlers.ContainsKey(Event))
@@ -93,7 +118,7 @@ namespace UncomplicatedCustomRoles.API.Features
             bool IsAllowed = true;
             if (Handlers.ContainsKey(Event))
             {
-                foreach (Func<ICustomRoleEvent, ICustomRoleEvent> Action in Handlers[Event])
+                foreach (Func<ICustomRoleEvent, ICustomRoleEvent> Action in Handlers[Event].Where(action => action is not null))
                 {
                     IsAllowed = IsAllowed && Action(InternalEvent).IsAllowed;
                 }

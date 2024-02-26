@@ -155,13 +155,8 @@ namespace UncomplicatedCustomRoles.Manager
             PlayerRoleBase OldRole = Player.Role.Base; // That's for the event system, don't worry!;
 
             Player.Role.Set(Role.Role, SpawnFlag);
-            Vector3 BasicPosition = Player.Position;
 
-            if (Role.RoleAppearance != Role.Role)
-            {
-                Log.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
-                Player.ChangeAppearance(Role.RoleAppearance, true);
-            }
+            Vector3 BasicPosition = Player.Position;
 
             if (Role.Spawn == SpawnLocationType.KeepRoleSpawn)
             {
@@ -222,8 +217,8 @@ namespace UncomplicatedCustomRoles.Manager
                 Player.DisplayNickname = Role.DisplayNickname.Replace("%name%", Player.Nickname).Replace("%dnumber%", new System.Random().Next(1000, 9999).ToString()).Replace("%o5number%", new System.Random().Next(01, 10).ToString());
             }
 
-            Player.MaxHealth = Role.MaxHealth;
             Player.Health = Role.Health;
+            Player.MaxHealth = Role.MaxHealth;
             Player.ArtificialHealth = Role.Ahp;
 
             Plugin.PermanentEffectStatus.Add(Player.Id, new());
@@ -264,6 +259,12 @@ namespace UncomplicatedCustomRoles.Manager
             if (Role.SpawnHint != string.Empty)
             {
                 Player.ShowHint(Role.SpawnHint, Role.SpawnHintDuration);
+            }
+
+            if (Role.RoleAppearance != Role.Role)
+            {
+                Log.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
+                Player.ChangeAppearance(Role.RoleAppearance, true);
             }
 
             // Call the event for the spawn of the player

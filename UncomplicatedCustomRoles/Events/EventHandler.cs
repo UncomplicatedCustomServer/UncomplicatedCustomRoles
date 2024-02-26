@@ -78,7 +78,8 @@ namespace UncomplicatedCustomRoles.Events
 {
     public class EventHandler
     {
-        protected CoroutineHandle EffectCoroutine;
+        internal CoroutineHandle EffectCoroutine;
+
         public void OnRoundStarted()
         {
             Plugin.PlayerRegistry = new();
@@ -144,6 +145,7 @@ namespace UncomplicatedCustomRoles.Events
         public void OnDied(DiedEventArgs Died)
         {
             Died.Player.CustomName = null;
+            Died.Player.DisplayNickname = Died.Player.Nickname;
             SpawnManager.ClearCustomTypes(Died.Player);
         }
 
@@ -201,7 +203,7 @@ namespace UncomplicatedCustomRoles.Events
                 {
                     SpawnManager.SetAllActiveEffect(Player);
                 }
-                yield return Timing.WaitForSeconds(10f);
+                yield return Timing.WaitForSeconds(2f);
             }
         }
 
@@ -234,11 +236,13 @@ namespace UncomplicatedCustomRoles.Events
                     }
                 }
             }
+
             if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
             {
                 Log.Debug("Was evalutating role select for an already custom role player, stopping");
                 return;
             }
+
             if (RolePercentage.ContainsKey(Player.Role.Type))
             {
                 // We can proceed with the chance

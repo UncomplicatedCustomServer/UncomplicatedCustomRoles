@@ -9,34 +9,81 @@ namespace UncomplicatedCustomRoles.API.Features
 #nullable enable
     public partial class Manager
     {
+        /// <summary>
+        /// Get a <see cref="Dictionary{int, ICustomRole}"/> of every <see cref="ICustomRole"/> registered at the moment.
+        /// </summary>
         public static Dictionary<int, ICustomRole> GetList()
         {
             return Plugin.CustomRoles;
         }
+
+        /// <summary>
+        /// Check if a <see cref="Player"/> is a custom role.
+        /// </summary>
         public static bool HasCustomRole(Player Player)
         {
             return Plugin.PlayerRegistry.ContainsKey(Player.Id);
         }
-       public static bool IsRegistered(int Id)
+
+        /// <summary>
+        /// Check if a <see cref="int">PlayerId</see> is a custom role.
+        /// </summary>
+        public static bool HasCustomRole(int Id)
+        {
+            return Plugin.PlayerRegistry.ContainsKey(Id);
+        }
+
+        /// <summary>
+        /// Check if a <see cref="int">CustomRoleId</see> is currently registered.
+        /// </summary>
+        public static bool IsRegistered(int Id)
         {
             return Plugin.CustomRoles.ContainsKey(Id);
         }
+
+        /// <summary>
+        /// Check if a <see cref="ICustomRole"/> is currently registered.
+        /// </summary>
+        public static bool IsRegistered(ICustomRole Role)
+        {
+            return Plugin.CustomRoles.ContainsKey(Role.Id);
+        }
+
+        /// <summary>
+        /// Get the <see cref="ICustomRole"/> istance by it's <see cref="int">Id</see>
+        /// </summary>
         public static ICustomRole Get(int Id)
         {
             return Plugin.CustomRoles[Id];
         }
+
+        /// <summary>
+        /// Summon a <see cref="Player"/> to a <see cref="int">CustomRole (id)</see>
+        /// </summary>
         public static void Summon(Player Player, int Id)
         {
             EventHandler.DoSpawnPlayer(Player, Id);
         }
+
+        /// <summary>
+        /// Summon a <see cref="Player"/> to a <see cref="ICustomRole"/>
+        /// </summary>
         public static void Summon(Player Player, ICustomRole Role)
         {
             Summon(Player, Role.Id);
         }
+
+        /// <summary>
+        /// Register a new <see cref="ICustomRole"/> istance.
+        /// </summary>
         public static void Register(ICustomRole Role)
         {
             SpawnManager.RegisterCustomSubclass(Role);
         }
+
+        /// <summary>
+        /// Get the current <see cref="ICustomRole"/> of a <see cref="Player"/>. If it have no custom role a <see cref="null"/> value will be returned.
+        /// </summary>
         public static ICustomRole? Get(Player Player)
         {
             if (HasCustomRole(Player))
@@ -45,6 +92,18 @@ namespace UncomplicatedCustomRoles.API.Features
             }
             return null;
         }
+
+        /// <summary>
+        /// Get all <see cref="int">PlayerId</see> alive with a <see cref="int">CustomRoleId</see>
+        /// </summary>
+        public static Dictionary<int, int> GetAlive()
+        {
+            return Plugin.PlayerRegistry;
+        }
+
+        /// <summary>
+        /// Try to get the current <see cref="ICustomRole"/> of a <see cref="Player"/>. If it have no custom role a <see cref="null"/> value will be returned.
+        /// </summary>
         public static bool TryGet(Player Player, out ICustomRole? Role)
         {
             Role = Get(Player);
@@ -54,14 +113,26 @@ namespace UncomplicatedCustomRoles.API.Features
             }
             return true;
         }
+
+        /// <summary>
+        /// Get the current number <see cref="ICustomRole"/> players in game.
+        /// </summary>
         public static int Count(ICustomRole Role)
         {
             return Plugin.RolesCount[Role.Id].Count;
         }
+
+        /// <summary>
+        /// Get the current number <see cref="int">CustomRoleId</see> players in game.
+        /// </summary>
         public static int Count(int Role)
         {
             return Plugin.RolesCount[Role].Count;
         }
+
+        /// <summary>
+        /// Get the current number of all players with a custom role in game.
+        /// </summary>
         public static int Count()
         {
             int total = 0;
@@ -71,6 +142,10 @@ namespace UncomplicatedCustomRoles.API.Features
             }
             return total;
         }
+
+        /// <summary>
+        /// Unregister a <see cref="int">CustomRoleId</see>.
+        /// </summary>
         public static void Unregister(int Role)
         {
             if (IsRegistered(Role))
@@ -78,34 +153,13 @@ namespace UncomplicatedCustomRoles.API.Features
                 Plugin.CustomRoles.Remove(Role);
             }
         }
+
+        /// <summary>
+        /// Unregister a <see cref="ICustomRole"/>.
+        /// </summary>
         public static void Unregister(ICustomRole Role)
         {
             Unregister(Role.Id);
-        }
-        public static List<IUCREffect>? InfiniteEffects(int Id)
-        {
-            if (Plugin.PermanentEffectStatus.ContainsKey(Id))
-            {
-                return Plugin.PermanentEffectStatus[Id];
-            }
-            return null;
-        }
-        public static List<IUCREffect>? InfiniteEffects(Player Player)
-        {
-            return InfiniteEffects(Player.Id);
-        }
-        public static bool AddInfiniteEffect(IUCREffect Effect, int Id)
-        {
-            if (Plugin.PlayerRegistry.ContainsKey(Id) && Plugin.PermanentEffectStatus.ContainsKey(Id))
-            {
-                Plugin.PermanentEffectStatus[Id].Add(Effect);
-                return true;
-            }
-            return false;
-        }
-        public static bool AddInfiniteEffect(IUCREffect Effect, Player Player)
-        {
-            return AddInfiniteEffect(Effect, Player.Id);
         }
     }
 }
