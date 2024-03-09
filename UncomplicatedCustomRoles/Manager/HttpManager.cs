@@ -7,10 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
-using Utf8Json.Formatters;
-using Utf8Json.Internal.DoubleConversion;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -77,7 +74,7 @@ namespace UncomplicatedCustomRoles.Manager
 
             float Average = Sum / ChunkList.Count();
 
-            Log.Info($"[UCS HTTP Presence] >> Put the presence for {ChunkList.Count()} times with success!\nAverage response time (ms): {Average}\nFailed HTTP Request(s): {FailedHttp}\nFail chance: {Average/100*FailedHttp}%\nTo disable this report, create a file named '.chunksize' in the 'UncomplicatedCustomRoles' and write 1 or -1, as your wish.");
+            Log.Info($"[UCS HTTP Presence] >> Put the presence for {ChunkList.Count()} times with success!\nAverage response time (ms): {Average}\nFailed HTTP Request(s): {FailedHttp}\nFail chance: {ChunkList.Count()/100*FailedHttp}%\nTo disable this report, create a file named '.chunksize' in the 'UncomplicatedCustomRoles' and write 1 or -1, as your wish.");
         }
 
         private static async void TaskGetHttpResponse()

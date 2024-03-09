@@ -2,7 +2,6 @@
 using Exiled.API.Features;
 using PlayerRoles;
 using System.Collections.Generic;
-using System.Linq;
 using UncomplicatedCustomRoles.Structures;
 using UnityEngine;
 
@@ -21,11 +20,6 @@ namespace UncomplicatedCustomRoles.Manager
                 }
             }
             return Rooms;
-        }
-
-        public static List<Room> GetRoomList()
-        {
-            return Room.List.ToList();
         }
 
         public static Dictionary<RoleTypeId, List<ICustomRole>> RoleIstance()

@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System;
 using UncomplicatedCustomRoles.Manager;
 using UncomplicatedCustomRoles.Structures;
-using System.Net.Http;
 using Handler = UncomplicatedCustomRoles.Events.EventHandler;
 using PlayerHandler = Exiled.Events.Handlers.Player;
 using ServerHandler = Exiled.Events.Handlers.Server;
-using MEC;
-using System.IO;
+using Scp049Handler = Exiled.Events.Handlers.Scp049;
 using UncomplicatedCustomRoles.Events;
 
 namespace UncomplicatedCustomRoles
@@ -18,7 +16,7 @@ namespace UncomplicatedCustomRoles
         public override string Name => "UncomplicatedCustomRoles";
         public override string Prefix => "UncomplicatedCustomRoles";
         public override string Author => "FoxWorn3365, Dr.Agenda";
-        public override Version Version { get; } = new(1, 7, 5);
+        public override Version Version { get; } = new(1, 8, 0);
         public override Version RequiredExiledVersion { get; } = new(8, 8, 0);
         public static Plugin Instance;
         internal Handler Handler;
@@ -49,6 +47,8 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Spawned += Handler.OnPlayerSpawned;
             PlayerHandler.Escaping += Handler.OnEscaping;
             PlayerHandler.UsedItem += Handler.OnItemUsed;
+            PlayerHandler.Hurting += Handler.OnHurting;
+            Scp049Handler.StartingRecall += Handler.OnScp049StartReviving;
 
             // Player Events for the external handler ONLY if the config agree
             if (Config.EnableExternalEventHandler)
@@ -129,6 +129,8 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Spawned -= Handler.OnPlayerSpawned;
             PlayerHandler.Escaping -= Handler.OnEscaping;
             PlayerHandler.UsedItem -= Handler.OnItemUsed;
+            PlayerHandler.Hurting -= Handler.OnHurting;
+            Scp049Handler.StartingRecall -= Handler.OnScp049StartReviving;
 
             // Player Events for the external handler
             if (Config.EnableExternalEventHandler)

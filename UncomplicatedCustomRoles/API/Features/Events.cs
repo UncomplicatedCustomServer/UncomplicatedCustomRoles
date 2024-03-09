@@ -12,7 +12,7 @@ namespace UncomplicatedCustomRoles.API.Features
 {
     public class Events
     {
-        public static Dictionary<UCREvents, List<Func<ICustomRoleEvent, ICustomRoleEvent>>> Handlers { get; set; } = new();
+        internal static Dictionary<UCREvents, List<Func<ICustomRoleEvent, ICustomRoleEvent>>> Handlers { get; set; } = new();
 
         /// <summary>
         /// Register a new <see cref="Func{ICustomRoleEvent, ICustomRoleEvent}">Event Handler</see> for a <see cref="UCREvents"/>.
@@ -116,6 +116,10 @@ namespace UncomplicatedCustomRoles.API.Features
             }
             ICustomRoleEvent InternalEvent = new CustomRoleEvent(Plugin.CustomRoles[Plugin.PlayerRegistry[Base.Player.Id]], Event, Base);
             bool IsAllowed = true;
+            if (Base is IDeniableEvent)
+            {
+                IsAllowed = ((IDeniableEvent)Base).IsAllowed;
+            }
             if (Handlers.ContainsKey(Event))
             {
                 foreach (Func<ICustomRoleEvent, ICustomRoleEvent> Action in Handlers[Event].Where(action => action is not null))

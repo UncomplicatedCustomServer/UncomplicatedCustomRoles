@@ -8,10 +8,7 @@ using UncomplicatedCustomRoles.Structures;
 using UnityEngine;
 using UncomplicatedCustomRoles.Elements;
 using Exiled.CustomItems.API.Features;
-using System.Net.Http;
-using System.Security.Policy;
 using Exiled.Events.EventArgs.Player;
-using Exiled.API.Features.Roles;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -71,7 +68,9 @@ namespace UncomplicatedCustomRoles.Manager
                 RequiredPermission = Role.RequiredPermission,
                 IgnoreSpawnSystem = Role.IgnoreSpawnSystem,
                 Health = Role.Health,
-                SpawnChance = Role.SpawnChance
+                SpawnChance = Role.SpawnChance,
+                DamageMultiplier = Role.DamageMultiplier,
+                RoleAfterEscape = Role.RoleAfterEscape
             };
         }
 
@@ -171,7 +170,7 @@ namespace UncomplicatedCustomRoles.Manager
                         Player.Position = Factory.AdjustRoomPosition(Factory.RoomsInZone(Role.SpawnZones.RandomItem()).RandomItem());
                         break;
                     case SpawnLocationType.CompleteRandomSpawn:
-                        Player.Position = Factory.AdjustRoomPosition(Factory.GetRoomList().RandomItem());
+                        Player.Position = Factory.AdjustRoomPosition(Room.List.ToList().RandomItem());
                         break;
                     case SpawnLocationType.RoomsSpawn:
                         Player.Position = Factory.AdjustRoomPosition(Room.Get(Role.SpawnRooms.RandomItem()));

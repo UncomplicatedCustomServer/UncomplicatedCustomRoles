@@ -8,9 +8,8 @@ using MEC;
 using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
 using Exiled.Permissions.Extensions;
-using System.Net.Http;
 using Exiled.Events.EventArgs.Server;
-using Newtonsoft.Json;
+using Exiled.Events.EventArgs.Scp049;
 
 /*
  * Il mio canto libero - Lucio Battisti
@@ -131,7 +130,7 @@ namespace UncomplicatedCustomRoles.Events
             else if (Plugin.RoleSpawnQueue.Contains(Spawned.Player.Id))
             {
                 Plugin.RoleSpawnQueue.Remove(Spawned.Player.Id);
-                LogReason = " [going with a respawn wave]";
+                LogReason = " [going with a respawn wave OR 049 revival]";
             }
 
             Log.Debug($"Player {Spawned.Player.Nickname} spawned{LogReason}, going to assign a role if needed!");
@@ -140,6 +139,13 @@ namespace UncomplicatedCustomRoles.Events
             {
                 DoEvaluateSpawnForPlayer(Spawned.Player);
             });
+        }
+
+        public void OnScp049StartReviving(StartingRecallEventArgs Recall)
+        {
+            if (Plugin.CustomRoles.Where(cr => cr.Value.CanReplaceRoles.Contains(RoleTypeId.Scp0492)).Count() > 0) {
+                Plugin.RoleSpawnQueue.Add(Recall.Target.Id);
+            }
         }
 
         public void OnDied(DiedEventArgs Died)
@@ -154,17 +160,31 @@ namespace UncomplicatedCustomRoles.Events
             SpawnManager.ClearCustomTypes(Spawning.Player);
         }
 
+        public void OnHurting(HurtingEventArgs Hurting)
+        {
+            if (Plugin.PlayerRegistry.ContainsKey(Hurting.Player.Id))
+            {
+                ICustomRole Role = Plugin.CustomRoles[Plugin.PlayerRegistry[Hurting.Player.Id]];
+                Hurting.DamageHandler.Damage *= Role.DamageMultiplier;
+            }
+        }
+
         public void OnEscaping(EscapingEventArgs Escaping)
         {
             if (Plugin.PlayerRegistry.ContainsKey(Escaping.Player.Id))
             {
-                int RoleId = Plugin.PlayerRegistry[Escaping.Player.Id];
-                ICustomRole Role = Plugin.CustomRoles[RoleId];
+                ICustomRole Role = Plugin.CustomRoles[Plugin.PlayerRegistry[Escaping.Player.Id]];
 
                 if (!Role.CanEscape)
                 {
                     Escaping.IsAllowed = false;
                     return;
+                }
+
+                // Try to set the role
+                if (Role.CanEscape && Role.RoleAfterEscape is not null)
+                {
+                    Escaping.Player.Role.Set((RoleTypeId)Role.RoleAfterEscape);
                 }
             }
 
@@ -182,7 +202,7 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnItemUsed(UsedItemEventArgs UsedItem)
         {
-            if (SpawnManager.TryGetCustomRole(UsedItem.Player) is not null && Plugin.PermanentEffectStatus.ContainsKey(UsedItem.Player.Id)  && UsedItem.Item.Type == ItemType.SCP500)
+            if (SpawnManager.TryGetCustomRole(UsedItem.Player) is not null && Plugin.PermanentEffectStatus.ContainsKey(UsedItem.Player.Id) && UsedItem.Item.Type == ItemType.SCP500)
             {
                 foreach (IUCREffect Effect in Plugin.PermanentEffectStatus[UsedItem.Player.Id])
                 {

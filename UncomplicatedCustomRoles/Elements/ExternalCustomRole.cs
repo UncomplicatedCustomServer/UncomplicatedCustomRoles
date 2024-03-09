@@ -31,6 +31,7 @@ namespace UncomplicatedCustomRoles.Elements
             new()
         };
         public bool CanEscape { get; set; } = true;
+        public RoleTypeId? RoleAfterEscape { get; set; } = null;
         public string Scale { get; set; } = "0, 0, 0";
         public string SpawnBroadcast { get; set; } = "You are a <color=orange><b>Janitor</b></color>!\nClean the Light Containment Zone!";
         public ushort SpawnBroadcastDuration { get; set; } = 5;
@@ -54,6 +55,7 @@ namespace UncomplicatedCustomRoles.Elements
         };
         public string SpawnPosition { get; set; } = "0, 0, 0";
         public string SpawnOffset { get; set; } = "0, 0, 0";
+        public float DamageMultiplier { get; set; } = 1f;
         public string? RequiredPermission { get; set; } = null;
         public bool IgnoreSpawnSystem { get; set; } = false;
     }

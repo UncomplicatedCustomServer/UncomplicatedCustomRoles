@@ -24,6 +24,7 @@ namespace UncomplicatedCustomRoles.Structures
         public abstract float HumeShield { get; set; }
         public abstract List<UCREffect>? Effects { get; set; }
         public abstract bool CanEscape { get; set; }
+        public abstract RoleTypeId? RoleAfterEscape { get; set; }
         public abstract string Scale { get; set; }
         public abstract string SpawnBroadcast { get; set; }
         public abstract ushort SpawnBroadcastDuration { get; set; }
@@ -37,6 +38,7 @@ namespace UncomplicatedCustomRoles.Structures
         public abstract List<RoomType> SpawnRooms { get; set; }
         public abstract string SpawnPosition { get; set; }
         public abstract string SpawnOffset { get; set; }
+        public abstract float DamageMultiplier { get; set; }
         public abstract string? RequiredPermission { get; set; }
         public abstract bool IgnoreSpawnSystem { get; set; }
     }

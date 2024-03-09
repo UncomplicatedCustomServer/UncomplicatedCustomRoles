@@ -1,11 +1,9 @@
 ﻿using CommandSystem;
 using Exiled.API.Features;
 using Exiled.Permissions.Extensions;
-using MEC;
 using System;
 using UncomplicatedCustomRoles.Manager;
 using UncomplicatedCustomRoles.Structures;
-using Handler = UncomplicatedCustomRoles.Events.EventHandler;
 
 namespace UncomplicatedCustomRoles.Commands.UCRSpawn
 {
