@@ -3,12 +3,18 @@ using System.Collections.Generic;
 using UncomplicatedCustomRoles.Manager;
 using UncomplicatedCustomRoles.Structures;
 using UncomplicatedCustomRoles.Events;
+using System;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
 #nullable enable
     public partial class Manager
     {
+        /// <summary>
+        /// Get the <see cref="System.Version"/> of the APIs
+        /// </summary>
+        public static Version Version { get; } = new(2, 0, 0);
+
         /// <summary>
         /// Get a <see cref="Dictionary{int, ICustomRole}"/> of every <see cref="ICustomRole"/> registered at the moment.
         /// </summary>
@@ -62,7 +68,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public static void Summon(Player Player, int Id)
         {
-            EventHandler.DoSpawnPlayer(Player, Id);
+            UncomplicatedCustomRoles.Events.EventHandler.DoSpawnPlayer(Player, Id);
         }
 
         /// <summary>

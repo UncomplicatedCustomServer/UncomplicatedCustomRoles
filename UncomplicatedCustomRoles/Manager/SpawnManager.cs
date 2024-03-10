@@ -213,7 +213,16 @@ namespace UncomplicatedCustomRoles.Manager
             }
             if (Role.DisplayNickname != string.Empty && Role.DisplayNickname != null)
             {
-                Player.DisplayNickname = Role.DisplayNickname.Replace("%name%", Player.Nickname).Replace("%dnumber%", new System.Random().Next(1000, 9999).ToString()).Replace("%o5number%", new System.Random().Next(01, 10).ToString());
+                string Nick;
+                if (Role.DisplayNickname.Contains(", "))
+                {
+                    Nick = Role.DisplayNickname.Split(new string[] {", "}, System.StringSplitOptions.RemoveEmptyEntries).RandomItem();
+                }
+                else
+                {
+                     Nick = Role.DisplayNickname;
+                }
+                Player.DisplayNickname = Nick.Replace("%name%", Player.Nickname).Replace("%dnumber%", new System.Random().Next(1000, 9999).ToString()).Replace("%o5number%", new System.Random().Next(01, 10).ToString());
             }
 
             Player.Health = Role.Health;
