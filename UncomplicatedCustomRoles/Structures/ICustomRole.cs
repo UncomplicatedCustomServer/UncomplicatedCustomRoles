@@ -25,7 +25,7 @@ namespace UncomplicatedCustomRoles.Structures
         public abstract float HumeShield { get; set; }
         public abstract List<UCREffect>? Effects { get; set; }
         public abstract bool CanEscape { get; set; }
-        public abstract RoleTypeId? RoleAfterEscape { get; set; }
+        public abstract string? RoleAfterEscape { get; set; }
         public abstract Vector3 Scale { get; set; }
         public abstract string SpawnBroadcast { get; set; }
         public abstract ushort SpawnBroadcastDuration { get; set; }

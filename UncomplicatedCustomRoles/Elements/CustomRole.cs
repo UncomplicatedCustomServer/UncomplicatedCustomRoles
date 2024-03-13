@@ -32,7 +32,7 @@ namespace UncomplicatedCustomRoles.Elements
             new()
         };
         public bool CanEscape { get; set; } = true;
-        public RoleTypeId? RoleAfterEscape { get; set; } = null;
+        public string? RoleAfterEscape { get; set; } = null;
         public Vector3 Scale { get; set; } = new();
         public string SpawnBroadcast { get; set; } = "You are a <color=orange><b>Janitor</b></color>!\nClean the Light Containment Zone!";
         public ushort SpawnBroadcastDuration { get; set; } = 5;
