@@ -9,6 +9,8 @@ using UnityEngine;
 using UncomplicatedCustomRoles.Elements;
 using Exiled.CustomItems.API.Features;
 using Exiled.Events.EventArgs.Player;
+using Exiled.API.Features.Items;
+using InventorySystem.Items.Firearms.Attachments;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -32,6 +34,18 @@ namespace UncomplicatedCustomRoles.Manager
             Log.Info($"Custom Role {Role.Name} with the old Id {Role.Id} will be registered with the following Id: {NewId}");
             Role.Id = NewId;
             RegisterCustomSubclass(Role);
+        }
+
+        public static void RegisterCustomFirearm(ICustomFirearm Firearm)
+        {
+            if (!Plugin.Firearms.ContainsKey(Firearm.Id))
+            {
+                Plugin.Firearms.Add(Firearm.Id, Firearm);
+            } 
+            else
+            {
+                Log.Warn($"Falied to register the UCR Custom Firearm with the Id {Firearm.Id} ({Firearm.Item}) -> There's another role with this Id!");
+            }
         }
 
         public static ICustomRole RenderExportMethodToInternal(IExternalCustomRole Role)
@@ -70,7 +84,8 @@ namespace UncomplicatedCustomRoles.Manager
                 Health = Role.Health,
                 SpawnChance = Role.SpawnChance,
                 DamageMultiplier = Role.DamageMultiplier,
-                RoleAfterEscape = Role.RoleAfterEscape
+                RoleAfterEscape = Role.RoleAfterEscape,
+                InfiniteStamina = Role.InfiniteStamina
             };
         }
 
@@ -125,6 +140,33 @@ namespace UncomplicatedCustomRoles.Manager
                 Plugin.RolesCount[Role].Remove(Player.Id);
                 Plugin.PlayerRegistry.Remove(Player.Id);
             }
+        }
+
+        public static Firearm CreateFirearm(ICustomFirearm Firearm)
+        {
+            Firearm Item = Exiled.API.Features.Items.Firearm.Create(Firearm.Item);
+
+            foreach (AttachmentName Attachment in Firearm.Attachments)
+            {
+                Item.AddAttachment(Attachment);
+            }
+
+            if (Firearm.Scale != null && Firearm.Scale != new Vector3())
+            {
+                Item.Scale = Firearm.Scale;
+            }
+
+            if (Firearm.MaxAmmo is not null && Firearm.MaxAmmo > 0)
+            {
+                Item.MaxAmmo = (byte)Firearm.MaxAmmo;
+            }
+
+            if (Firearm.FireRate is not null && Firearm.FireRate > 0)
+            {
+                Item.FireRate = (float)Firearm.FireRate;
+            }
+
+            return Item;
         }
 
         public static void SummonCustomSubclass(Player Player, int Id, bool DoBypassRoleOverwrite = true)
@@ -193,7 +235,15 @@ namespace UncomplicatedCustomRoles.Manager
                 {
                     if (!Player.IsInventoryFull)
                     {
-                        CustomItem.Get(ItemId).Give(Player);
+                        // If the Id is the Id of a registered custom weapon we'll give it, otherwise the custom item will be given
+                        if (Plugin.Firearms.ContainsKey((int)ItemId))
+                        {
+                            CreateFirearm(Plugin.Firearms[(int)ItemId]).Give(Player);
+                        } 
+                        else
+                        {
+                            CustomItem.Get(ItemId)?.Give(Player);
+                        }
                     }
                 }
             }

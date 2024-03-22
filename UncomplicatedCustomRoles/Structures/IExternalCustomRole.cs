@@ -23,6 +23,7 @@ namespace UncomplicatedCustomRoles.Structures
         public abstract float Ahp { get; set; }
         public abstract float HumeShield { get; set; }
         public abstract List<UCREffect>? Effects { get; set; }
+        public abstract bool InfiniteStamina { get; set; }
         public abstract bool CanEscape { get; set; }
         public abstract string? RoleAfterEscape { get; set; }
         public abstract string Scale { get; set; }

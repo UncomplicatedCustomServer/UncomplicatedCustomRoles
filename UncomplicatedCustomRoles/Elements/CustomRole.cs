@@ -31,6 +31,7 @@ namespace UncomplicatedCustomRoles.Elements
         {
             new()
         };
+        public bool InfiniteStamina { get; set; } = false;
         public bool CanEscape { get; set; } = true;
         public string? RoleAfterEscape { get; set; } = null;
         public Vector3 Scale { get; set; } = new();

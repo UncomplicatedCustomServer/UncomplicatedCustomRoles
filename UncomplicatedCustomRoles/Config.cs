@@ -18,7 +18,12 @@ namespace UncomplicatedCustomRoles
         [Description("A list of custom roles")]
         public List<CustomRole> CustomRoles { get; set; } = new()
         {
-            new CustomRole()
+            new()
+        };
+        [Description("Here you can create firearms and associate them with an ID, so you'll be able to add this weapon to the role by putting the Id inside the custom_item_inventory array")]
+        public List<CustomFirearm> Firearms { get; set; } = new()
+        {
+            new()
         };
     }
 }

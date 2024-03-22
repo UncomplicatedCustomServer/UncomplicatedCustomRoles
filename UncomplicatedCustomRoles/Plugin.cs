@@ -26,6 +26,7 @@ namespace UncomplicatedCustomRoles
         // RolesCount: RoleId => [PlayerId, PlayerId]
         public static Dictionary<int, List<int>> RolesCount = new();
         public static Dictionary<int, List<IUCREffect>> PermanentEffectStatus = new();
+        public static Dictionary<int, ICustomFirearm> Firearms = new();
         public static List<int> RoleSpawnQueue = new();
         public bool DoSpawnBasicRoles = false;
         public string PresenceUrl = "https://ucs.fcosma.it/api/plugin/presence";

@@ -4,6 +4,7 @@ using UncomplicatedCustomRoles.Manager;
 using UncomplicatedCustomRoles.Structures;
 using UncomplicatedCustomRoles.Events;
 using System;
+using CustomPlayerEffects;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
@@ -14,6 +15,8 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Get the <see cref="System.Version"/> of the APIs
         /// </summary>
         public static Version Version { get; } = new(2, 0, 0);
+
+        internal static Dictionary<uint, Action> Actions { get; set; } = new();
 
         /// <summary>
         /// Get a <see cref="Dictionary{int, ICustomRole}"/> of every <see cref="ICustomRole"/> registered at the moment.
@@ -166,6 +169,48 @@ namespace UncomplicatedCustomRoles.API.Features
         public static void Unregister(ICustomRole Role)
         {
             Unregister(Role.Id);
+        }
+
+        /// <summary>
+        /// Register a <see cref="ICustomFirearm"/> to the plugin
+        /// </summary>
+        public static void RegisterFirearm(ICustomFirearm Firearm)
+        {
+            RegisterFirearm(Firearm);
+        }
+
+        /// <summary>
+        /// Register a new <see cref="Action"/> that will be performed every 2 seconds
+        /// </summary>
+        public static void RegisterAction(Action Action, uint? Id = null)
+        {
+            if (Action is not null)
+            {
+                if (Id is not null && !Actions.ContainsKey((uint)Id))
+                {
+                    Actions.Add((uint)Id, Action);
+                } 
+                else
+                {
+                    uint RId = (uint)Actions.Count;
+                    while (Actions.ContainsKey(RId))
+                    {
+                        RId++;
+                    }
+                    Actions.Add(RId, Action);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Unregister a new <see cref="Action"/> that will be performed every 2 seconds
+        /// </summary>
+        public static void UnregisterAction(uint Id)
+        {
+            if (Actions.ContainsKey(Id))
+            {
+                Actions.Remove(Id);
+            }
         }
     }
 }

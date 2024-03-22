@@ -151,7 +151,7 @@ namespace UncomplicatedCustomRoles.Events
         public void OnDied(DiedEventArgs Died)
         {
             Died.Player.CustomName = null;
-            Died.Player.DisplayNickname = Died.Player.Nickname;
+            Died.Player.DisplayNickname = null;
             SpawnManager.ClearCustomTypes(Died.Player);
         }
 
@@ -249,10 +249,25 @@ namespace UncomplicatedCustomRoles.Events
         {
             while (Round.InProgress)
             {
-                foreach (Player Player in Player.List.Where(player => Plugin.PermanentEffectStatus.ContainsKey(player.Id) && player.IsAlive))
+                foreach (Player Player in Player.List.Where(player => Plugin.PermanentEffectStatus.ContainsKey(player.Id) && player.IsAlive && Plugin.PlayerRegistry.ContainsKey(player.Id)))
                 {
                     SpawnManager.SetAllActiveEffect(Player);
                 }
+
+                // Also do the infinite stamina job
+                foreach (Player Player in Player.List.Where(player => Plugin.PlayerRegistry.ContainsKey(player.Id) && Plugin.CustomRoles[Plugin.PlayerRegistry[player.Id]].InfiniteStamina == true))
+                {
+                    Player.Stamina = 1;
+                }
+
+                if (API.Features.Manager.Actions.Count() > 0)
+                {
+                    foreach (Action Action in API.Features.Manager.Actions.Values)
+                    {
+                        Action();
+                    }
+                }
+
                 yield return Timing.WaitForSeconds(2f);
             }
         }
