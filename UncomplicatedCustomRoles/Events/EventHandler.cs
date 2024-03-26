@@ -10,6 +10,8 @@ using PlayerRoles;
 using Exiled.Permissions.Extensions;
 using Exiled.Events.EventArgs.Server;
 using Exiled.Events.EventArgs.Scp049;
+using Exiled.API.Enums;
+using UnityEngine;
 
 /*
  * Il mio canto libero - Lucio Battisti
@@ -171,12 +173,15 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnEscaping(EscapingEventArgs Escaping)
         {
+            Log.Debug($"Player {Escaping.Player.Nickname} triggered the escaping event as {Escaping.Player.Role.Name}");
             if (Plugin.PlayerRegistry.ContainsKey(Escaping.Player.Id))
             {
+                Log.Debug($"Player IS a custom role: {Plugin.PlayerRegistry[Escaping.Player.Id]}");
                 ICustomRole Role = Plugin.CustomRoles[Plugin.PlayerRegistry[Escaping.Player.Id]];
 
                 if (!Role.CanEscape)
                 {
+                    Log.Debug($"Player with the role {Role.Id} ({Role.Name} can't escape, so nuh uh!");
                     Escaping.IsAllowed = false;
                     return;
                 }
@@ -199,12 +204,24 @@ namespace UncomplicatedCustomRoles.Events
                     }
                     else if (Action[0].ToUpper() == "CR")
                     {
+                        Log.Debug($"Start parsing the action for a custom role. Full: {Role.RoleAfterEscape}");
                         if (int.TryParse(Action[1], out int Id))
                         {
+                            Log.Debug($"Found a valid Id (i guess so): {Id}");
                             if (Plugin.CustomRoles.ContainsKey(Id))
                             {
-                                Timing.RunCoroutine(DoSpawnPlayer(Escaping.Player, Id));
-                                Escaping.IsAllowed = false;
+                                Log.Debug($"Seems that the role {Id} really exists, let's gooo!");
+                                if (!Escaping.Player.IsScp)
+                                {
+                                    Timing.CallDelayed(2f, () =>
+                                    {
+                                        Timing.RunCoroutine(DoSpawnPlayer(Escaping.Player, Id, true));
+                                    });
+                                } else
+                                {
+                                    Timing.RunCoroutine(DoSpawnPlayer(Escaping.Player, Id, true));
+                                }
+                                Escaping.IsAllowed = true;
                             } else
                             {
                                 Log.Warn($"Custom Role config parse ERROR: The role {Role.Id} ({Role.Name}) have an invalid role_after_escape, the role {Action[1]} (CUSTOM) was NOT FOUND!");
@@ -268,6 +285,13 @@ namespace UncomplicatedCustomRoles.Events
                     }
                 }
 
+                // Here we can see and trigger role for SCPs escape event
+                foreach (Player Player in Player.List.Where(player => player.IsScp && Vector3.Distance(new(123.85f, 988.8f, 18.9f), player.Position) < 2.5f)) 
+                {
+                    // Let's make this SCP escape
+                    OnEscaping(new(Player, RoleTypeId.ChaosConscript, EscapeScenario.None));
+                }
+
                 yield return Timing.WaitForSeconds(2f);
             }
         }
@@ -311,7 +335,7 @@ namespace UncomplicatedCustomRoles.Events
             if (RolePercentage.ContainsKey(Player.Role.Type))
             {
                 // We can proceed with the chance
-                int Chance = new Random().Next(0, 100);
+                int Chance = new System.Random().Next(0, 100);
                 if (Chance < RolePercentage[Player.Role.Type].Count())
                 {
                     // The role exists, good, let's give the player a role
