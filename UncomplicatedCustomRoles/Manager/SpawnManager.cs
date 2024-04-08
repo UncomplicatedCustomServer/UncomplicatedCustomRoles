@@ -26,7 +26,10 @@ namespace UncomplicatedCustomRoles.Manager
             if (!Plugin.CustomRoles.ContainsKey(Role.Id))
             {
                 Plugin.CustomRoles.Add(Role.Id, Role);
-                Log.Info($"Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
+                if (Plugin.Instance.Config.EnableBasicLogs)
+                {
+                    Log.Info($"Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
+                }
                 return;
             }
             Log.Warn($"Failed to register the UCR role with the ID {Role.Id}: The problem can be the following: ERR_ID_ALREADY_HERE!\nTrying to assign a new one...");
@@ -55,7 +58,6 @@ namespace UncomplicatedCustomRoles.Manager
                 Name = Role.Name,
                 Id = Role.Id,
                 CustomInfo = Role.CustomInfo,
-                DisplayNickname = Role.DisplayNickname,
                 MaxHealth = Role.MaxHealth,
                 MaxPlayers = Role.MaxPlayers,
                 MinPlayers = Role.MinPlayers,
@@ -256,23 +258,9 @@ namespace UncomplicatedCustomRoles.Manager
                 }
             }
 
-            Player.CustomInfo = Role.Name;
             if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
             {
                 Player.CustomInfo += $"\n{Role.CustomInfo}";
-            }
-            if (Role.DisplayNickname != string.Empty && Role.DisplayNickname != null)
-            {
-                string Nick;
-                if (Role.DisplayNickname.Contains(", "))
-                {
-                    Nick = Role.DisplayNickname.Split(new string[] {", "}, System.StringSplitOptions.RemoveEmptyEntries).RandomItem();
-                }
-                else
-                {
-                     Nick = Role.DisplayNickname;
-                }
-                Player.DisplayNickname = Nick.Replace("%name%", Player.Nickname).Replace("%dnumber%", new System.Random().Next(1000, 9999).ToString()).Replace("%o5number%", new System.Random().Next(01, 10).ToString());
             }
 
             Player.Health = Role.Health;

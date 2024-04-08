@@ -152,8 +152,6 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnDied(DiedEventArgs Died)
         {
-            Died.Player.CustomName = null;
-            Died.Player.DisplayNickname = null;
             SpawnManager.ClearCustomTypes(Died.Player);
         }
 

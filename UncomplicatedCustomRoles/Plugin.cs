@@ -106,11 +106,14 @@ namespace UncomplicatedCustomRoles
 
             HttpManager.StartAll();
 
-            Log.Info("===========================================");
-            Log.Info(" Thanks for using UncomplicatedCustomRoles");
-            Log.Info("        by FoxWorn3365 & Dr.Agenda");
-            Log.Info("===========================================");
-            Log.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
+            if (Config.EnableBasicLogs)
+            {
+                Log.Info("===========================================");
+                Log.Info(" Thanks for using UncomplicatedCustomRoles");
+                Log.Info("        by FoxWorn3365 & Dr.Agenda");
+                Log.Info("===========================================");
+                Log.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
+            }
 
             FileConfigs.Welcome();
             FileConfigs.Welcome(Server.Port.ToString());
