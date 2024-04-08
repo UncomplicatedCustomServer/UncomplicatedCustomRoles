@@ -12,8 +12,6 @@ namespace UncomplicatedCustomRoles.Elements
     {
         public int Id { get; set; } = 1;
         public string Name { get; set; } = "Janitor";
-        public string CustomInfo { get; set; } = "Clean the Light Containment Zone.";
-        public string DisplayNickname { get; set; } = "D-%name%";
         public int MaxPlayers { get; set; } = 5;
         public int MinPlayers { get; set; } = 1;
         public int SpawnChance { get; set; } = 60;

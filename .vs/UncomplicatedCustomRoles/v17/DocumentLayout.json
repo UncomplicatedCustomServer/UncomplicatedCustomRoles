@@ -1,0 +1,149 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}|UncomplicatedCustomRoles\\UncomplicatedCustomRoles.csproj|c:\\users\\aster\\documents\\gitkraken\\uncomplicatedcustomroles\\uncomplicatedcustomroles\\manager\\httpmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}|UncomplicatedCustomRoles\\UncomplicatedCustomRoles.csproj|solutionrelative:uncomplicatedcustomroles\\manager\\httpmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}|UncomplicatedCustomRoles\\UncomplicatedCustomRoles.csproj|C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\uncomplicatedcustomroles\\config.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}|UncomplicatedCustomRoles\\UncomplicatedCustomRoles.csproj|solutionrelative:uncomplicatedcustomroles\\config.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}|UncomplicatedCustomRoles\\UncomplicatedCustomRoles.csproj|C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\uncomplicatedcustomroles\\api\\features\\events.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}|UncomplicatedCustomRoles\\UncomplicatedCustomRoles.csproj|solutionrelative:uncomplicatedcustomroles\\api\\features\\events.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}|UncomplicatedCustomRoles\\UncomplicatedCustomRoles.csproj|C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\uncomplicatedcustomroles\\manager\\spawnmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}|UncomplicatedCustomRoles\\UncomplicatedCustomRoles.csproj|solutionrelative:uncomplicatedcustomroles\\manager\\spawnmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}|UncomplicatedCustomRoles\\UncomplicatedCustomRoles.csproj|C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\uncomplicatedcustomroles\\structures\\icustomrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}|UncomplicatedCustomRoles\\UncomplicatedCustomRoles.csproj|solutionrelative:uncomplicatedcustomroles\\structures\\icustomrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}|UncomplicatedCustomRoles\\UncomplicatedCustomRoles.csproj|C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\uncomplicatedcustomroles\\plugin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}|UncomplicatedCustomRoles\\UncomplicatedCustomRoles.csproj|solutionrelative:uncomplicatedcustomroles\\plugin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}|UncomplicatedCustomRoles\\UncomplicatedCustomRoles.csproj|C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\uncomplicatedcustomroles\\elements\\customrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}|UncomplicatedCustomRoles\\UncomplicatedCustomRoles.csproj|solutionrelative:uncomplicatedcustomroles\\elements\\customrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}|UncomplicatedCustomRoles\\UncomplicatedCustomRoles.csproj|C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\uncomplicatedcustomroles\\manager\\fileconfigs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}|UncomplicatedCustomRoles\\UncomplicatedCustomRoles.csproj|solutionrelative:uncomplicatedcustomroles\\manager\\fileconfigs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "HttpManager.cs",
+              "DocumentMoniker": "C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\UncomplicatedCustomRoles\\Manager\\HttpManager.cs",
+              "RelativeDocumentMoniker": "UncomplicatedCustomRoles\\Manager\\HttpManager.cs",
+              "ToolTip": "C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\UncomplicatedCustomRoles\\Manager\\HttpManager.cs",
+              "RelativeToolTip": "UncomplicatedCustomRoles\\Manager\\HttpManager.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAIAAAAGAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-08T18:41:52.842Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Config.cs",
+              "DocumentMoniker": "C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\UncomplicatedCustomRoles\\Config.cs",
+              "RelativeDocumentMoniker": "UncomplicatedCustomRoles\\Config.cs",
+              "ToolTip": "C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\UncomplicatedCustomRoles\\Config.cs",
+              "RelativeToolTip": "UncomplicatedCustomRoles\\Config.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAcAAAAjAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-08T18:40:45.398Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Events.cs",
+              "DocumentMoniker": "C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\UncomplicatedCustomRoles\\API\\Features\\Events.cs",
+              "RelativeDocumentMoniker": "UncomplicatedCustomRoles\\API\\Features\\Events.cs",
+              "ToolTip": "C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\UncomplicatedCustomRoles\\API\\Features\\Events.cs",
+              "RelativeToolTip": "UncomplicatedCustomRoles\\API\\Features\\Events.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAGAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-08T18:40:07.982Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "SpawnManager.cs",
+              "DocumentMoniker": "C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\UncomplicatedCustomRoles\\Manager\\SpawnManager.cs",
+              "RelativeDocumentMoniker": "UncomplicatedCustomRoles\\Manager\\SpawnManager.cs",
+              "ToolTip": "C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\UncomplicatedCustomRoles\\Manager\\SpawnManager.cs",
+              "RelativeToolTip": "UncomplicatedCustomRoles\\Manager\\SpawnManager.cs",
+              "ViewState": "AQIAAOsAAAAAAAAAAAApwP4AAAANAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-08T18:35:04.846Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ICustomRole.cs",
+              "DocumentMoniker": "C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\UncomplicatedCustomRoles\\Structures\\ICustomRole.cs",
+              "RelativeDocumentMoniker": "UncomplicatedCustomRoles\\Structures\\ICustomRole.cs",
+              "ToolTip": "C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\UncomplicatedCustomRoles\\Structures\\ICustomRole.cs",
+              "RelativeToolTip": "UncomplicatedCustomRoles\\Structures\\ICustomRole.cs",
+              "ViewState": "AQIAAAMAAAAAAAAAAAAAAAwAAAAxAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-08T18:34:26.596Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "CustomRole.cs",
+              "DocumentMoniker": "C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\UncomplicatedCustomRoles\\Elements\\CustomRole.cs",
+              "RelativeDocumentMoniker": "UncomplicatedCustomRoles\\Elements\\CustomRole.cs",
+              "ToolTip": "C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\UncomplicatedCustomRoles\\Elements\\CustomRole.cs",
+              "RelativeToolTip": "UncomplicatedCustomRoles\\Elements\\CustomRole.cs",
+              "ViewState": "AQIAAAMAAAAAAAAAAAAAAAoAAAApAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-08T18:33:59.479Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "FileConfigs.cs",
+              "DocumentMoniker": "C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\UncomplicatedCustomRoles\\Manager\\FileConfigs.cs",
+              "RelativeDocumentMoniker": "UncomplicatedCustomRoles\\Manager\\FileConfigs.cs",
+              "ToolTip": "C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\UncomplicatedCustomRoles\\Manager\\FileConfigs.cs",
+              "RelativeToolTip": "UncomplicatedCustomRoles\\Manager\\FileConfigs.cs",
+              "ViewState": "AQIAABsAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-08T18:33:51.196Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Plugin.cs",
+              "DocumentMoniker": "C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\UncomplicatedCustomRoles\\Plugin.cs",
+              "RelativeDocumentMoniker": "UncomplicatedCustomRoles\\Plugin.cs",
+              "ToolTip": "C:\\Users\\aster\\Documents\\GitKraken\\UncomplicatedCustomRoles\\UncomplicatedCustomRoles\\Plugin.cs",
+              "RelativeToolTip": "UncomplicatedCustomRoles\\Plugin.cs",
+              "ViewState": "AQIAAFQAAAAAAAAAAAAAAGoAAAAjAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-08T18:27:56.631Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
