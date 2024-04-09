@@ -5,6 +5,8 @@ using UncomplicatedCustomRoles.Structures;
 using UncomplicatedCustomRoles.Events;
 using System;
 using CustomPlayerEffects;
+using MEC;
+using PluginAPI.Core;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
@@ -71,7 +73,9 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public static void Summon(Player Player, int Id)
         {
-            UncomplicatedCustomRoles.Events.EventHandler.DoSpawnPlayer(Player, Id);
+            Log.Info("Attempting to summon player to custom role");
+            Timing.RunCoroutine(UncomplicatedCustomRoles.Events.EventHandler.DoSpawnPlayer(Player, Id, true));
+            Log.Info("Send event.");
         }
 
         /// <summary>
@@ -189,7 +193,7 @@ namespace UncomplicatedCustomRoles.API.Features
                 if (Id is not null && !Actions.ContainsKey((uint)Id))
                 {
                     Actions.Add((uint)Id, Action);
-                } 
+                }
                 else
                 {
                     uint RId = (uint)Actions.Count;
