@@ -6,7 +6,6 @@ using UncomplicatedCustomRoles.Events;
 using System;
 using CustomPlayerEffects;
 using MEC;
-using PluginAPI.Core;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
