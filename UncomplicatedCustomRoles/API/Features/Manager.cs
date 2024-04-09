@@ -73,9 +73,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public static void Summon(Player Player, int Id)
         {
-            Log.Info("Attempting to summon player to custom role");
             Timing.RunCoroutine(UncomplicatedCustomRoles.Events.EventHandler.DoSpawnPlayer(Player, Id, true));
-            Log.Info("Send event.");
         }
 
         /// <summary>
