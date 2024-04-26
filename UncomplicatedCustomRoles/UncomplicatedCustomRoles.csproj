@@ -168,6 +168,9 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
+    <Reference Include="UncomplicatedCustomItems">
+      <HintPath>..\..\..\..\Downloads\UncomplicatedCustomItems.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Burst">
       <HintPath>..\..\..\..\Downloads\Master\Unity.Burst.dll</HintPath>
     </Reference>

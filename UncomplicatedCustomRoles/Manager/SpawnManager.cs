@@ -11,6 +11,7 @@ using Exiled.CustomItems.API.Features;
 using Exiled.Events.EventArgs.Player;
 using Exiled.API.Features.Items;
 using InventorySystem.Items.Firearms.Attachments;
+using System;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -242,9 +243,28 @@ namespace UncomplicatedCustomRoles.Manager
                         {
                             CreateFirearm(Plugin.Firearms[(int)ItemId]).Give(Player);
                         } 
+                        else if (Type.GetType("UncomplicatedCustomItems") is not null && UncomplicatedCustomItems.API.Utilities.TryGetCustomItem(ItemId, out UncomplicatedCustomItems.Interfaces.ICustomItem ItemBase))
+                        {
+                            UncomplicatedCustomItems.API.Features.SummonedCustomItem.Summon(ItemBase, Player);
+                        }
                         else
                         {
-                            CustomItem.Get(ItemId)?.Give(Player);
+                            try
+                            {
+                                if (UncomplicatedCustomItems.API.Utilities.IsCustomItem(ItemId))
+                                {
+                                    UncomplicatedCustomItems.API.Features.SummonedCustomItem.Summon(UncomplicatedCustomItems.API.Utilities.GetCustomItem(ItemId), Player);
+                                } 
+                                else
+                                {
+                                    CustomItem.Get(ItemId)?.Give(Player);
+                                }
+                            } 
+                            catch (Exception ex)
+                            {
+                                Log.Debug($"Exception handled by CSHARP: Plugin UncomplicatedCustomItems not found!\nError: {ex.Message}");
+                                CustomItem.Get(ItemId)?.Give(Player);
+                            }
                         }
                     }
                 }
