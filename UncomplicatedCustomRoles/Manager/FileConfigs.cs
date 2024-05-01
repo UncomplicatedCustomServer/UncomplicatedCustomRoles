@@ -27,19 +27,26 @@ namespace UncomplicatedCustomRoles.Manager
             IDeserializer Deserializer = new DeserializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build();
             foreach (string FileName in List(LocalDir))
             {
-                if (Directory.Exists(FileName))
+                try
                 {
-                    continue;
+                    if (Directory.Exists(FileName))
+                    {
+                        continue;
+                    }
+                    if (FileName.Split().First() == ".")
+                    {
+                        return;
+                    }
+                    Dictionary<string, List<ExternalCustomRole>> Deserialized = Deserializer.Deserialize<Dictionary<string, List<ExternalCustomRole>>>(File.ReadAllText(FileName));
+                    foreach (ExternalCustomRole Role in Deserialized["custom_roles"])
+                    {
+                        Log.Debug($"Proposed to the registerer the external role {Role.Id} [{Role.Name}] from file:\n{FileName}");
+                        SpawnManager.RegisterCustomSubclass(SpawnManager.RenderExportMethodToInternal(Role));
+                    }
                 }
-                if (FileName.Split().First() == ".")
+                catch (YamlDotNet.Core.YamlException ex)
                 {
-                    return;
-                }
-                Dictionary<string, List<ExternalCustomRole>> Deserialized = Deserializer.Deserialize<Dictionary<string, List<ExternalCustomRole>>>(File.ReadAllText(FileName));
-                foreach (ExternalCustomRole Role in Deserialized["custom_roles"])
-                {
-                    Log.Debug($"Proposed to the registerer the external role {Role.Id} [{Role.Name}] from file:\n{FileName}");
-                    SpawnManager.RegisterCustomSubclass(SpawnManager.RenderExportMethodToInternal(Role));
+                    Log.Error($"Failed to parse {FileName} at {ex.End}. Recheck yml file's syntax and try again");
                 }
             }
         }
