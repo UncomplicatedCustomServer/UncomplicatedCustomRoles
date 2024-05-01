@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Exiled.API.Features;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Exiled.API.Features;
 using UncomplicatedCustomRoles.Elements;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -46,7 +46,14 @@ namespace UncomplicatedCustomRoles.Manager
                 }
                 catch (YamlDotNet.Core.YamlException ex)
                 {
-                    Log.Error($"Failed to parse {FileName} at {ex.End}. Recheck yml file's syntax and try again");
+                    if (!Plugin.Instance.Config.Debug)
+                    {
+                        Log.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.");
+                    }
+                    else
+                    {
+                        Log.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.\nStack trace: {ex.StackTrace}");
+                    }
                 }
             }
         }
