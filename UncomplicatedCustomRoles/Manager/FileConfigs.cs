@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Exiled.API.Features;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Exiled.API.Features;
 using UncomplicatedCustomRoles.Elements;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -27,19 +27,33 @@ namespace UncomplicatedCustomRoles.Manager
             IDeserializer Deserializer = new DeserializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build();
             foreach (string FileName in List(LocalDir))
             {
-                if (Directory.Exists(FileName))
+                try
                 {
-                    continue;
+                    if (Directory.Exists(FileName))
+                    {
+                        continue;
+                    }
+                    if (FileName.Split().First() == ".")
+                    {
+                        return;
+                    }
+                    Dictionary<string, List<ExternalCustomRole>> Deserialized = Deserializer.Deserialize<Dictionary<string, List<ExternalCustomRole>>>(File.ReadAllText(FileName));
+                    foreach (ExternalCustomRole Role in Deserialized["custom_roles"])
+                    {
+                        Log.Debug($"Proposed to the registerer the external role {Role.Id} [{Role.Name}] from file:\n{FileName}");
+                        SpawnManager.RegisterCustomSubclass(SpawnManager.RenderExportMethodToInternal(Role));
+                    }
                 }
-                if (FileName.Split().First() == ".")
+                catch (YamlDotNet.Core.YamlException ex)
                 {
-                    return;
-                }
-                Dictionary<string, List<ExternalCustomRole>> Deserialized = Deserializer.Deserialize<Dictionary<string, List<ExternalCustomRole>>>(File.ReadAllText(FileName));
-                foreach (ExternalCustomRole Role in Deserialized["custom_roles"])
-                {
-                    Log.Debug($"Proposed to the registerer the external role {Role.Id} [{Role.Name}] from file:\n{FileName}");
-                    SpawnManager.RegisterCustomSubclass(SpawnManager.RenderExportMethodToInternal(Role));
+                    if (!Plugin.Instance.Config.Debug)
+                    {
+                        Log.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.");
+                    }
+                    else
+                    {
+                        Log.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.\nStack trace: {ex.StackTrace}");
+                    }
                 }
             }
         }
