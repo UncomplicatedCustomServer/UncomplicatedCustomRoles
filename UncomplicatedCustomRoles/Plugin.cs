@@ -8,28 +8,45 @@ using PlayerHandler = Exiled.Events.Handlers.Player;
 using ServerHandler = Exiled.Events.Handlers.Server;
 using Scp049Handler = Exiled.Events.Handlers.Scp049;
 using UncomplicatedCustomRoles.Events;
+using System.IO;
 
 namespace UncomplicatedCustomRoles
 {
     internal class Plugin : Plugin<Config>
     {
         public override string Name => "UncomplicatedCustomRoles";
+
         public override string Prefix => "UncomplicatedCustomRoles";
+
         public override string Author => "FoxWorn3365, Dr.Agenda";
-        public override Version Version { get; } = new(1, 9, 0);
+
+        public override Version Version { get; } = new(1, 9, 1);
+
         public override Version RequiredExiledVersion { get; } = new(8, 8, 0);
+
         public static Plugin Instance;
+
         internal Handler Handler;
+
         internal ExternalPlayerEventHandler ExternalHandler;
+
         public static Dictionary<int, ICustomRole> CustomRoles;
+
         public static Dictionary<int, int> PlayerRegistry = new();
-        // RolesCount: RoleId => [PlayerId, PlayerId]
+
+        // RolesCount: RoleId => [PlayerId, PlayerId, ...]
         public static Dictionary<int, List<int>> RolesCount = new();
+
         public static Dictionary<int, List<IUCREffect>> PermanentEffectStatus = new();
+
         public static Dictionary<int, ICustomFirearm> Firearms = new();
+
         public static List<int> RoleSpawnQueue = new();
+
         public bool DoSpawnBasicRoles = false;
-        public string PresenceUrl = "https://ucs.fcosma.it/api/plugin/presence";
+
+        internal static HttpManager HttpManager = new("ucr");
+
         internal FileConfigs FileConfigs;
         public override void OnEnabled()
         {
@@ -104,7 +121,10 @@ namespace UncomplicatedCustomRoles
                 SpawnManager.RegisterCustomSubclass(CustomRole);
             }
 
-            HttpManager.StartAll();
+            if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomRoles", ".nohttp")))
+            {
+                HttpManager.Start();
+            }
 
             if (Config.EnableBasicLogs)
             {
@@ -113,6 +133,11 @@ namespace UncomplicatedCustomRoles
                 Log.Info("        by FoxWorn3365 & Dr.Agenda");
                 Log.Info("===========================================");
                 Log.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
+            }
+
+            if (HttpManager.IsLatestVersion())
+            {
+                Log.Warn($"You are NOT using the latest version of UncomplicatedCustomRoles!\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
             }
 
             FileConfigs.Welcome();
@@ -182,6 +207,8 @@ namespace UncomplicatedCustomRoles
                 PlayerHandler.StayingOnEnvironmentalHazard -= ExternalHandler.OnStayingOnEnvHazard;
                 PlayerHandler.ExitingEnvironmentalHazard -= ExternalHandler.OnExitingEnvHazard;
             }
+
+            HttpManager.Stop();
 
             Handler = null;
             ExternalHandler = null;

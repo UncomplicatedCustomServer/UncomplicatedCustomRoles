@@ -8,117 +8,161 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine.UIElements;
 
 namespace UncomplicatedCustomRoles.Manager
 {
     internal class HttpManager
     {
-        public static CoroutineHandle HttpPresenceCoroutine { get; set; }
+        /// <summary>
+        /// The <see cref="CoroutineHandle"/> of the presence coroutine.
+        /// </summary>
+        public CoroutineHandle PresenceCoroutine { get; internal set; }
 
-        public static int LogChunk { get; set; } = 50;
+        /// <summary>
+        /// If <see cref="true"/> the message that confirm that the server is communicating correctly with our APIs has been sent in the console.
+        /// </summary>
+        public bool SentConfirmationMessage { get; internal set; } = false;
 
-        public static List<float> ChunkList { get; set; } = new();
+        /// <summary>
+        /// The number of errors that has occurred. If this number exceed the <see cref="MaxErrors"/> quote then this feature will be deactivated.
+        /// </summary>
+        public uint Errors { get; internal set; } = 0;
 
-        public static int FailedHttp { get; set; } = 0;
+        /// <summary>
+        /// The maximum number of errors that can occur before deactivating the function.
+        /// </summary>
+        public uint MaxErrors { get; }
 
-        public static HttpClient HttpClient;
+        /// <summary>
+        /// If <see cref="true"/> this feature is active.
+        /// </summary>
+        public bool Active { get; internal set; } = false;
 
-        public static void StartHttpJob()
+        /// <summary>
+        /// The prefix of the plugin for our APIs
+        /// </summary>
+        public string Prefix { get; }
+
+        /// <summary>
+        /// The <see cref="HttpClient"/> public istance
+        /// </summary>
+        public HttpClient HttpClient { get; }
+
+        /// <summary>
+        /// The UCS APIs endpoint
+        /// </summary>
+        public string Endpoint { get; } = "https://ucs.fcosma.it/api/v2";
+
+        /// <summary>
+        /// An array of response times
+        /// </summary>
+        public List<float> ResponseTimes { get; } = new();
+
+        /// <summary>
+        /// Create a new istance of the HttpManager
+        /// </summary>
+        /// <param name="prefix"></param>
+        /// <param name="maxErrors"></param>
+        public HttpManager(string prefix, uint maxErrors = 5)
         {
-            if (HttpPresenceCoroutine.IsRunning)
-            {
-                Timing.KillCoroutines(HttpPresenceCoroutine);
-            }
-            if (!File.Exists(Path.Combine(Paths.Configs, "UncomplicatedCustomRoles", ".nohttp")))
-            {
-                Log.Info($"Selecting server for UCS presence...\nFound {Plugin.Instance.PresenceUrl.Replace("https://", "").Split('/')[0]}");
-                HttpPresenceCoroutine = Timing.RunCoroutine(DoHttpPresence());
-            }
-        }
-
-        public static void StartAll()
-        {
+            Prefix = prefix;
+            MaxErrors = maxErrors;
             HttpClient = new();
-            CheckForNewVersion();
-            StartHttpJob();
-            if (File.Exists(Path.Combine(Paths.Configs, "UncomplicatedCustomRoles", ".chunksize")))
-            {
-                LogChunk = int.Parse(File.ReadAllText(Path.Combine(Paths.Configs, "UncomplicatedCustomRoles", ".chunksize")));
-            }
         }
 
-        public static async void CheckForNewVersion()
+        internal HttpResponseMessage HttpRequest(string url)
         {
-            int Version = int.Parse(await HttpClient.GetStringAsync("https://ucs.fcosma.it/api/plugin/latest_raw"));
-            if (Version > int.Parse(Plugin.Instance.Version.ToString().Remove('.')))
-            {
-                Log.Warn("Found a new version of UncomplicatedCustomRoles!\nPlease update the plugin: https://github.com/FoxWorn3365/UncomplicatedCustomRoles\nLatest relase:\nhttps://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
-            }
+            Task<HttpResponseMessage> Response = Task.Run(() => HttpClient.GetAsync(url));
+
+            Response.Wait();
+
+            return Response.Result;
         }
 
-        public static HttpStatusCode ProposeOwner(string DiscordId)
+        internal string RetriveString(HttpResponseMessage response)
         {
-            Task<HttpResponseMessage> Task = System.Threading.Tasks.Task.Run(() => HttpClient.GetAsync($"https://ucs.fcosma.it/api/plugin/owner_raw?discordid={DiscordId}"));
-            Task.Wait();
-            return Task.Result.StatusCode;
+            return RetriveString(response.Content);
         }
 
-        private static void SendLogs()
+        internal string RetriveString(HttpContent response)
         {
-            float Sum = 0f;
+            Task<string> String = Task.Run(response.ReadAsStringAsync);
 
-            foreach (float Chunk in ChunkList)
-            {
-                Sum += Chunk;
-            }
+            String.Wait();
 
-            float Average = Sum / ChunkList.Count();
-
-            Log.Info($"[UCS HTTP Presence] >> Put the presence for {ChunkList.Count()} times with success!\nAverage response time (ms): {Average}\nFailed HTTP Request(s): {FailedHttp}\nFail chance: {ChunkList.Count()/100*FailedHttp}%\nTo disable this report, create a file named '.chunksize' in the 'UncomplicatedCustomRoles' and write 1 or -1, as your wish.");
+            return String.Result;
         }
 
-        private static async void TaskGetHttpResponse()
+        public HttpStatusCode AddServerOwner(string discordId)
         {
-            long Start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-
-            HttpResponseMessage RawData = await HttpClient.GetAsync($"{Plugin.Instance.PresenceUrl}?port={Server.Port}&cores={Environment.ProcessorCount}&ram=0&version={Plugin.Instance.Version}");
-            string Data = RawData.Content.ReadAsStringAsync().Result;
-
-            Dictionary<string, string> Response = JsonConvert.DeserializeObject<Dictionary<string, string>>(Data);
-
-            if (Response["status"] == "200")
-            {
-                ChunkList.Add(DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start);
-            }
-            else
-            {
-                FailedHttp++;
-                Log.Warn($"[UCS HTTP Presence] >> Failed to put data in the UCS server for presence! HTTP-CODE: {Response["status"]}, server says: {Response["message"]}");
-                ChunkList.Add(-1);
-            }
+            return HttpRequest($"{Endpoint}/owners/add?discorid={discordId}").StatusCode;
         }
 
-        public static IEnumerator<float> DoHttpPresence()
+        public Version LatestVersion()
         {
-            Log.Info("[UCS HTTP Presence] >> Started the presence task manager");
+            return new(RetriveString(HttpRequest($"{Endpoint}/{Prefix}/version?vts=5")));
+        }
 
-            while (true)
+        public bool IsLatestVersion()
+        {
+            if (LatestVersion().CompareTo(Plugin.Instance.Version) != 0)
             {
-                if (FailedHttp > 5)
+                return false;
+            }
+
+            return true;
+        }
+
+        internal bool Presence(out HttpContent httpContent)
+        {
+            float Start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            HttpResponseMessage Status = HttpRequest($"{Endpoint}/{Prefix}/presence?port={Server.Port}&cores={Environment.ProcessorCount}&ram=0&version={Plugin.Instance.Version}");
+            httpContent = Status.Content;
+            ResponseTimes.Add(DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start);
+            if (Status.StatusCode == HttpStatusCode.OK)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        internal IEnumerator<float> PresenceAction()
+        {
+            while (Active && Errors <= MaxErrors)
+            {
+                if (!Presence(out HttpContent content))
                 {
-                    Log.Error($"[UCS HTTP Presence] >> Failed to put data on stream for {FailedHttp} times, disabling the function...");
-                    yield break;
-                }
-                
-                if (ChunkList.Count() >= LogChunk && LogChunk > 1)
-                {
-                    SendLogs();
+                    Dictionary<string, string> Response = JsonConvert.DeserializeObject<Dictionary<string, string>>(RetriveString(content));
+                    Errors++;
+                    Log.Warn($"[UCS HTTP Manager] >> Error while trying to put data inside our APIs.\nThe endpoint say: {Response["message"]} ({Response["status"]})");
                 }
 
-                TaskGetHttpResponse();
-
-                yield return Timing.WaitForSeconds(500);
+                yield return Timing.WaitForSeconds(500.0f);
             }
+        }
+        
+        public void Start()
+        {
+            if (Active)
+            {
+                return;
+            }
+
+            Active = true;
+            PresenceCoroutine = Timing.RunCoroutine(PresenceAction());
+        }
+
+        public void Stop()
+        {
+            if (!Active)
+            {
+                return;
+            }
+
+            Active = false;
+            Timing.KillCoroutines(PresenceCoroutine);
         }
     }
 }
