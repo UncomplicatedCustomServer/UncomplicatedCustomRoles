@@ -33,7 +33,7 @@ namespace UncomplicatedCustomRoles.Commands.UCROwner
                 return false;
             }
 
-            HttpStatusCode Response = HttpManager.ProposeOwner(arguments.At(0));
+            HttpStatusCode Response = Plugin.HttpManager.AddServerOwner(arguments.At(0));
 
             switch (Response)
             {
