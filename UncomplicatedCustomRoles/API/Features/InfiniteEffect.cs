@@ -2,7 +2,7 @@
 using MEC;
 using System.Collections.Generic;
 using System.Linq;
-using UncomplicatedCustomRoles.Structures;
+using UncomplicatedCustomRoles.Interfaces;
 
 #nullable enable
 namespace UncomplicatedCustomRoles.API.Features

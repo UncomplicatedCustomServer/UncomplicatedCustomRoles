@@ -1,6 +1,6 @@
 ﻿using Exiled.API.Enums;
 using System.ComponentModel;
-using UncomplicatedCustomRoles.Structures;
+using UncomplicatedCustomRoles.Interfaces;
 
 namespace UncomplicatedCustomRoles.Manager
 {

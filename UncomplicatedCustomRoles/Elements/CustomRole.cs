@@ -2,7 +2,7 @@
 using PlayerRoles;
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.Manager;
-using UncomplicatedCustomRoles.Structures;
+using UncomplicatedCustomRoles.Interfaces;
 using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Elements

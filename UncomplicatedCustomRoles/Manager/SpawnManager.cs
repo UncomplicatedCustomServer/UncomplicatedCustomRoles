@@ -4,14 +4,14 @@ using Exiled.API.Features;
 using PlayerRoles;
 using System.Collections.Generic;
 using System.Linq;
-using UncomplicatedCustomRoles.Structures;
+using UncomplicatedCustomRoles.Interfaces;
 using UnityEngine;
-using UncomplicatedCustomRoles.Elements;
 using Exiled.CustomItems.API.Features;
 using Exiled.Events.EventArgs.Player;
 using Exiled.API.Features.Items;
 using InventorySystem.Items.Firearms.Attachments;
 using System;
+using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -22,74 +22,31 @@ namespace UncomplicatedCustomRoles.Manager
             if (!SubclassValidator(Role))
             {
                 Log.Warn($"Failed to register the UCR role with the ID {Role.Id} due to the validator check!");
+
                 return;
             }
+
             if (!Plugin.CustomRoles.ContainsKey(Role.Id))
             {
                 Plugin.CustomRoles.Add(Role.Id, Role);
+
                 if (Plugin.Instance.Config.EnableBasicLogs)
                 {
                     Log.Info($"Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
                 }
+
                 return;
             }
+
             Log.Warn($"Failed to register the UCR role with the ID {Role.Id}: The problem can be the following: ERR_ID_ALREADY_HERE!\nTrying to assign a new one...");
+
             int NewId = GetFirstFreeID(Role.Id);
+
             Log.Info($"Custom Role {Role.Name} with the old Id {Role.Id} will be registered with the following Id: {NewId}");
+
             Role.Id = NewId;
+
             RegisterCustomSubclass(Role);
-        }
-
-        public static void RegisterCustomFirearm(ICustomFirearm Firearm)
-        {
-            if (!Plugin.Firearms.ContainsKey(Firearm.Id))
-            {
-                Plugin.Firearms.Add(Firearm.Id, Firearm);
-            } 
-            else
-            {
-                Log.Warn($"Falied to register the UCR Custom Firearm with the Id {Firearm.Id} ({Firearm.Item}) -> There's another role with this Id!");
-            }
-        }
-
-        public static ICustomRole RenderExportMethodToInternal(IExternalCustomRole Role)
-        {
-            return new CustomRole()
-            {
-                Name = Role.Name,
-                Id = Role.Id,
-                CustomInfo = Role.CustomInfo,
-                MaxHealth = Role.MaxHealth,
-                MaxPlayers = Role.MaxPlayers,
-                MinPlayers = Role.MinPlayers,
-                Role = Role.Role,
-                RoleAppearance = Role.RoleAppearance,
-                CanReplaceRoles = Role.CanReplaceRoles,
-                Ahp = Role.Ahp,
-                HumeShield = Role.HumeShield,
-                Effects = Role.Effects,
-                CanEscape = Role.CanEscape,
-                Scale = VectorConvertor(Role.Scale),
-                SpawnBroadcast = Role.SpawnBroadcast,
-                SpawnBroadcastDuration = Role.SpawnBroadcastDuration,
-                SpawnHint = Role.SpawnHint,
-                SpawnHintDuration = Role.SpawnHintDuration,
-                Inventory = Role.Inventory,
-                CustomItemsInventory = Role.CustomItemsInventory,
-                Ammo = Role.Ammo,
-                Spawn = Role.Spawn,
-                SpawnRooms = Role.SpawnRooms,
-                SpawnZones = Role.SpawnZones,
-                SpawnPosition = VectorConvertor(Role.SpawnPosition),
-                SpawnOffset = VectorConvertor(Role.SpawnOffset),
-                RequiredPermission = Role.RequiredPermission,
-                IgnoreSpawnSystem = Role.IgnoreSpawnSystem,
-                Health = Role.Health,
-                SpawnChance = Role.SpawnChance,
-                DamageMultiplier = Role.DamageMultiplier,
-                RoleAfterEscape = Role.RoleAfterEscape,
-                InfiniteStamina = Role.InfiniteStamina
-            };
         }
 
         public static bool SubclassValidator(ICustomRole Role)
@@ -145,33 +102,6 @@ namespace UncomplicatedCustomRoles.Manager
             }
         }
 
-        public static Firearm CreateFirearm(ICustomFirearm Firearm)
-        {
-            Firearm Item = Exiled.API.Features.Items.Firearm.Create(Firearm.Item);
-
-            foreach (AttachmentName Attachment in Firearm.Attachments)
-            {
-                Item.AddAttachment(Attachment);
-            }
-
-            if (Firearm.Scale != null && Firearm.Scale != new Vector3())
-            {
-                Item.Scale = Firearm.Scale;
-            }
-
-            if (Firearm.MaxAmmo is not null && Firearm.MaxAmmo > 0)
-            {
-                Item.MaxAmmo = (byte)Firearm.MaxAmmo;
-            }
-
-            if (Firearm.FireRate is not null && Firearm.FireRate > 0)
-            {
-                Item.FireRate = (float)Firearm.FireRate;
-            }
-
-            return Item;
-        }
-
         public static void SummonCustomSubclass(Player Player, int Id, bool DoBypassRoleOverwrite = true)
         {
             // Does the role exists?
@@ -212,13 +142,13 @@ namespace UncomplicatedCustomRoles.Manager
                 switch (Role.Spawn)
                 {
                     case SpawnLocationType.ZoneSpawn:
-                        Player.Position = Factory.AdjustRoomPosition(Factory.RoomsInZone(Role.SpawnZones.RandomItem()).RandomItem());
+                        Player.Position = Room.List.Where(room => room.Zone == Role.SpawnZones.RandomItem()).GetRandomValue().Position.AddY(1.5f);
                         break;
                     case SpawnLocationType.CompleteRandomSpawn:
-                        Player.Position = Factory.AdjustRoomPosition(Room.List.ToList().RandomItem());
+                        Player.Position = Room.List.GetRandomValue().Position.AddY(1.5f);
                         break;
                     case SpawnLocationType.RoomsSpawn:
-                        Player.Position = Factory.AdjustRoomPosition(Room.Get(Role.SpawnRooms.RandomItem()));
+                        Player.Position = Room.Get(Role.SpawnRooms.RandomItem()).Position.AddY(1.5f);
                         if (Role.SpawnOffset != new Vector3())
                         {
                             Player.Position += Role.SpawnOffset;
@@ -238,33 +168,21 @@ namespace UncomplicatedCustomRoles.Manager
                 {
                     if (!Player.IsInventoryFull)
                     {
-                        // If the Id is the Id of a registered custom weapon we'll give it, otherwise the custom item will be given
-                        if (Plugin.Firearms.ContainsKey((int)ItemId))
+                        try
                         {
-                            CreateFirearm(Plugin.Firearms[(int)ItemId]).Give(Player);
-                        } 
-                        else if (Type.GetType("UncomplicatedCustomItems") is not null && UncomplicatedCustomItems.API.Utilities.TryGetCustomItem(ItemId, out UncomplicatedCustomItems.Interfaces.ICustomItem ItemBase))
-                        {
-                            UncomplicatedCustomItems.API.Features.SummonedCustomItem.Summon(ItemBase, Player);
-                        }
-                        else
-                        {
-                            try
+                            if (UncomplicatedCustomItems.API.Utilities.IsCustomItem(ItemId))
                             {
-                                if (UncomplicatedCustomItems.API.Utilities.IsCustomItem(ItemId))
-                                {
-                                    UncomplicatedCustomItems.API.Features.SummonedCustomItem.Summon(UncomplicatedCustomItems.API.Utilities.GetCustomItem(ItemId), Player);
-                                } 
-                                else
-                                {
-                                    CustomItem.Get(ItemId)?.Give(Player);
-                                }
+                                UncomplicatedCustomItems.API.Features.SummonedCustomItem.Summon(UncomplicatedCustomItems.API.Utilities.GetCustomItem(ItemId), Player);
                             } 
-                            catch (Exception ex)
+                            else
                             {
-                                Log.Debug($"Exception handled by CSHARP: Plugin UncomplicatedCustomItems not found!\nError: {ex.Message}");
                                 CustomItem.Get(ItemId)?.Give(Player);
                             }
+                        } 
+                        catch (Exception ex)
+                        {
+                            Log.Debug($"Exception handled by CSHARP: Plugin UncomplicatedCustomItems not found!\nError: {ex.Message}");
+                            CustomItem.Get(ItemId)?.Give(Player);
                         }
                     }
                 }
@@ -332,27 +250,6 @@ namespace UncomplicatedCustomRoles.Manager
                 Log.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
                 Player.ChangeAppearance(Role.RoleAppearance, true);
             }
-
-            // Call the event for the spawn of the player
-            API.Features.Events.__CallEvent(UCREvents.Spawned, new SpawnedEventArgs(Player, OldRole));
-        }
-
-        public static Vector3 VectorConvertor(string Vector)
-        {
-            if (Vector.Length - Vector.Replace(",", "").Length != 2)
-            {
-                Log.Warn($"Error while parsing StringVector '{Vector}', found {Vector.Length - Vector.Replace(",", "").Length} commas instead of 2!\nSyntax: x, y, z");
-                return new();
-            }
-            string[] Data = Vector.Replace(" ", "").Split(',');
-            if (Data.Length != 3) 
-            {
-                Log.Warn($"Error while parsing StringVector '{Vector}', found {Data.Length} elements instead of 3!\nSyntax: x, y, z");
-                return new();
-            }
-            Vector3 Vector3 = new(float.Parse(Data[0].Replace(".", ",")), float.Parse(Data[1].Replace(".", ",")), float.Parse(Data[2].Replace(".", ",")));
-            Log.Debug($"Parsed StringVector '{Vector}' with success -- Results: {Vector3}!");
-            return Vector3;
         }
         
         public static int GetFirstFreeID(int Id)

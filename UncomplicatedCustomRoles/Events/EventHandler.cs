@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.Manager;
-using UncomplicatedCustomRoles.Structures;
+using UncomplicatedCustomRoles.Interfaces;
 using MEC;
 using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
@@ -172,6 +172,7 @@ namespace UncomplicatedCustomRoles.Events
         public void OnEscaping(EscapingEventArgs Escaping)
         {
             Log.Debug($"Player {Escaping.Player.Nickname} triggered the escaping event as {Escaping.Player.Role.Name}");
+
             if (Plugin.PlayerRegistry.ContainsKey(Escaping.Player.Id))
             {
                 Log.Debug($"Player IS a custom role: {Plugin.PlayerRegistry[Escaping.Player.Id]}");
@@ -232,9 +233,6 @@ namespace UncomplicatedCustomRoles.Events
                     }
                 }
             }
-
-            // If we are still here let's send the event
-            API.Features.Events.__CallEvent(UCREvents.Escaping, Escaping);
         }
 
         public void OnRespawningWave(RespawningTeamEventArgs Respawn)
@@ -275,14 +273,6 @@ namespace UncomplicatedCustomRoles.Events
                     Player.Stamina = 1;
                 }
 
-                if (API.Features.Manager.Actions.Count() > 0)
-                {
-                    foreach (Action Action in API.Features.Manager.Actions.Values)
-                    {
-                        Action();
-                    }
-                }
-
                 // Here we can see and trigger role for SCPs escape event
                 foreach (Player Player in Player.List.Where(player => player.IsScp && Vector3.Distance(new(123.85f, 988.8f, 18.9f), player.Position) < 2.5f)) 
                 {
@@ -302,7 +292,29 @@ namespace UncomplicatedCustomRoles.Events
 
         public static void DoEvaluateSpawnForPlayer(Player Player)
         {
-            Dictionary<RoleTypeId, List<ICustomRole>> RolePercentage = Factory.RoleIstance();
+            Dictionary<RoleTypeId, List<ICustomRole>> RolePercentage = new()
+            {
+                { RoleTypeId.ClassD, new() },
+                { RoleTypeId.Scientist, new() },
+                { RoleTypeId.NtfPrivate, new() },
+                { RoleTypeId.NtfSergeant, new() },
+                { RoleTypeId.NtfCaptain, new() },
+                { RoleTypeId.NtfSpecialist, new() },
+                { RoleTypeId.ChaosConscript, new() },
+                { RoleTypeId.ChaosMarauder, new() },
+                { RoleTypeId.ChaosRepressor, new() },
+                { RoleTypeId.ChaosRifleman, new() },
+                { RoleTypeId.Tutorial, new() },
+                { RoleTypeId.Scp049, new() },
+                { RoleTypeId.Scp0492, new() },
+                { RoleTypeId.Scp079, new() },
+                { RoleTypeId.Scp173, new() },
+                { RoleTypeId.Scp939, new() },
+                { RoleTypeId.Scp096, new() },
+                { RoleTypeId.Scp106, new() },
+                { RoleTypeId.Scp3114, new() },
+                { RoleTypeId.FacilityGuard, new() }
+            };
 
             foreach (KeyValuePair<int, ICustomRole> Role in Plugin.CustomRoles)
             {
