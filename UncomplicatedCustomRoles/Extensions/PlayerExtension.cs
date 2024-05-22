@@ -34,7 +34,7 @@ namespace UncomplicatedCustomRoles.Extensions
 
         public static bool TryGetCustomRole(this Player player, out ICustomRole role)
         {
-            if (HasCustomRole(player))
+            if (player.HasCustomRole())
             {
                 role = Plugin.CustomRoles[Plugin.PlayerRegistry[player.Id]];
                 return true;
@@ -46,7 +46,8 @@ namespace UncomplicatedCustomRoles.Extensions
 
         public static ICustomRole GetCustomRole(this Player player)
         {
-            return Plugin.CustomRoles[Plugin.PlayerRegistry[player.Id]] ?? null;
+            player.TryGetCustomRole(out ICustomRole role);
+            return role;
         }
     }
 }

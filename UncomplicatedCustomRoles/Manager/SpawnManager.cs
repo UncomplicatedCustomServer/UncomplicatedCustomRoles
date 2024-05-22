@@ -12,6 +12,8 @@ using Exiled.API.Features.Items;
 using InventorySystem.Items.Firearms.Attachments;
 using System;
 using UncomplicatedCustomRoles.Extensions;
+using Exiled.API.Features.Roles;
+using MEC;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -277,6 +279,58 @@ namespace UncomplicatedCustomRoles.Manager
                 Player.EnableEffect(Effect.EffectType, 15f);
                 Player.ChangeEffectIntensity(Effect.EffectType, Effect.Intensity, 15f);
             }
+        }
+
+        public static RoleTypeId? ParseEscapeRole(ICustomRole role, Player player)
+        {
+            if (role.CanEscape && role.RoleAfterEscape is not null && role.RoleAfterEscape != string.Empty)
+            {
+                // Syntax: IR (Internal Role) or CR (Custom Role) : the ID.   For example IR:0 will be SCP-173 (also IR:Scp173) and CR:1 will be the Custom Role with the Id = 1
+                string[] Action = role.RoleAfterEscape.Split(':');
+                if (Action[0].ToUpper() == "IR")
+                {
+                    if (Enum.TryParse(Action[1], out RoleTypeId Out))
+                    {
+                        return Out;
+                    }
+                    else
+                    {
+                        Log.Warn($"Custom Role config parse ERROR: The role {role.Id} ({role.Name}) have an invalid role_after_escape, the role {Action[1]} (INTERNAL) was NOT FOUND!");
+                    }
+                }
+                else if (Action[0].ToUpper() == "CR")
+                {
+                    Log.Debug($"Start parsing the action for a custom role. Full: {role.RoleAfterEscape}");
+                    if (int.TryParse(Action[1], out int Id))
+                    {
+                        Log.Debug($"Found a valid Id (i guess so): {Id}");
+                        if (Plugin.CustomRoles.ContainsKey(Id))
+                        {
+                            Log.Debug($"Seems that the role {Id} really exists, let's gooo!");
+                            if (!player.IsScp)
+                            {
+                                Timing.CallDelayed(2f, () =>
+                                {
+                                    Timing.RunCoroutine(Events.EventHandler.DoSpawnPlayer(player, Id, true));
+                                });
+                            }
+                            else
+                            {
+                                Timing.RunCoroutine(Events.EventHandler.DoSpawnPlayer(player, Id, true));
+                            }
+                        }
+                        else
+                        {
+                            Log.Warn($"Custom Role config parse ERROR: The role {role.Id} ({role.Name}) have an invalid role_after_escape, the role {Action[1]} (CUSTOM) was NOT FOUND!");
+                        }
+                    }
+                    else
+                    {
+                        Log.Warn($"Custom Role config parse ERROR: The role {role.Id} ({role.Name}) have an invalid role_after_escape, the Id {Action[1]} seems to not be an int!");
+                    }
+                }
+            }
+            return null;
         }
     }  
 }

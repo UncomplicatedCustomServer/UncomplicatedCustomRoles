@@ -186,51 +186,16 @@ namespace UncomplicatedCustomRoles.Events
                 }
 
                 // Try to set the role
-                if (Role.CanEscape && Role.RoleAfterEscape is not null && Role.RoleAfterEscape != string.Empty)
+                RoleTypeId? NewRole = SpawnManager.ParseEscapeRole(Role, Escaping.Player);
+
+                if (NewRole is not null)
                 {
-                    // Syntax: IR (Internal Role) or CR (Custom Role) : the ID.   For example IR:0 will be SCP-173 (also IR:Scp173) and CR:1 will be the Custom Role with the Id = 1
-                    string[] Action = Role.RoleAfterEscape.Split(':');
-                    if (Action[0].ToUpper() == "IR")
-                    {
-                        if (Enum.TryParse(Action[1], out RoleTypeId Out))
-                        {
-                            Escaping.NewRole = Out;
-                        } 
-                        else
-                        {
-                            Log.Warn($"Custom Role config parse ERROR: The role {Role.Id} ({Role.Name}) have an invalid role_after_escape, the role {Action[1]} (INTERNAL) was NOT FOUND!");
-                        }
-                    }
-                    else if (Action[0].ToUpper() == "CR")
-                    {
-                        Log.Debug($"Start parsing the action for a custom role. Full: {Role.RoleAfterEscape}");
-                        if (int.TryParse(Action[1], out int Id))
-                        {
-                            Log.Debug($"Found a valid Id (i guess so): {Id}");
-                            if (Plugin.CustomRoles.ContainsKey(Id))
-                            {
-                                Log.Debug($"Seems that the role {Id} really exists, let's gooo!");
-                                if (!Escaping.Player.IsScp)
-                                {
-                                    Timing.CallDelayed(2f, () =>
-                                    {
-                                        Timing.RunCoroutine(DoSpawnPlayer(Escaping.Player, Id, true));
-                                    });
-                                } else
-                                {
-                                    Timing.RunCoroutine(DoSpawnPlayer(Escaping.Player, Id, true));
-                                }
-                                Escaping.IsAllowed = true;
-                            } else
-                            {
-                                Log.Warn($"Custom Role config parse ERROR: The role {Role.Id} ({Role.Name}) have an invalid role_after_escape, the role {Action[1]} (CUSTOM) was NOT FOUND!");
-                            }
-                        } 
-                        else
-                        {
-                            Log.Warn($"Custom Role config parse ERROR: The role {Role.Id} ({Role.Name}) have an invalid role_after_escape, the Id {Action[1]} seems to not be an int!");
-                        }
-                    }
+                    Escaping.IsAllowed = true;
+                    Escaping.NewRole = (RoleTypeId)NewRole;
+                }
+                else
+                {
+                    Escaping.IsAllowed = false;
                 }
             }
         }
