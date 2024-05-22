@@ -281,26 +281,22 @@ namespace UncomplicatedCustomRoles.Manager
             }
         }
 
-        public static RoleTypeId? ParseEscapeRole(ICustomRole role, Player player)
+        public static RoleTypeId? ParseEscapeRole(string roleAfterEscape, Player player)
         {
-            if (role.CanEscape && role.RoleAfterEscape is not null && role.RoleAfterEscape != string.Empty)
+            if (roleAfterEscape is not null && roleAfterEscape != string.Empty)
             {
                 // Syntax: IR (Internal Role) or CR (Custom Role) : the ID.   For example IR:0 will be SCP-173 (also IR:Scp173) and CR:1 will be the Custom Role with the Id = 1
-                string[] Action = role.RoleAfterEscape.Split(':');
+                string[] Action = roleAfterEscape.Split(':');
                 if (Action[0].ToUpper() == "IR")
                 {
                     if (Enum.TryParse(Action[1], out RoleTypeId Out))
                     {
                         return Out;
                     }
-                    else
-                    {
-                        Log.Warn($"Custom Role config parse ERROR: The role {role.Id} ({role.Name}) have an invalid role_after_escape, the role {Action[1]} (INTERNAL) was NOT FOUND!");
-                    }
                 }
                 else if (Action[0].ToUpper() == "CR")
                 {
-                    Log.Debug($"Start parsing the action for a custom role. Full: {role.RoleAfterEscape}");
+                    Log.Debug($"Start parsing the action for a custom role. Full: {roleAfterEscape}");
                     if (int.TryParse(Action[1], out int Id))
                     {
                         Log.Debug($"Found a valid Id (i guess so): {Id}");
@@ -319,14 +315,6 @@ namespace UncomplicatedCustomRoles.Manager
                                 Timing.RunCoroutine(Events.EventHandler.DoSpawnPlayer(player, Id, true));
                             }
                         }
-                        else
-                        {
-                            Log.Warn($"Custom Role config parse ERROR: The role {role.Id} ({role.Name}) have an invalid role_after_escape, the role {Action[1]} (CUSTOM) was NOT FOUND!");
-                        }
-                    }
-                    else
-                    {
-                        Log.Warn($"Custom Role config parse ERROR: The role {role.Id} ({role.Name}) have an invalid role_after_escape, the Id {Action[1]} seems to not be an int!");
                     }
                 }
             }

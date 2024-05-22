@@ -186,7 +186,7 @@ namespace UncomplicatedCustomRoles.Events
                 }
 
                 // Try to set the role
-                RoleTypeId? NewRole = SpawnManager.ParseEscapeRole(Role, Escaping.Player);
+                RoleTypeId? NewRole = SpawnManager.ParseEscapeRole(Role.RoleAfterEscape, Escaping.Player);
 
                 if (NewRole is not null)
                 {
