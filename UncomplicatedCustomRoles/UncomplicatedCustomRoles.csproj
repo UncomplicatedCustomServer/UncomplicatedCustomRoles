@@ -111,9 +111,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Net" />
-    <Reference Include="UncomplicatedCustomItems">
-      <HintPath>..\..\..\..\Downloads\UncomplicatedCustomItems.dll</HintPath>
-    </Reference>
     <Reference Include="Unity.Burst">
       <HintPath>..\..\..\..\Downloads\Master\Unity.Burst.dll</HintPath>
     </Reference>

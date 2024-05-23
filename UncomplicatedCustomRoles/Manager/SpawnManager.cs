@@ -7,13 +7,12 @@ using System.Linq;
 using UncomplicatedCustomRoles.Interfaces;
 using UnityEngine;
 using Exiled.CustomItems.API.Features;
-using Exiled.Events.EventArgs.Player;
-using Exiled.API.Features.Items;
-using InventorySystem.Items.Firearms.Attachments;
 using System;
 using UncomplicatedCustomRoles.Extensions;
-using Exiled.API.Features.Roles;
 using MEC;
+using Exiled.API.Interfaces;
+using InventorySystem.Items;
+using System.Reflection;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -172,19 +171,28 @@ namespace UncomplicatedCustomRoles.Manager
                     {
                         try
                         {
-                            if (UncomplicatedCustomItems.API.Utilities.IsCustomItem(ItemId))
+                            if (Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems") is not null)
                             {
-                                UncomplicatedCustomItems.API.Features.SummonedCustomItem.Summon(UncomplicatedCustomItems.API.Utilities.GetCustomItem(ItemId), Player);
-                            } 
+                                Type AssemblyType = Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems").Assembly.GetType("UncomplicatedCustomItems.API.Utilities");
+                                if ((bool)AssemblyType?.GetMethod("IsCustomItem")?.Invoke(null, new object[] { ItemId }))
+                                {
+                                    object CustomItem = AssemblyType?.GetMethod("GetCustomItem")?.Invoke(null, new object[] { ItemId });
+
+                                    Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems").Assembly.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem")?.GetMethods().Where(method => method.Name == "Summon" && method.GetParameters().Length == 2).FirstOrDefault()?.Invoke(null, new object[]
+                                    {
+                                        CustomItem,
+                                        Player
+                                    });
+                                }
+                            }
                             else
                             {
                                 CustomItem.Get(ItemId)?.Give(Player);
                             }
-                        } 
+                        }
                         catch (Exception ex)
                         {
-                            Log.Debug($"Exception handled by CSHARP: Plugin UncomplicatedCustomItems not found!\nError: {ex.Message}");
-                            CustomItem.Get(ItemId)?.Give(Player);
+                            Log.Debug($"Error while giving a custom item.\nError: {ex.Message}");
                         }
                     }
                 }
