@@ -10,9 +10,6 @@ using Exiled.CustomItems.API.Features;
 using System;
 using UncomplicatedCustomRoles.Extensions;
 using MEC;
-using Exiled.API.Interfaces;
-using InventorySystem.Items;
-using System.Reflection;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -83,13 +80,7 @@ namespace UncomplicatedCustomRoles.Manager
         {
             Player.CustomInfo = string.Empty;
             Player.Scale = new(1, 1, 1);
-            if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
-            {
-                Plugin.PermanentEffectStatus.Remove(Player.Id);
-                int Role = Plugin.PlayerRegistry[Player.Id];
-                Plugin.RolesCount[Role].Remove(Player.Id);
-                Plugin.PlayerRegistry.Remove(Player.Id);
-            }
+            LimitedClearCustomTypes(Player);
         }
 
         public static void LimitedClearCustomTypes(Player Player)
@@ -97,8 +88,7 @@ namespace UncomplicatedCustomRoles.Manager
             if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
             {
                 Plugin.PermanentEffectStatus.Remove(Player.Id);
-                int Role = Plugin.PlayerRegistry[Player.Id];
-                Plugin.RolesCount[Role].Remove(Player.Id);
+                Plugin.RolesCount[Plugin.PlayerRegistry[Player.Id]].Remove(Player.Id);
                 Plugin.PlayerRegistry.Remove(Player.Id);
             }
         }
@@ -143,10 +133,10 @@ namespace UncomplicatedCustomRoles.Manager
                 switch (Role.Spawn)
                 {
                     case SpawnLocationType.ZoneSpawn:
-                        Player.Position = Room.List.Where(room => room.Zone == Role.SpawnZones.RandomItem()).GetRandomValue().Position.AddY(1.5f);
+                        Player.Position = Room.List.Where(room => room.Zone == Role.SpawnZones.RandomItem() && room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
                         break;
                     case SpawnLocationType.CompleteRandomSpawn:
-                        Player.Position = Room.List.GetRandomValue().Position.AddY(1.5f);
+                        Player.Position = Room.List.Where(room => room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
                         break;
                     case SpawnLocationType.RoomsSpawn:
                         Player.Position = Room.Get(Role.SpawnRooms.RandomItem()).Position.AddY(1.5f);
@@ -211,8 +201,8 @@ namespace UncomplicatedCustomRoles.Manager
                 Player.CustomInfo += $"\n{Role.CustomInfo}";
             }
 
-            Player.Health = Role.Health;
             Player.MaxHealth = Role.MaxHealth;
+            Player.Health = Role.Health;
             Player.ArtificialHealth = Role.Ahp;
 
             Plugin.PermanentEffectStatus.Add(Player.Id, new());
@@ -311,17 +301,7 @@ namespace UncomplicatedCustomRoles.Manager
                         if (Plugin.CustomRoles.ContainsKey(Id))
                         {
                             Log.Debug($"Seems that the role {Id} really exists, let's gooo!");
-                            if (!player.IsScp)
-                            {
-                                Timing.CallDelayed(2f, () =>
-                                {
-                                    Timing.RunCoroutine(Events.EventHandler.DoSpawnPlayer(player, Id, true));
-                                });
-                            }
-                            else
-                            {
-                                Timing.RunCoroutine(Events.EventHandler.DoSpawnPlayer(player, Id, true));
-                            }
+                            SummonCustomSubclass(player, Id, true);
                         }
                     }
                 }
