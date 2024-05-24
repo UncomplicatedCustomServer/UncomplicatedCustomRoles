@@ -10,6 +10,7 @@ using Exiled.CustomItems.API.Features;
 using System;
 using UncomplicatedCustomRoles.Extensions;
 using MEC;
+using CustomPlayerEffects;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -87,6 +88,7 @@ namespace UncomplicatedCustomRoles.Manager
         {
             if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
             {
+                Player.IsUsingStamina = true;
                 Plugin.PermanentEffectStatus.Remove(Player.Id);
                 Plugin.RolesCount[Plugin.PlayerRegistry[Player.Id]].Remove(Player.Id);
                 Plugin.PlayerRegistry.Remove(Player.Id);
@@ -187,6 +189,8 @@ namespace UncomplicatedCustomRoles.Manager
                     }
                 }
             }
+
+            Player.IsUsingStamina = !Role.InfiniteStamina;
             
             if (Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
             {
