@@ -4,14 +4,12 @@ using Exiled.API.Features;
 using PlayerRoles;
 using System.Collections.Generic;
 using System.Linq;
-using UncomplicatedCustomRoles.Structures;
+using UncomplicatedCustomRoles.Interfaces;
 using UnityEngine;
-using UncomplicatedCustomRoles.Elements;
 using Exiled.CustomItems.API.Features;
-using Exiled.Events.EventArgs.Player;
-using Exiled.API.Features.Items;
-using InventorySystem.Items.Firearms.Attachments;
 using System;
+using UncomplicatedCustomRoles.Extensions;
+using MEC;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -22,74 +20,31 @@ namespace UncomplicatedCustomRoles.Manager
             if (!SubclassValidator(Role))
             {
                 Log.Warn($"Failed to register the UCR role with the ID {Role.Id} due to the validator check!");
+
                 return;
             }
+
             if (!Plugin.CustomRoles.ContainsKey(Role.Id))
             {
                 Plugin.CustomRoles.Add(Role.Id, Role);
+
                 if (Plugin.Instance.Config.EnableBasicLogs)
                 {
                     Log.Info($"Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
                 }
+
                 return;
             }
+
             Log.Warn($"Failed to register the UCR role with the ID {Role.Id}: The problem can be the following: ERR_ID_ALREADY_HERE!\nTrying to assign a new one...");
+
             int NewId = GetFirstFreeID(Role.Id);
+
             Log.Info($"Custom Role {Role.Name} with the old Id {Role.Id} will be registered with the following Id: {NewId}");
+
             Role.Id = NewId;
+
             RegisterCustomSubclass(Role);
-        }
-
-        public static void RegisterCustomFirearm(ICustomFirearm Firearm)
-        {
-            if (!Plugin.Firearms.ContainsKey(Firearm.Id))
-            {
-                Plugin.Firearms.Add(Firearm.Id, Firearm);
-            } 
-            else
-            {
-                Log.Warn($"Falied to register the UCR Custom Firearm with the Id {Firearm.Id} ({Firearm.Item}) -> There's another role with this Id!");
-            }
-        }
-
-        public static ICustomRole RenderExportMethodToInternal(IExternalCustomRole Role)
-        {
-            return new CustomRole()
-            {
-                Name = Role.Name,
-                Id = Role.Id,
-                CustomInfo = Role.CustomInfo,
-                MaxHealth = Role.MaxHealth,
-                MaxPlayers = Role.MaxPlayers,
-                MinPlayers = Role.MinPlayers,
-                Role = Role.Role,
-                RoleAppearance = Role.RoleAppearance,
-                CanReplaceRoles = Role.CanReplaceRoles,
-                Ahp = Role.Ahp,
-                HumeShield = Role.HumeShield,
-                Effects = Role.Effects,
-                CanEscape = Role.CanEscape,
-                Scale = VectorConvertor(Role.Scale),
-                SpawnBroadcast = Role.SpawnBroadcast,
-                SpawnBroadcastDuration = Role.SpawnBroadcastDuration,
-                SpawnHint = Role.SpawnHint,
-                SpawnHintDuration = Role.SpawnHintDuration,
-                Inventory = Role.Inventory,
-                CustomItemsInventory = Role.CustomItemsInventory,
-                Ammo = Role.Ammo,
-                Spawn = Role.Spawn,
-                SpawnRooms = Role.SpawnRooms,
-                SpawnZones = Role.SpawnZones,
-                SpawnPosition = VectorConvertor(Role.SpawnPosition),
-                SpawnOffset = VectorConvertor(Role.SpawnOffset),
-                RequiredPermission = Role.RequiredPermission,
-                IgnoreSpawnSystem = Role.IgnoreSpawnSystem,
-                Health = Role.Health,
-                SpawnChance = Role.SpawnChance,
-                DamageMultiplier = Role.DamageMultiplier,
-                RoleAfterEscape = Role.RoleAfterEscape,
-                InfiniteStamina = Role.InfiniteStamina
-            };
         }
 
         public static bool SubclassValidator(ICustomRole Role)
@@ -125,13 +80,7 @@ namespace UncomplicatedCustomRoles.Manager
         {
             Player.CustomInfo = string.Empty;
             Player.Scale = new(1, 1, 1);
-            if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
-            {
-                Plugin.PermanentEffectStatus.Remove(Player.Id);
-                int Role = Plugin.PlayerRegistry[Player.Id];
-                Plugin.RolesCount[Role].Remove(Player.Id);
-                Plugin.PlayerRegistry.Remove(Player.Id);
-            }
+            LimitedClearCustomTypes(Player);
         }
 
         public static void LimitedClearCustomTypes(Player Player)
@@ -139,37 +88,9 @@ namespace UncomplicatedCustomRoles.Manager
             if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
             {
                 Plugin.PermanentEffectStatus.Remove(Player.Id);
-                int Role = Plugin.PlayerRegistry[Player.Id];
-                Plugin.RolesCount[Role].Remove(Player.Id);
+                Plugin.RolesCount[Plugin.PlayerRegistry[Player.Id]].Remove(Player.Id);
                 Plugin.PlayerRegistry.Remove(Player.Id);
             }
-        }
-
-        public static Firearm CreateFirearm(ICustomFirearm Firearm)
-        {
-            Firearm Item = Exiled.API.Features.Items.Firearm.Create(Firearm.Item);
-
-            foreach (AttachmentName Attachment in Firearm.Attachments)
-            {
-                Item.AddAttachment(Attachment);
-            }
-
-            if (Firearm.Scale != null && Firearm.Scale != new Vector3())
-            {
-                Item.Scale = Firearm.Scale;
-            }
-
-            if (Firearm.MaxAmmo is not null && Firearm.MaxAmmo > 0)
-            {
-                Item.MaxAmmo = (byte)Firearm.MaxAmmo;
-            }
-
-            if (Firearm.FireRate is not null && Firearm.FireRate > 0)
-            {
-                Item.FireRate = (float)Firearm.FireRate;
-            }
-
-            return Item;
         }
 
         public static void SummonCustomSubclass(Player Player, int Id, bool DoBypassRoleOverwrite = true)
@@ -212,13 +133,13 @@ namespace UncomplicatedCustomRoles.Manager
                 switch (Role.Spawn)
                 {
                     case SpawnLocationType.ZoneSpawn:
-                        Player.Position = Factory.AdjustRoomPosition(Factory.RoomsInZone(Role.SpawnZones.RandomItem()).RandomItem());
+                        Player.Position = Room.List.Where(room => room.Zone == Role.SpawnZones.RandomItem() && room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
                         break;
                     case SpawnLocationType.CompleteRandomSpawn:
-                        Player.Position = Factory.AdjustRoomPosition(Room.List.ToList().RandomItem());
+                        Player.Position = Room.List.Where(room => room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
                         break;
                     case SpawnLocationType.RoomsSpawn:
-                        Player.Position = Factory.AdjustRoomPosition(Room.Get(Role.SpawnRooms.RandomItem()));
+                        Player.Position = Room.Get(Role.SpawnRooms.RandomItem()).Position.AddY(1.5f);
                         if (Role.SpawnOffset != new Vector3())
                         {
                             Player.Position += Role.SpawnOffset;
@@ -238,33 +159,30 @@ namespace UncomplicatedCustomRoles.Manager
                 {
                     if (!Player.IsInventoryFull)
                     {
-                        // If the Id is the Id of a registered custom weapon we'll give it, otherwise the custom item will be given
-                        if (Plugin.Firearms.ContainsKey((int)ItemId))
+                        try
                         {
-                            CreateFirearm(Plugin.Firearms[(int)ItemId]).Give(Player);
-                        } 
-                        else if (Type.GetType("UncomplicatedCustomItems") is not null && UncomplicatedCustomItems.API.Utilities.TryGetCustomItem(ItemId, out UncomplicatedCustomItems.Interfaces.ICustomItem ItemBase))
-                        {
-                            UncomplicatedCustomItems.API.Features.SummonedCustomItem.Summon(ItemBase, Player);
-                        }
-                        else
-                        {
-                            try
+                            if (Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems") is not null)
                             {
-                                if (UncomplicatedCustomItems.API.Utilities.IsCustomItem(ItemId))
+                                Type AssemblyType = Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems").Assembly.GetType("UncomplicatedCustomItems.API.Utilities");
+                                if ((bool)AssemblyType?.GetMethod("IsCustomItem")?.Invoke(null, new object[] { ItemId }))
                                 {
-                                    UncomplicatedCustomItems.API.Features.SummonedCustomItem.Summon(UncomplicatedCustomItems.API.Utilities.GetCustomItem(ItemId), Player);
-                                } 
-                                else
-                                {
-                                    CustomItem.Get(ItemId)?.Give(Player);
+                                    object CustomItem = AssemblyType?.GetMethod("GetCustomItem")?.Invoke(null, new object[] { ItemId });
+
+                                    Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems").Assembly.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem")?.GetMethods().Where(method => method.Name == "Summon" && method.GetParameters().Length == 2).FirstOrDefault()?.Invoke(null, new object[]
+                                    {
+                                        CustomItem,
+                                        Player
+                                    });
                                 }
-                            } 
-                            catch (Exception ex)
+                            }
+                            else
                             {
-                                Log.Debug($"Exception handled by CSHARP: Plugin UncomplicatedCustomItems not found!\nError: {ex.Message}");
                                 CustomItem.Get(ItemId)?.Give(Player);
                             }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Debug($"Error while giving a custom item.\nError: {ex.Message}");
                         }
                     }
                 }
@@ -283,8 +201,8 @@ namespace UncomplicatedCustomRoles.Manager
                 Player.CustomInfo += $"\n{Role.CustomInfo}";
             }
 
-            Player.Health = Role.Health;
             Player.MaxHealth = Role.MaxHealth;
+            Player.Health = Role.Health;
             Player.ArtificialHealth = Role.Ahp;
 
             Plugin.PermanentEffectStatus.Add(Player.Id, new());
@@ -332,27 +250,6 @@ namespace UncomplicatedCustomRoles.Manager
                 Log.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
                 Player.ChangeAppearance(Role.RoleAppearance, true);
             }
-
-            // Call the event for the spawn of the player
-            API.Features.Events.__CallEvent(UCREvents.Spawned, new SpawnedEventArgs(Player, OldRole));
-        }
-
-        public static Vector3 VectorConvertor(string Vector)
-        {
-            if (Vector.Length - Vector.Replace(",", "").Length != 2)
-            {
-                Log.Warn($"Error while parsing StringVector '{Vector}', found {Vector.Length - Vector.Replace(",", "").Length} commas instead of 2!\nSyntax: x, y, z");
-                return new();
-            }
-            string[] Data = Vector.Replace(" ", "").Split(',');
-            if (Data.Length != 3) 
-            {
-                Log.Warn($"Error while parsing StringVector '{Vector}', found {Data.Length} elements instead of 3!\nSyntax: x, y, z");
-                return new();
-            }
-            Vector3 Vector3 = new(float.Parse(Data[0].Replace(".", ",")), float.Parse(Data[1].Replace(".", ",")), float.Parse(Data[2].Replace(".", ",")));
-            Log.Debug($"Parsed StringVector '{Vector}' with success -- Results: {Vector3}!");
-            return Vector3;
         }
         
         public static int GetFirstFreeID(int Id)
@@ -380,6 +277,36 @@ namespace UncomplicatedCustomRoles.Manager
                 Player.EnableEffect(Effect.EffectType, 15f);
                 Player.ChangeEffectIntensity(Effect.EffectType, Effect.Intensity, 15f);
             }
+        }
+
+        public static RoleTypeId? ParseEscapeRole(string roleAfterEscape, Player player)
+        {
+            if (roleAfterEscape is not null && roleAfterEscape != string.Empty)
+            {
+                // Syntax: IR (Internal Role) or CR (Custom Role) : the ID.   For example IR:0 will be SCP-173 (also IR:Scp173) and CR:1 will be the Custom Role with the Id = 1
+                string[] Action = roleAfterEscape.Split(':');
+                if (Action[0].ToUpper() == "IR")
+                {
+                    if (Enum.TryParse(Action[1], out RoleTypeId Out))
+                    {
+                        return Out;
+                    }
+                }
+                else if (Action[0].ToUpper() == "CR")
+                {
+                    Log.Debug($"Start parsing the action for a custom role. Full: {roleAfterEscape}");
+                    if (int.TryParse(Action[1], out int Id))
+                    {
+                        Log.Debug($"Found a valid Id (i guess so): {Id}");
+                        if (Plugin.CustomRoles.ContainsKey(Id))
+                        {
+                            Log.Debug($"Seems that the role {Id} really exists, let's gooo!");
+                            SummonCustomSubclass(player, Id, true);
+                        }
+                    }
+                }
+            }
+            return null;
         }
     }  
 }

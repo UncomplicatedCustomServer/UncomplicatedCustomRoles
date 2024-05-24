@@ -1,42 +1,30 @@
 ﻿using CommandSystem;
 using Exiled.API.Features;
-using Exiled.Permissions.Extensions;
-using System;
+using System.Collections.Generic;
+using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
-using UncomplicatedCustomRoles.Structures;
 
-namespace UncomplicatedCustomRoles.Commands.UCRSpawn
+namespace UncomplicatedCustomRoles.Commands
 {
-    [CommandHandler(typeof(RemoteAdminCommandHandler))]
-    public class UCRRole : ParentCommand
+    public class UCRRole : IUCRCommand
     {
-        public UCRRole() => LoadGeneratedCommands();
+        public string Name { get; } = "role";
 
-        public override string Command { get; } = "ucrrole";
+        public string Description { get; } = "List all players with a custom role or see a player's custom role";
 
-        public override string[] Aliases { get; } = new string[] { };
+        public string RequiredPermission { get; } = "ucr.role";
 
-        public override string Description { get; } = "See if one or more player are a custom role";
-
-        public override void LoadGeneratedCommands() { }
-
-        protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
+        public bool Executor(List<string> arguments, ICommandSender sender, out string response)
         {
-            if (!((CommandSender)sender).CheckPermission("ucr.role"))
-            {
-                response = "You do not have permission to use this command!";
-                return false;
-            }
-
             if (arguments.Count > 1)
             {
-                response = "Usage: ucrrole  -  ucrrole (Player ID or Name)";
+                response = "Usage: ucr role (Player ID or Name)";
                 return false;
             }
 
             if (arguments.Count == 1)
             {
-                Player Player = Player.Get(arguments.At(0));
+                Player Player = Player.Get(arguments[0]);
                 int? RoleId = SpawnManager.TryGetCustomRole(Player);
                 if (RoleId is not null)
                 {
@@ -49,7 +37,7 @@ namespace UncomplicatedCustomRoles.Commands.UCRSpawn
             }
             else
             {
-                response = "Custom roles of every player:\n";
+                response = "Custom roles of every player:";
                 foreach (Player Player in Player.List)
                 {
                     int? RoleId = SpawnManager.TryGetCustomRole(Player);

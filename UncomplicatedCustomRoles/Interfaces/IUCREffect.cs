@@ -1,6 +1,6 @@
 ﻿using Exiled.API.Enums;
-
-namespace UncomplicatedCustomRoles.Structures
+    
+namespace UncomplicatedCustomRoles.Interfaces
 {
     public interface IUCREffect
     {

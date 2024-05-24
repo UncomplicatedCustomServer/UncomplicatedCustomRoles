@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.Manager;
-using UncomplicatedCustomRoles.Structures;
+using UncomplicatedCustomRoles.Interfaces;
 using MEC;
 using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
@@ -172,6 +172,7 @@ namespace UncomplicatedCustomRoles.Events
         public void OnEscaping(EscapingEventArgs Escaping)
         {
             Log.Debug($"Player {Escaping.Player.Nickname} triggered the escaping event as {Escaping.Player.Role.Name}");
+
             if (Plugin.PlayerRegistry.ContainsKey(Escaping.Player.Id))
             {
                 Log.Debug($"Player IS a custom role: {Plugin.PlayerRegistry[Escaping.Player.Id]}");
@@ -185,56 +186,18 @@ namespace UncomplicatedCustomRoles.Events
                 }
 
                 // Try to set the role
-                if (Role.CanEscape && Role.RoleAfterEscape is not null && Role.RoleAfterEscape != string.Empty)
+                RoleTypeId? NewRole = SpawnManager.ParseEscapeRole(Role.RoleAfterEscape, Escaping.Player);
+
+                if (NewRole is not null)
                 {
-                    // Syntax: IR (Internal Role) or CR (Custom Role) : the ID.   For example IR:0 will be SCP-173 (also IR:Scp173) and CR:1 will be the Custom Role with the Id = 1
-                    string[] Action = Role.RoleAfterEscape.Split(':');
-                    if (Action[0].ToUpper() == "IR")
-                    {
-                        if (Enum.TryParse(Action[1], out RoleTypeId Out))
-                        {
-                            Escaping.NewRole = Out;
-                        } 
-                        else
-                        {
-                            Log.Warn($"Custom Role config parse ERROR: The role {Role.Id} ({Role.Name}) have an invalid role_after_escape, the role {Action[1]} (INTERNAL) was NOT FOUND!");
-                        }
-                    }
-                    else if (Action[0].ToUpper() == "CR")
-                    {
-                        Log.Debug($"Start parsing the action for a custom role. Full: {Role.RoleAfterEscape}");
-                        if (int.TryParse(Action[1], out int Id))
-                        {
-                            Log.Debug($"Found a valid Id (i guess so): {Id}");
-                            if (Plugin.CustomRoles.ContainsKey(Id))
-                            {
-                                Log.Debug($"Seems that the role {Id} really exists, let's gooo!");
-                                if (!Escaping.Player.IsScp)
-                                {
-                                    Timing.CallDelayed(2f, () =>
-                                    {
-                                        Timing.RunCoroutine(DoSpawnPlayer(Escaping.Player, Id, true));
-                                    });
-                                } else
-                                {
-                                    Timing.RunCoroutine(DoSpawnPlayer(Escaping.Player, Id, true));
-                                }
-                                Escaping.IsAllowed = true;
-                            } else
-                            {
-                                Log.Warn($"Custom Role config parse ERROR: The role {Role.Id} ({Role.Name}) have an invalid role_after_escape, the role {Action[1]} (CUSTOM) was NOT FOUND!");
-                            }
-                        } 
-                        else
-                        {
-                            Log.Warn($"Custom Role config parse ERROR: The role {Role.Id} ({Role.Name}) have an invalid role_after_escape, the Id {Action[1]} seems to not be an int!");
-                        }
-                    }
+                    Escaping.IsAllowed = true;
+                    Escaping.NewRole = (RoleTypeId)NewRole;
+                }
+                else
+                {
+                    Escaping.IsAllowed = false;
                 }
             }
-
-            // If we are still here let's send the event
-            API.Features.Events.__CallEvent(UCREvents.Escaping, Escaping);
         }
 
         public void OnRespawningWave(RespawningTeamEventArgs Respawn)
@@ -275,17 +238,10 @@ namespace UncomplicatedCustomRoles.Events
                     Player.Stamina = 1;
                 }
 
-                if (API.Features.Manager.Actions.Count() > 0)
-                {
-                    foreach (Action Action in API.Features.Manager.Actions.Values)
-                    {
-                        Action();
-                    }
-                }
-
                 // Here we can see and trigger role for SCPs escape event
                 foreach (Player Player in Player.List.Where(player => player.IsScp && Vector3.Distance(new(123.85f, 988.8f, 18.9f), player.Position) < 2.5f)) 
                 {
+                    Log.Debug("Calling respawn event for plauer -> position");
                     // Let's make this SCP escape
                     OnEscaping(new(Player, RoleTypeId.ChaosConscript, EscapeScenario.None));
                 }
@@ -302,7 +258,29 @@ namespace UncomplicatedCustomRoles.Events
 
         public static void DoEvaluateSpawnForPlayer(Player Player)
         {
-            Dictionary<RoleTypeId, List<ICustomRole>> RolePercentage = Factory.RoleIstance();
+            Dictionary<RoleTypeId, List<ICustomRole>> RolePercentage = new()
+            {
+                { RoleTypeId.ClassD, new() },
+                { RoleTypeId.Scientist, new() },
+                { RoleTypeId.NtfPrivate, new() },
+                { RoleTypeId.NtfSergeant, new() },
+                { RoleTypeId.NtfCaptain, new() },
+                { RoleTypeId.NtfSpecialist, new() },
+                { RoleTypeId.ChaosConscript, new() },
+                { RoleTypeId.ChaosMarauder, new() },
+                { RoleTypeId.ChaosRepressor, new() },
+                { RoleTypeId.ChaosRifleman, new() },
+                { RoleTypeId.Tutorial, new() },
+                { RoleTypeId.Scp049, new() },
+                { RoleTypeId.Scp0492, new() },
+                { RoleTypeId.Scp079, new() },
+                { RoleTypeId.Scp173, new() },
+                { RoleTypeId.Scp939, new() },
+                { RoleTypeId.Scp096, new() },
+                { RoleTypeId.Scp106, new() },
+                { RoleTypeId.Scp3114, new() },
+                { RoleTypeId.FacilityGuard, new() }
+            };
 
             foreach (KeyValuePair<int, ICustomRole> Role in Plugin.CustomRoles)
             {
