@@ -7,13 +7,10 @@ using System.Linq;
 using UncomplicatedCustomRoles.Interfaces;
 using UnityEngine;
 using Exiled.CustomItems.API.Features;
-using Exiled.Events.EventArgs.Player;
-using Exiled.API.Features.Items;
-using InventorySystem.Items.Firearms.Attachments;
 using System;
 using UncomplicatedCustomRoles.Extensions;
-using Exiled.API.Features.Roles;
 using MEC;
+using CustomPlayerEffects;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -84,22 +81,16 @@ namespace UncomplicatedCustomRoles.Manager
         {
             Player.CustomInfo = string.Empty;
             Player.Scale = new(1, 1, 1);
-            if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
-            {
-                Plugin.PermanentEffectStatus.Remove(Player.Id);
-                int Role = Plugin.PlayerRegistry[Player.Id];
-                Plugin.RolesCount[Role].Remove(Player.Id);
-                Plugin.PlayerRegistry.Remove(Player.Id);
-            }
+            LimitedClearCustomTypes(Player);
         }
 
         public static void LimitedClearCustomTypes(Player Player)
         {
             if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
             {
+                Player.IsUsingStamina = true;
                 Plugin.PermanentEffectStatus.Remove(Player.Id);
-                int Role = Plugin.PlayerRegistry[Player.Id];
-                Plugin.RolesCount[Role].Remove(Player.Id);
+                Plugin.RolesCount[Plugin.PlayerRegistry[Player.Id]].Remove(Player.Id);
                 Plugin.PlayerRegistry.Remove(Player.Id);
             }
         }
@@ -144,10 +135,10 @@ namespace UncomplicatedCustomRoles.Manager
                 switch (Role.Spawn)
                 {
                     case SpawnLocationType.ZoneSpawn:
-                        Player.Position = Room.List.Where(room => room.Zone == Role.SpawnZones.RandomItem()).GetRandomValue().Position.AddY(1.5f);
+                        Player.Position = Room.List.Where(room => room.Zone == Role.SpawnZones.RandomItem() && room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
                         break;
                     case SpawnLocationType.CompleteRandomSpawn:
-                        Player.Position = Room.List.GetRandomValue().Position.AddY(1.5f);
+                        Player.Position = Room.List.Where(room => room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
                         break;
                     case SpawnLocationType.RoomsSpawn:
                         Player.Position = Room.Get(Role.SpawnRooms.RandomItem()).Position.AddY(1.5f);
@@ -172,23 +163,34 @@ namespace UncomplicatedCustomRoles.Manager
                     {
                         try
                         {
-                            if (UncomplicatedCustomItems.API.Utilities.IsCustomItem(ItemId))
+                            if (Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems") is not null)
                             {
-                                UncomplicatedCustomItems.API.Features.SummonedCustomItem.Summon(UncomplicatedCustomItems.API.Utilities.GetCustomItem(ItemId), Player);
-                            } 
+                                Type AssemblyType = Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems").Assembly.GetType("UncomplicatedCustomItems.API.Utilities");
+                                if ((bool)AssemblyType?.GetMethod("IsCustomItem")?.Invoke(null, new object[] { ItemId }))
+                                {
+                                    object CustomItem = AssemblyType?.GetMethod("GetCustomItem")?.Invoke(null, new object[] { ItemId });
+
+                                    Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems").Assembly.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem")?.GetMethods().Where(method => method.Name == "Summon" && method.GetParameters().Length == 2).FirstOrDefault()?.Invoke(null, new object[]
+                                    {
+                                        CustomItem,
+                                        Player
+                                    });
+                                }
+                            }
                             else
                             {
                                 CustomItem.Get(ItemId)?.Give(Player);
                             }
-                        } 
+                        }
                         catch (Exception ex)
                         {
-                            Log.Debug($"Exception handled by CSHARP: Plugin UncomplicatedCustomItems not found!\nError: {ex.Message}");
-                            CustomItem.Get(ItemId)?.Give(Player);
+                            Log.Debug($"Error while giving a custom item.\nError: {ex.Message}");
                         }
                     }
                 }
             }
+
+            Player.IsUsingStamina = !Role.InfiniteStamina;
             
             if (Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
             {
@@ -203,8 +205,8 @@ namespace UncomplicatedCustomRoles.Manager
                 Player.CustomInfo += $"\n{Role.CustomInfo}";
             }
 
-            Player.Health = Role.Health;
             Player.MaxHealth = Role.MaxHealth;
+            Player.Health = Role.Health;
             Player.ArtificialHealth = Role.Ahp;
 
             Plugin.PermanentEffectStatus.Add(Player.Id, new());
@@ -303,17 +305,7 @@ namespace UncomplicatedCustomRoles.Manager
                         if (Plugin.CustomRoles.ContainsKey(Id))
                         {
                             Log.Debug($"Seems that the role {Id} really exists, let's gooo!");
-                            if (!player.IsScp)
-                            {
-                                Timing.CallDelayed(2f, () =>
-                                {
-                                    Timing.RunCoroutine(Events.EventHandler.DoSpawnPlayer(player, Id, true));
-                                });
-                            }
-                            else
-                            {
-                                Timing.RunCoroutine(Events.EventHandler.DoSpawnPlayer(player, Id, true));
-                            }
+                            SummonCustomSubclass(player, Id, true);
                         }
                     }
                 }

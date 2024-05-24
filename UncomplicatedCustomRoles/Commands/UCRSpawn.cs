@@ -18,7 +18,7 @@ namespace UncomplicatedCustomRoles.Commands
 
         public bool Executor(List<string> arguments, ICommandSender sender, out string response)
         {
-            if (arguments.Count != 2)
+            if (arguments.Count < 2)
             {
                 response = "Usage: ucr spawn <Player Id> <Role Id>";
                 return false;

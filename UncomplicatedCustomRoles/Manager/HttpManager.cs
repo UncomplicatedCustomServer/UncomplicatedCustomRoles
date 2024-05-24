@@ -3,13 +3,9 @@ using MEC;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Unity.Collections.LowLevel.Unsafe;
-using UnityEngine.UIElements;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -97,7 +93,7 @@ namespace UncomplicatedCustomRoles.Manager
 
         public HttpStatusCode AddServerOwner(string discordId)
         {
-            return HttpRequest($"{Endpoint}/owners/add?discorid={discordId}").StatusCode;
+            return HttpRequest($"{Endpoint}/owners/add?discordid={discordId}").StatusCode;
         }
 
         public Version LatestVersion()

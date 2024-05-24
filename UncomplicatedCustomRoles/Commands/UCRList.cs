@@ -17,7 +17,7 @@ namespace UncomplicatedCustomRoles.Commands
             response = "List of all registered CustomRoles:";
             foreach (KeyValuePair<int, ICustomRole> Role in Plugin.CustomRoles)
             {
-                response += $"\n{Role.Key} -> {Role.Value.Name} ({Role.Value.Role})";
+                response += $"\n[{Role.Key}] '{Role.Value.Name}' ({Role.Value.Role})";
             }
 
             return true;

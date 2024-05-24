@@ -1,5 +1,4 @@
 ﻿using CommandSystem;
-using Exiled.API.Features;
 using System;
 using System.Collections.Generic;
 using Exiled.Permissions.Extensions;
@@ -34,7 +33,7 @@ namespace UncomplicatedCustomRoles.Commands
             if (arguments.Count() == 0)
             {
                 // Help page
-                response = "Available commands:";
+                response = $"\n>> UncomplicatedCustomRoles v{Plugin.Instance.Version} <<\nby FoxWorn3365 & Dr.Agenda\n\nAvailable commands:";
 
                 foreach (IUCRCommand Command in RegisteredCommands)
                 {

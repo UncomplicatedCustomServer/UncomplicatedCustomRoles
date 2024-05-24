@@ -37,7 +37,7 @@ namespace UncomplicatedCustomRoles.Commands
             }
             else
             {
-                response = "Custom roles of every player:\n";
+                response = "Custom roles of every player:";
                 foreach (Player Player in Player.List)
                 {
                     int? RoleId = SpawnManager.TryGetCustomRole(Player);
