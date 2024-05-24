@@ -232,12 +232,6 @@ namespace UncomplicatedCustomRoles.Events
                     SpawnManager.SetAllActiveEffect(Player);
                 }
 
-                // Also do the infinite stamina job
-                foreach (Player Player in Player.List.Where(player => Plugin.PlayerRegistry.ContainsKey(player.Id) && Plugin.CustomRoles[Plugin.PlayerRegistry[player.Id]].InfiniteStamina == true))
-                {
-                    Player.Stamina = 1;
-                }
-
                 // Here we can see and trigger role for SCPs escape event
                 foreach (Player Player in Player.List.Where(player => player.IsScp && Vector3.Distance(new(123.85f, 988.8f, 18.9f), player.Position) < 2.5f)) 
                 {
