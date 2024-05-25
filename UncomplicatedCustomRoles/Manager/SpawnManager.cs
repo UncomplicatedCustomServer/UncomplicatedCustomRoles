@@ -118,8 +118,6 @@ namespace UncomplicatedCustomRoles.Manager
             {
                 SpawnFlag = RoleSpawnFlags.UseSpawnpoint;
             }
-            // It's all OK so we can start to elaborate the spawn
-            PlayerRoleBase OldRole = Player.Role.Base; // That's for the event system, don't worry!;
 
             Player.Role.Set(Role.Role, SpawnFlag);
 
