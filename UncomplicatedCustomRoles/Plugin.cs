@@ -83,7 +83,7 @@ namespace UncomplicatedCustomRoles
                 Log.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
             }
 
-            if (HttpManager.IsLatestVersion())
+            if (!HttpManager.IsLatestVersion())
             {
                 Log.Warn($"You are NOT using the latest version of UncomplicatedCustomRoles!\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
             }
