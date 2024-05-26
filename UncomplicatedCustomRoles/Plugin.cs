@@ -7,7 +7,6 @@ using Handler = UncomplicatedCustomRoles.Events.EventHandler;
 using PlayerHandler = Exiled.Events.Handlers.Player;
 using ServerHandler = Exiled.Events.Handlers.Server;
 using Scp049Handler = Exiled.Events.Handlers.Scp049;
-using UncomplicatedCustomRoles.Events;
 using System.IO;
 
 namespace UncomplicatedCustomRoles
@@ -20,7 +19,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(2, 0, 0);
+        public override Version Version { get; } = new(2, 0, 0, 2);
 
         public override Version RequiredExiledVersion { get; } = new(8, 8, 1);
 
