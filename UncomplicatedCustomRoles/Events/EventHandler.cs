@@ -1,5 +1,4 @@
 ﻿using Exiled.API.Features;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.Manager;
@@ -180,8 +179,15 @@ namespace UncomplicatedCustomRoles.Events
 
                 if (!Role.CanEscape)
                 {
-                    Log.Debug($"Player with the role {Role.Id} ({Role.Name} can't escape, so nuh uh!");
+                    Log.Debug($"Player with the role {Role.Id} ({Role.Name}) can't escape, so nuh uh!");
                     Escaping.IsAllowed = false;
+                    return;
+                }
+
+                if (Role.CanEscape && (Role.RoleAfterEscape is null || Role.RoleAfterEscape.Length < 2))
+                {
+                    Log.Debug($"Player with the role {Role.Id} ({Role.Name}) evaluated for a natural respawn!");
+                    Escaping.IsAllowed = true;
                     return;
                 }
 

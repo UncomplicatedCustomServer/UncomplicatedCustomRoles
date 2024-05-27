@@ -16,7 +16,7 @@ namespace UncomplicatedCustomRoles.Manager
 {
     public class SpawnManager
     {
-        public static void RegisterCustomSubclass(ICustomRole Role)
+        public static void RegisterCustomSubclass(ICustomRole Role, bool notLoadIfLoaded = false)
         {
             if (!SubclassValidator(Role))
             {
@@ -34,6 +34,12 @@ namespace UncomplicatedCustomRoles.Manager
                     Log.Info($"Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
                 }
 
+                return;
+            }
+
+            if (notLoadIfLoaded)
+            {
+                Log.Debug($"Can't load role {Role.Id} {Role.Name} due to plugin settings!\nPlease reach UCS support for UCR!");
                 return;
             }
 

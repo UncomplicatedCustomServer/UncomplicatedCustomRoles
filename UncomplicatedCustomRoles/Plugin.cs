@@ -63,9 +63,12 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Hurting += Handler.OnHurting;
             Scp049Handler.StartingRecall += Handler.OnScp049StartReviving;
 
-            foreach (ICustomRole CustomRole in Config.CustomRoles)
+            if (Config.CustomRoles is not null && Config.CustomRoles.Count > 0)
             {
-                SpawnManager.RegisterCustomSubclass(CustomRole);
+                foreach (ICustomRole CustomRole in Config.CustomRoles)
+                {
+                    SpawnManager.RegisterCustomSubclass(CustomRole, true);
+                }
             }
 
             if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomRoles", ".nohttp")))
