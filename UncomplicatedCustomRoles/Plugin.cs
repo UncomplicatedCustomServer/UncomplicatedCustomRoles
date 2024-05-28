@@ -9,6 +9,11 @@ using ServerHandler = Exiled.Events.Handlers.Server;
 using Scp049Handler = Exiled.Events.Handlers.Scp049;
 using UncomplicatedCustomRoles.Events;
 using System.IO;
+using Exiled.API.Interfaces;
+using Exiled.Loader;
+using HarmonyLib;
+using UncomplicatedCustomRolesRespawnTimer;
+using System.Linq;
 
 namespace UncomplicatedCustomRoles
 {
@@ -27,6 +32,8 @@ namespace UncomplicatedCustomRoles
         internal static Plugin Instance;
 
         internal Handler Handler;
+
+        internal Harmony Harmony;
 
         internal static Dictionary<int, ICustomRole> CustomRoles;
 
@@ -51,7 +58,7 @@ namespace UncomplicatedCustomRoles
 
             Handler = new();
             CustomRoles = new();
-
+            Harmony = new Harmony("UncomplicatedCustomRoles");
             FileConfigs = new();
 
             ServerHandler.RespawningTeam += Handler.OnRespawningWave;
@@ -63,6 +70,8 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.UsedItem += Handler.OnItemUsed;
             PlayerHandler.Hurting += Handler.OnHurting;
             Scp049Handler.StartingRecall += Handler.OnScp049StartReviving;
+
+            TryPatching();
 
             foreach (ICustomRole CustomRole in Config.CustomRoles)
             {
@@ -99,6 +108,7 @@ namespace UncomplicatedCustomRoles
         public override void OnDisabled()
         {
             Instance = null;
+            Harmony.UnpatchAll(Harmony.Id);
 
             ServerHandler.RespawningTeam -= Handler.OnRespawningWave;
             ServerHandler.RoundStarted -= Handler.OnRoundStarted;
@@ -117,5 +127,29 @@ namespace UncomplicatedCustomRoles
 
             base.OnDisabled();
         }
+
+        private void TryPatching()
+        {
+            if (!Config.RespawnTimerCompatiblity)
+                return;
+
+            if (Loader.Plugins.Any(plugin => plugin.Name == "RespawnTimer"))
+            {
+                try
+                {
+                    Harmony.CreateClassProcessor(SchrodingerType()).Patch();
+                }
+                catch (Exception e)
+                {
+
+                    Log.Error("This is not a valid RespawnTimer plugin! "
+                        + e.ToString()
+                        + "\n\nDisable this log if this normal inside the config... respawn_timer_compatiblity = false");
+                }
+            }
+        }
+
+        // This method is to avoid JIT trying to do stuff...
+        private Type SchrodingerType() => typeof(RespawnTimerPatch);
     }
 }
