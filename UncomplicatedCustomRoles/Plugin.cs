@@ -11,9 +11,12 @@ using UncomplicatedCustomRoles.Events;
 using System.IO;
 using Exiled.API.Interfaces;
 using Exiled.Loader;
-using HarmonyLib;
-using UncomplicatedCustomRolesRespawnTimer;
 using System.Linq;
+using HarmonyLib;
+using System.Reflection;
+using PlayerRoles;
+using Exiled.API.Features.Roles;
+using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles
 {
@@ -33,8 +36,6 @@ namespace UncomplicatedCustomRoles
 
         internal Handler Handler;
 
-        internal Harmony Harmony;
-
         internal static Dictionary<int, ICustomRole> CustomRoles;
 
         internal static Dictionary<int, int> PlayerRegistry = new();
@@ -52,13 +53,15 @@ namespace UncomplicatedCustomRoles
 
         internal FileConfigs FileConfigs;
 
+        // Can be null if not using the RespawnTimer compatiblity or if the RespawnTimer is not loaded
+        private Dictionary<string, Func<Player, string>> ReplaceHelperRespawTimer = null;
+
         public override void OnEnabled()
         {
             Instance = this;
 
             Handler = new();
             CustomRoles = new();
-            Harmony = new Harmony("UncomplicatedCustomRoles");
             FileConfigs = new();
 
             ServerHandler.RespawningTeam += Handler.OnRespawningWave;
@@ -71,7 +74,9 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Hurting += Handler.OnHurting;
             Scp049Handler.StartingRecall += Handler.OnScp049StartReviving;
 
-            TryPatching();
+            Log.Debug($"Config.RespawnTimerCompatiblity: {Config.RespawnTimerCompatiblity}");
+            if (Config.RespawnTimerCompatiblity)
+                RespawnTimerCompatability();
 
             foreach (ICustomRole CustomRole in Config.CustomRoles)
             {
@@ -108,7 +113,8 @@ namespace UncomplicatedCustomRoles
         public override void OnDisabled()
         {
             Instance = null;
-            Harmony.UnpatchAll(Harmony.Id);
+
+            RemoveRespawnTimerCompatiblity();
 
             ServerHandler.RespawningTeam -= Handler.OnRespawningWave;
             ServerHandler.RoundStarted -= Handler.OnRoundStarted;
@@ -128,28 +134,79 @@ namespace UncomplicatedCustomRoles
             base.OnDisabled();
         }
 
-        private void TryPatching()
+        private void RespawnTimerCompatability()
         {
-            if (!Config.RespawnTimerCompatiblity)
-                return;
+            const string ReplaceHelperFullName = "RespawnTimer.API.Features.TimerView:ReplaceHelper";
 
-            if (Loader.Plugins.Any(plugin => plugin.Name == "RespawnTimer"))
+            var propertyReplaceHelperRespawTimer = AccessTools.PropertyGetter(ReplaceHelperFullName);
+            if (propertyReplaceHelperRespawTimer == null)
             {
-                try
-                {
-                    Harmony.CreateClassProcessor(SchrodingerType()).Patch();
-                }
-                catch (Exception e)
-                {
-
-                    Log.Error("This is not a valid RespawnTimer plugin! "
-                        + e.ToString()
-                        + "\n\nDisable this log if this normal inside the config... respawn_timer_compatiblity = false");
-                }
+                Log.Debug("hook to RespawnTimer, RespawnTimer.API.Features.TimerView.ReplaceHelper not found.");
+                return;
             }
+
+            ReplaceHelperRespawTimer = propertyReplaceHelperRespawTimer.Invoke(null, new object[0]) as Dictionary<string, Func<Player, string>>;
+            if (ReplaceHelperRespawTimer == null)
+            {
+                Log.Debug("hook to RespawnTimer, faild to get the dictionary.");
+                return;
+            }
+
+            ReplaceHelperRespawTimer.Add("role", GetPublicRoleName);
+            Log.Debug("hook to RespawnTimer, succes.");
         }
 
-        // This method is to avoid JIT trying to do stuff...
-        private Type SchrodingerType() => typeof(RespawnTimerPatch);
+        private void RemoveRespawnTimerCompatiblity()
+        {
+            // no need to check that mean RespawnTimerCompatability did not do it job
+            if (ReplaceHelperRespawTimer == null)
+                return;
+
+            ReplaceHelperRespawTimer.Remove("role");
+        }
+
+        public static string GetPublicCustomRoleName(ICustomRole role, Player watcherPlayer)
+        {
+            if (!Plugin.Instance.Config.HiddenRolesId.TryGetValue(role.Id, out var information))
+                return role.Name;
+
+            if (information.OnlyVisibleOnOverwatch)
+            {
+                if (watcherPlayer.Role == RoleTypeId.Overwatch)
+                {
+                    return role.Name;
+                }
+            }
+            else
+            {
+                if (watcherPlayer.RemoteAdminAccess)
+                {
+                    return role.Name;
+                }
+            }
+            return information.RoleNameWhenHidden;
+        }
+
+        public static string GetPublicRoleName(Player player)
+        {
+            if (player.Role is not SpectatorRole spectator) return "...";
+
+            var spectated = spectator.SpectatedPlayer;
+            string roleName;
+
+            if (spectated == null)
+            {
+                roleName = "...";
+            }
+            else if (spectated.TryGetCustomRole(out var customRole))
+            {
+                roleName = GetPublicCustomRoleName(customRole, player);
+            }
+            else
+            {
+                roleName = spectated.Role.Name;
+            }
+            return roleName;
+        }
     }
 }

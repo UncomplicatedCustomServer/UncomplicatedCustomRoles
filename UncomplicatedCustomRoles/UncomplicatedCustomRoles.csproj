@@ -67,7 +67,6 @@
     <Compile Include="Elements\UCREffect.cs" />
     <Compile Include="Manager\HttpManager.cs" />
     <Compile Include="Manager\SpawnManager.cs" />
-    <Compile Include="Patch\RespawnTimerPatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Interfaces\ICustomRole.cs" />
     <Compile Include="Interfaces\IUCREffect.cs" />
@@ -462,10 +461,6 @@
     <Reference Include="zxing, Version=0.16.9.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\zxing.dll</HintPath>
-    </Reference>
-	<Reference Include="RespawnTimer, Version=0.0.0.0, Culture=neutral, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-    <HintPath>$(AppData)\EXILED\Plugins\RespawnTimer.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
