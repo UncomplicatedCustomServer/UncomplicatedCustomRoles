@@ -25,9 +25,6 @@ namespace UncomplicatedCustomRoles
             new()
         };
 
-        [Description("Is the plugin try to handle compatibility with RespwnTimer (need on for Exiled version)?")]
-        public bool RespawnTimerCompatiblity { get; set; } = false;
-        
         public Dictionary<int, HiddenRoleInformation> HiddenRolesId { get; set; } = new() 
         {
             { 1, new HiddenRoleInformation() }

@@ -70,6 +70,7 @@
     <Compile Include="Plugin.cs" />
     <Compile Include="Interfaces\ICustomRole.cs" />
     <Compile Include="Interfaces\IUCREffect.cs" />
+    <Compile Include="Manager\RespawnTimerCompatibility.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

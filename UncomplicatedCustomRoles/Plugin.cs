@@ -1,22 +1,13 @@
-﻿using Exiled.API.Features;
+﻿using System;
 using System.Collections.Generic;
-using System;
-using UncomplicatedCustomRoles.Manager;
+using System.IO;
+using Exiled.API.Features;
 using UncomplicatedCustomRoles.Interfaces;
+using UncomplicatedCustomRoles.Manager;
 using Handler = UncomplicatedCustomRoles.Events.EventHandler;
 using PlayerHandler = Exiled.Events.Handlers.Player;
-using ServerHandler = Exiled.Events.Handlers.Server;
 using Scp049Handler = Exiled.Events.Handlers.Scp049;
-using UncomplicatedCustomRoles.Events;
-using System.IO;
-using Exiled.API.Interfaces;
-using Exiled.Loader;
-using System.Linq;
-using HarmonyLib;
-using System.Reflection;
-using PlayerRoles;
-using Exiled.API.Features.Roles;
-using UncomplicatedCustomRoles.Extensions;
+using ServerHandler = Exiled.Events.Handlers.Server;
 
 namespace UncomplicatedCustomRoles
 {
@@ -53,9 +44,6 @@ namespace UncomplicatedCustomRoles
 
         internal FileConfigs FileConfigs;
 
-        // Can be null if not using the RespawnTimer compatiblity or if the RespawnTimer is not loaded
-        private Dictionary<string, Func<Player, string>> ReplaceHelperRespawTimer = null;
-
         public override void OnEnabled()
         {
             Instance = this;
@@ -74,9 +62,7 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Hurting += Handler.OnHurting;
             Scp049Handler.StartingRecall += Handler.OnScp049StartReviving;
 
-            Log.Debug($"Config.RespawnTimerCompatiblity: {Config.RespawnTimerCompatiblity}");
-            if (Config.RespawnTimerCompatiblity)
-                RespawnTimerCompatability();
+            RespawnTimerCompatibility.Enable();
 
             foreach (ICustomRole CustomRole in Config.CustomRoles)
             {
@@ -114,7 +100,7 @@ namespace UncomplicatedCustomRoles
         {
             Instance = null;
 
-            RemoveRespawnTimerCompatiblity();
+            RespawnTimerCompatibility.Disable();
 
             ServerHandler.RespawningTeam -= Handler.OnRespawningWave;
             ServerHandler.RoundStarted -= Handler.OnRoundStarted;
@@ -132,81 +118,6 @@ namespace UncomplicatedCustomRoles
             CustomRoles = null;
 
             base.OnDisabled();
-        }
-
-        private void RespawnTimerCompatability()
-        {
-            const string ReplaceHelperFullName = "RespawnTimer.API.Features.TimerView:ReplaceHelper";
-
-            var propertyReplaceHelperRespawTimer = AccessTools.PropertyGetter(ReplaceHelperFullName);
-            if (propertyReplaceHelperRespawTimer == null)
-            {
-                Log.Debug("hook to RespawnTimer, RespawnTimer.API.Features.TimerView.ReplaceHelper not found.");
-                return;
-            }
-
-            ReplaceHelperRespawTimer = propertyReplaceHelperRespawTimer.Invoke(null, new object[0]) as Dictionary<string, Func<Player, string>>;
-            if (ReplaceHelperRespawTimer == null)
-            {
-                Log.Debug("hook to RespawnTimer, faild to get the dictionary.");
-                return;
-            }
-
-            ReplaceHelperRespawTimer.Add("role", GetPublicRoleName);
-            Log.Debug("hook to RespawnTimer, succes.");
-        }
-
-        private void RemoveRespawnTimerCompatiblity()
-        {
-            // no need to check that mean RespawnTimerCompatability did not do it job
-            if (ReplaceHelperRespawTimer == null)
-                return;
-
-            ReplaceHelperRespawTimer.Remove("role");
-        }
-
-        public static string GetPublicCustomRoleName(ICustomRole role, Player watcherPlayer)
-        {
-            if (!Plugin.Instance.Config.HiddenRolesId.TryGetValue(role.Id, out var information))
-                return role.Name;
-
-            if (information.OnlyVisibleOnOverwatch)
-            {
-                if (watcherPlayer.Role == RoleTypeId.Overwatch)
-                {
-                    return role.Name;
-                }
-            }
-            else
-            {
-                if (watcherPlayer.RemoteAdminAccess)
-                {
-                    return role.Name;
-                }
-            }
-            return information.RoleNameWhenHidden;
-        }
-
-        public static string GetPublicRoleName(Player player)
-        {
-            if (player.Role is not SpectatorRole spectator) return "...";
-
-            var spectated = spectator.SpectatedPlayer;
-            string roleName;
-
-            if (spectated == null)
-            {
-                roleName = "...";
-            }
-            else if (spectated.TryGetCustomRole(out var customRole))
-            {
-                roleName = GetPublicCustomRoleName(customRole, player);
-            }
-            else
-            {
-                roleName = spectated.Role.Name;
-            }
-            return roleName;
         }
     }
 }
