@@ -19,7 +19,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(2, 0, 0, 2);
+        public override Version Version { get; } = new(2, 0, 0, 3);
 
         public override Version RequiredExiledVersion { get; } = new(8, 8, 1);
 
@@ -63,14 +63,6 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Hurting += Handler.OnHurting;
             Scp049Handler.StartingRecall += Handler.OnScp049StartReviving;
 
-            if (Config.CustomRoles is not null && Config.CustomRoles.Count > 0)
-            {
-                foreach (ICustomRole CustomRole in Config.CustomRoles)
-                {
-                    SpawnManager.RegisterCustomSubclass(CustomRole, true);
-                }
-            }
-
             if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomRoles", ".nohttp")))
             {
                 HttpManager.Start();
@@ -85,9 +77,9 @@ namespace UncomplicatedCustomRoles
                 Log.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
             }
 
-            if (!HttpManager.IsLatestVersion())
+            if (!HttpManager.IsLatestVersion(out Version latest))
             {
-                Log.Warn($"You are NOT using the latest version of UncomplicatedCustomRoles!\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
+                Log.Warn($"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Version}  | Latest available: v{latest}\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
             }
 
             FileConfigs.Welcome();

@@ -18,11 +18,5 @@ namespace UncomplicatedCustomRoles
 
         [Description("Do enable the basic UCR logs?")]
         public bool EnableBasicLogs { get; set; } = true;
-
-        [Description("A list of custom roles")]
-        public List<CustomRole> CustomRoles { get; set; } = new()
-        {
-            new()
-        };
     }
 }
