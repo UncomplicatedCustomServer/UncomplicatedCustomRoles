@@ -8,7 +8,7 @@ Avec **UncomplicatedCustomRoles** vous pourrez créer des rôle personnalisé de
 <a href='https://discord.gg/5StRGu8EJV'><img src='https://www.allkpop.com/upload/2021/01/content/262046/1611711962-discord-button.png' height="100"></a>
 
 # README Traduis
-- [Français](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/README-FR.md)
+- [Original (Anglais)](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/README.md)
 
 ## Fonctionnalités / Caractéristiques
 - Un nombre illimité de rôles personnalisable
