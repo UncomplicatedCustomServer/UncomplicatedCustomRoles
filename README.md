@@ -1,23 +1,23 @@
 # UncomplicatedCustomRoles
-With **UncomplicatedCustomRoles** you can create custom roles in a way that is convenient, fast, and most importantly, fully customizable!
+Avec **UncomplicatedCustomRoles** vous pourrez créer des rôle personnalisé de façon pratique, rapide, et le plus important, de manière complètement customisable !
 
 **EXILED >= 8.7.0**
 
-## [Please read the official documentation here!](https://github.com/FoxWorn3365/UncomplicatedCustomRoles/wiki)
+## [S'il vous plaît lisez la documentation officiel içi!](https://github.com/FoxWorn3365/UncomplicatedCustomRoles/wiki)
 
 <a href='https://discord.gg/5StRGu8EJV'><img src='https://www.allkpop.com/upload/2021/01/content/262046/1611711962-discord-button.png' height="100"></a>
 
-## Features
-- Unlimited number of custom roles
-- Multi-file configuration
-- Fully configurable and customizable
-- Comprehensive and comprehensive wiki
-- No dependence required
-- Easy to configure
-- We reply to DMs
+## Fonctionnalités / Caractéristiques
+- Un nombre illimité de rôles personnalisable
+- Config utilisant plusieur fichiers
+- Complètement configurable et customisable
+- Wiki complet & compréhensible
+- Pas de dépendance requise
+- Facile à configurer
+- Nous répondons au message privé (MP)
 
 ## Supporters
-A huge **thank you** to `@timmeyxd` who through his donation convinced me to update the plugin to the latest version, still making it available to everyone! ✨
+Un grand **merci** à `@timmeyxd` qui grâce à ses donations, m’a convaincu de mettre à jour le plugin à la dernière version, le rendant encore disponible pour tout le monde ! ✨
 
 ## Contacts
 ### Email:
