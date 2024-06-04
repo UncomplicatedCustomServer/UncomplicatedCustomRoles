@@ -8,7 +8,7 @@ With **UncomplicatedCustomRoles** you can create custom roles in a way that is c
 <a href='https://discord.gg/5StRGu8EJV'><img src='https://www.allkpop.com/upload/2021/01/content/262046/1611711962-discord-button.png' height="100"></a>
 
 # Localized READMEs
-- [Français](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/README-FR.md)
+- [Français](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-FR.md)
 
 ## Features
 - Unlimited number of custom roles
