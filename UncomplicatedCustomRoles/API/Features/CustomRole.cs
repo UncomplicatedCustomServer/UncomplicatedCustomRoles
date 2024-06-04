@@ -1,15 +1,11 @@
-﻿using Exiled.API.Features.Roles;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
-    internal class CustomRole
+    public class CustomRole
     {
         /// <summary>
         /// Get a list of every <see cref="ICustomRole"/> registered.

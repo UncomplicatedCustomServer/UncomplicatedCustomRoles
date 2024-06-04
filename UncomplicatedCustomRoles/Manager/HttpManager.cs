@@ -70,11 +70,17 @@ namespace UncomplicatedCustomRoles.Manager
 
         internal HttpResponseMessage HttpRequest(string url)
         {
-            Task<HttpResponseMessage> Response = Task.Run(() => HttpClient.GetAsync(url));
+            try
+            {
+                Task<HttpResponseMessage> Response = Task.Run(() => HttpClient.GetAsync(url));
 
-            Response.Wait();
+                Response.Wait();
 
-            return Response.Result;
+                return Response.Result;
+            } catch(Exception)
+            {
+                return null;
+            }
         }
 
         internal string RetriveString(HttpResponseMessage response)
