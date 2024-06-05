@@ -50,3 +50,7 @@ Read the [WIKI](https://github.com/UncomplicatedCustomServer/UncomplicatedCustom
   **Email:** `foxworn3365@gmail.com`
 ### Dr.Agenda
   **Discord:** `dr.agenda`
+
+## Translation Credits
+**FRENCH:** `@robocnop`\ 
+**ITALIAN** `@foxworn`\ 

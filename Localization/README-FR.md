@@ -49,6 +49,3 @@ Lisez le [WIKI](https://github.com/UncomplicatedCustomServer/UncomplicatedCustom
   **Email:** `foxworn3365@gmail.com`
 ### Dr.Agenda
   **Discord:** `dr.agenda`
-
-## Traductions
-**Discord:** `@robocnop`\ 
