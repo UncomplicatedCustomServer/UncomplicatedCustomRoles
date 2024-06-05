@@ -15,6 +15,10 @@ namespace UncomplicatedCustomRoles.Interfaces
 
         public abstract string CustomInfo { get; set; }
 
+        public abstract string BadgeName { get; set; }
+
+        public abstract string BadgeColor { get; set; }
+
         public abstract int MaxPlayers { get; set; }
 
         public abstract int MinPlayers { get; set; }

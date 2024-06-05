@@ -1,7 +1,13 @@
 ﻿using Exiled.API.Features;
 using MEC;
+using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
+using UnityEngine;
+
+/*
+ * > 05/06/2024 - A really really good day :)
+*/
 
 namespace UncomplicatedCustomRoles.Extensions
 {
@@ -84,6 +90,37 @@ namespace UncomplicatedCustomRoles.Extensions
         {
             player.TryGetCustomRole(out ICustomRole role);
             return role;
+        }
+
+        /// <summary>
+        /// Try to remove a <see cref="ICustomRole"/> from a <see cref="Player"/> if it has one.
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="doResetRole">If true the role will be resetted => modified stats like health and other things will be lost</param>
+        /// <returns>True if success</returns>
+        public static bool TryRemoveCustomRole(this Player player, bool doResetRole = false)
+        {
+            if (player.TryGetCustomRole(out ICustomRole role))
+            {
+                InfiniteEffect.Remove(player);
+
+                if (doResetRole)
+                {
+                    Vector3 OriginalPosition = player.Position;
+
+                    player.Role.Set(role.Role, PlayerRoles.RoleSpawnFlags.AssignInventory);
+
+                    player.Position = OriginalPosition;
+
+                    return true;
+                }
+
+                Plugin.PlayerRegistry.Remove(player.Id);
+                Plugin.RolesCount[role.Id].Remove(player.Id);
+
+                return true;
+            }
+            return false;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using CommandSystem;
 using Exiled.API.Features;
 using System.Collections.Generic;
+using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
 
@@ -25,10 +26,15 @@ namespace UncomplicatedCustomRoles.Commands
             if (arguments.Count == 1)
             {
                 Player Player = Player.Get(arguments[0]);
-                int? RoleId = SpawnManager.TryGetCustomRole(Player);
-                if (RoleId is not null)
+
+                if (Player is null)
                 {
-                    ICustomRole Role = Plugin.CustomRoles[RoleId.Value];
+                    response = $"Sorry but the player {arguments[0]} does not exists!";
+                    return false;
+                }
+
+                if (Player.TryGetCustomRole(out ICustomRole Role))
+                {
                     response = $"Player {Player.Nickname} {Player.UserId} [{Player.Id}] is the custom role {Role.Name} [{Role.Id}]";
                     return true;
                 }
@@ -40,10 +46,8 @@ namespace UncomplicatedCustomRoles.Commands
                 response = "Custom roles of every player:";
                 foreach (Player Player in Player.List)
                 {
-                    int? RoleId = SpawnManager.TryGetCustomRole(Player);
-                    if (RoleId is not null)
+                    if (Player.TryGetCustomRole(out ICustomRole Role))
                     {
-                        ICustomRole Role = Plugin.CustomRoles[RoleId.Value];
                         response += $"\n - Player {Player.Nickname} {Player.UserId} [{Player.Id}] is the custom role {Role.Name} [{Role.Id}]";
                     } else
                     {

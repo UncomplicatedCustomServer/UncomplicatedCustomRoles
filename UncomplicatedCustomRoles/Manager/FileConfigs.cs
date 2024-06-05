@@ -72,6 +72,9 @@ namespace UncomplicatedCustomRoles.Manager
                     "custom_roles", new List<CustomRole>()
                     {
                         new()
+                        {
+                            Id = new Random().Next(2, 15)
+                        }
                     }
                   }
                 }));

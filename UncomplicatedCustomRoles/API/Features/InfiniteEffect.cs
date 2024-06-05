@@ -72,11 +72,21 @@ namespace UncomplicatedCustomRoles.API.Features
         }
 
         /// <summary>
-        /// Remove a <see cref="IUCREffect"/> istance to the player, if it exists.
+        /// Remove a <see cref="IUCREffect"/> istance from the player, if it exists.
         /// </summary>
         public static bool Remove(IUCREffect Effect, Player Player)
         {
             return Remove(Effect, Player.Id);
+        }
+
+        /// <summary>
+        /// Remove every infinite effect from a player
+        /// </summary>
+        /// <param name="Player"></param>
+        /// <returns></returns>
+        public static bool Remove(Player Player)
+        {
+            return Plugin.PermanentEffectStatus.Remove(Player.Id);
         }
 
         /// <summary>
