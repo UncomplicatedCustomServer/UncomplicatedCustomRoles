@@ -15,13 +15,14 @@
 
 ## Localized READMEs
 - [Français](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-FR.md)
+- [Italiano](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-IT.md)
 
 ## What's UncomplicatedCustomRoles
 **UncomplicatedCustomRoles** or **UCR** is a plugin for [EXILED](https://github.com/Exiled-Team/EXILED) that allow you to create fully configurable and customizable custom role with YAML.\
 You'll be able to configure the <ins>role</ins>, the <ins>health</ins>, the <ins>role after escape</ins> and many more things. 
 
 ## Features
-**UCI** has lots of features like:
+**UCR** has lots of features like:
 - Unlimited number of custom roles
 - Configs are in a separate file, not the EXILED default one
 - Exhaustive [wiki](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki)
@@ -49,3 +50,7 @@ Read the [WIKI](https://github.com/UncomplicatedCustomServer/UncomplicatedCustom
   **Email:** `foxworn3365@gmail.com`
 ### Dr.Agenda
   **Discord:** `dr.agenda`
+
+## Translation Credits
+**French:** `@robocnop`\
+**Italian:** `@foxworn`
