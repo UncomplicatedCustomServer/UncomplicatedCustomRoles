@@ -52,5 +52,5 @@ Read the [WIKI](https://github.com/UncomplicatedCustomServer/UncomplicatedCustom
   **Discord:** `dr.agenda`
 
 ## Translation Credits
-**FRENCH:** `@robocnop`\ 
-**ITALIAN** `@foxworn`\ 
+**French:** `@robocnop`\
+**Italian:** `@foxworn`
