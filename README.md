@@ -15,6 +15,7 @@
 
 ## Localized READMEs
 - [Français](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-FR.md)
+- [Italiano](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-IT.md)
 
 ## What's UncomplicatedCustomRoles
 **UncomplicatedCustomRoles** or **UCR** is a plugin for [EXILED](https://github.com/Exiled-Team/EXILED) that allow you to create fully configurable and customizable custom role with YAML.\
