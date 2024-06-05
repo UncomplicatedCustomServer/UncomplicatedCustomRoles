@@ -21,7 +21,7 @@
 You'll be able to configure the <ins>role</ins>, the <ins>health</ins>, the <ins>role after escape</ins> and many more things. 
 
 ## Features
-**UCI** has lots of features like:
+**UCR** has lots of features like:
 - Unlimited number of custom roles
 - Configs are in a separate file, not the EXILED default one
 - Exhaustive [wiki](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki)
