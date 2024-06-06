@@ -9,14 +9,12 @@ using UnityEngine;
 using Exiled.CustomItems.API.Features;
 using System;
 using UncomplicatedCustomRoles.Extensions;
-using MEC;
-using CustomPlayerEffects;
 
 namespace UncomplicatedCustomRoles.Manager
 {
     public class SpawnManager
     {
-        public static void RegisterCustomSubclass(ICustomRole Role)
+        public static void RegisterCustomSubclass(ICustomRole Role, bool notLoadIfLoaded = false)
         {
             if (!SubclassValidator(Role))
             {
@@ -34,6 +32,12 @@ namespace UncomplicatedCustomRoles.Manager
                     Log.Info($"Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
                 }
 
+                return;
+            }
+
+            if (notLoadIfLoaded)
+            {
+                Log.Debug($"Can't load role {Role.Id} {Role.Name} due to plugin settings!\nPlease reach UCS support for UCR!");
                 return;
             }
 
@@ -77,21 +81,34 @@ namespace UncomplicatedCustomRoles.Manager
             }
         }
 
-        public static void ClearCustomTypes(Player Player)
+        public static void ClearCustomTypes(Player player)
         {
-            Player.CustomInfo = string.Empty;
-            Player.Scale = new(1, 1, 1);
-            LimitedClearCustomTypes(Player);
+            if (player.TryGetCustomRole(out ICustomRole role))
+            {
+                if (role.BadgeName is not null && role.BadgeName.Length > 1 && role.BadgeColor is not null && role.BadgeColor.Length > 2 && Plugin.Tags.ContainsKey(player.Id))
+                {
+                    player.RankName = Plugin.Tags[player.Id][0];
+                    player.RankColor = Plugin.Tags[player.Id][1];
+
+                    Log.Debug($"Badge detected, represted");
+
+                    Plugin.Tags.Remove(player.Id);
+                }
+            }
+
+            player.CustomInfo = string.Empty;
+            player.Scale = new(1, 1, 1);
+            LimitedClearCustomTypes(player);
         }
 
-        public static void LimitedClearCustomTypes(Player Player)
+        public static void LimitedClearCustomTypes(Player player)
         {
-            if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
+            if (player.TryGetCustomRole(out ICustomRole role))
             {
-                Player.IsUsingStamina = true;
-                Plugin.PermanentEffectStatus.Remove(Player.Id);
-                Plugin.RolesCount[Plugin.PlayerRegistry[Player.Id]].Remove(Player.Id);
-                Plugin.PlayerRegistry.Remove(Player.Id);
+                player.IsUsingStamina = true;
+                Plugin.PermanentEffectStatus.Remove(player.Id);
+                Plugin.RolesCount[role.Id].Remove(player.Id);
+                Plugin.PlayerRegistry.Remove(player.Id);
             }
         }
 
@@ -118,8 +135,6 @@ namespace UncomplicatedCustomRoles.Manager
             {
                 SpawnFlag = RoleSpawnFlags.UseSpawnpoint;
             }
-            // It's all OK so we can start to elaborate the spawn
-            PlayerRoleBase OldRole = Player.Role.Base; // That's for the event system, don't worry!;
 
             Player.Role.Set(Role.Role, SpawnFlag);
 
@@ -249,6 +264,20 @@ namespace UncomplicatedCustomRoles.Manager
                 Player.ShowHint(Role.SpawnHint, Role.SpawnHintDuration);
             }
 
+            if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null && Role.BadgeColor.Length > 2)
+            {
+                Plugin.Tags.Add(Player.Id, new string[]
+                {
+                        Player.RankName ?? "",
+                        Player.RankColor ?? ""
+                });
+
+                Log.Debug($"Badge detected, putting {Role.BadgeName}@{Role.BadgeColor} to player {Player.Id}");
+
+                Player.RankName = Role.BadgeName;
+                Player.RankColor = Role.BadgeColor;
+            }
+
             if (Role.RoleAppearance != Role.Role)
             {
                 Log.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
@@ -263,15 +292,6 @@ namespace UncomplicatedCustomRoles.Manager
                 Id++;
             }
             return Id;
-        }
-
-        public static int? TryGetCustomRole(Player Player)
-        {
-            if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
-            {
-                return Plugin.PlayerRegistry[Player.Id];
-            }
-            return null;
         }
 
         public static void SetAllActiveEffect(Player Player)

@@ -1,5 +1,4 @@
 ﻿using Exiled.API.Features;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.Manager;
@@ -12,68 +11,7 @@ using Exiled.Events.EventArgs.Server;
 using Exiled.Events.EventArgs.Scp049;
 using Exiled.API.Enums;
 using UnityEngine;
-
-/*
- * Il mio canto libero - Lucio Battisti
- * 
- * In un mondo che
- * Non ci vuole più
- * Il mio canto libero sei tu
- * E l'immensità
- * Si apre intorno a noi
- * Al di là del limite degli occhi tuoi
- * Nasce il sentimento
- * Nasce in mezzo al pianto
- * E s'innalza altissimo e va
- * E vola sulle accuse della gente
- * A tutti i suoi retaggi indifferente
- * Sorretto da un anelito d'amore
- * Di vero amore
- * In un mondo che (Pietre, un giorno case)
- * Prigioniero è (Ricoperte dalle rose selvatiche)
- * Respiriamo liberi io e te (Rivivono, ci chiamano)
- * E la verità (Boschi abbandonati)
- * Si offre nuda a noi (Perciò sopravvissuti, vergini)
- * E limpida è l'immagine (Si aprono)
- * Ormai (Ci abbracciano)
- * Nuove sensazioni
- * Giovani emozioni
- * Si esprimono purissime in noi
- * La veste dei fantasmi del passato
- * Cadendo lascia il quadro immacolato
- * E s'alza un vento tiepido d'amore
- * Di vero amore
- * E riscopro te
- * 
- * Dolce compagna che
- * Non sai domandare, ma sai
- * Che ovunque andrai
- * Al fianco tuo mi avrai
- * Se tu lo vuoi
- * 
- * Pietre, un giorno case
- * Ricoperte dalle rose selvatiche
- * Rivivono, ci chiamano
- * Boschi abbandonati
- * E perciò sopravvissuti vergini
- * Si aprono, ci abbracciano
- * 
- * In un mondo che
- * Prigioniero è
- * Respiriamo liberi
- * Io e te
- * E la verità
- * Si offre nuda a noi
- * E limpida è l'immagine ormai
- * Nuove sensazioni
- * Giovani emozioni
- * Si esprimono purissime in noi
- * La veste dei fantasmi del passato
- * Cadendo lascia il quadro immacolato
- * E s'alza un vento tiepido d'amore
- * Di vero amore
- * E riscopro te
- */
+using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -180,8 +118,15 @@ namespace UncomplicatedCustomRoles.Events
 
                 if (!Role.CanEscape)
                 {
-                    Log.Debug($"Player with the role {Role.Id} ({Role.Name} can't escape, so nuh uh!");
+                    Log.Debug($"Player with the role {Role.Id} ({Role.Name}) can't escape, so nuh uh!");
                     Escaping.IsAllowed = false;
+                    return;
+                }
+
+                if (Role.CanEscape && (Role.RoleAfterEscape is null || Role.RoleAfterEscape.Length < 2))
+                {
+                    Log.Debug($"Player with the role {Role.Id} ({Role.Name}) evaluated for a natural respawn!");
+                    Escaping.IsAllowed = true;
                     return;
                 }
 
@@ -210,7 +155,7 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnItemUsed(UsedItemEventArgs UsedItem)
         {
-            if (SpawnManager.TryGetCustomRole(UsedItem.Player) is not null && Plugin.PermanentEffectStatus.ContainsKey(UsedItem.Player.Id) && UsedItem.Item.Type == ItemType.SCP500)
+            if (UsedItem.Player is not null && UsedItem.Player.HasCustomRole() && Plugin.PermanentEffectStatus.ContainsKey(UsedItem.Player.Id) && UsedItem.Item.Type == ItemType.SCP500)
             {
                 foreach (IUCREffect Effect in Plugin.PermanentEffectStatus[UsedItem.Player.Id])
                 {

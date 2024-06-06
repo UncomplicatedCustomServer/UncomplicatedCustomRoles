@@ -1,7 +1,5 @@
 ﻿using Exiled.API.Interfaces;
-using System.Collections.Generic;
 using System.ComponentModel;
-using UncomplicatedCustomRoles.Elements;
 
 namespace UncomplicatedCustomRoles
 {
@@ -19,12 +17,6 @@ namespace UncomplicatedCustomRoles
         [Description("Do enable the basic UCR logs?")]
         public bool EnableBasicLogs { get; set; } = true;
 
-        [Description("A list of custom roles")]
-        public List<CustomRole> CustomRoles { get; set; } = new()
-        {
-            new()
-        };
-
         public Dictionary<int, HiddenRoleInformation> HiddenRolesId { get; set; } = new() 
         {
             { 1, new HiddenRoleInformation() }
@@ -38,6 +30,5 @@ namespace UncomplicatedCustomRoles
 
         [Description("Empty to get the current display role.")]
         public string RoleNameWhenHidden { get; set; } = "";
-
     }
 }
