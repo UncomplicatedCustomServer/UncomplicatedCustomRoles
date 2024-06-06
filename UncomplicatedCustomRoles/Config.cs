@@ -1,4 +1,5 @@
 ﻿using Exiled.API.Interfaces;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace UncomplicatedCustomRoles
@@ -16,5 +17,19 @@ namespace UncomplicatedCustomRoles
 
         [Description("Do enable the basic UCR logs?")]
         public bool EnableBasicLogs { get; set; } = true;
+
+        public Dictionary<int, HiddenRoleInformation> HiddenRolesId { get; set; } = new() 
+        {
+            { 1, new HiddenRoleInformation() }
+        };
+    }
+
+    public class HiddenRoleInformation
+    {
+        [Description("If false, any staff with access to RemoteAdmin see the player role.")]
+        public bool OnlyVisibleOnOverwatch { get; set; } = false;
+
+        [Description("Empty to get the current display role.")]
+        public string RoleNameWhenHidden { get; set; } = "";
     }
 }

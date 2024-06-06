@@ -1,13 +1,13 @@
-﻿using Exiled.API.Features;
-using System.Collections.Generic;
 using System;
-using UncomplicatedCustomRoles.Manager;
+using System.Collections.Generic;
+using System.IO;
+using Exiled.API.Features;
 using UncomplicatedCustomRoles.Interfaces;
+using UncomplicatedCustomRoles.Manager;
 using Handler = UncomplicatedCustomRoles.Events.EventHandler;
 using PlayerHandler = Exiled.Events.Handlers.Player;
-using ServerHandler = Exiled.Events.Handlers.Server;
 using Scp049Handler = Exiled.Events.Handlers.Scp049;
-using System.IO;
+using ServerHandler = Exiled.Events.Handlers.Server;
 
 namespace UncomplicatedCustomRoles
 {
@@ -57,7 +57,6 @@ namespace UncomplicatedCustomRoles
 
             Handler = new();
             CustomRoles = new();
-
             FileConfigs = new();
 
             ServerHandler.RespawningTeam += Handler.OnRespawningWave;
@@ -69,7 +68,9 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.UsedItem += Handler.OnItemUsed;
             PlayerHandler.Hurting += Handler.OnHurting;
             Scp049Handler.StartingRecall += Handler.OnScp049StartReviving;
-
+            
+            RespawnTimerCompatibility.Enable();
+            
             if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomRoles", ".nohttp")))
             {
                 HttpManager.Start();
@@ -100,6 +101,8 @@ namespace UncomplicatedCustomRoles
         public override void OnDisabled()
         {
             Instance = null;
+
+            RespawnTimerCompatibility.Disable();
 
             ServerHandler.RespawningTeam -= Handler.OnRespawningWave;
             ServerHandler.RoundStarted -= Handler.OnRoundStarted;
