@@ -7,7 +7,6 @@ using Handler = UncomplicatedCustomRoles.Events.EventHandler;
 using PlayerHandler = Exiled.Events.Handlers.Player;
 using ServerHandler = Exiled.Events.Handlers.Server;
 using Scp049Handler = Exiled.Events.Handlers.Scp049;
-using UncomplicatedCustomRoles.Events;
 using System.IO;
 
 namespace UncomplicatedCustomRoles
@@ -20,7 +19,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(2, 0, 0);
+        public override Version Version { get; } = new(2, 1, 0);
 
         public override Version RequiredExiledVersion { get; } = new(8, 8, 1);
 
@@ -30,14 +29,21 @@ namespace UncomplicatedCustomRoles
 
         internal static Dictionary<int, ICustomRole> CustomRoles;
 
+        // PlayerId => RoleId
         internal static Dictionary<int, int> PlayerRegistry = new();
 
         // RolesCount: RoleId => [PlayerId, PlayerId, ...]
         internal static Dictionary<int, List<int>> RolesCount = new();
 
+        // PlayerId => List<IUCREffect>
         internal static Dictionary<int, List<IUCREffect>> PermanentEffectStatus = new();
 
+        // List of PlayerIds
         internal static List<int> RoleSpawnQueue = new();
+
+        // useful because when the spawn manager overrides the tags they will be saved here so when the role will be removed they will be reassigned
+        // PlayerId => [color, name]
+        internal static Dictionary<int, string[]> Tags = new();
 
         internal bool DoSpawnBasicRoles = false;
 
@@ -64,11 +70,6 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Hurting += Handler.OnHurting;
             Scp049Handler.StartingRecall += Handler.OnScp049StartReviving;
 
-            foreach (ICustomRole CustomRole in Config.CustomRoles)
-            {
-                SpawnManager.RegisterCustomSubclass(CustomRole);
-            }
-
             if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomRoles", ".nohttp")))
             {
                 HttpManager.Start();
@@ -83,9 +84,9 @@ namespace UncomplicatedCustomRoles
                 Log.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
             }
 
-            if (HttpManager.IsLatestVersion())
+            if (!HttpManager.IsLatestVersion(out Version latest))
             {
-                Log.Warn($"You are NOT using the latest version of UncomplicatedCustomRoles!\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
+                Log.Warn($"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Version}  | Latest available: v{latest}\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
             }
 
             FileConfigs.Welcome();

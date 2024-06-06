@@ -70,11 +70,17 @@ namespace UncomplicatedCustomRoles.Manager
 
         internal HttpResponseMessage HttpRequest(string url)
         {
-            Task<HttpResponseMessage> Response = Task.Run(() => HttpClient.GetAsync(url));
+            try
+            {
+                Task<HttpResponseMessage> Response = Task.Run(() => HttpClient.GetAsync(url));
 
-            Response.Wait();
+                Response.Wait();
 
-            return Response.Result;
+                return Response.Result;
+            } catch(Exception)
+            {
+                return null;
+            }
         }
 
         internal string RetriveString(HttpResponseMessage response)
@@ -101,9 +107,21 @@ namespace UncomplicatedCustomRoles.Manager
             return new(RetriveString(HttpRequest($"{Endpoint}/{Prefix}/version?vts=5")));
         }
 
+        public bool IsLatestVersion(out Version latest)
+        {
+            latest = LatestVersion();
+            if (latest.CompareTo(Plugin.Instance.Version) > 0)
+            {
+                return false;
+            }
+
+            return true;
+
+        }
+
         public bool IsLatestVersion()
         {
-            if (LatestVersion().CompareTo(Plugin.Instance.Version) != 0)
+            if (LatestVersion().CompareTo(Plugin.Instance.Version) > 0)
             {
                 return false;
             }

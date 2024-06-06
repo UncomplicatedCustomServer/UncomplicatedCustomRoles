@@ -24,6 +24,12 @@ namespace UncomplicatedCustomRoles.Commands
                 return false;
             }
 
+            if (!Round.IsStarted)
+            {
+                response = "Sorry but you can't use this command if the round is not started!";
+                return false;
+            }
+
             Player Player = Player.Get(arguments[0]);
             if (Player is null)
             {
