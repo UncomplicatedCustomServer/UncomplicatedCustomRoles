@@ -10,7 +10,7 @@
   <br><br>
 </div>
 
-**EXILED** >= `v8.8.1`
+**EXILED** >= `v8.9.4`
 <br><br>
 
 ## Localized READMEs
