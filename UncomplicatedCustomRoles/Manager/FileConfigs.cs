@@ -38,12 +38,12 @@ namespace UncomplicatedCustomRoles.Manager
 
                     if (!Roles.ContainsKey("custom_roles"))
                     {
-                        Log.Error($"Error during the deserialization of file {FileName}: Node name 'custom_roles' not found!");
+                        LogManager.Error($"Error during the deserialization of file {FileName}: Node name 'custom_roles' not found!");
                         return;
                     }
                     foreach (CustomRole Role in Roles["custom_roles"])
                     {
-                        Log.Debug($"Proposed to the registerer the external role {Role.Id} [{Role.Name}] from file:\n{FileName}");
+                        LogManager.Debug($"Proposed to the registerer the external role {Role.Id} [{Role.Name}] from file:\n{FileName}");
                         SpawnManager.RegisterCustomSubclass(Role);
                     }
                 }
@@ -51,11 +51,11 @@ namespace UncomplicatedCustomRoles.Manager
                 {
                     if (!Plugin.Instance.Config.Debug)
                     {
-                        Log.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.");
+                        LogManager.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.");
                     }
                     else
                     {
-                        Log.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.\nStack trace: {ex.StackTrace}");
+                        LogManager.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.\nStack trace: {ex.StackTrace}");
                     }
                 }
             }
@@ -79,7 +79,7 @@ namespace UncomplicatedCustomRoles.Manager
                   }
                 }));
 
-                Log.Info($"Plugin does not have a role folder, generated one in {Path.Combine(Dir, localDir)}");
+                LogManager.Info($"Plugin does not have a role folder, generated one in {Path.Combine(Dir, localDir)}");
             }
         }
     }

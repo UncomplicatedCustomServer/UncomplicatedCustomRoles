@@ -54,6 +54,7 @@
     <Compile Include="API\Features\InfiniteEffect.cs" />
     <Compile Include="Commands\CommandParent.cs" />
     <Compile Include="Commands\UCRList.cs" />
+    <Compile Include="Commands\UCRLogShare.cs" />
     <Compile Include="Commands\UCROwner.cs" />
     <Compile Include="Commands\UCRRole.cs" />
     <Compile Include="Commands\UCRSpawn.cs" />
@@ -67,6 +68,7 @@
     <Compile Include="Manager\FileConfigs.cs" />
     <Compile Include="Elements\UCREffect.cs" />
     <Compile Include="Manager\HttpManager.cs" />
+    <Compile Include="Manager\LogManager.cs" />
     <Compile Include="Manager\SpawnManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Interfaces\ICustomRole.cs" />

@@ -64,7 +64,7 @@ namespace UncomplicatedCustomRoles.Events
             string LogReason = string.Empty;
             if (Plugin.Instance.Config.AllowOnlyNaturalSpawns && !Plugin.RoleSpawnQueue.Contains(Spawned.Player.Id))
             {
-                Log.Debug("The player is not in the queue for respawning!");
+                LogManager.Debug("The player is not in the queue for respawning!");
                 return;
             }
             else if (Plugin.RoleSpawnQueue.Contains(Spawned.Player.Id))
@@ -73,7 +73,7 @@ namespace UncomplicatedCustomRoles.Events
                 LogReason = " [going with a respawn wave OR 049 revival]";
             }
 
-            Log.Debug($"Player {Spawned.Player.Nickname} spawned{LogReason}, going to assign a role if needed!");
+            LogManager.Debug($"Player {Spawned.Player.Nickname} spawned{LogReason}, going to assign a role if needed!");
 
             Timing.CallDelayed(0.1f, () =>
             {
@@ -109,23 +109,23 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnEscaping(EscapingEventArgs Escaping)
         {
-            Log.Debug($"Player {Escaping.Player.Nickname} triggered the escaping event as {Escaping.Player.Role.Name}");
+            LogManager.Debug($"Player {Escaping.Player.Nickname} triggered the escaping event as {Escaping.Player.Role.Name}");
 
             if (Plugin.PlayerRegistry.ContainsKey(Escaping.Player.Id))
             {
-                Log.Debug($"Player IS a custom role: {Plugin.PlayerRegistry[Escaping.Player.Id]}");
+                LogManager.Debug($"Player IS a custom role: {Plugin.PlayerRegistry[Escaping.Player.Id]}");
                 ICustomRole Role = Plugin.CustomRoles[Plugin.PlayerRegistry[Escaping.Player.Id]];
 
                 if (!Role.CanEscape)
                 {
-                    Log.Debug($"Player with the role {Role.Id} ({Role.Name}) can't escape, so nuh uh!");
+                    LogManager.Debug($"Player with the role {Role.Id} ({Role.Name}) can't escape, so nuh uh!");
                     Escaping.IsAllowed = false;
                     return;
                 }
 
                 if (Role.CanEscape && (Role.RoleAfterEscape is null || Role.RoleAfterEscape.Length < 2))
                 {
-                    Log.Debug($"Player with the role {Role.Id} ({Role.Name}) evaluated for a natural respawn!");
+                    LogManager.Debug($"Player with the role {Role.Id} ({Role.Name}) evaluated for a natural respawn!");
                     Escaping.IsAllowed = true;
                     return;
                 }
@@ -180,7 +180,7 @@ namespace UncomplicatedCustomRoles.Events
                 // Here we can see and trigger role for SCPs escape event
                 foreach (Player Player in Player.List.Where(player => player.IsScp && Vector3.Distance(new(123.85f, 988.8f, 18.9f), player.Position) < 2.5f)) 
                 {
-                    Log.Debug("Calling respawn event for plauer -> position");
+                    LogManager.Debug("Calling respawn event for plauer -> position");
                     // Let's make this SCP escape
                     OnEscaping(new(Player, RoleTypeId.ChaosConscript, EscapeScenario.None));
                 }
@@ -227,7 +227,7 @@ namespace UncomplicatedCustomRoles.Events
                 {
                     if (Role.Value.RequiredPermission != null && Role.Value.RequiredPermission != string.Empty && !Player.CheckPermission(Role.Value.RequiredPermission))
                     {
-                        Log.Debug($"[NOTICE] Ignoring the role {Role.Value.Id} [{Role.Value.Name}] while creating the list for the player {Player.Nickname} due to: cannot [permissions].");
+                        LogManager.Debug($"[NOTICE] Ignoring the role {Role.Value.Id} [{Role.Value.Name}] while creating the list for the player {Player.Nickname} due to: cannot [permissions].");
                         continue;
                     }
 
@@ -243,7 +243,7 @@ namespace UncomplicatedCustomRoles.Events
 
             if (Plugin.PlayerRegistry.ContainsKey(Player.Id))
             {
-                Log.Debug("Was evalutating role select for an already custom role player, stopping");
+                LogManager.Debug("Was evalutating role select for an already custom role player, stopping");
                 return;
             }
 
@@ -260,11 +260,11 @@ namespace UncomplicatedCustomRoles.Events
                     {
                         Timing.RunCoroutine(DoSpawnPlayer(Player, RoleId, false));
                         Plugin.RolesCount[RoleId].Add(Player.Id);
-                        Log.Debug($"Player {Player.Nickname} spawned as CustomRole {RoleId}");
+                        LogManager.Debug($"Player {Player.Nickname} spawned as CustomRole {RoleId}");
                     }
                     else
                     {
-                        Log.Debug($"Player {Player.Nickname} won't be spawned as CustomRole {RoleId} because it has reached the maximus number");
+                        LogManager.Debug($"Player {Player.Nickname} won't be spawned as CustomRole {RoleId} because it has reached the maximus number");
                     }
                 }
             }

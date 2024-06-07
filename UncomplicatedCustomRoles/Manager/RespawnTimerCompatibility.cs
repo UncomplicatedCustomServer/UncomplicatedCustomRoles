@@ -33,7 +33,7 @@ namespace UncomplicatedCustomRoles.Manager
             TimerView = RespawnTimer.Assembly.GetType("RespawnTimer.API.Features.TimerView");
             if (TimerView is null)
             {
-                Log.Debug("Compatibility loader for RespawnTimer failed: no class 'RespawnTimer.API.Features.TimerView' present!");
+                LogManager.Debug("Compatibility loader for RespawnTimer failed: no class 'RespawnTimer.API.Features.TimerView' present!");
                 return false;
             }
 
@@ -54,7 +54,7 @@ namespace UncomplicatedCustomRoles.Manager
                 GetPublicRoleName
             });
 
-            Log.Debug("Compatibility loader for RespawnTimer: success");
+            LogManager.Debug("Compatibility loader for RespawnTimer: success");
         }
 
         public static void Disable()

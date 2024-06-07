@@ -1,10 +1,12 @@
 ﻿using Exiled.API.Features;
+using Exiled.Loader;
 using MEC;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace UncomplicatedCustomRoles.Manager
@@ -68,7 +70,7 @@ namespace UncomplicatedCustomRoles.Manager
             HttpClient = new();
         }
 
-        internal HttpResponseMessage HttpRequest(string url)
+        internal HttpResponseMessage HttpGetRequest(string url)
         {
             try
             {
@@ -77,7 +79,24 @@ namespace UncomplicatedCustomRoles.Manager
                 Response.Wait();
 
                 return Response.Result;
-            } catch(Exception)
+            } 
+            catch(Exception)
+            {
+                return null;
+            }
+        }
+
+        internal HttpResponseMessage HttpPutRequest(string url, string content)
+        {
+            try
+            {
+                Task<HttpResponseMessage> Response = Task.Run(() => HttpClient.PutAsync(url, new StringContent(content, Encoding.UTF8, "text/plain")));
+
+                Response.Wait();
+
+                return Response.Result;
+            }
+            catch (Exception)
             {
                 return null;
             }
@@ -85,11 +104,17 @@ namespace UncomplicatedCustomRoles.Manager
 
         internal string RetriveString(HttpResponseMessage response)
         {
+            if (response is null)
+                return string.Empty;
+
             return RetriveString(response.Content);
         }
 
         internal string RetriveString(HttpContent response)
         {
+            if (response is null)
+                return string.Empty;
+
             Task<string> String = Task.Run(response.ReadAsStringAsync);
 
             String.Wait();
@@ -99,21 +124,19 @@ namespace UncomplicatedCustomRoles.Manager
 
         public HttpStatusCode AddServerOwner(string discordId)
         {
-            return HttpRequest($"{Endpoint}/owners/add?discordid={discordId}").StatusCode;
+            return HttpGetRequest($"{Endpoint}/owners/add?discordid={discordId}")?.StatusCode ?? HttpStatusCode.InternalServerError;
         }
 
         public Version LatestVersion()
         {
-            return new(RetriveString(HttpRequest($"{Endpoint}/{Prefix}/version?vts=5")));
+            return new(RetriveString(HttpGetRequest($"{Endpoint}/{Prefix}/version?vts=5")));
         }
 
         public bool IsLatestVersion(out Version latest)
         {
             latest = LatestVersion();
             if (latest.CompareTo(Plugin.Instance.Version) > 0)
-            {
                 return false;
-            }
 
             return true;
 
@@ -122,9 +145,7 @@ namespace UncomplicatedCustomRoles.Manager
         public bool IsLatestVersion()
         {
             if (LatestVersion().CompareTo(Plugin.Instance.Version) > 0)
-            {
                 return false;
-            }
 
             return true;
         }
@@ -132,7 +153,7 @@ namespace UncomplicatedCustomRoles.Manager
         internal bool Presence(out HttpContent httpContent)
         {
             float Start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            HttpResponseMessage Status = HttpRequest($"{Endpoint}/{Prefix}/presence?port={Server.Port}&cores={Environment.ProcessorCount}&ram=0&version={Plugin.Instance.Version}");
+            HttpResponseMessage Status = HttpGetRequest($"{Endpoint}/{Prefix}/presence?port={Server.Port}&cores={Environment.ProcessorCount}&ram=0&version={Plugin.Instance.Version}");
             httpContent = Status.Content;
             ResponseTimes.Add(DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start);
             if (Status.StatusCode == HttpStatusCode.OK)
@@ -142,15 +163,26 @@ namespace UncomplicatedCustomRoles.Manager
             return false;
         }
 
+        internal HttpStatusCode ShareLogs(string data, out HttpContent httpContent)
+        {
+            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&plugin_version={Plugin.Instance.Version}", data);
+            httpContent = Status.Content;
+            return Status.StatusCode;
+        }
+
         internal IEnumerator<float> PresenceAction()
         {
             while (Active && Errors <= MaxErrors)
             {
                 if (!Presence(out HttpContent content))
                 {
-                    Dictionary<string, string> Response = JsonConvert.DeserializeObject<Dictionary<string, string>>(RetriveString(content));
-                    Errors++;
-                    Log.Warn($"[UCS HTTP Manager] >> Error while trying to put data inside our APIs.\nThe endpoint say: {Response["message"]} ({Response["status"]})");
+                    try
+                    {
+                        Dictionary<string, string> Response = JsonConvert.DeserializeObject<Dictionary<string, string>>(RetriveString(content));
+                        Errors++;
+                        LogManager.Warn($"[UCS HTTP Manager] >> Error while trying to put data inside our APIs.\nThe endpoint say: {Response["message"]} ({Response["status"]})");
+                    }
+                    catch (Exception) { }
                 }
 
                 yield return Timing.WaitForSeconds(500.0f);
@@ -160,9 +192,7 @@ namespace UncomplicatedCustomRoles.Manager
         public void Start()
         {
             if (Active)
-            {
                 return;
-            }
 
             Active = true;
             PresenceCoroutine = Timing.RunCoroutine(PresenceAction());
@@ -171,9 +201,7 @@ namespace UncomplicatedCustomRoles.Manager
         public void Stop()
         {
             if (!Active)
-            {
                 return;
-            }
 
             Active = false;
             Timing.KillCoroutines(PresenceCoroutine);

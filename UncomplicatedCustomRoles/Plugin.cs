@@ -78,16 +78,16 @@ namespace UncomplicatedCustomRoles
 
             if (Config.EnableBasicLogs)
             {
-                Log.Info("===========================================");
-                Log.Info(" Thanks for using UncomplicatedCustomRoles");
-                Log.Info("        by FoxWorn3365 & Dr.Agenda");
-                Log.Info("===========================================");
-                Log.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
+                LogManager.Info("===========================================");
+                LogManager.Info(" Thanks for using UncomplicatedCustomRoles");
+                LogManager.Info("        by FoxWorn3365 & Dr.Agenda");
+                LogManager.Info("===========================================");
+                LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
             }
 
             if (!HttpManager.IsLatestVersion(out Version latest))
             {
-                Log.Warn($"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Version}  | Latest available: v{latest}\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
+                LogManager.Warn($"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Version} | Latest available: v{latest}\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
             }
 
             FileConfigs.Welcome();

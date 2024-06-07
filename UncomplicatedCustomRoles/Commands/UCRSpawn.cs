@@ -41,7 +41,7 @@ namespace UncomplicatedCustomRoles.Commands
             {
                 int Id = int.Parse(arguments[1]);
 
-                Log.Debug($"Selected role Id as Int32: {Id}");
+                LogManager.Debug($"Selected role Id as Int32: {Id}");
                 if (!Plugin.CustomRoles.ContainsKey(Id))
                 {
                     response = $"Role with the Id {Id} was not found!";
@@ -54,12 +54,12 @@ namespace UncomplicatedCustomRoles.Commands
 
                     if (arguments.Count > 2 && arguments[2] is not null && arguments[2] == "sync")
                     {
-                        Log.Debug("Spawning player sync");
+                        LogManager.Debug("Spawning player sync");
                         SpawnManager.SummonCustomSubclass(Player, Id, true);
                     }
                     else
                     {
-                        Log.Debug("Spawning player async");
+                        LogManager.Debug("Spawning player async");
                         Timing.RunCoroutine(Handler.DoSpawnPlayer(Player, Id));
                     }
                     return true;
