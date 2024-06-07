@@ -24,6 +24,7 @@ namespace UncomplicatedCustomRoles.Commands
             RegisteredCommands.Add(new UCROwner());
             RegisteredCommands.Add(new UCRRole());
             RegisteredCommands.Add(new UCRSpawn());
+            RegisteredCommands.Add(new UCRReload());
         }
 
         public List<IUCRCommand> RegisteredCommands { get; } = new();

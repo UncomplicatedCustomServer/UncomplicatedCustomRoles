@@ -24,6 +24,14 @@ namespace UncomplicatedCustomRoles.Manager
 
         public void LoadAll(string localDir = "")
         {
+            LoadAction((CustomRole Role) =>
+            {
+                SpawnManager.RegisterCustomSubclass(Role);
+            }, localDir);
+        }
+
+        public void LoadAction(Action<CustomRole> action, string localDir = "")
+        {
             foreach (string FileName in List(localDir))
             {
                 try
@@ -44,7 +52,7 @@ namespace UncomplicatedCustomRoles.Manager
                     foreach (CustomRole Role in Roles["custom_roles"])
                     {
                         LogManager.Debug($"Proposed to the registerer the external role {Role.Id} [{Role.Name}] from file:\n{FileName}");
-                        SpawnManager.RegisterCustomSubclass(Role);
+                        action(Role);
                     }
                 }
                 catch (Exception ex)

@@ -49,7 +49,7 @@ namespace UncomplicatedCustomRoles
 
         internal static HttpManager HttpManager = new("ucr");
 
-        internal FileConfigs FileConfigs;
+        internal static FileConfigs FileConfigs;
 
         public override void OnEnabled()
         {

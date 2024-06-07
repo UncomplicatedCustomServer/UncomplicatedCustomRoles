@@ -57,6 +57,7 @@
     <Compile Include="Commands\UCRLogShare.cs" />
     <Compile Include="Commands\UCROwner.cs" />
     <Compile Include="Commands\UCRRole.cs" />
+    <Compile Include="Commands\UCRReload.cs" />
     <Compile Include="Commands\UCRSpawn.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Elements\CustomRole.cs" />
@@ -466,10 +467,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="EXILED">
-      <Version>8.9.2</Version>
-    </PackageReference>
-    <PackageReference Include="Lib.Harmony">
-      <Version>2.3.3</Version>
+      <Version>8.9.4</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.3</Version>
