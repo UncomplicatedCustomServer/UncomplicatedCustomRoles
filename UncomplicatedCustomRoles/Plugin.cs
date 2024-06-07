@@ -19,9 +19,9 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(2, 1, 3);
+        public override Version Version { get; } = new(2, 2, 0);
 
-        public override Version RequiredExiledVersion { get; } = new(8, 8, 1);
+        public override Version RequiredExiledVersion { get; } = new(8, 9, 4);
 
         internal static Plugin Instance;
 
