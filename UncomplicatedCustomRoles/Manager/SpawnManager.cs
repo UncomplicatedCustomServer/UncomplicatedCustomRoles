@@ -18,7 +18,7 @@ namespace UncomplicatedCustomRoles.Manager
         {
             if (!SubclassValidator(Role))
             {
-                Log.Warn($"Failed to register the UCR role with the ID {Role.Id} due to the validator check!");
+                LogManager.Warn($"Failed to register the UCR role with the ID {Role.Id} due to the validator check!");
 
                 return;
             }
@@ -29,7 +29,7 @@ namespace UncomplicatedCustomRoles.Manager
 
                 if (Plugin.Instance.Config.EnableBasicLogs)
                 {
-                    Log.Info($"Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
+                    LogManager.Info($"Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
                 }
 
                 return;
@@ -37,15 +37,15 @@ namespace UncomplicatedCustomRoles.Manager
 
             if (notLoadIfLoaded)
             {
-                Log.Debug($"Can't load role {Role.Id} {Role.Name} due to plugin settings!\nPlease reach UCS support for UCR!");
+                LogManager.Debug($"Can't load role {Role.Id} {Role.Name} due to plugin settings!\nPlease reach UCS support for UCR!");
                 return;
             }
 
-            Log.Warn($"Failed to register the UCR role with the ID {Role.Id}: The problem can be the following: ERR_ID_ALREADY_HERE!\nTrying to assign a new one...");
+            LogManager.Warn($"Failed to register the UCR role with the ID {Role.Id}: The problem can be the following: ERR_ID_ALREADY_HERE!\nTrying to assign a new one...");
 
             int NewId = GetFirstFreeID(Role.Id);
 
-            Log.Info($"Custom Role {Role.Name} with the old Id {Role.Id} will be registered with the following Id: {NewId}");
+            LogManager.Info($"Custom Role {Role.Name} with the old Id {Role.Id} will be registered with the following Id: {NewId}");
 
             Role.Id = NewId;
 
@@ -61,20 +61,20 @@ namespace UncomplicatedCustomRoles.Manager
             {
                 if (Role.Spawn == SpawnLocationType.ZoneSpawn && Role.SpawnZones.Count() < 1)
                 {
-                    Log.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the ZoneSpawn as SpawnType the List SpawnZones can't be empty!");
+                    LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the ZoneSpawn as SpawnType the List SpawnZones can't be empty!");
                     return false;
                 } else if (Role.Spawn == SpawnLocationType.RoomsSpawn && Role.SpawnRooms.Count() < 1)
                 {
-                    Log.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the RoomSpawn as SpawnType the List SpawnRooms can't be empty!");
+                    LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the RoomSpawn as SpawnType the List SpawnRooms can't be empty!");
                     return false;
                 } else if (Role.Spawn == SpawnLocationType.PositionSpawn && Role.SpawnPosition == new Vector3(0, 0, 0))
                 {
-                    Log.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the PositionSpawn as SpawnType the Vector3 SpawnPosition can't be empty!");
+                    LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the PositionSpawn as SpawnType the Vector3 SpawnPosition can't be empty!");
                     return false;
                 }
                 else if (Role.MinPlayers == 0)
                 {
-                    Log.Warn($"The UCR custom role with the ID {Role.Id} failed the check: the value of MinPlayers field must be greater than or equals to 1!");
+                    LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: the value of MinPlayers field must be greater than or equals to 1!");
                     return false;
                 }
                 return true;
@@ -90,7 +90,7 @@ namespace UncomplicatedCustomRoles.Manager
                     player.RankName = Plugin.Tags[player.Id][0];
                     player.RankColor = Plugin.Tags[player.Id][1];
 
-                    Log.Debug($"Badge detected, represted");
+                    LogManager.Debug($"Badge detected, represted");
 
                     Plugin.Tags.Remove(player.Id);
                 }
@@ -117,7 +117,7 @@ namespace UncomplicatedCustomRoles.Manager
             // Does the role exists?
             if (!Plugin.CustomRoles.ContainsKey(Id))
             {
-                Log.Warn($"Sorry but the role with the Id {Id} is not registered inside UncomplicatedCustomRoles!");
+                LogManager.Warn($"Sorry but the role with the Id {Id} is not registered inside UncomplicatedCustomRoles!");
                 return;
             }
 
@@ -125,7 +125,7 @@ namespace UncomplicatedCustomRoles.Manager
 
             if (!DoBypassRoleOverwrite && !Role.CanReplaceRoles.Contains(Player.Role.Type))
             {
-                Log.Debug($"Can't spawn the player {Player.Nickname} as UCR custom role {Role.Name} because it's role is not in the overwrittable list of custom role!\nStrange because this should be managed correctly by the plugin!");
+                LogManager.Debug($"Can't spawn the player {Player.Nickname} as UCR custom role {Role.Name} because it's role is not in the overwrittable list of custom role!\nStrange because this should be managed correctly by the plugin!");
                 return;
             }
 
@@ -199,7 +199,7 @@ namespace UncomplicatedCustomRoles.Manager
                         }
                         catch (Exception ex)
                         {
-                            Log.Debug($"Error while giving a custom item.\nError: {ex.Message}");
+                            LogManager.Debug($"Error while giving a custom item.\nError: {ex.Message}");
                         }
                     }
                 }
@@ -272,7 +272,7 @@ namespace UncomplicatedCustomRoles.Manager
                         Player.RankColor ?? ""
                 });
 
-                Log.Debug($"Badge detected, putting {Role.BadgeName}@{Role.BadgeColor} to player {Player.Id}");
+                LogManager.Debug($"Badge detected, putting {Role.BadgeName}@{Role.BadgeColor} to player {Player.Id}");
 
                 Player.RankName = Role.BadgeName;
                 Player.RankColor = Role.BadgeColor;
@@ -280,7 +280,7 @@ namespace UncomplicatedCustomRoles.Manager
 
             if (Role.RoleAppearance != Role.Role)
             {
-                Log.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
+                LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
                 Player.ChangeAppearance(Role.RoleAppearance, true);
             }
         }
@@ -318,13 +318,13 @@ namespace UncomplicatedCustomRoles.Manager
                 }
                 else if (Action[0].ToUpper() == "CR")
                 {
-                    Log.Debug($"Start parsing the action for a custom role. Full: {roleAfterEscape}");
+                    LogManager.Debug($"Start parsing the action for a custom role. Full: {roleAfterEscape}");
                     if (int.TryParse(Action[1], out int Id))
                     {
-                        Log.Debug($"Found a valid Id (i guess so): {Id}");
+                        LogManager.Debug($"Found a valid Id (i guess so): {Id}");
                         if (Plugin.CustomRoles.ContainsKey(Id))
                         {
-                            Log.Debug($"Seems that the role {Id} really exists, let's gooo!");
+                            LogManager.Debug($"Seems that the role {Id} really exists, let's gooo!");
                             SummonCustomSubclass(player, Id, true);
                         }
                     }

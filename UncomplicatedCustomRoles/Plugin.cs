@@ -19,9 +19,9 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(2, 1, 0);
+        public override Version Version { get; } = new(2, 2, 0);
 
-        public override Version RequiredExiledVersion { get; } = new(8, 8, 1);
+        public override Version RequiredExiledVersion { get; } = new(8, 9, 4);
 
         internal static Plugin Instance;
 
@@ -49,7 +49,7 @@ namespace UncomplicatedCustomRoles
 
         internal static HttpManager HttpManager = new("ucr");
 
-        internal FileConfigs FileConfigs;
+        internal static FileConfigs FileConfigs;
 
         public override void OnEnabled()
         {
@@ -78,16 +78,16 @@ namespace UncomplicatedCustomRoles
 
             if (Config.EnableBasicLogs)
             {
-                Log.Info("===========================================");
-                Log.Info(" Thanks for using UncomplicatedCustomRoles");
-                Log.Info("        by FoxWorn3365 & Dr.Agenda");
-                Log.Info("===========================================");
-                Log.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
+                LogManager.Info("===========================================");
+                LogManager.Info(" Thanks for using UncomplicatedCustomRoles");
+                LogManager.Info("        by FoxWorn3365 & Dr.Agenda");
+                LogManager.Info("===========================================");
+                LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
             }
 
             if (!HttpManager.IsLatestVersion(out Version latest))
             {
-                Log.Warn($"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Version}  | Latest available: v{latest}\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
+                LogManager.Warn($"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Version} | Latest available: v{latest}\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
             }
 
             FileConfigs.Welcome();
