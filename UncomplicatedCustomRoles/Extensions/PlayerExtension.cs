@@ -1,5 +1,6 @@
 ﻿using Exiled.API.Features;
 using MEC;
+using System;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
@@ -61,6 +62,18 @@ namespace UncomplicatedCustomRoles.Extensions
         public static void SetCustomRole(this Player player, ICustomRole role)
         {
             Timing.RunCoroutine(Events.EventHandler.DoSpawnPlayer(player, role.Id));
+        }
+
+        /// <summary>
+        /// Set every attribute of a given <see cref="ICustomRole"/> to a <see cref="Player"/> without considering the spawn settings.
+        /// Use this only at your own risk and only if you know what you are doing!
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="role"></param>
+        [Obsolete("You should not use this function unless you want to handle the role spawn by yourself!", false)]
+        public static void SetCustomRoleAttributes(this Player player, ICustomRole role)
+        {
+            SpawnManager.SummonSubclassApplier(player, role);
         }
 
         /// <summary>

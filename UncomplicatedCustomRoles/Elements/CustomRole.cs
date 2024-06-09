@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UncomplicatedCustomRoles.Manager;
 using UncomplicatedCustomRoles.Interfaces;
 using UnityEngine;
+using UncomplicatedCustomRoles.API.Features;
 
 namespace UncomplicatedCustomRoles.Elements
 {
@@ -20,20 +21,9 @@ namespace UncomplicatedCustomRoles.Elements
 
         public string BadgeColor { get; set; } = string.Empty;
 
-        public int MaxPlayers { get; set; } = 5;
-
-        public int MinPlayers { get; set; } = 1;
-
-        public int SpawnChance { get; set; } = 60;
-
         public RoleTypeId Role { get; set; } = RoleTypeId.ClassD;
 
         public RoleTypeId RoleAppearance { get; set; } = RoleTypeId.ClassD;
-
-        public List<RoleTypeId> CanReplaceRoles { get; set; } = new()
-        {
-            RoleTypeId.ClassD
-        };
 
         public float Health { get; set; } = 100f;
 
@@ -77,22 +67,9 @@ namespace UncomplicatedCustomRoles.Elements
             {AmmoType.Nato9, 5 }
         };
 
-        public SpawnLocationType Spawn { get; set; } = SpawnLocationType.RoomsSpawn;
-
-        public List<ZoneType> SpawnZones { get; set; } = new();
-
-        public List<RoomType> SpawnRooms { get; set; } = new()
-        {
-            RoomType.LczToilets
-        };
-
-        public Vector3 SpawnPosition { get; set; } = new();
-
-        public Vector3 SpawnOffset { get; set; } = new();
-
         public float DamageMultiplier { get; set; } = 1f;
 
-        public string? RequiredPermission { get; set; } = null;
+        public SpawnBehaviour? SpawnSettings { get; set; } = new();
 
         public bool IgnoreSpawnSystem { get; set; } = false;
     }

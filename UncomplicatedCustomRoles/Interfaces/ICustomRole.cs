@@ -1,6 +1,7 @@
 ﻿using Exiled.API.Enums;
 using PlayerRoles;
 using System.Collections.Generic;
+using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 
@@ -19,17 +20,9 @@ namespace UncomplicatedCustomRoles.Interfaces
 
         public abstract string BadgeColor { get; set; }
 
-        public abstract int MaxPlayers { get; set; }
-
-        public abstract int MinPlayers { get; set; }
-
-        public abstract int SpawnChance { get; set; }
-
         public abstract RoleTypeId Role { get; set; }
 
         public abstract RoleTypeId RoleAppearance { get; set; }
-
-        public abstract List<RoleTypeId> CanReplaceRoles { get; set; }
 
         public abstract float Health { get; set; }
 
@@ -63,19 +56,9 @@ namespace UncomplicatedCustomRoles.Interfaces
 
         public abstract Dictionary<AmmoType, ushort> Ammo { get; set; }
 
-        public abstract SpawnLocationType Spawn { get; set; }
-
-        public abstract List<ZoneType> SpawnZones { get; set; }
-
-        public abstract List<RoomType> SpawnRooms { get; set; }
-
-        public abstract Vector3 SpawnPosition { get; set; }
-
-        public abstract Vector3 SpawnOffset { get; set; }
-
         public abstract float DamageMultiplier { get; set; }
 
-        public abstract string? RequiredPermission { get; set; }
+        public abstract SpawnBehaviour? SpawnSettings { get; set; }
 
         public abstract bool IgnoreSpawnSystem { get; set; }
     }

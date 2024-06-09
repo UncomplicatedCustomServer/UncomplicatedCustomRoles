@@ -83,7 +83,7 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnScp049StartReviving(StartingRecallEventArgs Recall)
         {
-            if (Plugin.CustomRoles.Where(cr => cr.Value.CanReplaceRoles.Contains(RoleTypeId.Scp0492)).Count() > 0) {
+            if (Plugin.CustomRoles.Where(cr => cr.Value.SpawnSettings is not null && cr.Value.SpawnSettings.CanReplaceRoles.Contains(RoleTypeId.Scp0492)).Count() > 0) {
                 Plugin.RoleSpawnQueue.Add(Recall.Target.Id);
             }
         }
@@ -221,21 +221,21 @@ namespace UncomplicatedCustomRoles.Events
                 { RoleTypeId.FacilityGuard, new() }
             };
 
-            foreach (KeyValuePair<int, ICustomRole> Role in Plugin.CustomRoles)
+            foreach (ICustomRole Role in Plugin.CustomRoles.Values.Where(cr => cr.SpawnSettings is not null))
             {
-                if (!Role.Value.IgnoreSpawnSystem && Player.List.Count() >= Role.Value.MinPlayers)
+                if (!Role.IgnoreSpawnSystem && Player.List.Count() >= Role.SpawnSettings.MinPlayers)
                 {
-                    if (Role.Value.RequiredPermission != null && Role.Value.RequiredPermission != string.Empty && !Player.CheckPermission(Role.Value.RequiredPermission))
+                    if (Role.SpawnSettings.RequiredPermission != null && Role.SpawnSettings.RequiredPermission != string.Empty && !Player.CheckPermission(Role.SpawnSettings.RequiredPermission))
                     {
-                        LogManager.Debug($"[NOTICE] Ignoring the role {Role.Value.Id} [{Role.Value.Name}] while creating the list for the player {Player.Nickname} due to: cannot [permissions].");
+                        LogManager.Debug($"[NOTICE] Ignoring the role {Role.Id} [{Role.Name}] while creating the list for the player {Player.Nickname} due to: cannot [permissions].");
                         continue;
                     }
 
-                    foreach (RoleTypeId RoleType in Role.Value.CanReplaceRoles)
+                    foreach (RoleTypeId RoleType in Role.SpawnSettings.CanReplaceRoles)
                     {
-                        for (int a = 0; a < Role.Value.SpawnChance; a++)
+                        for (int a = 0; a < Role.SpawnSettings.SpawnChance; a++)
                         {
-                            RolePercentage[RoleType].Add(Role.Value);
+                            RolePercentage[RoleType].Add(Role);
                         }
                     }
                 }
@@ -256,7 +256,7 @@ namespace UncomplicatedCustomRoles.Events
                     // The role exists, good, let's give the player a role
                     int RoleId = RolePercentage[Player.Role.Type].RandomItem().Id;
 
-                    if (Plugin.RolesCount[RoleId].Count() < Plugin.CustomRoles[RoleId].MaxPlayers)
+                    if (Plugin.RolesCount[RoleId].Count() < Plugin.CustomRoles[RoleId].SpawnSettings.MaxPlayers)
                     {
                         Timing.RunCoroutine(DoSpawnPlayer(Player, RoleId, false));
                         Plugin.RolesCount[RoleId].Add(Player.Id);

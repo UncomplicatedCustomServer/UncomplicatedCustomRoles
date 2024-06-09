@@ -12,7 +12,7 @@ using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.Manager
 {
-    public class SpawnManager
+    internal class SpawnManager
     {
         public static void RegisterCustomSubclass(ICustomRole Role, bool notLoadIfLoaded = false)
         {
@@ -54,25 +54,31 @@ namespace UncomplicatedCustomRoles.Manager
 
         public static bool SubclassValidator(ICustomRole Role)
         {
-            if (Role == null)
+            if (Role is null)
             {
                 return false;
             } else
             {
-                if (Role.Spawn == SpawnLocationType.ZoneSpawn && Role.SpawnZones.Count() < 1)
+                if (Role.SpawnSettings is null)
+                {
+                    LogManager.Warn($"Is kinda useless registering a role with no spawn_settings.\nFound (or not found) in role: {Role.Name} ({Role.Id})");
+                    return false;
+                }
+
+                if (Role.SpawnSettings.Spawn == SpawnLocationType.ZoneSpawn && Role.SpawnSettings.SpawnZones.Count() < 1)
                 {
                     LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the ZoneSpawn as SpawnType the List SpawnZones can't be empty!");
                     return false;
-                } else if (Role.Spawn == SpawnLocationType.RoomsSpawn && Role.SpawnRooms.Count() < 1)
+                } else if (Role.SpawnSettings.Spawn == SpawnLocationType.RoomsSpawn && Role.SpawnSettings.SpawnRooms.Count() < 1)
                 {
                     LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the RoomSpawn as SpawnType the List SpawnRooms can't be empty!");
                     return false;
-                } else if (Role.Spawn == SpawnLocationType.PositionSpawn && Role.SpawnPosition == new Vector3(0, 0, 0))
+                } else if (Role.SpawnSettings.Spawn == SpawnLocationType.PositionSpawn && Role.SpawnSettings.SpawnPosition == new Vector3(0, 0, 0))
                 {
                     LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the PositionSpawn as SpawnType the Vector3 SpawnPosition can't be empty!");
                     return false;
                 }
-                else if (Role.MinPlayers == 0)
+                else if (Role.SpawnSettings.MinPlayers == 0)
                 {
                     LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: the value of MinPlayers field must be greater than or equals to 1!");
                     return false;
@@ -90,7 +96,7 @@ namespace UncomplicatedCustomRoles.Manager
                     player.RankName = Plugin.Tags[player.Id][0];
                     player.RankColor = Plugin.Tags[player.Id][1];
 
-                    LogManager.Debug($"Badge detected, represted");
+                    LogManager.Debug($"Badge detected, fixed");
 
                     Plugin.Tags.Remove(player.Id);
                 }
@@ -123,51 +129,62 @@ namespace UncomplicatedCustomRoles.Manager
 
             ICustomRole Role = Plugin.CustomRoles[Id];
 
-            if (!DoBypassRoleOverwrite && !Role.CanReplaceRoles.Contains(Player.Role.Type))
+            if (Role.SpawnSettings is null)
+            {
+                LogManager.Warn($"Tried to spawn a custom role without spawn_settings, aborting the SummonCustomSubclass(...) action!\nRole: {Role.Name} ({Role.Id})");
+                return;
+            }
+
+            if (!DoBypassRoleOverwrite && !Role.SpawnSettings.CanReplaceRoles.Contains(Player.Role.Type))
             {
                 LogManager.Debug($"Can't spawn the player {Player.Nickname} as UCR custom role {Role.Name} because it's role is not in the overwrittable list of custom role!\nStrange because this should be managed correctly by the plugin!");
                 return;
             }
 
+            Vector3 BasicPosition = Player.Position;
+
             RoleSpawnFlags SpawnFlag = RoleSpawnFlags.None;
 
-            if (Role.Spawn == SpawnLocationType.KeepRoleSpawn)
+            if (Role.SpawnSettings.Spawn == SpawnLocationType.KeepRoleSpawn)
             {
                 SpawnFlag = RoleSpawnFlags.UseSpawnpoint;
             }
 
             Player.Role.Set(Role.Role, SpawnFlag);
 
-            Vector3 BasicPosition = Player.Position;
-
-            if (Role.Spawn == SpawnLocationType.KeepRoleSpawn)
+            if (Role.SpawnSettings.Spawn == SpawnLocationType.KeepCurrentPositionSpawn)
             {
                 Player.Position = BasicPosition;
             }
 
             if (SpawnFlag == RoleSpawnFlags.None)
             {
-                switch (Role.Spawn)
+                switch (Role.SpawnSettings.Spawn)
                 {
                     case SpawnLocationType.ZoneSpawn:
-                        Player.Position = Room.List.Where(room => room.Zone == Role.SpawnZones.RandomItem() && room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
+                        Player.Position = Room.List.Where(room => room.Zone == Role.SpawnSettings.SpawnZones.RandomItem() && room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
                         break;
                     case SpawnLocationType.CompleteRandomSpawn:
                         Player.Position = Room.List.Where(room => room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
                         break;
                     case SpawnLocationType.RoomsSpawn:
-                        Player.Position = Room.Get(Role.SpawnRooms.RandomItem()).Position.AddY(1.5f);
-                        if (Role.SpawnOffset != new Vector3())
+                        Player.Position = Room.Get(Role.SpawnSettings.SpawnRooms.RandomItem()).Position.AddY(1.5f);
+                        if (Role.SpawnSettings.SpawnOffset != new Vector3())
                         {
-                            Player.Position += Role.SpawnOffset;
+                            Player.Position += Role.SpawnSettings.SpawnOffset;
                         }
                         break;
                     case SpawnLocationType.PositionSpawn:
-                        Player.Position = Role.SpawnPosition;
+                        Player.Position = Role.SpawnSettings.SpawnPosition;
                         break;
                 };
             }
 
+            SummonSubclassApplier(Player, Role);
+        }
+
+        public static void SummonSubclassApplier(Player Player, ICustomRole Role)
+        {
             Player.ResetInventory(Role.Inventory);
 
             if (Role.CustomItemsInventory.Count() > 0)
@@ -206,7 +223,7 @@ namespace UncomplicatedCustomRoles.Manager
             }
 
             Player.IsUsingStamina = !Role.InfiniteStamina;
-            
+
             if (Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
             {
                 foreach (KeyValuePair<AmmoType, ushort> Ammo in Role.Ammo)

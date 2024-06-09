@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="API\Features\CustomRole.cs" />
     <Compile Include="API\Features\InfiniteEffect.cs" />
+    <Compile Include="API\Features\SpawnBehaviour.cs" />
     <Compile Include="Commands\CommandParent.cs" />
     <Compile Include="Commands\UCRList.cs" />
     <Compile Include="Commands\UCRLogShare.cs" />
@@ -467,7 +468,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="EXILED">
-      <Version>8.9.4</Version>
+      <Version>8.9.5</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.3</Version>
