@@ -13,7 +13,12 @@ namespace UncomplicatedCustomRoles.API.Features
         public static List<ICustomRole> List { get; } = Plugin.CustomRoles.Values.ToList();
 
         /// <summary>
-        /// Get a list of every alive player with a custom role and the custom role Id
+        /// Handle the Respawn Queue for waves handled by UCR.
+        /// </summary>
+        public List<int> RespawnQueue = Plugin.RoleSpawnQueue;
+
+        /// <summary>
+        /// Get a list of every alive player with a custom role and the custom role Id.
         /// </summary>
         public static Dictionary<int, int> Alive { get; } = Plugin.PlayerRegistry;
 
