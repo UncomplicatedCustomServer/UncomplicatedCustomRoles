@@ -10,7 +10,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Get a list of every <see cref="ICustomRole"/> registered.
         /// </summary>
-        public static List<ICustomRole> List { get; } = Plugin.CustomRoles.Values.ToList();
+        public static List<ICustomRole> List { get; } = new(Plugin.CustomRoles.Values);
 
         /// <summary>
         /// Handle the Respawn Queue for waves handled by UCR.

@@ -19,7 +19,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(2, 2, 0);
+        public override Version Version { get; } = new(2, 2, 5);
 
         public override Version RequiredExiledVersion { get; } = new(8, 9, 4);
 

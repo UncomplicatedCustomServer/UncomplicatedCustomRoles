@@ -9,6 +9,7 @@ using UnityEngine;
 using Exiled.CustomItems.API.Features;
 using System;
 using UncomplicatedCustomRoles.Extensions;
+using MEC;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -260,6 +261,7 @@ namespace UncomplicatedCustomRoles.Manager
 
             // Add the player to the player classes list
             Plugin.PlayerRegistry.Add(Player.Id, Role.Id);
+            Plugin.RolesCount[Role.Id].Add(Player.Id);
 
             if (Role.HumeShield > 0)
             {
@@ -298,7 +300,10 @@ namespace UncomplicatedCustomRoles.Manager
             if (Role.RoleAppearance != Role.Role)
             {
                 LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
-                Player.ChangeAppearance(Role.RoleAppearance, true);
+                Timing.CallDelayed(1f, () =>
+                {
+                    Player.ChangeAppearance(Role.RoleAppearance, true);
+                });
             }
         }
         

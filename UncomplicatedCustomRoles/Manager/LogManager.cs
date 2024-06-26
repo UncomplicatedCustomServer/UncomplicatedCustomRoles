@@ -24,19 +24,19 @@ namespace UncomplicatedCustomRoles.Manager
 
         public static void Info(string message)
         {
-            History.Add(new(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Debug), message));
+            History.Add(new(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Info), message));
             Log.Info(message);
         }
 
         public static void Warn(string message)
         {
-            History.Add(new(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Debug), message));
+            History.Add(new(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Warn), message));
             Log.Warn(message);
         }
 
         public static void Error(string message)
         {
-            History.Add(new(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Debug), message));
+            History.Add(new(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Error), message));
             Log.Error(message);
         }
 
