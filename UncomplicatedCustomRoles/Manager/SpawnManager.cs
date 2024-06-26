@@ -142,6 +142,13 @@ namespace UncomplicatedCustomRoles.Manager
                 return;
             }
 
+            Plugin.InternalCooldownQueue.Add(Player.Id);
+
+            Timing.CallDelayed(4f, () =>
+            {
+                Plugin.InternalCooldownQueue.Remove(Player.Id);
+            });
+
             Vector3 BasicPosition = Player.Position;
 
             RoleSpawnFlags SpawnFlag = RoleSpawnFlags.None;

@@ -19,7 +19,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(2, 2, 5);
+        public override Version Version { get; } = new(2, 2, 6);
 
         public override Version RequiredExiledVersion { get; } = new(8, 9, 4);
 
@@ -37,6 +37,8 @@ namespace UncomplicatedCustomRoles
 
         // PlayerId => List<IUCREffect>
         internal static Dictionary<int, List<IUCREffect>> PermanentEffectStatus = new();
+
+        internal static List<int> InternalCooldownQueue = new();
 
         // List of PlayerIds
         internal static List<int> RoleSpawnQueue = new();

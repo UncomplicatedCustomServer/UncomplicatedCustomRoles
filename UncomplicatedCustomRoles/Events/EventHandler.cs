@@ -46,10 +46,7 @@ namespace UncomplicatedCustomRoles.Events
             }
         }
 
-        public void OnPlayerSpawned(SpawnedEventArgs Spawned)
-        {
-            Log.Warn("Called SPAWNED event!");
-        }
+        public void OnPlayerSpawned(SpawnedEventArgs ev) { }
 
         public void OnScp049StartReviving(StartingRecallEventArgs Recall)
         {
@@ -66,6 +63,9 @@ namespace UncomplicatedCustomRoles.Events
         public void OnSpawning(SpawningEventArgs Spawning)
         {
             Log.Warn("Called SPAWNING event");
+
+            if (Plugin.InternalCooldownQueue.Contains(Spawning.Player.Id))
+                return;
 
             if (Plugin.PlayerRegistry.ContainsKey(Spawning.Player.Id))
                 return;
