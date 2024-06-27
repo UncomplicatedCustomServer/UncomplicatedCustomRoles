@@ -31,6 +31,7 @@ namespace UncomplicatedCustomRoles.Extensions
         /// <param name="role"></param>
         public static void SetCustomRoleSync(this Player player, ICustomRole role)
         {
+            SpawnManager.ClearCustomTypes(player);
             SpawnManager.SummonCustomSubclass(player, role.Id, true);
         }
 
@@ -41,6 +42,7 @@ namespace UncomplicatedCustomRoles.Extensions
         /// <param name="role"></param>
         public static void SetCustomRoleSync(this Player player, int role)
         {
+            SpawnManager.ClearCustomTypes(player);
             SpawnManager.SummonCustomSubclass(player, role, true);
         }
 
@@ -51,6 +53,7 @@ namespace UncomplicatedCustomRoles.Extensions
         /// <param name="role"></param>
         public static void SetCustomRole(this Player player, int role)
         {
+            SpawnManager.ClearCustomTypes(player);
             Timing.RunCoroutine(Events.EventHandler.DoSpawnPlayer(player, role));
         }
 
@@ -61,6 +64,7 @@ namespace UncomplicatedCustomRoles.Extensions
         /// <param name="role"></param>
         public static void SetCustomRole(this Player player, ICustomRole role)
         {
+            SpawnManager.ClearCustomTypes(player);
             Timing.RunCoroutine(Events.EventHandler.DoSpawnPlayer(player, role.Id));
         }
 
@@ -73,6 +77,7 @@ namespace UncomplicatedCustomRoles.Extensions
         [Obsolete("You should not use this function unless you want to handle the role spawn by yourself!", false)]
         public static void SetCustomRoleAttributes(this Player player, ICustomRole role)
         {
+            SpawnManager.ClearCustomTypes(player);
             SpawnManager.SummonSubclassApplier(player, role);
         }
 
