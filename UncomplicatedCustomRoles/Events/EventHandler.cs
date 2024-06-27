@@ -49,7 +49,9 @@ namespace UncomplicatedCustomRoles.Events
         public void OnPlayerSpawned(SpawnedEventArgs Spawned)
         {
             if (Spawned.Player.HasCustomRole() && Plugin.InternalCooldownQueue.Contains(Spawned.Player.Id))
+            {
                 Plugin.InternalCooldownQueue.Remove(Spawned.Player.Id);
+            }
         }
 
         public void OnScp049StartReviving(StartingRecallEventArgs Recall)
