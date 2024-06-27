@@ -49,9 +49,7 @@ namespace UncomplicatedCustomRoles.Events
         public void OnPlayerSpawned(SpawnedEventArgs Spawned)
         {
             if (Spawned.Player.HasCustomRole() && Plugin.InternalCooldownQueue.Contains(Spawned.Player.Id))
-            {
                 Plugin.InternalCooldownQueue.Remove(Spawned.Player.Id);
-            }
         }
 
         public void OnScp049StartReviving(StartingRecallEventArgs Recall)
@@ -95,6 +93,9 @@ namespace UncomplicatedCustomRoles.Events
             }
 
             LogManager.Debug($"Player {Spawning.Player.Nickname} spawned{LogReason}, going to assign a role if needed!");
+
+            // Let's clear for custom types
+            SpawnManager.ClearCustomTypes(Spawning.Player);
 
             ICustomRole Role = DoEvaluateSpawnForPlayer(Spawning.Player);
 

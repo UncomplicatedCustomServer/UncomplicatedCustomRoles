@@ -52,6 +52,9 @@ namespace UncomplicatedCustomRoles.Commands
                     // Summon the player to the role
                     response = $"Player {Player.Nickname} will be spawned as {Id}!";
 
+                    // Remove shit from the db
+                    SpawnManager.ClearCustomTypes(Player);
+
                     if (arguments.Count > 2 && arguments[2] is not null && arguments[2] == "sync")
                     {
                         LogManager.Debug("Spawning player sync");

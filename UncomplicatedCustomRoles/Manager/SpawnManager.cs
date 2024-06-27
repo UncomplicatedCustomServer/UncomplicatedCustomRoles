@@ -143,13 +143,6 @@ namespace UncomplicatedCustomRoles.Manager
             }
 
             Plugin.InternalCooldownQueue.Add(Player.Id);
-            Timing.CallDelayed(2f, () =>
-            {
-                if (Plugin.InternalCooldownQueue.Contains(Player.Id))
-                {
-                    Plugin.InternalCooldownQueue.Remove(Player.Id);
-                }
-            });
 
             Vector3 BasicPosition = Player.Position;
 
