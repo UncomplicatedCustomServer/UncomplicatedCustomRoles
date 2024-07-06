@@ -5,6 +5,8 @@ VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UncomplicatedCustomRoles", "UncomplicatedCustomRoles\UncomplicatedCustomRoles.csproj", "{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UncomplicatedCustomRoles.PlaceHolders", "UncomplicatedCustomRoles.PlaceHolders\UncomplicatedCustomRoles.PlaceHolders.csproj", "{9983FF92-1524-4F88-A786-325A239D846F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,14 @@ Global
 		{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}.Release|x64.ActiveCfg = Release|x64
 		{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}.Release|x64.Build.0 = Release|x64
+		{9983FF92-1524-4F88-A786-325A239D846F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9983FF92-1524-4F88-A786-325A239D846F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9983FF92-1524-4F88-A786-325A239D846F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9983FF92-1524-4F88-A786-325A239D846F}.Debug|x64.Build.0 = Debug|Any CPU
+		{9983FF92-1524-4F88-A786-325A239D846F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9983FF92-1524-4F88-A786-325A239D846F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9983FF92-1524-4F88-A786-325A239D846F}.Release|x64.ActiveCfg = Release|Any CPU
+		{9983FF92-1524-4F88-A786-325A239D846F}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
