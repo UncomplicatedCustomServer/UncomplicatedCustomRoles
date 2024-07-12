@@ -81,7 +81,7 @@ namespace UncomplicatedCustomRoles.Manager
                     {
                         new()
                         {
-                            Id = new Random().Next(2, 15)
+                            Id = SpawnManager.GetFirstFreeID(1)
                         }
                     }
                   }

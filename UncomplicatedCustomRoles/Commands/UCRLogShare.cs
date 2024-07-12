@@ -1,7 +1,5 @@
 ﻿using CommandSystem;
 using System;
-using Exiled.Permissions.Extensions;
-using Exiled.API.Features;
 using System.Net;
 using UncomplicatedCustomRoles.Manager;
 using System.Net.Http;

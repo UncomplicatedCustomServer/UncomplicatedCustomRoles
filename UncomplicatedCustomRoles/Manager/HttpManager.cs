@@ -129,7 +129,12 @@ namespace UncomplicatedCustomRoles.Manager
 
         public Version LatestVersion()
         {
-            return new(RetriveString(HttpGetRequest($"{Endpoint}/{Prefix}/version?vts=5")));
+            string Version = RetriveString(HttpGetRequest($"{Endpoint}/{Prefix}/version?vts=5"));
+            
+            if (Version is not null && Version != string.Empty)
+                return new(Version);
+
+            return Plugin.Instance.Version;
         }
 
         public bool IsLatestVersion(out Version latest)

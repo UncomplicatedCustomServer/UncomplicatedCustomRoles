@@ -15,6 +15,8 @@ namespace UncomplicatedCustomRoles.Elements
 
         public string Name { get; set; } = "Janitor";
 
+        public string? Nickname { get; set; } = null;
+
         public string CustomInfo { get; set; } = "Clean the Light Containment Zone.";
 
         public string BadgeName { get; set; } = string.Empty;

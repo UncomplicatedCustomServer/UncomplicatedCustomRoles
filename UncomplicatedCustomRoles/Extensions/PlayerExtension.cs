@@ -69,7 +69,7 @@ namespace UncomplicatedCustomRoles.Extensions
         }
 
         /// <summary>
-        /// Set every attribute of a given <see cref="ICustomRole"/> to a <see cref="Player"/> without considering the spawn settings.
+        /// Set every attribute of a given <see cref="ICustomRole"/> to a <see cref="Player"/> without considering the <see cref="ICustomRole.SpawnSettings"/>.<br></br>
         /// Use this only at your own risk and only if you know what you are doing!
         /// </summary>
         /// <param name="player"></param>

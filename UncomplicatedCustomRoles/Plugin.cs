@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Exiled.API.Enums;
 using Exiled.API.Features;
 using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
@@ -23,6 +24,8 @@ namespace UncomplicatedCustomRoles
 
         public override Version RequiredExiledVersion { get; } = new(8, 9, 4);
 
+        public override PluginPriority Priority => PluginPriority.Higher;
+
         internal static Plugin Instance;
 
         internal Handler Handler;
@@ -30,42 +33,59 @@ namespace UncomplicatedCustomRoles
         internal static Dictionary<int, ICustomRole> CustomRoles;
 
         // PlayerId => RoleId
-        internal static Dictionary<int, int> PlayerRegistry = new();
+        internal static Dictionary<int, int> PlayerRegistry;
 
         // RolesCount: RoleId => [PlayerId, PlayerId, ...]
-        internal static Dictionary<int, List<int>> RolesCount = new();
+        internal static Dictionary<int, List<int>> RolesCount;
 
         // PlayerId => List<IUCREffect>
-        internal static Dictionary<int, List<IUCREffect>> PermanentEffectStatus = new();
+        internal static Dictionary<int, List<IUCREffect>> PermanentEffectStatus;
 
-        internal static List<int> InternalCooldownQueue = new();
+        internal static List<int> InternalCooldownQueue;
 
         // List of PlayerIds
-        internal static List<int> RoleSpawnQueue = new();
+        internal static List<int> RoleSpawnQueue;
 
         // useful because when the spawn manager overrides the tags they will be saved here so when the role will be removed they will be reassigned
         // PlayerId => [color, name]
-        internal static Dictionary<int, string[]> Tags = new();
+        internal static Dictionary<int, string[]> Tags;
 
         internal bool DoSpawnBasicRoles = false;
 
-        internal static HttpManager HttpManager = new("ucr");
+        internal static HttpManager HttpManager;
 
         internal static FileConfigs FileConfigs;
+
+        internal static List<int> NicknameTracker;
 
         public override void OnEnabled()
         {
             Instance = this;
 
+            // QoL things
+            LogManager.History.Clear();
+
             Handler = new();
-            CustomRoles = new();
             FileConfigs = new();
+            HttpManager = new("ucr", int.MaxValue);
+
+            // Dictionary setup
+            CustomRoles = new();
+            PlayerRegistry = new();
+            RoleSpawnQueue = new();
+            Tags = new();
+            RolesCount = new();
+            PermanentEffectStatus = new();
+            InternalCooldownQueue = new();
+            NicknameTracker = new();
 
             ServerHandler.RespawningTeam += Handler.OnRespawningWave;
             ServerHandler.RoundStarted += Handler.OnRoundStarted;
             PlayerHandler.Died += Handler.OnDied;
             PlayerHandler.Spawning += Handler.OnSpawning;
             PlayerHandler.Spawned += Handler.OnPlayerSpawned;
+            PlayerHandler.ChangingRole += Handler.OnChangingRole;
+            //PlayerHandler.Spawned += Handler.OnSpawning;
             PlayerHandler.Escaping += Handler.OnEscaping;
             PlayerHandler.UsedItem += Handler.OnItemUsed;
             PlayerHandler.Hurting += Handler.OnHurting;
@@ -111,6 +131,8 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Died -= Handler.OnDied;
             PlayerHandler.Spawning -= Handler.OnSpawning;
             PlayerHandler.Spawned -= Handler.OnPlayerSpawned;
+            PlayerHandler.ChangingRole -= Handler.OnChangingRole;
+            //PlayerHandler.Spawned -= Handler.OnSpawning;
             PlayerHandler.Escaping -= Handler.OnEscaping;
             PlayerHandler.UsedItem -= Handler.OnItemUsed;
             PlayerHandler.Hurting -= Handler.OnHurting;
@@ -119,7 +141,6 @@ namespace UncomplicatedCustomRoles
             HttpManager.Stop();
 
             Handler = null;
-            CustomRoles = null;
 
             base.OnDisabled();
         }
