@@ -161,8 +161,6 @@ namespace UncomplicatedCustomRoles.Manager
                 Player.CustomInfo += $"\n{Role.CustomInfo}";
 
 
-            LogManager.Debug("B");
-
             if (!Plugin.RolesCount[Role.Id].Contains(Player.Id))
             {
                 Plugin.RolesCount[Role.Id].Add(Player.Id);
@@ -175,11 +173,8 @@ namespace UncomplicatedCustomRoles.Manager
             Role.Ahp?.Apply(Player);
             Role.Stamina?.Apply(Player);
 
-            LogManager.Debug("C");
-
             if (Role.Effects.Count() > 0 && Role.Effects != null)
             {
-                LogManager.Debug("D1");
                 foreach (IUCREffect effect in Role.Effects)
                 {
                     float Duration = effect.Duration;
@@ -193,12 +188,8 @@ namespace UncomplicatedCustomRoles.Manager
                 }
             }
 
-            LogManager.Debug("F");
-
             if (Role.Scale != Vector3.zero && Role.Scale != Vector3.one)
                 Player.Scale = Role.Scale;
-
-            LogManager.Debug("G");
 
             if (Role.SpawnBroadcast != string.Empty)
             {
@@ -206,12 +197,8 @@ namespace UncomplicatedCustomRoles.Manager
                 Player.Broadcast(Role.SpawnBroadcastDuration, Role.SpawnBroadcast);
             }
 
-            LogManager.Debug("H");
-
             if (Role.SpawnHint != string.Empty)
                 Player.ShowHint(Role.SpawnHint, Role.SpawnHintDuration);
-
-            LogManager.Debug("I");
 
             if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null && Role.BadgeColor.Length > 2)
             {
@@ -227,8 +214,6 @@ namespace UncomplicatedCustomRoles.Manager
                 Player.RankColor = Role.BadgeColor;
             }
 
-            LogManager.Debug("J");
-
             // Changing nickname if needed
             if (Plugin.Instance.Config.AllowNicknameEdit && Role.Nickname is not null && Role.Nickname != string.Empty)
             {
@@ -241,8 +226,6 @@ namespace UncomplicatedCustomRoles.Manager
                 Plugin.NicknameTracker.Add(Player.Id);
             }
 
-            LogManager.Debug("K");
-
             if (Role.RoleAppearance != Role.Role)
             {
                 LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
@@ -252,7 +235,7 @@ namespace UncomplicatedCustomRoles.Manager
                 });
             }
 
-            LogManager.Debug("L");
+            LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})!");
         }
 
         public static void SetAllActiveEffect(Player Player)

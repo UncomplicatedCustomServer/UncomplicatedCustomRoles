@@ -3,7 +3,7 @@ using PlayerRoles;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace UncomplicatedCustomRoles.API.Features
+namespace UncomplicatedCustomRoles.API.Features.Behaviour
 {
 #nullable enable
     public class SpawnBehaviour

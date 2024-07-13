@@ -1,7 +1,7 @@
 ﻿using Exiled.API.Features;
 using Exiled.API.Features.Roles;
 
-namespace UncomplicatedCustomRoles.API.Features
+namespace UncomplicatedCustomRoles.API.Features.Behaviour
 {
     public class StaminaBehaviour
     {

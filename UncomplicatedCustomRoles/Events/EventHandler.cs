@@ -14,6 +14,7 @@ using UncomplicatedCustomRoles.Extensions;
 using System;
 using UncomplicatedCustomRoles.API.Features;
 using Exiled.Events.EventArgs.Scp330;
+using UncomplicatedCustomRoles.API.Features.Behaviour;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -64,9 +65,13 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnReceivingEffect(ReceivingEffectEventArgs ev)
         {
-            LogManager.Debug($"Role {ev.Player.GetCustomRole()?.Name} {ev.Player.GetCustomRole()?.Id} has a maximum of {ev.Player.GetCustomRole()?.MaxScp330Candies} candies");
+            if (ev.Player is null)
+                return;
 
-            if (ev.Player.TryGetCustomRole(out ICustomRole Role) && Role.MaxScp330Candies >= Plugin.Scp330Count.TryGetElement<int, uint>(ev.Player.Id, 0))
+            if (!ev.IsAllowed)
+                return;
+
+            if (ev.Effect.name is "SeveredHands" && ev.Player.TryGetCustomRole(out ICustomRole Role) && Role.MaxScp330Candies >= Plugin.Scp330Count.TryGetElement<int, uint>(ev.Player.Id, 0))
             {
                 LogManager.Debug($"Tried to add the {ev.Effect.name} but was not allowed due to {Plugin.Scp330Count.TryGetElement<int, uint>(ev.Player.Id, 0)} <= {Role.MaxScp330Candies}");
                 ev.IsAllowed = false;
