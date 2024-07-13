@@ -12,6 +12,9 @@ using UncomplicatedCustomRoles.Extensions;
 using MEC;
 using Exiled.Permissions.Extensions;
 
+// Mormora, la gente mormora
+// falla tacere praticando l'allegria
+
 namespace UncomplicatedCustomRoles.Manager
 {
     internal class SpawnManager
@@ -171,7 +174,6 @@ namespace UncomplicatedCustomRoles.Manager
             Role.Health?.Apply(Player);
             Role.Ahp?.Apply(Player);
             Role.Stamina?.Apply(Player);
-            Role.Movement?.Apply(Player);
 
             LogManager.Debug("C");
 
@@ -297,7 +299,7 @@ namespace UncomplicatedCustomRoles.Manager
                     else
                         LogManager.Error($"Error while parsing role_after_escape for player {player.Nickname} ({player.Id}): the first string was not 'IR' nor 'CR', found '{Role[SearchIndex]}'!\nPlease see our documentation: https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki/Specifics#role-after-escape");
                 else
-                    LogManager.Warn($"Error while parsing role_after_escape: index is out of range!\nExpected to found {SearchIndex}, total: {Role.Count}!");
+                    LogManager.Debug($"Error while parsing role_after_escape: index is out of range!\nExpected to found {SearchIndex}, total: {Role.Count}!");
             }
 
             return new(false, null);

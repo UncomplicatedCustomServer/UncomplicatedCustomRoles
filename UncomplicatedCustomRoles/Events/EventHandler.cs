@@ -52,12 +52,25 @@ namespace UncomplicatedCustomRoles.Events
             }
         }
 
-        public void OnEatenScp330(EatenScp330EventArgs ev)
+        public void OnInteractingScp330(InteractingScp330EventArgs ev)
         {
+            if (!ev.IsAllowed)
+                return;
+
             Plugin.Scp330Count.TryAdd(ev.Player.Id, Plugin.Scp330Count.TryGetElement<int, uint>(ev.Player.Id, 0) + 1);
 
-            if (ev.Player.TryGetCustomRole(out ICustomRole Role) && Role.MaxScp330Candies <= Plugin.Scp330Count.TryGetElement<int, uint>(ev.Player.Id, 0) && ev.Player.ActiveEffects.Where(b => b == ev.Player.GetEffect(EffectType.SeveredHands)).Count() > 0)
-                ev.Player.DisableEffect(EffectType.SeveredHands);
+            LogManager.Debug($"Player {ev.Player} eaten {Plugin.Scp330Count[ev.Player.Id]} candies!");
+        }
+
+        public void OnReceivingEffect(ReceivingEffectEventArgs ev)
+        {
+            LogManager.Debug($"Role {ev.Player.GetCustomRole()?.Name} {ev.Player.GetCustomRole()?.Id} has a maximum of {ev.Player.GetCustomRole()?.MaxScp330Candies} candies");
+
+            if (ev.Player.TryGetCustomRole(out ICustomRole Role) && Role.MaxScp330Candies >= Plugin.Scp330Count.TryGetElement<int, uint>(ev.Player.Id, 0))
+            {
+                LogManager.Debug($"Tried to add the {ev.Effect.name} but was not allowed due to {Plugin.Scp330Count.TryGetElement<int, uint>(ev.Player.Id, 0)} <= {Role.MaxScp330Candies}");
+                ev.IsAllowed = false;
+            }
         }
 
         public void OnPlayerSpawned(SpawnedEventArgs Spawned)
@@ -78,6 +91,9 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnSpawning(SpawningEventArgs ev)
         {
+            if (ev.Player is null)
+                return;
+
             LogManager.Debug("Called CHANGINGROLE event");
 
             if (Plugin.InternalCooldownQueue.Contains(ev.Player.Id))
@@ -125,7 +141,7 @@ namespace UncomplicatedCustomRoles.Events
                 SpawnManager.SummonCustomSubclass(ev.Player, Role.Id);
             }
 
-            LogManager.Debug($"Evaluated custom role for player {ev.Player.Nickname} - found: {Role.Id} ({Role.Name})");
+            LogManager.Debug($"Evaluated custom role for player {ev.Player.Nickname} - found: {Role?.Id} ({Role?.Name})");
         }
 
         public void OnHurting(HurtingEventArgs Hurting)

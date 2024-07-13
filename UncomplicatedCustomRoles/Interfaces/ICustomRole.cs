@@ -61,8 +61,6 @@ namespace UncomplicatedCustomRoles.Interfaces
 
         public abstract float DamageMultiplier { get; set; }
 
-        public abstract MovementBehaviour? Movement { get; set; }
-
         public abstract SpawnBehaviour? SpawnSettings { get; set; }
 
         public abstract bool IgnoreSpawnSystem { get; set; }

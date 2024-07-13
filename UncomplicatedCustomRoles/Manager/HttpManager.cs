@@ -2,6 +2,7 @@
 using Exiled.Loader;
 using MEC;
 using Newtonsoft.Json;
+using PlayerRoles;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -177,7 +178,7 @@ namespace UncomplicatedCustomRoles.Manager
 
         internal KeyValuePair<HttpStatusCode, string> Mailbox()
         {
-            HttpResponseMessage Message = HttpGetRequest($"{Endpoint}/{Prefix}/mailbox");
+            HttpResponseMessage Message = HttpGetRequest($"{Endpoint}/{Prefix}/mailbox?version={Plugin.Instance.Version}");
             return new(Message.StatusCode, RetriveString(Message.Content));
         }
 

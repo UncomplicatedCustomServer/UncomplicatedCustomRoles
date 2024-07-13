@@ -22,9 +22,9 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(2, 2, 8);
+        public override Version Version { get; } = new(3, 0, 0);
 
-        public override Version RequiredExiledVersion { get; } = new(8, 9, 4);
+        public override Version RequiredExiledVersion { get; } = new(8, 9, 6);
 
         public override PluginPriority Priority => PluginPriority.Higher;
 
@@ -91,7 +91,8 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Spawning += Handler.OnSpawning;
             PlayerHandler.Spawned += Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole += Handler.OnChangingRole;
-            Scp330Handler.EatenScp330 += Handler.OnEatenScp330;
+            PlayerHandler.ReceivingEffect += Handler.OnReceivingEffect;
+            Scp330Handler.InteractingScp330 += Handler.OnInteractingScp330;
             //PlayerHandler.Spawned += Handler.OnSpawning;
             PlayerHandler.Escaping += Handler.OnEscaping;
             PlayerHandler.UsedItem += Handler.OnItemUsed;
@@ -144,7 +145,8 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Spawning -= Handler.OnSpawning;
             PlayerHandler.Spawned -= Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole -= Handler.OnChangingRole;
-            Scp330Handler.EatenScp330 -= Handler.OnEatenScp330;
+            PlayerHandler.ReceivingEffect -= Handler.OnReceivingEffect;
+            Scp330Handler.InteractingScp330 -= Handler.OnInteractingScp330;
             //PlayerHandler.Spawned -= Handler.OnSpawning;
             PlayerHandler.Escaping -= Handler.OnEscaping;
             PlayerHandler.UsedItem -= Handler.OnItemUsed;

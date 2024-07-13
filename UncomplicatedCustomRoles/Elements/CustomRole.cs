@@ -72,8 +72,6 @@ namespace UncomplicatedCustomRoles.Elements
 
         public float DamageMultiplier { get; set; } = 1;
 
-        public MovementBehaviour? Movement { get; set; } = new();
-
         public SpawnBehaviour? SpawnSettings { get; set; } = new();
 
         public bool IgnoreSpawnSystem { get; set; } = false;
