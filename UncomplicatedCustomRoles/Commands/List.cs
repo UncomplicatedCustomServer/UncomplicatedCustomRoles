@@ -4,7 +4,7 @@ using UncomplicatedCustomRoles.Interfaces;
 
 namespace UncomplicatedCustomRoles.Commands
 {
-    public class UCRList : IUCRCommand
+    public class List : IUCRCommand
     {
         public string Name { get; } = "list";
 

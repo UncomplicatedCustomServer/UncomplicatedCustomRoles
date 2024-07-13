@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UncomplicatedCustomRoles.Manager;
 using UncomplicatedCustomRoles.Interfaces;
 using UnityEngine;
+using UncomplicatedCustomRoles.API.Features;
+using UncomplicatedCustomRoles.API.Features.Behaviour;
 
 namespace UncomplicatedCustomRoles.Elements
 {
@@ -14,55 +16,43 @@ namespace UncomplicatedCustomRoles.Elements
 
         public string Name { get; set; } = "Janitor";
 
-        public string CustomInfo { get; set; } = "Clean the Light Containment Zone.";
+        public string? Nickname { get; set; } = "D-%dnumber%";
 
-        public string BadgeName { get; set; } = string.Empty;
+        public string CustomInfo { get; set; } = "Janitor";
 
-        public string BadgeColor { get; set; } = string.Empty;
+        public string BadgeName { get; set; } = "Janitor";
 
-        public int MaxPlayers { get; set; } = 5;
-
-        public int MinPlayers { get; set; } = 1;
-
-        public int SpawnChance { get; set; } = 60;
+        public string BadgeColor { get; set; } = "pumpkin";
 
         public RoleTypeId Role { get; set; } = RoleTypeId.ClassD;
 
         public RoleTypeId RoleAppearance { get; set; } = RoleTypeId.ClassD;
 
-        public List<RoleTypeId> CanReplaceRoles { get; set; } = new()
-        {
-            RoleTypeId.ClassD
-        };
+        public Team? IsFriendOf { get; set; } = null;
 
-        public float Health { get; set; } = 100f;
+        public HealthBehaviour Health { get; set; } = new();
 
-        public float MaxHealth { get; set; } = 100f;
+        public AhpBehaviour Ahp { get; set; } = new();
 
-        public float Ahp { get; set; } = 0f;
+        public List<UCREffect>? Effects { get; set; } = new();
 
-        public float HumeShield { get; set; } = 0f;
+        public StaminaBehaviour Stamina { get; set; } = new();
 
-        public List<UCREffect>? Effects { get; set; } = new()
-        {
-            new()
-        };
-
-        public bool InfiniteStamina { get; set; } = false;
+        public int MaxScp330Candies { get; set; } = 2;
 
         public bool CanEscape { get; set; } = true;
 
-        public string? RoleAfterEscape { get; set; } = null;
+        public string? RoleAfterEscape { get; set; } = "IR:Spectator,IR:NtfCaptain";
 
-        public Vector3 Scale { get; set; } = new();
+        public Vector3 Scale { get; set; } = Vector3.one;
 
         public string SpawnBroadcast { get; set; } = "You are a <color=orange><b>Janitor</b></color>!\nClean the Light Containment Zone!";
 
         public ushort SpawnBroadcastDuration { get; set; } = 5;
 
-        public string SpawnHint { get; set; } = "This is an hint shown when you spawn as a Janitor!";
+        public string SpawnHint { get; set; } = "This hint will be shown when you'll spawn as a Janitor!";
 
-        public float SpawnHintDuration { get; set; } = 3;
+        public float SpawnHintDuration { get; set; } = 5;
 
         public List<ItemType> Inventory { get; set; } = new()
         {
@@ -74,26 +64,24 @@ namespace UncomplicatedCustomRoles.Elements
 
         public Dictionary<AmmoType, ushort> Ammo { get; set; } = new()
         {
-            {AmmoType.Nato9, 5 }
+            {
+                AmmoType.Nato9,
+                10
+            }
         };
 
-        public SpawnLocationType Spawn { get; set; } = SpawnLocationType.RoomsSpawn;
+        public float DamageMultiplier { get; set; } = 1;
 
-        public List<ZoneType> SpawnZones { get; set; } = new();
-
-        public List<RoomType> SpawnRooms { get; set; } = new()
-        {
-            RoomType.LczToilets
-        };
-
-        public Vector3 SpawnPosition { get; set; } = new();
-
-        public Vector3 SpawnOffset { get; set; } = new();
-
-        public float DamageMultiplier { get; set; } = 1f;
-
-        public string? RequiredPermission { get; set; } = null;
+        public SpawnBehaviour? SpawnSettings { get; set; } = new();
 
         public bool IgnoreSpawnSystem { get; set; } = false;
+
+        public bool HasTeam(Team team)
+        {
+            if (IsFriendOf is not null)
+                return (IsFriendOf & team) == team;
+
+            return false;
+        }
     }
 }

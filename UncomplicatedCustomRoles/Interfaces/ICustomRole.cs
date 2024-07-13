@@ -1,6 +1,8 @@
 ﻿using Exiled.API.Enums;
 using PlayerRoles;
 using System.Collections.Generic;
+using UncomplicatedCustomRoles.API.Features;
+using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 
@@ -13,35 +15,29 @@ namespace UncomplicatedCustomRoles.Interfaces
 
         public abstract string Name { get; set; }
 
+        public abstract string? Nickname { get; set; }
+
         public abstract string CustomInfo { get; set; }
 
         public abstract string BadgeName { get; set; }
 
         public abstract string BadgeColor { get; set; }
 
-        public abstract int MaxPlayers { get; set; }
-
-        public abstract int MinPlayers { get; set; }
-
-        public abstract int SpawnChance { get; set; }
-
         public abstract RoleTypeId Role { get; set; }
 
         public abstract RoleTypeId RoleAppearance { get; set; }
 
-        public abstract List<RoleTypeId> CanReplaceRoles { get; set; }
+        public abstract Team? IsFriendOf { get; set; }
 
-        public abstract float Health { get; set; }
+        public abstract HealthBehaviour Health { get; set; }
 
-        public abstract float MaxHealth { get; set; }
-
-        public abstract float Ahp { get; set; }
-
-        public abstract float HumeShield { get; set; }
+        public abstract AhpBehaviour Ahp { get; set; }
 
         public abstract List<UCREffect>? Effects { get; set; }
 
-        public abstract bool InfiniteStamina { get; set; }
+        public abstract StaminaBehaviour Stamina { get; set; }
+
+        public abstract int MaxScp330Candies { get; set; }
 
         public abstract bool CanEscape { get; set; }
 
@@ -63,19 +59,9 @@ namespace UncomplicatedCustomRoles.Interfaces
 
         public abstract Dictionary<AmmoType, ushort> Ammo { get; set; }
 
-        public abstract SpawnLocationType Spawn { get; set; }
-
-        public abstract List<ZoneType> SpawnZones { get; set; }
-
-        public abstract List<RoomType> SpawnRooms { get; set; }
-
-        public abstract Vector3 SpawnPosition { get; set; }
-
-        public abstract Vector3 SpawnOffset { get; set; }
-
         public abstract float DamageMultiplier { get; set; }
 
-        public abstract string? RequiredPermission { get; set; }
+        public abstract SpawnBehaviour? SpawnSettings { get; set; }
 
         public abstract bool IgnoreSpawnSystem { get; set; }
     }

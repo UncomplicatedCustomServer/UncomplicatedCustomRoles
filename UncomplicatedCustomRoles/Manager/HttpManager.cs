@@ -2,6 +2,7 @@
 using Exiled.Loader;
 using MEC;
 using Newtonsoft.Json;
+using PlayerRoles;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -129,7 +130,12 @@ namespace UncomplicatedCustomRoles.Manager
 
         public Version LatestVersion()
         {
-            return new(RetriveString(HttpGetRequest($"{Endpoint}/{Prefix}/version?vts=5")));
+            string Version = RetriveString(HttpGetRequest($"{Endpoint}/{Prefix}/version?vts=5"));
+            
+            if (Version is not null && Version != string.Empty)
+                return new(Version);
+
+            return Plugin.Instance.Version;
         }
 
         public bool IsLatestVersion(out Version latest)
@@ -170,6 +176,12 @@ namespace UncomplicatedCustomRoles.Manager
             return Status.StatusCode;
         }
 
+        internal KeyValuePair<HttpStatusCode, string> Mailbox()
+        {
+            HttpResponseMessage Message = HttpGetRequest($"{Endpoint}/{Prefix}/mailbox?version={Plugin.Instance.Version}");
+            return new(Message.StatusCode, RetriveString(Message.Content));
+        }
+
         internal IEnumerator<float> PresenceAction()
         {
             while (Active && Errors <= MaxErrors)
@@ -183,6 +195,15 @@ namespace UncomplicatedCustomRoles.Manager
                         LogManager.Warn($"[UCS HTTP Manager] >> Error while trying to put data inside our APIs.\nThe endpoint say: {Response["message"]} ({Response["status"]})");
                     }
                     catch (Exception) { }
+                }
+
+                // Do anche the Mailbox action
+                if (Plugin.Instance.Config.DoEnableAdminMessages)
+                {
+                    KeyValuePair<HttpStatusCode, string> Mail = Mailbox();
+
+                    if (Mail.Key is HttpStatusCode.OK)
+                        LogManager.Warn($"[UCS HTTP Manager]:[UCS Mailbox] >> Central server have a message:\n{Mail.Value}");
                 }
 
                 yield return Timing.WaitForSeconds(500.0f);

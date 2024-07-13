@@ -15,8 +15,14 @@ namespace UncomplicatedCustomRoles
         [Description("Ignore spawns that are not included in waves and initial spawn? So when you do a forcelass an UCR role won't spawn in any case")]
         public bool AllowOnlyNaturalSpawns { get; set; } = true;
 
+        [Description("If true the plugin will apply the 'nickname' param in each role config to every player. Disable this if you encounter problems or bugs!")]
+        public bool AllowNicknameEdit { get; set; } = true;
+
         [Description("Do enable the basic UCR logs?")]
         public bool EnableBasicLogs { get; set; } = true;
+
+        [Description("If false you won't receive important messages sent from our central servers (they are important!)")]
+        public bool DoEnableAdminMessages { get; set; } = true;
 
         [Description("The content that will be replaced instead of {CUSTOM_ROLE} on your RespawnTimer display config if the current spectated player is a custom role. %customrole% is the role name")]
         public string RespawnTimerContent { get; set; } = "Player has custom role %customrole%";

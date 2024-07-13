@@ -1,7 +1,5 @@
 ﻿using CommandSystem;
 using System;
-using Exiled.Permissions.Extensions;
-using Exiled.API.Features;
 using System.Net;
 using UncomplicatedCustomRoles.Manager;
 using System.Net.Http;
@@ -11,9 +9,9 @@ using Newtonsoft.Json;
 namespace UncomplicatedCustomRoles.Commands
 {
     [CommandHandler(typeof(GameConsoleCommandHandler))]
-    internal class UCRLogShare : ParentCommand
+    internal class LogShare : ParentCommand
     {
-        public UCRLogShare() => LoadGeneratedCommands();
+        public LogShare() => LoadGeneratedCommands();
 
         public override string Command { get; } = "ucrlogs";
 

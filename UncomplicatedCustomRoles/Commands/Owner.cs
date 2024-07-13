@@ -6,7 +6,7 @@ using UncomplicatedCustomRoles.Interfaces;
 
 namespace UncomplicatedCustomRoles.Commands
 {
-    public class UCROwner : IUCRCommand
+    public class Owner : IUCRCommand
     {
         public string Name { get; } = "owner";
 

@@ -26,7 +26,7 @@ namespace UncomplicatedCustomRoles.Manager
         {
             LoadAction((CustomRole Role) =>
             {
-                SpawnManager.RegisterCustomSubclass(Role);
+                API.Features.CustomRole.Register(Role);
             }, localDir);
         }
 
@@ -81,7 +81,7 @@ namespace UncomplicatedCustomRoles.Manager
                     {
                         new()
                         {
-                            Id = new Random().Next(2, 15)
+                            Id = API.Features.CustomRole.GetFirstFreeID(1)
                         }
                     }
                   }

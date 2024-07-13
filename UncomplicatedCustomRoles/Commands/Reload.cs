@@ -7,7 +7,8 @@ using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Commands
 {
-    public class UCRReload : IUCRCommand
+#pragma warning disable CS0618 // Obsolete
+    public class Reload : IUCRCommand
     {
         public string Name { get; } = "reload";
 
@@ -28,7 +29,7 @@ namespace UncomplicatedCustomRoles.Commands
 
             Plugin.FileConfigs.LoadAction((CustomRole Role) =>
             {
-                if (!SpawnManager.SubclassValidator(Role))
+                if (!API.Features.CustomRole.Validate(Role))
                 {
                     LogManager.Warn($"[RL] Failed to register the UCR role with the ID {Role.Id} due to the validator check!");
                     return;
@@ -51,7 +52,7 @@ namespace UncomplicatedCustomRoles.Commands
 
             Plugin.FileConfigs.LoadAction((CustomRole Role) =>
             {
-                if (!SpawnManager.SubclassValidator(Role))
+                if (!API.Features.CustomRole.Validate(Role))
                 {
                     LogManager.Warn($"[RL] Failed to register the UCR role with the ID {Role.Id} due to the validator check!");
                     return;

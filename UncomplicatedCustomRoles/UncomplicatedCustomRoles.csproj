@@ -50,21 +50,27 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="API\Features\Behaviour\AhpBehaviour.cs" />
+    <Compile Include="API\Features\Behaviour\HealthBehaviour.cs" />
     <Compile Include="API\Features\CustomRole.cs" />
     <Compile Include="API\Features\InfiniteEffect.cs" />
+    <Compile Include="API\Features\Behaviour\SpawnBehaviour.cs" />
+    <Compile Include="API\Features\Behaviour\StaminaBehaviour.cs" />
     <Compile Include="Commands\CommandParent.cs" />
-    <Compile Include="Commands\UCRList.cs" />
-    <Compile Include="Commands\UCRLogShare.cs" />
-    <Compile Include="Commands\UCROwner.cs" />
-    <Compile Include="Commands\UCRRole.cs" />
-    <Compile Include="Commands\UCRReload.cs" />
-    <Compile Include="Commands\UCRSpawn.cs" />
+    <Compile Include="Commands\List.cs" />
+    <Compile Include="Commands\LogShare.cs" />
+    <Compile Include="Commands\Owner.cs" />
+    <Compile Include="Commands\Role.cs" />
+    <Compile Include="Commands\Reload.cs" />
+    <Compile Include="Commands\Spawn.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Elements\CustomRole.cs" />
     <Compile Include="Enums\SpawnLocationType.cs" />
     <Compile Include="Events\EventHandler.cs" />
+    <Compile Include="Extensions\DictionaryExtension.cs" />
     <Compile Include="Extensions\PlayerExtension.cs" />
     <Compile Include="Extensions\Vector3Extension.cs" />
+    <Compile Include="Integrations\ScriptedEvents.cs" />
     <Compile Include="Interfaces\IUCRCommand.cs" />
     <Compile Include="Manager\FileConfigs.cs" />
     <Compile Include="Elements\UCREffect.cs" />
@@ -74,7 +80,7 @@
     <Compile Include="Plugin.cs" />
     <Compile Include="Interfaces\ICustomRole.cs" />
     <Compile Include="Interfaces\IUCREffect.cs" />
-    <Compile Include="Manager\RespawnTimerCompatibility.cs" />
+    <Compile Include="Integrations\RespawnTimer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -467,7 +473,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="EXILED">
-      <Version>8.9.4</Version>
+      <Version>8.9.6</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.3</Version>

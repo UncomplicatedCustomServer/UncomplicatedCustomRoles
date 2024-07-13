@@ -9,78 +9,16 @@ using UnityEngine;
 using Exiled.CustomItems.API.Features;
 using System;
 using UncomplicatedCustomRoles.Extensions;
+using MEC;
+using Exiled.Permissions.Extensions;
+
+// Mormora, la gente mormora
+// falla tacere praticando l'allegria
 
 namespace UncomplicatedCustomRoles.Manager
 {
-    public class SpawnManager
+    internal class SpawnManager
     {
-        public static void RegisterCustomSubclass(ICustomRole Role, bool notLoadIfLoaded = false)
-        {
-            if (!SubclassValidator(Role))
-            {
-                LogManager.Warn($"Failed to register the UCR role with the ID {Role.Id} due to the validator check!");
-
-                return;
-            }
-
-            if (!Plugin.CustomRoles.ContainsKey(Role.Id))
-            {
-                Plugin.CustomRoles.Add(Role.Id, Role);
-
-                if (Plugin.Instance.Config.EnableBasicLogs)
-                {
-                    LogManager.Info($"Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
-                }
-
-                return;
-            }
-
-            if (notLoadIfLoaded)
-            {
-                LogManager.Debug($"Can't load role {Role.Id} {Role.Name} due to plugin settings!\nPlease reach UCS support for UCR!");
-                return;
-            }
-
-            LogManager.Warn($"Failed to register the UCR role with the ID {Role.Id}: The problem can be the following: ERR_ID_ALREADY_HERE!\nTrying to assign a new one...");
-
-            int NewId = GetFirstFreeID(Role.Id);
-
-            LogManager.Info($"Custom Role {Role.Name} with the old Id {Role.Id} will be registered with the following Id: {NewId}");
-
-            Role.Id = NewId;
-
-            RegisterCustomSubclass(Role);
-        }
-
-        public static bool SubclassValidator(ICustomRole Role)
-        {
-            if (Role == null)
-            {
-                return false;
-            } else
-            {
-                if (Role.Spawn == SpawnLocationType.ZoneSpawn && Role.SpawnZones.Count() < 1)
-                {
-                    LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the ZoneSpawn as SpawnType the List SpawnZones can't be empty!");
-                    return false;
-                } else if (Role.Spawn == SpawnLocationType.RoomsSpawn && Role.SpawnRooms.Count() < 1)
-                {
-                    LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the RoomSpawn as SpawnType the List SpawnRooms can't be empty!");
-                    return false;
-                } else if (Role.Spawn == SpawnLocationType.PositionSpawn && Role.SpawnPosition == new Vector3(0, 0, 0))
-                {
-                    LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the PositionSpawn as SpawnType the Vector3 SpawnPosition can't be empty!");
-                    return false;
-                }
-                else if (Role.MinPlayers == 0)
-                {
-                    LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: the value of MinPlayers field must be greater than or equals to 1!");
-                    return false;
-                }
-                return true;
-            }
-        }
-
         public static void ClearCustomTypes(Player player)
         {
             if (player.TryGetCustomRole(out ICustomRole role))
@@ -90,25 +28,28 @@ namespace UncomplicatedCustomRoles.Manager
                     player.RankName = Plugin.Tags[player.Id][0];
                     player.RankColor = Plugin.Tags[player.Id][1];
 
-                    LogManager.Debug($"Badge detected, represted");
+                    LogManager.Debug($"Badge detected, fixed");
 
                     Plugin.Tags.Remove(player.Id);
                 }
-            }
 
-            player.CustomInfo = string.Empty;
-            player.Scale = new(1, 1, 1);
-            LimitedClearCustomTypes(player);
-        }
-
-        public static void LimitedClearCustomTypes(Player player)
-        {
-            if (player.TryGetCustomRole(out ICustomRole role))
-            {
                 player.IsUsingStamina = true;
                 Plugin.PermanentEffectStatus.Remove(player.Id);
                 Plugin.RolesCount[role.Id].Remove(player.Id);
                 Plugin.PlayerRegistry.Remove(player.Id);
+            }
+
+            Plugin.Scp330Count.TryRemove(player.Id);
+
+            player.CustomInfo = string.Empty;
+
+            LogManager.Debug("Scale reset to 1, 1, 1");
+            player.Scale = new(1, 1, 1);
+            
+            if (Plugin.NicknameTracker.Contains(player.Id))
+            {
+                player.DisplayNickname = null;
+                Plugin.NicknameTracker.Remove(player.Id);
             }
         }
 
@@ -123,59 +64,71 @@ namespace UncomplicatedCustomRoles.Manager
 
             ICustomRole Role = Plugin.CustomRoles[Id];
 
-            if (!DoBypassRoleOverwrite && !Role.CanReplaceRoles.Contains(Player.Role.Type))
+            if (Role.SpawnSettings is null)
+            {
+                LogManager.Warn($"Tried to spawn a custom role without spawn_settings, aborting the SummonCustomSubclass(...) action!\nRole: {Role.Name} ({Role.Id})");
+                return;
+            }
+
+            if (!DoBypassRoleOverwrite && !Role.SpawnSettings.CanReplaceRoles.Contains(Player.Role.Type))
             {
                 LogManager.Debug($"Can't spawn the player {Player.Nickname} as UCR custom role {Role.Name} because it's role is not in the overwrittable list of custom role!\nStrange because this should be managed correctly by the plugin!");
                 return;
             }
 
-            RoleSpawnFlags SpawnFlag = RoleSpawnFlags.None;
-
-            if (Role.Spawn == SpawnLocationType.KeepRoleSpawn)
-            {
-                SpawnFlag = RoleSpawnFlags.UseSpawnpoint;
-            }
-
-            Player.Role.Set(Role.Role, SpawnFlag);
+            Plugin.InternalCooldownQueue.Add(Player.Id);
 
             Vector3 BasicPosition = Player.Position;
 
-            if (Role.Spawn == SpawnLocationType.KeepRoleSpawn)
-            {
+            RoleSpawnFlags SpawnFlag = RoleSpawnFlags.None;
+
+            if (Role.SpawnSettings.Spawn == SpawnLocationType.KeepRoleSpawn)
+                SpawnFlag = RoleSpawnFlags.UseSpawnpoint;
+
+            // To avoid the loop on OnChangingRole we just add the Id inside the beautiful array!
+            // Add the player to the player classes list
+            Plugin.RolesCount[Role.Id].Add(Player.Id);
+            Plugin.PlayerRegistry.Add(Player.Id, Role.Id);
+            Plugin.PermanentEffectStatus.Add(Player.Id, new());
+
+            Player.Role.Set(Role.Role, SpawnFlag);
+
+            if (Role.SpawnSettings.Spawn == SpawnLocationType.KeepCurrentPositionSpawn)
                 Player.Position = BasicPosition;
-            }
 
             if (SpawnFlag == RoleSpawnFlags.None)
             {
-                switch (Role.Spawn)
+                switch (Role.SpawnSettings.Spawn)
                 {
                     case SpawnLocationType.ZoneSpawn:
-                        Player.Position = Room.List.Where(room => room.Zone == Role.SpawnZones.RandomItem() && room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
+                        Player.Position = Room.List.Where(room => room.Zone == Role.SpawnSettings.SpawnZones.RandomItem() && room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
                         break;
                     case SpawnLocationType.CompleteRandomSpawn:
                         Player.Position = Room.List.Where(room => room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
                         break;
                     case SpawnLocationType.RoomsSpawn:
-                        Player.Position = Room.Get(Role.SpawnRooms.RandomItem()).Position.AddY(1.5f);
-                        if (Role.SpawnOffset != new Vector3())
-                        {
-                            Player.Position += Role.SpawnOffset;
-                        }
+                        Player.Position = Room.Get(Role.SpawnSettings.SpawnRooms.RandomItem()).Position.AddY(1.5f);
+
+                        if (Role.SpawnSettings.SpawnOffset != new Vector3())
+                            Player.Position += Role.SpawnSettings.SpawnOffset;
+
                         break;
                     case SpawnLocationType.PositionSpawn:
-                        Player.Position = Role.SpawnPosition;
+                        Player.Position = Role.SpawnSettings.SpawnPosition;
                         break;
                 };
             }
 
+            SummonSubclassApplier(Player, Role);
+        }
+
+        public static void SummonSubclassApplier(Player Player, ICustomRole Role)
+        {
             Player.ResetInventory(Role.Inventory);
 
             if (Role.CustomItemsInventory.Count() > 0)
-            {
                 foreach (uint ItemId in Role.CustomItemsInventory)
-                {
                     if (!Player.IsInventoryFull)
-                    {
                         try
                         {
                             if (Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems") is not null)
@@ -193,38 +146,31 @@ namespace UncomplicatedCustomRoles.Manager
                                 }
                             }
                             else
-                            {
                                 CustomItem.Get(ItemId)?.Give(Player);
-                            }
                         }
                         catch (Exception ex)
                         {
                             LogManager.Debug($"Error while giving a custom item.\nError: {ex.Message}");
                         }
-                    }
-                }
-            }
 
-            Player.IsUsingStamina = !Role.InfiniteStamina;
-            
             if (Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
-            {
                 foreach (KeyValuePair<AmmoType, ushort> Ammo in Role.Ammo)
-                {
                     Player.AddAmmo(Ammo.Key, Ammo.Value);
-                }
-            }
 
             if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
-            {
                 Player.CustomInfo += $"\n{Role.CustomInfo}";
+
+            if (!Plugin.RolesCount[Role.Id].Contains(Player.Id))
+            {
+                Plugin.RolesCount[Role.Id].Add(Player.Id);
+                Plugin.PlayerRegistry.Add(Player.Id, Role.Id);
+                Plugin.PermanentEffectStatus.Add(Player.Id, new());
             }
 
-            Player.MaxHealth = Role.MaxHealth;
-            Player.Health = Role.Health;
-            Player.ArtificialHealth = Role.Ahp;
-
-            Plugin.PermanentEffectStatus.Add(Player.Id, new());
+            // Apply every required stats
+            Role.Health?.Apply(Player);
+            Role.Ahp?.Apply(Player);
+            Role.Stamina?.Apply(Player);
 
             if (Role.Effects.Count() > 0 && Role.Effects != null)
             {
@@ -241,28 +187,17 @@ namespace UncomplicatedCustomRoles.Manager
                 }
             }
 
-            // Add the player to the player classes list
-            Plugin.PlayerRegistry.Add(Player.Id, Role.Id);
-
-            if (Role.HumeShield > 0)
-            {
-                Player.HumeShield = Role.HumeShield;
-            }
-
-            if (Role.Scale != new Vector3(0, 0, 0))
-            {
+            if (Role.Scale != Vector3.zero && Role.Scale != Vector3.one)
                 Player.Scale = Role.Scale;
-            }
 
             if (Role.SpawnBroadcast != string.Empty)
             {
+                Player.ClearBroadcasts();
                 Player.Broadcast(Role.SpawnBroadcastDuration, Role.SpawnBroadcast);
             }
 
             if (Role.SpawnHint != string.Empty)
-            {
                 Player.ShowHint(Role.SpawnHint, Role.SpawnHintDuration);
-            }
 
             if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null && Role.BadgeColor.Length > 2)
             {
@@ -278,20 +213,28 @@ namespace UncomplicatedCustomRoles.Manager
                 Player.RankColor = Role.BadgeColor;
             }
 
+            // Changing nickname if needed
+            if (Plugin.Instance.Config.AllowNicknameEdit && Role.Nickname is not null && Role.Nickname != string.Empty)
+            {
+                Role.Nickname = Role.Nickname.Replace("%dnumber%", new System.Random().Next(1000, 9999).ToString()).Replace("%nick%", Player.Nickname).Replace("%rand%", new System.Random().Next(0, 9).ToString());
+                if (Role.Nickname.Contains(","))
+                    Player.DisplayNickname = Role.Nickname.Split(',').RandomItem();
+                else
+                    Player.DisplayNickname = Role.Nickname;
+
+                Plugin.NicknameTracker.Add(Player.Id);
+            }
+
             if (Role.RoleAppearance != Role.Role)
             {
                 LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
-                Player.ChangeAppearance(Role.RoleAppearance, true);
+                Timing.CallDelayed(1f, () =>
+                {
+                    Player.ChangeAppearance(Role.RoleAppearance, true);
+                });
             }
-        }
-        
-        public static int GetFirstFreeID(int Id)
-        {
-            while (Plugin.CustomRoles.ContainsKey(Id))
-            {
-                Id++;
-            }
-            return Id;
+
+            LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})!");
         }
 
         public static void SetAllActiveEffect(Player Player)
@@ -303,33 +246,118 @@ namespace UncomplicatedCustomRoles.Manager
             }
         }
 
-        public static RoleTypeId? ParseEscapeRole(string roleAfterEscape, Player player)
+        public static KeyValuePair<bool, object> ParseEscapeRole(string roleAfterEscape, Player player)
         {
+            List<string> Role = new();
+
             if (roleAfterEscape is not null && roleAfterEscape != string.Empty)
             {
-                // Syntax: IR (Internal Role) or CR (Custom Role) : the ID.   For example IR:0 will be SCP-173 (also IR:Scp173) and CR:1 will be the Custom Role with the Id = 1
-                string[] Action = roleAfterEscape.Split(':');
-                if (Action[0].ToUpper() == "IR")
+                if (roleAfterEscape.Contains(","))
                 {
-                    if (Enum.TryParse(Action[1], out RoleTypeId Out))
-                    {
-                        return Out;
-                    }
+                    string[] roles = roleAfterEscape.Split(',');
+                    foreach (string role in roles)
+                        foreach (string rolePart in role.Split(':')) 
+                            Role.Add(rolePart);
                 }
-                else if (Action[0].ToUpper() == "CR")
-                {
-                    LogManager.Debug($"Start parsing the action for a custom role. Full: {roleAfterEscape}");
-                    if (int.TryParse(Action[1], out int Id))
+
+                int SearchIndex = 0;
+
+                if (player.IsCuffed && player.Cuffer is not null)
+                    SearchIndex = player.Cuffer.Role.Team switch
                     {
-                        LogManager.Debug($"Found a valid Id (i guess so): {Id}");
-                        if (Plugin.CustomRoles.ContainsKey(Id))
+                        Team.FoundationForces => 2,
+                        Team.ChaosInsurgency => 4,
+                        Team.Scientists => 6,
+                        Team.ClassD => 8,
+                        _ => 0
+                    };
+
+                // Let's proceed
+                if (Role.Count >= SearchIndex + 2)
+                    if (Role[SearchIndex] is "IR")
+                        return new(false, Role[SearchIndex + 1]);
+                    else if (Role[SearchIndex] is "CR")
+                        return new(true, Role[SearchIndex + 1]);
+                    else
+                        LogManager.Error($"Error while parsing role_after_escape for player {player.Nickname} ({player.Id}): the first string was not 'IR' nor 'CR', found '{Role[SearchIndex]}'!\nPlease see our documentation: https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki/Specifics#role-after-escape");
+                else
+                    LogManager.Debug($"Error while parsing role_after_escape: index is out of range!\nExpected to found {SearchIndex}, total: {Role.Count}!");
+            }
+
+            return new(false, null);
+        }
+
+#nullable enable
+#pragma warning disable CS8602 // <Element> can be null at this point! (added a check!)
+        public static ICustomRole? DoEvaluateSpawnForPlayer(Player player, RoleTypeId? role = null)
+        {
+            role ??= player.Role.Type;
+
+            RoleTypeId NewRole = (RoleTypeId)role;
+
+            Dictionary<RoleTypeId, List<ICustomRole>> RolePercentage = new()
+            {
+                { RoleTypeId.ClassD, new() },
+                { RoleTypeId.Scientist, new() },
+                { RoleTypeId.NtfPrivate, new() },
+                { RoleTypeId.NtfSergeant, new() },
+                { RoleTypeId.NtfCaptain, new() },
+                { RoleTypeId.NtfSpecialist, new() },
+                { RoleTypeId.ChaosConscript, new() },
+                { RoleTypeId.ChaosMarauder, new() },
+                { RoleTypeId.ChaosRepressor, new() },
+                { RoleTypeId.ChaosRifleman, new() },
+                { RoleTypeId.Tutorial, new() },
+                { RoleTypeId.Scp049, new() },
+                { RoleTypeId.Scp0492, new() },
+                { RoleTypeId.Scp079, new() },
+                { RoleTypeId.Scp173, new() },
+                { RoleTypeId.Scp939, new() },
+                { RoleTypeId.Scp096, new() },
+                { RoleTypeId.Scp106, new() },
+                { RoleTypeId.Scp3114, new() },
+                { RoleTypeId.FacilityGuard, new() }
+            };
+
+            foreach (ICustomRole Role in Plugin.CustomRoles.Values.Where(cr => cr.SpawnSettings is not null))
+                if (!Role.IgnoreSpawnSystem && Player.List.Count() >= Role.SpawnSettings.MinPlayers)
+                {
+                    if (Role.SpawnSettings.RequiredPermission != null && Role.SpawnSettings.RequiredPermission != string.Empty && !player.CheckPermission(Role.SpawnSettings.RequiredPermission))
+                    {
+                        LogManager.Debug($"[NOTICE] Ignoring the role {Role.Id} [{Role.Name}] while creating the list for the player {player.Nickname} due to: cannot [permissions].");
+                        continue;
+                    }
+
+                    foreach (RoleTypeId RoleType in Role.SpawnSettings.CanReplaceRoles)
+                    {
+                        for (int a = 0; a < Role.SpawnSettings.SpawnChance; a++)
                         {
-                            LogManager.Debug($"Seems that the role {Id} really exists, let's gooo!");
-                            SummonCustomSubclass(player, Id, true);
+                            RolePercentage[RoleType].Add(Role);
                         }
                     }
                 }
+
+            if (Plugin.PlayerRegistry.ContainsKey(player.Id))
+            {
+                LogManager.Debug("Was evalutating role select for an already custom role player, stopping");
+                return null;
             }
+
+            if (RolePercentage.ContainsKey(player.Role.Type))
+                if (new System.Random().Next(0, 100) < RolePercentage[NewRole].Count())
+                {
+                    // The role exists, good, let's give the player a role
+                    int RoleId = RolePercentage[NewRole].RandomItem().Id;
+
+                    if (Plugin.CustomRoles[RoleId] is null || Plugin.CustomRoles[RoleId].SpawnSettings is null)
+                        return Plugin.CustomRoles[RoleId];
+
+                    if (Plugin.RolesCount[RoleId].Count() <= Plugin.CustomRoles[RoleId].SpawnSettings.MaxPlayers)
+                        return Plugin.CustomRoles[RoleId];
+                    else
+                        LogManager.Debug($"Player {player.Nickname} won't be spawned as CustomRole {RoleId} because it has reached the maximus number");
+                }
+
             return null;
         }
     }  
