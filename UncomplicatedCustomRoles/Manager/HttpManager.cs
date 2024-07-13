@@ -175,6 +175,12 @@ namespace UncomplicatedCustomRoles.Manager
             return Status.StatusCode;
         }
 
+        internal KeyValuePair<HttpStatusCode, string> Mailbox()
+        {
+            HttpResponseMessage Message = HttpGetRequest($"{Endpoint}/{Prefix}/mailbox");
+            return new(Message.StatusCode, RetriveString(Message.Content));
+        }
+
         internal IEnumerator<float> PresenceAction()
         {
             while (Active && Errors <= MaxErrors)
@@ -188,6 +194,15 @@ namespace UncomplicatedCustomRoles.Manager
                         LogManager.Warn($"[UCS HTTP Manager] >> Error while trying to put data inside our APIs.\nThe endpoint say: {Response["message"]} ({Response["status"]})");
                     }
                     catch (Exception) { }
+                }
+
+                // Do anche the Mailbox action
+                if (Plugin.Instance.Config.DoEnableAdminMessages)
+                {
+                    KeyValuePair<HttpStatusCode, string> Mail = Mailbox();
+
+                    if (Mail.Key is HttpStatusCode.OK)
+                        LogManager.Warn($"[UCS HTTP Manager]:[UCS Mailbox] >> Central server have a message:\n{Mail.Value}");
                 }
 
                 yield return Timing.WaitForSeconds(500.0f);

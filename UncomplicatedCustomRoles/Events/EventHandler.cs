@@ -13,6 +13,7 @@ using UnityEngine;
 using UncomplicatedCustomRoles.Extensions;
 using System;
 using UncomplicatedCustomRoles.API.Features;
+using Exiled.Events.EventArgs.Scp330;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -49,6 +50,14 @@ namespace UncomplicatedCustomRoles.Events
                 if (Role is not null)
                     SpawnManager.SummonCustomSubclass(Player, Role.Id);
             }
+        }
+
+        public void OnEatenScp330(EatenScp330EventArgs ev)
+        {
+            Plugin.Scp330Count.TryAdd(ev.Player.Id, Plugin.Scp330Count.TryGetElement<int, uint>(ev.Player.Id, 0) + 1);
+
+            if (ev.Player.TryGetCustomRole(out ICustomRole Role) && Role.MaxScp330Candies <= Plugin.Scp330Count.TryGetElement<int, uint>(ev.Player.Id, 0) && ev.Player.ActiveEffects.Where(b => b == ev.Player.GetEffect(EffectType.SeveredHands)).Count() > 0)
+                ev.Player.DisableEffect(EffectType.SeveredHands);
         }
 
         public void OnPlayerSpawned(SpawnedEventArgs Spawned)
@@ -121,10 +130,24 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnHurting(HurtingEventArgs Hurting)
         {
-            if (Plugin.PlayerRegistry.ContainsKey(Hurting.Player.Id))
+            if (Hurting.Attacker is not null && Hurting.Attacker.TryGetCustomRole(out ICustomRole AttackerRole))
             {
-                ICustomRole Role = Plugin.CustomRoles[Plugin.PlayerRegistry[Hurting.Player.Id]];
-                Hurting.DamageHandler.Damage *= Role.DamageMultiplier;
+                // Let's first check if te thing is allowed!
+                if (Hurting.Player is not null && AttackerRole is Elements.CustomRole CustomRole && CustomRole.HasTeam(Hurting.Player.Role.Team))
+                {
+                    Hurting.IsAllowed = false;
+                    return;
+                }
+
+                Hurting.DamageHandler.Damage *= AttackerRole.DamageMultiplier;
+            }
+            else if (Hurting.Player is not null && Hurting.Attacker is not null && Hurting.Player.TryGetCustomRole(out ICustomRole PlayerRole))
+            {
+                if (PlayerRole is Elements.CustomRole CustomRole && CustomRole.HasTeam(Hurting.Attacker.Role.Team))
+                {
+                    Hurting.IsAllowed = false;
+                    return;
+                }
             }
         }
 

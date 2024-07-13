@@ -12,13 +12,13 @@ namespace UncomplicatedCustomRoles.Manager
 {
 #pragma warning disable CS8974 // Conversione del gruppo di metodi in un tipo non delegato
 
-    internal class RespawnTimerCompatibility
+    internal class RespawnTimer
     {
         // Get the IPlugin<IConfig> of the RespawnTimer plugin 
-        public static readonly IPlugin<IConfig> RespawnTimer = Exiled.Loader.Loader.GetPlugin("RespawnTimer");
+        public static readonly IPlugin<IConfig> RespawnTimerPlugin = Exiled.Loader.Loader.GetPlugin("RespawnTimer");
 
         // Check if the respawn timer plugin is with us
-        public static readonly bool Allowed = RespawnTimer is not null;
+        public static readonly bool Allowed = RespawnTimerPlugin is not null;
 
         const string RespawnTimerTextKey = "CUSTOM_ROLE";
 
@@ -30,7 +30,7 @@ namespace UncomplicatedCustomRoles.Manager
                 return false;
             }
 
-            TimerView = RespawnTimer.Assembly.GetType("RespawnTimer.API.Features.TimerView");
+            TimerView = RespawnTimerPlugin.Assembly.GetType("RespawnTimer.API.Features.TimerView");
             if (TimerView is null)
             {
                 LogManager.Debug("Compatibility loader for RespawnTimer failed: no class 'RespawnTimer.API.Features.TimerView' present!");

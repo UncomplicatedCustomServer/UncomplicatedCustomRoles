@@ -16,77 +16,6 @@ namespace UncomplicatedCustomRoles.Manager
 {
     internal class SpawnManager
     {
-        public static void RegisterCustomSubclass(ICustomRole Role, bool notLoadIfLoaded = false)
-        {
-            if (!SubclassValidator(Role))
-            {
-                LogManager.Warn($"Failed to register the UCR role with the ID {Role.Id} due to the validator check!");
-
-                return;
-            }
-
-            if (!Plugin.CustomRoles.ContainsKey(Role.Id))
-            {
-                Plugin.CustomRoles.Add(Role.Id, Role);
-
-                if (Plugin.Instance.Config.EnableBasicLogs)
-                {
-                    LogManager.Info($"Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
-                }
-
-                return;
-            }
-
-            if (notLoadIfLoaded)
-            {
-                LogManager.Debug($"Can't load role {Role.Id} {Role.Name} due to plugin settings!\nPlease reach UCS support for UCR!");
-                return;
-            }
-
-            LogManager.Warn($"Failed to register the UCR role with the ID {Role.Id}: The problem can be the following: ERR_ID_ALREADY_HERE!\nTrying to assign a new one...");
-
-            int NewId = GetFirstFreeID(Role.Id);
-
-            LogManager.Info($"Custom Role {Role.Name} with the old Id {Role.Id} will be registered with the following Id: {NewId}");
-
-            Role.Id = NewId;
-
-            RegisterCustomSubclass(Role);
-        }
-
-        public static bool SubclassValidator(ICustomRole Role)
-        {
-            if (Role is null)
-                return false;
-
-            if (Role.SpawnSettings is null)
-            {
-                LogManager.Warn($"Is kinda useless registering a role with no spawn_settings.\nFound (or not found) in role: {Role.Name} ({Role.Id})");
-                return false;
-            }
-
-            if (Role.SpawnSettings.Spawn == SpawnLocationType.ZoneSpawn && Role.SpawnSettings.SpawnZones.Count() < 1)
-            {
-                LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the ZoneSpawn as SpawnType the List SpawnZones can't be empty!");
-                return false;
-            } else if (Role.SpawnSettings.Spawn == SpawnLocationType.RoomsSpawn && Role.SpawnSettings.SpawnRooms.Count() < 1)
-            {
-                LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the RoomSpawn as SpawnType the List SpawnRooms can't be empty!");
-                return false;
-            } else if (Role.SpawnSettings.Spawn == SpawnLocationType.PositionSpawn && Role.SpawnSettings.SpawnPosition == new Vector3(0, 0, 0))
-            {
-                LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the PositionSpawn as SpawnType the Vector3 SpawnPosition can't be empty!");
-                return false;
-            }
-            else if (Role.SpawnSettings.MinPlayers == 0)
-            {
-                LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: the value of MinPlayers field must be greater than or equals to 1!");
-                return false;
-            }
-
-            return true;
-        }
-
         public static void ClearCustomTypes(Player player)
         {
             if (player.TryGetCustomRole(out ICustomRole role))
@@ -106,6 +35,8 @@ namespace UncomplicatedCustomRoles.Manager
                 Plugin.RolesCount[role.Id].Remove(player.Id);
                 Plugin.PlayerRegistry.Remove(player.Id);
             }
+
+            Plugin.Scp330Count.TryRemove(player.Id);
 
             player.CustomInfo = string.Empty;
 
@@ -219,20 +150,12 @@ namespace UncomplicatedCustomRoles.Manager
                             LogManager.Debug($"Error while giving a custom item.\nError: {ex.Message}");
                         }
 
-            Player.IsUsingStamina = !Role.InfiniteStamina;
-
             if (Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
                 foreach (KeyValuePair<AmmoType, ushort> Ammo in Role.Ammo)
                     Player.AddAmmo(Ammo.Key, Ammo.Value);
 
             if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
                 Player.CustomInfo += $"\n{Role.CustomInfo}";
-
-            LogManager.Debug("A");
-
-            Player.MaxHealth = Role.MaxHealth;
-            Player.Health = Role.Health;
-            Player.ArtificialHealth = Role.Ahp;
 
 
             LogManager.Debug("B");
@@ -243,6 +166,12 @@ namespace UncomplicatedCustomRoles.Manager
                 Plugin.PlayerRegistry.Add(Player.Id, Role.Id);
                 Plugin.PermanentEffectStatus.Add(Player.Id, new());
             }
+
+            // Apply every required stats
+            Role.Health?.Apply(Player);
+            Role.Ahp?.Apply(Player);
+            Role.Stamina?.Apply(Player);
+            Role.Movement?.Apply(Player);
 
             LogManager.Debug("C");
 
@@ -261,13 +190,6 @@ namespace UncomplicatedCustomRoles.Manager
                     Player.ChangeEffectIntensity(effect.EffectType, effect.Intensity, Duration);
                 }
             }
-
-            LogManager.Debug("D2");
-
-            LogManager.Debug("E");
-
-            if (Role.HumeShield > 0)
-                Player.HumeShield = Role.HumeShield;
 
             LogManager.Debug("F");
 
@@ -308,7 +230,7 @@ namespace UncomplicatedCustomRoles.Manager
             // Changing nickname if needed
             if (Plugin.Instance.Config.AllowNicknameEdit && Role.Nickname is not null && Role.Nickname != string.Empty)
             {
-                Role.Nickname = Role.Nickname.Replace("%dnumbers%", new System.Random().Next(1000, 9999).ToString()).Replace("%nick%", Player.Nickname).Replace("%rand%", new System.Random().Next(0, 9).ToString());
+                Role.Nickname = Role.Nickname.Replace("%dnumber%", new System.Random().Next(1000, 9999).ToString()).Replace("%nick%", Player.Nickname).Replace("%rand%", new System.Random().Next(0, 9).ToString());
                 if (Role.Nickname.Contains(","))
                     Player.DisplayNickname = Role.Nickname.Split(',').RandomItem();
                 else
@@ -329,14 +251,6 @@ namespace UncomplicatedCustomRoles.Manager
             }
 
             LogManager.Debug("L");
-        }
-        
-        public static int GetFirstFreeID(int Id)
-        {
-            while (Plugin.CustomRoles.ContainsKey(Id))
-                Id++;
-
-            return Id;
         }
 
         public static void SetAllActiveEffect(Player Player)
@@ -367,10 +281,10 @@ namespace UncomplicatedCustomRoles.Manager
                 if (player.IsCuffed && player.Cuffer is not null)
                     SearchIndex = player.Cuffer.Role.Team switch
                     {
-                        Team.FoundationForces => 1,
-                        Team.ChaosInsurgency => 3,
-                        Team.Scientists => 5,
-                        Team.ClassD => 7,
+                        Team.FoundationForces => 2,
+                        Team.ChaosInsurgency => 4,
+                        Team.Scientists => 6,
+                        Team.ClassD => 8,
                         _ => 0
                     };
 

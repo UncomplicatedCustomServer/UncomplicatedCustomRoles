@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using Exiled.API.Enums;
 using Exiled.API.Features;
+using UncomplicatedCustomRoles.Integrations;
 using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
 using Handler = UncomplicatedCustomRoles.Events.EventHandler;
 using PlayerHandler = Exiled.Events.Handlers.Player;
 using Scp049Handler = Exiled.Events.Handlers.Scp049;
 using ServerHandler = Exiled.Events.Handlers.Server;
+using Scp330Handler = Exiled.Events.Handlers.Scp330;
 
 namespace UncomplicatedCustomRoles
 {
@@ -50,6 +52,9 @@ namespace UncomplicatedCustomRoles
         // PlayerId => [color, name]
         internal static Dictionary<int, string[]> Tags;
 
+        // Let's track how may candies do the players eat -> PlayerId -> Count
+        internal static Dictionary<int, uint> Scp330Count;
+
         internal bool DoSpawnBasicRoles = false;
 
         internal static HttpManager HttpManager;
@@ -78,6 +83,7 @@ namespace UncomplicatedCustomRoles
             PermanentEffectStatus = new();
             InternalCooldownQueue = new();
             NicknameTracker = new();
+            Scp330Count = new();
 
             ServerHandler.RespawningTeam += Handler.OnRespawningWave;
             ServerHandler.RoundStarted += Handler.OnRoundStarted;
@@ -85,13 +91,12 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Spawning += Handler.OnSpawning;
             PlayerHandler.Spawned += Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole += Handler.OnChangingRole;
+            Scp330Handler.EatenScp330 += Handler.OnEatenScp330;
             //PlayerHandler.Spawned += Handler.OnSpawning;
             PlayerHandler.Escaping += Handler.OnEscaping;
             PlayerHandler.UsedItem += Handler.OnItemUsed;
             PlayerHandler.Hurting += Handler.OnHurting;
             Scp049Handler.StartingRecall += Handler.OnScp049StartReviving;
-            
-            RespawnTimerCompatibility.Enable();
             
             if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomRoles", ".nohttp")))
             {
@@ -104,6 +109,10 @@ namespace UncomplicatedCustomRoles
                 LogManager.Info(" Thanks for using UncomplicatedCustomRoles");
                 LogManager.Info("        by FoxWorn3365 & Dr.Agenda");
                 LogManager.Info("===========================================");
+                LogManager.Info("             Special thanks to:");
+                LogManager.Info("  >>  @timmeyxd - They gave me money in order to continue to develop this plugin while keeping it free");
+                LogManager.Info("  >>  @naxefir - They tested hundred of test versions in order to help me relasing the most bug-free versions");
+                LogManager.Info("                   ");
                 LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
             }
 
@@ -117,14 +126,17 @@ namespace UncomplicatedCustomRoles
             FileConfigs.LoadAll();
             FileConfigs.LoadAll(Server.Port.ToString());
 
+            // Register ScriptedEvents and RespawnTimer integration
+            ScriptedEvents.RegisterCustomActions();
+            RespawnTimer.Enable();
+
             base.OnEnabled();
         }
 
         public override void OnDisabled()
         {
-            Instance = null;
-
-            RespawnTimerCompatibility.Disable();
+            RespawnTimer.Disable();
+            ScriptedEvents.UnregisterCustomActions();
 
             ServerHandler.RespawningTeam -= Handler.OnRespawningWave;
             ServerHandler.RoundStarted -= Handler.OnRoundStarted;
@@ -132,6 +144,7 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Spawning -= Handler.OnSpawning;
             PlayerHandler.Spawned -= Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole -= Handler.OnChangingRole;
+            Scp330Handler.EatenScp330 -= Handler.OnEatenScp330;
             //PlayerHandler.Spawned -= Handler.OnSpawning;
             PlayerHandler.Escaping -= Handler.OnEscaping;
             PlayerHandler.UsedItem -= Handler.OnItemUsed;
@@ -141,6 +154,8 @@ namespace UncomplicatedCustomRoles
             HttpManager.Stop();
 
             Handler = null;
+
+            Instance = null;
 
             base.OnDisabled();
         }

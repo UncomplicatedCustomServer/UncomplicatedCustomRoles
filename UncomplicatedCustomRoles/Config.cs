@@ -21,6 +21,9 @@ namespace UncomplicatedCustomRoles
         [Description("Do enable the basic UCR logs?")]
         public bool EnableBasicLogs { get; set; } = true;
 
+        [Description("If false you won't receive important messages sent from our central servers (they are important!)")]
+        public bool DoEnableAdminMessages { get; set; } = true;
+
         [Description("The content that will be replaced instead of {CUSTOM_ROLE} on your RespawnTimer display config if the current spectated player is a custom role. %customrole% is the role name")]
         public string RespawnTimerContent { get; set; } = "Player has custom role %customrole%";
 
