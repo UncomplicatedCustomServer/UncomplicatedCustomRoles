@@ -20,11 +20,11 @@ namespace UncomplicatedCustomRoles.Commands
 
         public override void LoadGeneratedCommands() 
         {
-            RegisteredCommands.Add(new UCRList());
-            RegisteredCommands.Add(new UCROwner());
-            RegisteredCommands.Add(new UCRRole());
-            RegisteredCommands.Add(new UCRSpawn());
-            RegisteredCommands.Add(new UCRReload());
+            RegisteredCommands.Add(new List());
+            RegisteredCommands.Add(new Owner());
+            RegisteredCommands.Add(new Role());
+            RegisteredCommands.Add(new Spawn());
+            RegisteredCommands.Add(new Reload());
         }
 
         public List<IUCRCommand> RegisteredCommands { get; } = new();

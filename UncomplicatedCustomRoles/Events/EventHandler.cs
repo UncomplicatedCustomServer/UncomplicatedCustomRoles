@@ -99,27 +99,19 @@ namespace UncomplicatedCustomRoles.Events
             if (ev.Player is null)
                 return;
 
-            LogManager.Debug("Called CHANGINGROLE event");
+            LogManager.Debug("Called SPAWNING event");
 
             if (Plugin.InternalCooldownQueue.Contains(ev.Player.Id))
                 return;
 
-            LogManager.Debug("Called CHANGINGROLE A event");
-
             if (Plugin.PlayerRegistry.ContainsKey(ev.Player.Id))
                 return;
-
-            LogManager.Debug("Called CHANGINGROLE B event");
 
             if (!Plugin.Instance.DoSpawnBasicRoles)
                 return;
 
-            LogManager.Debug("Called CHANGINGROLE C event");
-
             if (ev.Player.IsNPC)
                 return;
-
-            LogManager.Debug("Called CHANGINGROLE E event");
 
             string LogReason = string.Empty;
             if (Plugin.Instance.Config.AllowOnlyNaturalSpawns && !Plugin.RoleSpawnQueue.Contains(ev.Player.Id))

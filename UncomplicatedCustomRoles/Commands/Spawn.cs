@@ -8,7 +8,7 @@ using Handler = UncomplicatedCustomRoles.Events.EventHandler;
 
 namespace UncomplicatedCustomRoles.Commands
 {
-    public class UCRSpawn : IUCRCommand
+    public class Spawn : IUCRCommand
     {
         public string Name { get; } = "spawn";
 

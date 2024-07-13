@@ -8,7 +8,7 @@ using UncomplicatedCustomRoles.Manager;
 namespace UncomplicatedCustomRoles.Commands
 {
 #pragma warning disable CS0618 // Obsolete
-    public class UCRReload : IUCRCommand
+    public class Reload : IUCRCommand
     {
         public string Name { get; } = "reload";
 

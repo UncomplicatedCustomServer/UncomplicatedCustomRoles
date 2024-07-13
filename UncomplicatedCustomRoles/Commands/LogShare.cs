@@ -9,9 +9,9 @@ using Newtonsoft.Json;
 namespace UncomplicatedCustomRoles.Commands
 {
     [CommandHandler(typeof(GameConsoleCommandHandler))]
-    internal class UCRLogShare : ParentCommand
+    internal class LogShare : ParentCommand
     {
-        public UCRLogShare() => LoadGeneratedCommands();
+        public LogShare() => LoadGeneratedCommands();
 
         public override string Command { get; } = "ucrlogs";
 

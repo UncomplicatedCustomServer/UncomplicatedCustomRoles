@@ -160,7 +160,6 @@ namespace UncomplicatedCustomRoles.Manager
             if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
                 Player.CustomInfo += $"\n{Role.CustomInfo}";
 
-
             if (!Plugin.RolesCount[Role.Id].Contains(Player.Id))
             {
                 Plugin.RolesCount[Role.Id].Add(Player.Id);

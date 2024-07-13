@@ -7,7 +7,7 @@ using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Commands
 {
-    public class UCRRole : IUCRCommand
+    public class Role : IUCRCommand
     {
         public string Name { get; } = "role";
 
