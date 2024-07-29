@@ -2,7 +2,7 @@
     
 namespace UncomplicatedCustomRoles.Interfaces
 {
-    public interface IUCREffect
+    public interface IEffect
     {
         public abstract EffectType EffectType { get; set; }
 

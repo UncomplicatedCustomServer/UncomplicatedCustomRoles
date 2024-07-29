@@ -56,6 +56,8 @@
     <Compile Include="API\Features\InfiniteEffect.cs" />
     <Compile Include="API\Features\Behaviour\SpawnBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\StaminaBehaviour.cs" />
+    <Compile Include="API\Features\Spawn.cs" />
+    <Compile Include="API\Features\SummonedCustomRole.cs" />
     <Compile Include="Commands\CommandParent.cs" />
     <Compile Include="Commands\List.cs" />
     <Compile Include="Commands\LogShare.cs" />
@@ -64,22 +66,22 @@
     <Compile Include="Commands\Reload.cs" />
     <Compile Include="Commands\Spawn.cs" />
     <Compile Include="Config.cs" />
-    <Compile Include="Elements\CustomRole.cs" />
     <Compile Include="Enums\SpawnLocationType.cs" />
     <Compile Include="Events\EventHandler.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
+    <Compile Include="Extensions\ListExtension.cs" />
     <Compile Include="Extensions\PlayerExtension.cs" />
     <Compile Include="Extensions\Vector3Extension.cs" />
     <Compile Include="Integrations\ScriptedEvents.cs" />
     <Compile Include="Interfaces\IUCRCommand.cs" />
     <Compile Include="Manager\FileConfigs.cs" />
-    <Compile Include="Elements\UCREffect.cs" />
+    <Compile Include="API\Features\Effect.cs" />
     <Compile Include="Manager\HttpManager.cs" />
     <Compile Include="Manager\LogManager.cs" />
     <Compile Include="Manager\SpawnManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Interfaces\ICustomRole.cs" />
-    <Compile Include="Interfaces\IUCREffect.cs" />
+    <Compile Include="Interfaces\IEffect.cs" />
     <Compile Include="Integrations\RespawnTimer.cs" />
   </ItemGroup>
   <ItemGroup>

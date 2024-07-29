@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UncomplicatedCustomRoles.Elements;
+using UncomplicatedCustomRoles.API.Features;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -74,14 +74,13 @@ namespace UncomplicatedCustomRoles.Manager
             if (!Is(localDir))
             {
                 Directory.CreateDirectory(Path.Combine(Dir, localDir));
-
                 File.WriteAllText(Path.Combine(Dir, localDir, "example-role.yml"), Loader.Serializer.Serialize(new Dictionary<string, List<CustomRole>>() {
                   {
                     "custom_roles", new List<CustomRole>()
                     {
                         new()
                         {
-                            Id = API.Features.CustomRole.GetFirstFreeID(1)
+                            Id = CustomRole.GetFirstFreeID(1)
                         }
                     }
                   }

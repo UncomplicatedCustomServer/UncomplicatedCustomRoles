@@ -2,6 +2,7 @@
 using Exiled.API.Features;
 using MEC;
 using System.Collections.Generic;
+using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
 using Handler = UncomplicatedCustomRoles.Events.EventHandler;
@@ -42,7 +43,7 @@ namespace UncomplicatedCustomRoles.Commands
                 int Id = int.Parse(arguments[1]);
 
                 LogManager.Debug($"Selected role Id as Int32: {Id}");
-                if (!Plugin.CustomRoles.ContainsKey(Id))
+                if (!CustomRole.CustomRoles.ContainsKey(Id))
                 {
                     response = $"Role with the Id {Id} was not found!";
                     return false;

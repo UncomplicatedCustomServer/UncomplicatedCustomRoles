@@ -8,9 +8,6 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
 #nullable enable
     public class SpawnBehaviour
     {
-        // Spawn Behaviour for the plugin (global)
-        public static bool DoHandleWave { get; internal set; } = true;
-
         // Spawn Behaviour for the roles (role-based)
         public List<RoleTypeId> CanReplaceRoles { get; set; } = new()
         {
@@ -37,12 +34,5 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
         public Vector3 SpawnOffset { get; set; } = new();
 
         public string? RequiredPermission { get; set; } = string.Empty;
-
-        // You can use this class to handle the RespawnWave like to disable it
-        public static void DisableSpawnWave()
-        {
-            DoHandleWave = false;
-            Plugin.RoleSpawnQueue.Clear();
-        }
     }
 }

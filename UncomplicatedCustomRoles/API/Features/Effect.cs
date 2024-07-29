@@ -4,7 +4,7 @@ using UncomplicatedCustomRoles.Interfaces;
 
 namespace UncomplicatedCustomRoles.Manager
 {
-    public class UCREffect : IUCREffect
+    public class Effect : IEffect
     {
         [Description("The effect EffectType found on the EXILED discord server")]
         public EffectType EffectType { get; set; } = EffectType.MovementBoost;

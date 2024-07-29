@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Runtime.Remoting.Messaging;
 using Exiled.API.Features;
 using Exiled.API.Features.Roles;
 using Exiled.API.Interfaces;
 using PlayerRoles;
+using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Interfaces;
 
@@ -103,8 +102,8 @@ namespace UncomplicatedCustomRoles.Manager
             if (spectated is null)
                 return string.Empty;
             
-            if (spectated.TryGetCustomRole(out var customRole))
-                return GetPublicCustomRoleName(customRole, player);
+            if (spectated.TryGetSummonedInstance(out SummonedCustomRole summoned))
+                return GetPublicCustomRoleName(summoned.Role, player);
             
             return Plugin.Instance.Config.RespawnTimerContentEmpty;
         }

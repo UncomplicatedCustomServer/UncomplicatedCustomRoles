@@ -1,129 +1,70 @@
-﻿using Exiled.API.Features;
+﻿using Exiled.API.Enums;
+using Exiled.API.Features;
 using MEC;
+using PlayerRoles;
 using System.Collections.Generic;
 using System.Linq;
-using UncomplicatedCustomRoles.Interfaces;
+using UncomplicatedCustomRoles.Manager;
+using UnityEngine;
 
 #nullable enable
 namespace UncomplicatedCustomRoles.API.Features
 {
     public class InfiniteEffect
     {
+        /// <summary>
+        /// Whether the infinite effect coroutine is running or not
+        /// </summary>
+        public static bool IsRunning => CoroutineHandle.IsRunning;
+
+        internal static CoroutineHandle CoroutineHandle { get; private set; }
+
+        internal static bool EffectAssociationAllowed { get; set; } = false;
 
         /// <summary>
-        /// Get all of the infinite effects of a player if it's a custom role
+        /// Start the coroutine
         /// </summary>
-        public static List<IUCREffect>? List(Player Player)
+        public static void Start()
         {
-            return List(Player.Id);
+            if (IsRunning) 
+                return;
+
+            CoroutineHandle = Timing.RunCoroutine(Actor());
         }
 
         /// <summary>
-        /// Get all of the infinite effects of a player if it's a custom role in a List of <see cref="IUCREffect"/>
-        /// </summary>
-        public static List<IUCREffect>? List(int Id)
-        {
-            if (Plugin.PermanentEffectStatus.ContainsKey(Id))
-            {
-                return Plugin.PermanentEffectStatus[Id];
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Add a <see cref="IUCREffect"/> istance to the player. The duration must be less or equal to 0
-        /// </summary>
-        public static bool Add(IUCREffect Effect, int Id)
-        {
-            if (Plugin.PlayerRegistry.ContainsKey(Id) && Plugin.PermanentEffectStatus.ContainsKey(Id) && Effect.Duration < 0)
-            {
-                Plugin.PermanentEffectStatus[Id].Add(Effect);
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Add a <see cref="IUCREffect"/> istance to the player. The duration must be less or equal to 0
-        /// </summary>
-        public static bool Add(IUCREffect Effect, Player Player)
-        {
-            return Add(Effect, Player.Id);
-        }
-
-        /// <summary>
-        /// Remove a <see cref="IUCREffect"/> istance to the player, if it exists.
-        /// </summary>
-        public static bool Remove(IUCREffect Effect, int Id)
-        {
-            if (Plugin.PlayerRegistry.ContainsKey(Id) && Plugin.PermanentEffectStatus.ContainsKey(Id) && Effect.Duration < 0)
-            {
-                List<IUCREffect> Effects = Plugin.PermanentEffectStatus[Id].Where(effect => effect == Effect).ToList();
-                if (Effects.Count() > 0)
-                {
-                    foreach (IUCREffect InternalEffect in Effects)
-                    {
-                        Plugin.PermanentEffectStatus[Id].Remove(InternalEffect);
-                    }
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Remove a <see cref="IUCREffect"/> istance from the player, if it exists.
-        /// </summary>
-        public static bool Remove(IUCREffect Effect, Player Player)
-        {
-            return Remove(Effect, Player.Id);
-        }
-
-        /// <summary>
-        /// Remove every infinite effect from a player
-        /// </summary>
-        /// <param name="Player"></param>
-        /// <returns></returns>
-        public static bool Remove(Player Player)
-        {
-            return Plugin.PermanentEffectStatus.Remove(Player.Id);
-        }
-
-        /// <summary>
-        /// Get the <see cref="CoroutineHandle"/> of the infinite role coroutine. Can be <see cref="null"/>.
-        /// </summary>
-        public static CoroutineHandle Coroutine()
-        {
-            return Plugin.Instance.Handler.EffectCoroutine;
-        }
-
-        /// <summary>
-        /// Stops the <see cref="CoroutineHandle"/> of the infinite role coroutine.
+        /// Stop the coroutine
         /// </summary>
         public static void Stop()
         {
-            Timing.KillCoroutines(Coroutine());
+            if (!IsRunning)
+                return;
+
+            Timing.KillCoroutines(CoroutineHandle);
         }
 
-        /// <summary>
-        /// Check if the <see cref="CoroutineHandle"/> of the infinite role is still running.
-        /// </summary>
-        public static bool IsRunning()
+        internal static IEnumerator<float> Actor()
         {
-            return Coroutine().IsRunning;
-        }
-
-        /// <summary>
-        /// Start the <see cref="CoroutineHandle"/> of the infinite role coroutine again. Return <see cref="false"/> if the coroutine was already running.
-        /// </summary>
-        public static bool Start()
-        {
-            if (!IsRunning())
+            while (EffectAssociationAllowed)
             {
-                Plugin.Instance.Handler.EffectCoroutine = Timing.RunCoroutine(Plugin.Instance.Handler.DoSetInfiniteEffectToPlayers());
-                return true;
+                SummonedCustomRole.InfiniteEffectActor();
+
+                // Really funny we have also to check for SCPs near the escaping point
+                foreach (Player Player in Player.List.Where(player => player.IsScp && Vector3.Distance(new(123.85f, 988.8f, 18.9f), player.Position) < 7.5f))
+                {
+                    LogManager.Debug("Calling respawn event for player -> position -- It's an SCP!");
+                    // Let's make this SCP escape
+                    Plugin.Instance.Handler.OnEscaping(new(Player, RoleTypeId.ChaosConscript, EscapeScenario.None));
+                }
+
+                yield return Timing.WaitForSeconds(2.5f);
             }
-            return false;
+        }
+
+        internal static void Terminate()
+        {
+            EffectAssociationAllowed = false;
+            Stop();
         }
     }
 }

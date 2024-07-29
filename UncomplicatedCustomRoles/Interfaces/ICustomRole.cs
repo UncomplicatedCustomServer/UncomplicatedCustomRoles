@@ -33,7 +33,7 @@ namespace UncomplicatedCustomRoles.Interfaces
 
         public abstract AhpBehaviour Ahp { get; set; }
 
-        public abstract List<UCREffect>? Effects { get; set; }
+        public abstract List<Effect>? Effects { get; set; }
 
         public abstract StaminaBehaviour Stamina { get; set; }
 
