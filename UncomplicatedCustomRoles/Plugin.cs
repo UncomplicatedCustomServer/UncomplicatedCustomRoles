@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using Exiled.API.Enums;
 using Exiled.API.Features;
 using UncomplicatedCustomRoles.Integrations;
-using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
 using Handler = UncomplicatedCustomRoles.Events.EventHandler;
 using PlayerHandler = Exiled.Events.Handlers.Player;
