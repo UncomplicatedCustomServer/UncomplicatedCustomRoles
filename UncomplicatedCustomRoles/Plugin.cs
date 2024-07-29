@@ -1,31 +1,23 @@
 using System;
 using System.IO;
-using Exiled.API.Enums;
-using Exiled.API.Features;
 using UncomplicatedCustomRoles.Integrations;
 using UncomplicatedCustomRoles.Manager;
 using Handler = UncomplicatedCustomRoles.Events.EventHandler;
-using PlayerHandler = Exiled.Events.Handlers.Player;
-using Scp049Handler = Exiled.Events.Handlers.Scp049;
-using ServerHandler = Exiled.Events.Handlers.Server;
-using Scp330Handler = Exiled.Events.Handlers.Scp330;
 using UncomplicatedCustomRoles.API.Features;
+using PluginAPI.Core.Attributes;
+using PluginAPI.Helpers;
+using PluginAPI.Enums;
+using PluginAPI.Events;
+using PluginAPI.Core;
 
 namespace UncomplicatedCustomRoles
 {
-    internal class Plugin : Plugin<Config>
+    internal class Plugin
     {
-        public override string Name => "UncomplicatedCustomRoles";
+        [PluginConfig]
+        internal Config Config;
 
-        public override string Prefix => "UncomplicatedCustomRoles";
-
-        public override string Author => "FoxWorn3365, Dr.Agenda";
-
-        public override Version Version { get; } = new(3, 4, 2);
-
-        public override Version RequiredExiledVersion { get; } = new(8, 9, 6);
-
-        public override PluginPriority Priority => PluginPriority.Higher;
+        public readonly static Version Version = new(3, 4, 2);
 
         internal static Plugin Instance;
 
@@ -37,7 +29,9 @@ namespace UncomplicatedCustomRoles
 
         internal static FileConfigs FileConfigs;
 
-        public override void OnEnabled()
+        [PluginEntryPoint("UncomplicatedCustomRoles", "3.4.2", "UncomplicatedCustomRoles is a plugin that allow you to create custom roles for SCP:SL", "FoxWorn3365")]
+        [PluginPriority(LoadPriority.High)]
+        public void OnEnabled()
         {
             Instance = this;
 
@@ -49,23 +43,8 @@ namespace UncomplicatedCustomRoles
             HttpManager = new("ucr", int.MaxValue);
 
             CustomRole.List.Clear();
-
-            ServerHandler.RespawningTeam += Handler.OnRespawningWave;
-            ServerHandler.RoundStarted += Handler.OnRoundStarted;
-            ServerHandler.RoundEnded += Handler.OnRoundEnded;
-            PlayerHandler.Died += Handler.OnDied;
-            PlayerHandler.Spawning += Handler.OnSpawning;
-            PlayerHandler.Spawned += Handler.OnPlayerSpawned;
-            PlayerHandler.ChangingRole += Handler.OnChangingRole;
-            PlayerHandler.ReceivingEffect += Handler.OnReceivingEffect;
-            Scp330Handler.InteractingScp330 += Handler.OnInteractingScp330;
-            //PlayerHandler.Spawned += Handler.OnSpawning;
-            PlayerHandler.Escaping += Handler.OnEscaping;
-            PlayerHandler.UsedItem += Handler.OnItemUsed;
-            PlayerHandler.Hurting += Handler.OnHurting;
-            Scp049Handler.FinishingRecall += Handler.OnFinishingRecall;
             
-            if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomRoles", ".nohttp")))
+            if (!File.Exists(Path.Combine(Paths.Configs, "UncomplicatedCustomRoles", ".nohttp")))
                 HttpManager.Start();
 
             if (Config.EnableBasicLogs)
@@ -88,6 +67,9 @@ namespace UncomplicatedCustomRoles
             InfiniteEffect.EffectAssociationAllowed = true;
             InfiniteEffect.Start();
 
+            // Load events
+            EventManager.RegisterEvents(this, Handler);
+
             FileConfigs.Welcome();
             FileConfigs.Welcome(Server.Port.ToString());
             FileConfigs.LoadAll();
@@ -96,37 +78,21 @@ namespace UncomplicatedCustomRoles
             // Register ScriptedEvents and RespawnTimer integration
             ScriptedEvents.RegisterCustomActions();
             RespawnTimer.Enable();
-
-            base.OnEnabled();
         }
 
-        public override void OnDisabled()
+        [PluginUnload]
+        public void OnDisabled()
         {
             RespawnTimer.Disable();
             ScriptedEvents.UnregisterCustomActions();
 
-            ServerHandler.RespawningTeam -= Handler.OnRespawningWave;
-            ServerHandler.RoundEnded -= Handler.OnRoundEnded;
-            ServerHandler.RoundStarted -= Handler.OnRoundStarted;
-            PlayerHandler.Died -= Handler.OnDied;
-            PlayerHandler.Spawning -= Handler.OnSpawning;
-            PlayerHandler.Spawned -= Handler.OnPlayerSpawned;
-            PlayerHandler.ChangingRole -= Handler.OnChangingRole;
-            PlayerHandler.ReceivingEffect -= Handler.OnReceivingEffect;
-            Scp330Handler.InteractingScp330 -= Handler.OnInteractingScp330;
-            //PlayerHandler.Spawned -= Handler.OnSpawning;
-            PlayerHandler.Escaping -= Handler.OnEscaping;
-            PlayerHandler.UsedItem -= Handler.OnItemUsed;
-            PlayerHandler.Hurting -= Handler.OnHurting;
-            Scp049Handler.FinishingRecall -= Handler.OnFinishingRecall;
+            EventManager.UnregisterAllEvents(this);
 
             HttpManager.Stop();
 
             Handler = null;
 
             Instance = null;
-
-            base.OnDisabled();
         }
     }
 }

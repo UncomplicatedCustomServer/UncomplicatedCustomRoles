@@ -1,10 +1,9 @@
-﻿using Exiled.API.Interfaces;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace UncomplicatedCustomRoles
 {
-    internal class Config : IConfig
+    public class Config
     {
         [Description("Is the plugin enabled?")]
         public bool IsEnabled { get; set; } = true;
