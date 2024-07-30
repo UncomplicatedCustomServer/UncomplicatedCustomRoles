@@ -10,8 +10,7 @@ namespace UncomplicatedCustomRoles.API.Helpers.Imports.EXILED.YAML.Configs
     using System;
     using System.ComponentModel.DataAnnotations;
 
-    using Exiled.API.Features;
-
+    using PluginAPI.Core;
     using YamlDotNet.Core;
     using YamlDotNet.Serialization;
 
