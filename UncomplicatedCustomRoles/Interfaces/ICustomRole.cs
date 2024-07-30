@@ -1,7 +1,5 @@
-﻿using Exiled.API.Enums;
-using PlayerRoles;
+﻿using PlayerRoles;
 using System.Collections.Generic;
-using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
@@ -57,7 +55,7 @@ namespace UncomplicatedCustomRoles.Interfaces
 
         public abstract List<uint> CustomItemsInventory { get; set; }
 
-        public abstract Dictionary<AmmoType, ushort> Ammo { get; set; }
+        public abstract Dictionary<ItemType, ushort> Ammo { get; set; }
 
         public abstract float DamageMultiplier { get; set; }
 

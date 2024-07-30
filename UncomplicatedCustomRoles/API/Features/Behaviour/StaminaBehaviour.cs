@@ -1,5 +1,4 @@
-﻿using Exiled.API.Features;
-using Exiled.API.Features.Roles;
+﻿using PluginAPI.Core;
 
 namespace UncomplicatedCustomRoles.API.Features.Behaviour
 {
@@ -11,15 +10,6 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
 
         public bool Infinite { get; set; } = false;
 
-        public void Apply(Player player)
-        {
-            if (player.Role is FpcRole Fpc)
-            {
-                Fpc.StaminaRegenMultiplier = RegenMultiplier;
-                Fpc.StaminaUsageMultiplier = UsageMultiplier;
-            }
-
-            player.IsUsingStamina = !Infinite;
-        }
+        public void Apply(Player _) { }
     }
 }

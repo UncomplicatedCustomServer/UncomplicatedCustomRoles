@@ -58,6 +58,23 @@
     <Compile Include="API\Features\Behaviour\StaminaBehaviour.cs" />
     <Compile Include="API\Features\Spawn.cs" />
     <Compile Include="API\Features\SummonedCustomRole.cs" />
+    <Compile Include="API\Helpers\HealthHelper.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\MirrorExtension.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\Pools\DictionaryPool.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\Pools\HashSetPool.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\Pools\IPool.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\Pools\ListPool.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\Pools\QueuePool.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\Pools\StringBuilderPool.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\YAML\ColorConverter.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\CommentGatheringTypeInspector.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\CommentsObjectDescriptor.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\CommentsObjectGraphVisitor.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\CommentsPropertyDescriptor.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\TypeAssigningEventEmitter.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\UnderscoredNamingConvention.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\ValidatingNodeDeserializer.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\YAML\VectorsConverter.cs" />
     <Compile Include="Commands\CommandParent.cs" />
     <Compile Include="Commands\List.cs" />
     <Compile Include="Commands\LogShare.cs" />
@@ -67,12 +84,26 @@
     <Compile Include="Commands\Spawn.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Enums\SpawnLocationType.cs" />
-    <Compile Include="Events\EventHandler.cs" />
+    <Compile Include="Events\Args\EscapingEventArgs.cs" />
+    <Compile Include="Events\Args\EventArgs.cs" />
+    <Compile Include="Events\Args\HurtingEventArgs.cs" />
+    <Compile Include="Events\Args\RespawningTeamEventArgs.cs" />
+    <Compile Include="Events\Attributes\InternalPluginEvent.cs" />
+    <Compile Include="Events\EventManager.cs" />
+    <Compile Include="Events\Interfaces\IAttackerEvent.cs" />
+    <Compile Include="Events\Interfaces\IDeniableEvent.cs" />
+    <Compile Include="Events\Interfaces\IEventArgs.cs" />
+    <Compile Include="Events\Interfaces\IPlayerEvent.cs" />
+    <Compile Include="Handlers\EventHandler.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
-    <Compile Include="Extensions\ListExtension.cs" />
+    <Compile Include="Extensions\EnumberableExtension.cs" />
     <Compile Include="Extensions\PlayerExtension.cs" />
     <Compile Include="Extensions\Vector3Extension.cs" />
     <Compile Include="HarmonyElements\Patch\DamageHandler.cs" />
+    <Compile Include="HarmonyElements\Patch\EscapeHandler.cs" />
+    <Compile Include="HarmonyElements\Patch\RespawningTeamHandler.cs" />
+    <Compile Include="HarmonyElements\Patch\StaminaRegenHandler.cs" />
+    <Compile Include="HarmonyElements\Patch\StaminaUsageHandler.cs" />
     <Compile Include="Integrations\ScriptedEvents.cs" />
     <Compile Include="Interfaces\IUCRCommand.cs" />
     <Compile Include="Manager\FileConfigs.cs" />
@@ -80,6 +111,7 @@
     <Compile Include="Manager\HttpManager.cs" />
     <Compile Include="Manager\LogManager.cs" />
     <Compile Include="Manager\SpawnManager.cs" />
+    <Compile Include="Manager\YamlHelper.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Interfaces\ICustomRole.cs" />
     <Compile Include="Interfaces\IEffect.cs" />
@@ -99,6 +131,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
+    <Reference Include="Assembly-CSharp-Publicized, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Downloads\references\references\Assembly-CSharp-Publicized.dll</HintPath>
+    </Reference>
     <Reference Include="BouncyCastle.Cryptography, Version=2.0.0.0, Culture=neutral, PublicKeyToken=072edcf4a5328938, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\BouncyCastle.Cryptography.dll</HintPath>
@@ -106,6 +142,10 @@
     <Reference Include="Caress, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\Caress.dll</HintPath>
+    </Reference>
+    <Reference Include="CommandSystem.Core, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Downloads\references\references\CommandSystem.Core.dll</HintPath>
     </Reference>
     <Reference Include="DnsClient, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -126,6 +166,14 @@
     <Reference Include="Mono.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\Mono.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="NorthwoodLib, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Downloads\references\references\NorthwoodLib.dll</HintPath>
+    </Reference>
+    <Reference Include="PluginAPI, Version=13.1.3.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Downloads\references\references\PluginAPI.dll</HintPath>
     </Reference>
     <Reference Include="Pooling, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -471,6 +519,10 @@
     <Reference Include="UnityEngine.XRModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\UnityEngine.XRModule.dll</HintPath>
+    </Reference>
+    <Reference Include="YamlDotNet, Version=11.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Downloads\references\references\YamlDotNet.dll</HintPath>
     </Reference>
     <Reference Include="zxing, Version=0.16.9.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

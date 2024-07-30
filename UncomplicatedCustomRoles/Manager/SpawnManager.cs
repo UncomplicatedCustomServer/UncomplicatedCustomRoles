@@ -1,17 +1,16 @@
-﻿using Exiled.API.Enums;
-using Exiled.API.Extensions;
-using Exiled.API.Features;
-using PlayerRoles;
+﻿using PlayerRoles;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.Interfaces;
 using UnityEngine;
-using Exiled.CustomItems.API.Features;
 using System;
 using UncomplicatedCustomRoles.Extensions;
 using MEC;
-using Exiled.Permissions.Extensions;
+using PluginAPI.Core;
 using UncomplicatedCustomRoles.API.Features;
+using MapGeneration;
+using System.Reflection;
+using Mirror;
 
 // Mormora, la gente mormora
 // falla tacere praticando l'allegria
@@ -50,7 +49,7 @@ namespace UncomplicatedCustomRoles.Manager
             }
 
             // This will allow us to avoid the loop of another OnSpawning
-            Spawn.Spawning.TryAdd(player.Id);
+            Spawn.Spawning.TryAdd(player.PlayerId);
 
             Vector3 BasicPosition = player.Position;
 
@@ -59,32 +58,36 @@ namespace UncomplicatedCustomRoles.Manager
             if (Role.SpawnSettings.Spawn == SpawnLocationType.KeepRoleSpawn)
                 SpawnFlag = RoleSpawnFlags.UseSpawnpoint;
 
-            player.Role.Set(Role.Role, SpawnFlag);
+            player.ReferenceHub.roleManager.ServerSetRole(Role.Role, RoleChangeReason.Respawn, SpawnFlag);
 
             if (Role.SpawnSettings.Spawn == SpawnLocationType.KeepCurrentPositionSpawn)
                 player.Position = BasicPosition;
+
+            List<RoomIdentifier> OffLimitsRooms = new();
+
+            foreach (TeslaGate Gate in Map.TeslaGates)
+                OffLimitsRooms.Add(Gate.Room);
 
             if (SpawnFlag == RoleSpawnFlags.None)
             {
                 switch (Role.SpawnSettings.Spawn)
                 {
                     case SpawnLocationType.ZoneSpawn:
-                        player.Position = Room.List.Where(room => room.Zone == Role.SpawnSettings.SpawnZones.RandomItem() && room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
+                        player.Position = RoomIdentifier.AllRoomIdentifiers.Where(room => room.Zone == Role.SpawnSettings.SpawnZones.RandomItem() && !OffLimitsRooms.Contains(room)).RandomValue().ApiRoom.Position.AddY(1f);
                         break;
                     case SpawnLocationType.CompleteRandomSpawn:
-                        player.Position = Room.List.Where(room => room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
+                        player.Position = RoomIdentifier.AllRoomIdentifiers.Where(room => !OffLimitsRooms.Contains(room)).RandomValue().ApiRoom.Position.AddY(1f);
                         break;
                     case SpawnLocationType.RoomsSpawn:
-                        player.Position = Room.Get(Role.SpawnSettings.SpawnRooms.RandomItem()).Position.AddY(1.5f);
-
-                        if (Role.SpawnSettings.SpawnOffset != new Vector3())
-                            player.Position += Role.SpawnSettings.SpawnOffset;
-
+                        player.Position = Map.Rooms.Where(room => Role.SpawnSettings.SpawnRooms.Contains(room.Name)).RandomValue().ApiRoom.Position.AddY(1.5f);
                         break;
                     case SpawnLocationType.PositionSpawn:
                         player.Position = Role.SpawnSettings.SpawnPosition;
                         break;
                 };
+
+                if (Role.SpawnSettings.SpawnOffset != new Vector3())
+                    player.Position += Role.SpawnSettings.SpawnOffset;
             }
 
             SummonSubclassApplier(player, Role);
@@ -92,37 +95,39 @@ namespace UncomplicatedCustomRoles.Manager
 
         public static void SummonSubclassApplier(Player Player, ICustomRole Role)
         {
-            Player.ResetInventory(Role.Inventory);
+            Player.ClearInventory();
+
+            foreach (ItemType Item in Role.Inventory)
+                Player.AddItem(Item);
 
             if (Role.CustomItemsInventory.Count() > 0)
                 foreach (uint ItemId in Role.CustomItemsInventory)
                     if (!Player.IsInventoryFull)
                         try
                         {
-                            if (Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems") is not null)
+                            if (PluginAPI.Loader.AssemblyLoader.InstalledPlugins.Where(pl => pl.PluginName == "UncomplicatedCustomItems").Count() > 0)
                             {
-                                Type AssemblyType = Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems").Assembly.GetType("UncomplicatedCustomItems.API.Utilities");
-                                if ((bool)AssemblyType?.GetMethod("IsCustomItem")?.Invoke(null, new object[] { ItemId }))
+                                PluginHandler PluginType = PluginAPI.Loader.AssemblyLoader.InstalledPlugins.Where(pl => pl.PluginName == "UncomplicatedCustomItems").First();
+                                Assembly PluginAssembly = PluginAPI.Loader.AssemblyLoader.Plugins.Where(pl => pl.Value.ContainsKey(PluginType.GetType())).FirstOrDefault().Key;
+                                if (PluginAssembly is not null && (bool)PluginAssembly.GetType("UncomplicatedCustomItems.API.Utilities")?.GetMethod("IsCustomItem")?.Invoke(null, new object[] { ItemId }))
                                 {
-                                    object CustomItem = AssemblyType?.GetMethod("GetCustomItem")?.Invoke(null, new object[] { ItemId });
+                                    object CustomItem = PluginAssembly.GetType("UncomplicatedCustomItems.API.Utilities")?.GetMethod("GetCustomItem")?.Invoke(null, new object[] { ItemId });
 
-                                    Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems").Assembly.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem")?.GetMethods().Where(method => method.Name == "Summon" && method.GetParameters().Length == 2).FirstOrDefault()?.Invoke(null, new object[]
+                                    PluginAssembly.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem")?.GetMethods().Where(method => method.Name == "Summon" && method.GetParameters().Length == 2).FirstOrDefault()?.Invoke(null, new object[]
                                     {
                                         CustomItem,
                                         Player
                                     });
                                 }
                             }
-                            else
-                                CustomItem.Get(ItemId)?.Give(Player);
                         }
                         catch (Exception ex)
                         {
                             LogManager.Debug($"Error while giving a custom item.\nError: {ex.Message}");
                         }
 
-            if (Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
-                foreach (KeyValuePair<AmmoType, ushort> Ammo in Role.Ammo)
+            if (Role.Ammo.GetType() == typeof(Dictionary<ItemType, ushort>) && Role.Ammo.Count() > 0)
+                foreach (KeyValuePair<ItemType, ushort> Ammo in Role.Ammo)
                     Player.AddAmmo(Ammo.Key, Ammo.Value);
 
             if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
@@ -144,31 +149,34 @@ namespace UncomplicatedCustomRoles.Manager
                         PermanentEffects.Add(effect);
                         continue;
                     }
-                    Player.EnableEffect(effect.EffectType, effect.Duration);
-                    Player.ChangeEffectIntensity(effect.EffectType, effect.Intensity, effect.Duration);
+                    Player.ReferenceHub.playerEffectsController.ChangeState(effect.EffectType, effect.Intensity, effect.Duration);
                 }
             }
 
             if (Role.Scale != Vector3.zero && Role.Scale != Vector3.one)
-                Player.Scale = Role.Scale;
+            {
+                Player.ReferenceHub.transform.localScale = Role.Scale;
+                foreach (Player player in Player.GetPlayers())
+                    NetworkServer.SendSpawnMessage(player.ReferenceHub.networkIdentity, player.Connection);
+            }
 
             if (Role.SpawnBroadcast != string.Empty)
             {
                 Player.ClearBroadcasts();
-                Player.Broadcast(Role.SpawnBroadcastDuration, Role.SpawnBroadcast);
+                Player.SendBroadcast(Role.SpawnBroadcast, Role.SpawnBroadcastDuration);
             }
 
             if (Role.SpawnHint != string.Empty)
-                Player.ShowHint(Role.SpawnHint, Role.SpawnHintDuration);
+                Player.ReceiveHint(Role.SpawnHint, Role.SpawnHintDuration);
 
             KeyValuePair<string, string>? Badge = null;
             if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null && Role.BadgeColor.Length > 2)
             {
-                Badge = new(Player.RankName ?? "", Player.RankColor ?? "");
-                LogManager.Debug($"Badge detected, putting {Role.BadgeName}@{Role.BadgeColor} to player {Player.Id}");
+                Badge = new(Player.ReferenceHub.serverRoles.Network_myText ?? "", Player.ReferenceHub.serverRoles.Network_myColor ?? "");
+                LogManager.Debug($"Badge detected, putting {Role.BadgeName}@{Role.BadgeColor} to player {Player.PlayerId}");
 
-                Player.RankName = Role.BadgeName;
-                Player.RankColor = Role.BadgeColor;
+                Player.ReferenceHub.serverRoles.SetText(Role.BadgeName);
+                Player.ReferenceHub.serverRoles.SetColor(Role.BadgeColor);
             }
 
             // Changing nickname if needed
@@ -189,7 +197,7 @@ namespace UncomplicatedCustomRoles.Manager
                 LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
                 Timing.CallDelayed(1f, () =>
                 {
-                    Player.ChangeAppearance(Role.RoleAppearance, true);
+                    Player.RoleApp(Role.RoleAppearance, true);
                 });
             }
 

@@ -1,4 +1,5 @@
-﻿using Exiled.API.Features;
+﻿using Mirror;
+using PluginAPI.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -89,22 +90,23 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null && Role.BadgeColor.Length > 2 && Badge is not null)
             {
-                Player.RankName = ((KeyValuePair<string, string>)Badge).Key;
-                Player.RankColor = ((KeyValuePair<string, string>)Badge).Value;
+                Player.ReferenceHub.serverRoles.SetText(((KeyValuePair<string, string>)Badge).Key);
+                Player.ReferenceHub.serverRoles.SetColor(((KeyValuePair<string, string>)Badge).Value);
 
                 LogManager.Debug($"Badge detected, fixed");
             }
 
-            Player.IsUsingStamina = true;
             Player.CustomInfo = string.Empty;
 
             LogManager.Debug("Scale reset to 1, 1, 1");
-            Player.Scale = new(1, 1, 1);
+            Player.ReferenceHub.transform.localScale = new(1, 1, 1);
+
+            // Thanks to EXILED!
+            foreach (Player player in Player.GetPlayers())
+                NetworkServer.SendSpawnMessage(player.ReferenceHub.networkIdentity, player.Connection);
 
             if (IsCustomNickname)
-            {
                 Player.DisplayNickname = null;
-            }
         }
 
         /// <summary>
@@ -152,8 +154,8 @@ namespace UncomplicatedCustomRoles.API.Features
             foreach (SummonedCustomRole Role in List)
                 if (Role.InfiniteEffects.Count() > 0)
                     foreach (IEffect Effect in Role.InfiniteEffects)
-                        if (!Role.Player.ActiveEffects.Contains(Role.Player.GetEffect(Effect.EffectType)))
-                            Role.Player.EnableEffect(Effect.EffectType, Effect.Intensity, float.MaxValue);
+                        if (!Role.Player.ReferenceHub.playerEffectsController.AllEffects.Where(e => e.Intensity > 0).Contains(Role.Player.EffectsManager.GetEffect(Effect.EffectType)))
+                            Role.Player.EffectsManager.EnableEffect(Effect.EffectType, Effect.Intensity, float.MaxValue);
         }
     }
 }

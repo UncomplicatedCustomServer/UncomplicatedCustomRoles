@@ -1,4 +1,6 @@
-﻿using Exiled.API.Features;
+﻿using PlayerStatsSystem;
+using PluginAPI.Core;
+using UncomplicatedCustomRoles.API.Helpers;
 
 namespace UncomplicatedCustomRoles.API.Features.Behaviour
 {
@@ -13,10 +15,11 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
         public void Apply(Player player)
         {
             player.Health = Amount;
-            player.MaxHealth = Maximum;
+            HealthHelper health = player.ReferenceHub.playerStats.GetModule<HealthStat>() as HealthHelper;
+            health._MaxValue = Maximum;
 
             if (HumeShield > 0)
-                player.HumeShield = HumeShield;
+                player.ReferenceHub.playerStats.GetModule<HumeShieldStat>().CurValue = HumeShield;
         }
     }
 }

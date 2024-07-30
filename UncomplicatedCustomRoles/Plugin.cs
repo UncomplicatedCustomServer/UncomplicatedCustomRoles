@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using UncomplicatedCustomRoles.Integrations;
 using UncomplicatedCustomRoles.Manager;
-using Handler = UncomplicatedCustomRoles.Events.EventHandler;
+using Handler = UncomplicatedCustomRoles.Handlers.EventHandler;
 using UncomplicatedCustomRoles.API.Features;
 using PluginAPI.Core.Attributes;
 using PluginAPI.Helpers;
@@ -69,6 +69,7 @@ namespace UncomplicatedCustomRoles
 
             // Load events
             EventManager.RegisterEvents(this, Handler);
+            Events.EventManager.RegisterEvents(Handler);
 
             FileConfigs.Welcome();
             FileConfigs.Welcome(Server.Port.ToString());
@@ -86,6 +87,7 @@ namespace UncomplicatedCustomRoles
             RespawnTimer.Disable();
             ScriptedEvents.UnregisterCustomActions();
 
+            Events.EventManager.Events.Clear();
             EventManager.UnregisterAllEvents(this);
 
             HttpManager.Stop();

@@ -1,5 +1,4 @@
-﻿using Exiled.API.Enums;
-using PlayerRoles;
+﻿using PlayerRoles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -149,10 +148,10 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets or sets the ammo inventory of the player
         /// </summary>
-        public Dictionary<AmmoType, ushort> Ammo { get; set; } = new()
+        public Dictionary<ItemType, ushort> Ammo { get; set; } = new()
         {
             {
-                AmmoType.Nato9,
+                ItemType.Ammo9x19,
                 10
             }
         };

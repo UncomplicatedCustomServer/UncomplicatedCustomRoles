@@ -1,4 +1,4 @@
-﻿using Exiled.API.Enums;
+﻿using MapGeneration;
 using PlayerRoles;
 using System.Collections.Generic;
 using UnityEngine;
@@ -22,11 +22,11 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
 
         public SpawnLocationType Spawn { get; set; } = SpawnLocationType.RoomsSpawn;
 
-        public List<ZoneType> SpawnZones { get; set; } = new();
+        public List<FacilityZone> SpawnZones { get; set; } = new();
 
-        public List<RoomType> SpawnRooms { get; set; } = new()
+        public List<RoomName> SpawnRooms { get; set; } = new()
         {
-            RoomType.LczClassDSpawn
+            RoomName.LczClassDSpawn
         };
 
         public Vector3 SpawnPosition { get; set; } = new();

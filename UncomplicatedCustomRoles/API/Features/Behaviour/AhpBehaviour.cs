@@ -1,4 +1,5 @@
-﻿using Exiled.API.Features;
+﻿using PlayerStatsSystem;
+using PluginAPI.Core;
 
 namespace UncomplicatedCustomRoles.API.Features.Behaviour
 {
@@ -19,7 +20,7 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
         public void Apply(Player player)
         {
             if (Amount > 0)
-                player.AddAhp(Amount, Limit, Decay, Efficacy, Sustain, Persistant);
+                player.ReferenceHub.playerStats.GetModule<AhpStat>().ServerAddProcess(Amount, Limit, Decay, Efficacy, Sustain, Persistant);
         }
     }
 }
