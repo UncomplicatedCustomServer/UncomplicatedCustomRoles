@@ -68,9 +68,7 @@
     <Compile Include="API\Helpers\Imports\EXILED\Pools\StringBuilderPool.cs" />
     <Compile Include="API\Helpers\Imports\EXILED\YAML\ColorConverter.cs" />
     <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\CommentGatheringTypeInspector.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\CommentsObjectDescriptor.cs" />
     <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\CommentsObjectGraphVisitor.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\CommentsPropertyDescriptor.cs" />
     <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\TypeAssigningEventEmitter.cs" />
     <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\UnderscoredNamingConvention.cs" />
     <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\ValidatingNodeDeserializer.cs" />

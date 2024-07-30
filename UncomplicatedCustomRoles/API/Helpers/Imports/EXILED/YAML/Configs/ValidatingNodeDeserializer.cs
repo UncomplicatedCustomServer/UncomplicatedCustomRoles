@@ -9,7 +9,9 @@ namespace UncomplicatedCustomRoles.API.Helpers.Imports.EXILED.YAML.Configs
 {
     using System;
     using System.ComponentModel.DataAnnotations;
-    using PluginAPI.Core;
+
+    using Exiled.API.Features;
+
     using YamlDotNet.Core;
     using YamlDotNet.Serialization;
 
@@ -38,7 +40,6 @@ namespace UncomplicatedCustomRoles.API.Helpers.Imports.EXILED.YAML.Configs
                 {
                     if (value is null)
                         Log.Error("Null value");
-
                     Validator.ValidateObject(value, new ValidationContext(value, null, null), true);
 
                     return true;

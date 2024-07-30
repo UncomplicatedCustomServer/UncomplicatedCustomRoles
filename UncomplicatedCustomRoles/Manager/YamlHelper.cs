@@ -1,5 +1,7 @@
 ﻿using UncomplicatedCustomRoles.API.Helpers.Imports.EXILED.YAML;
+using UncomplicatedCustomRoles.API.Helpers.Imports.EXILED.YAML.Configs;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NodeDeserializers;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -14,6 +16,21 @@ namespace UncomplicatedCustomRoles.Manager
             .WithNamingConvention(UnderscoredNamingConvention.Instance)
             .IgnoreFields()
             .DisableAliases()
+            .Build();
+
+        //
+        // Riepilogo:
+        //     Gets or sets the deserializer for configs and translations.
+        public static IDeserializer Deserializer { get; set; } = new DeserializerBuilder()
+            .WithTypeConverter(new VectorsConverter())
+            .WithTypeConverter(new ColorConverter())
+            .WithNamingConvention(UnderscoredNamingConvention.Instance)
+            .WithNodeDeserializer((INodeDeserializer inner) => new ValidatingNodeDeserializer(inner), delegate (ITrackingRegistrationLocationSelectionSyntax<INodeDeserializer> deserializer)
+            {
+                deserializer.InsteadOf<ObjectNodeDeserializer>();
+            })
+            .IgnoreFields()
+            .IgnoreUnmatchedProperties()
             .Build();
     }
 }
