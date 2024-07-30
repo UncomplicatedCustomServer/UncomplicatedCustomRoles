@@ -8,13 +8,10 @@ using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
 using Exiled.Events.EventArgs.Server;
 using Exiled.Events.EventArgs.Scp049;
-using Exiled.API.Enums;
-using UnityEngine;
 using UncomplicatedCustomRoles.Extensions;
 using System;
 using UncomplicatedCustomRoles.API.Features;
 using Exiled.Events.EventArgs.Scp330;
-using UncomplicatedCustomRoles.API.Features.Behaviour;
 
 namespace UncomplicatedCustomRoles.Events
 {
