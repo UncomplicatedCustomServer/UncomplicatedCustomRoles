@@ -1,8 +1,6 @@
-﻿using Exiled.API.Features;
-using Exiled.Loader;
-using MEC;
+﻿using MEC;
 using Newtonsoft.Json;
-using PlayerRoles;
+using PluginAPI.Core;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -135,13 +133,13 @@ namespace UncomplicatedCustomRoles.Manager
             if (Version is not null && Version != string.Empty)
                 return new(Version);
 
-            return Plugin.Instance.Version;
+            return Plugin.Version;
         }
 
         public bool IsLatestVersion(out Version latest)
         {
             latest = LatestVersion();
-            if (latest.CompareTo(Plugin.Instance.Version) > 0)
+            if (latest.CompareTo(Plugin.Version) > 0)
                 return false;
 
             return true;
@@ -150,7 +148,7 @@ namespace UncomplicatedCustomRoles.Manager
 
         public bool IsLatestVersion()
         {
-            if (LatestVersion().CompareTo(Plugin.Instance.Version) > 0)
+            if (LatestVersion().CompareTo(Plugin.Version) > 0)
                 return false;
 
             return true;
@@ -159,7 +157,7 @@ namespace UncomplicatedCustomRoles.Manager
         internal bool Presence(out HttpContent httpContent)
         {
             float Start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            HttpResponseMessage Status = HttpGetRequest($"{Endpoint}/{Prefix}/presence?port={Server.Port}&cores={Environment.ProcessorCount}&ram=0&version={Plugin.Instance.Version}");
+            HttpResponseMessage Status = HttpGetRequest($"{Endpoint}/{Prefix}/presence?port={Server.Port}&cores={Environment.ProcessorCount}&ram=0&version={Plugin.Version}");
             httpContent = Status.Content;
             ResponseTimes.Add(DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start);
             if (Status.StatusCode == HttpStatusCode.OK)
@@ -171,14 +169,14 @@ namespace UncomplicatedCustomRoles.Manager
 
         internal HttpStatusCode ShareLogs(string data, out HttpContent httpContent)
         {
-            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&plugin_version={Plugin.Instance.Version}", data);
+            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={PluginAPI.PluginApiVersion.VersionStatic}&plugin_version={Plugin.Version}", data);
             httpContent = Status.Content;
             return Status.StatusCode;
         }
 
         internal KeyValuePair<HttpStatusCode, string> Mailbox()
         {
-            HttpResponseMessage Message = HttpGetRequest($"{Endpoint}/{Prefix}/mailbox?version={Plugin.Instance.Version}");
+            HttpResponseMessage Message = HttpGetRequest($"{Endpoint}/{Prefix}/mailbox?version={Plugin.Version}");
             return new(Message.StatusCode, RetriveString(Message.Content));
         }
 

@@ -8,8 +8,7 @@
 namespace UncomplicatedCustomRoles.API.Helpers.Imports.EXILED.YAML.Configs
 {
     using System.Collections.Generic;
-
-    using Exiled.API.Extensions;
+    using UncomplicatedCustomRoles.API.Helpers.Imports.EXILED.Extensions;
     using YamlDotNet.Serialization;
 
     /// <inheritdoc cref="YamlDotNet.Serialization.NamingConventions.UnderscoredNamingConvention"/>

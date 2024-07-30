@@ -32,9 +32,9 @@ namespace UncomplicatedCustomRoles.API.Helpers.Imports.EXILED.YAML.Configs
             if (eventInfo.Source.StaticType != typeof(object) && Type.GetTypeCode(eventInfo.Source.StaticType) == TypeCode.String && !UnderscoredNamingConvention.Instance.Properties.Contains(eventInfo.Source.Value))
             {
                 if (eventInfo.Source.Value == null || eventInfo.Source.Value.ToString().IndexOfAny(multiline) is -1)
-                    eventInfo.Style = LoaderPlugin.Config.ScalarStyle;
+                    eventInfo.Style = ScalarStyle.SingleQuoted;
                 else
-                    eventInfo.Style = LoaderPlugin.Config.MultiLineScalarStyle;
+                    eventInfo.Style = ScalarStyle.Literal;
             }
 
             base.Emit(eventInfo, emitter);

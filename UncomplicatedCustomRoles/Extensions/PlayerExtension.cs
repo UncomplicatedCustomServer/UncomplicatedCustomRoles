@@ -55,7 +55,7 @@ namespace UncomplicatedCustomRoles.Extensions
         public static void SetCustomRole(this Player player, int role)
         {
             SpawnManager.ClearCustomTypes(player);
-            Timing.RunCoroutine(Events.EventHandler.DoSpawnPlayer(player, role));
+            Timing.RunCoroutine(Handlers.EventHandler.DoSpawnPlayer(player, role));
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace UncomplicatedCustomRoles.Extensions
         public static void SetCustomRole(this Player player, ICustomRole role)
         {
             SpawnManager.ClearCustomTypes(player);
-            Timing.RunCoroutine(Events.EventHandler.DoSpawnPlayer(player, role.Id));
+            Timing.RunCoroutine(Handlers.EventHandler.DoSpawnPlayer(player, role.Id));
         }
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace UncomplicatedCustomRoles.Extensions
                 {
                     Vector3 OriginalPosition = player.Position;
 
-                    player.Role.Set(Role, RoleSpawnFlags.AssignInventory);
+                    player.ReferenceHub.roleManager.ServerSetRole(Role, RoleChangeReason.None, RoleSpawnFlags.AssignInventory);
 
                     player.Position = OriginalPosition;
                 }

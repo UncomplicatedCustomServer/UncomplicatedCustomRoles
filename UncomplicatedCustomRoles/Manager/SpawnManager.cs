@@ -11,6 +11,8 @@ using UncomplicatedCustomRoles.API.Features;
 using MapGeneration;
 using System.Reflection;
 using Mirror;
+using UncomplicatedCustomRoles.API.Helpers.Imports.EXILED.Extensions;
+using InventorySystem.Disarming;
 
 // Mormora, la gente mormora
 // falla tacere praticando l'allegria
@@ -42,7 +44,7 @@ namespace UncomplicatedCustomRoles.Manager
                 return;
             }
 
-            if (!doBypassRoleOverwrite && !Role.SpawnSettings.CanReplaceRoles.Contains(player.Role.Type))
+            if (!doBypassRoleOverwrite && !Role.SpawnSettings.CanReplaceRoles.Contains(player.Role))
             {
                 LogManager.Debug($"Can't spawn the player {player.Nickname} as UCR custom role {Role.Name} because it's role is not in the overwrittable list of custom role!\nStrange because this should be managed correctly by the plugin!");
                 return;
@@ -183,7 +185,7 @@ namespace UncomplicatedCustomRoles.Manager
             bool ChangedNick = false;
             if (Plugin.Instance.Config.AllowNicknameEdit && Role.Nickname is not null && Role.Nickname != string.Empty)
             {
-                Role.Nickname = Role.Nickname.Replace("%dnumber%", new System.Random().Next(1000, 9999).ToString()).Replace("%nick%", Player.Nickname).Replace("%rand%", new System.Random().Next(0, 9).ToString()).Replace("%unitid%", Player.UnitId.ToString()).Replace("%unitname%", Player.UnitName);
+                Role.Nickname = Role.Nickname.Replace("%dnumber%", new System.Random().Next(1000, 9999).ToString()).Replace("%nick%", Player.Nickname).Replace("%rand%", new System.Random().Next(0, 9).ToString()).Replace("%unitid%", Player.UnitId.ToString());
                 if (Role.Nickname.Contains(","))
                     Player.DisplayNickname = Role.Nickname.Split(',').RandomItem();
                 else
@@ -197,7 +199,7 @@ namespace UncomplicatedCustomRoles.Manager
                 LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
                 Timing.CallDelayed(1f, () =>
                 {
-                    Player.RoleApp(Role.RoleAppearance, true);
+                    Player.ChangeAppearance(Role.RoleAppearance, true);
                 });
             }
 
@@ -224,8 +226,10 @@ namespace UncomplicatedCustomRoles.Manager
 
                 int SearchIndex = 0;
 
-                if (player.IsCuffed && player.Cuffer is not null)
-                    SearchIndex = player.Cuffer.Role.Team switch
+                Player Cuffer = Player.Get(DisarmedPlayers.Entries.FirstOrDefault(entry => entry.DisarmedPlayer == player.NetworkId).Disarmer);
+
+                if (player.IsDisarmed && Cuffer is not null)
+                    SearchIndex = Cuffer.Team switch
                     {
                         Team.FoundationForces => 2,
                         Team.ChaosInsurgency => 4,
@@ -241,7 +245,7 @@ namespace UncomplicatedCustomRoles.Manager
                     else if (Role[SearchIndex] is "CR")
                         return new(true, Role[SearchIndex + 1]);
                     else
-                        LogManager.Error($"Error while parsing role_after_escape for player {player.Nickname} ({player.Id}): the first string was not 'IR' nor 'CR', found '{Role[SearchIndex]}'!\nPlease see our documentation: https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki/Specifics#role-after-escape");
+                        LogManager.Error($"Error while parsing role_after_escape for player {player.Nickname} ({player.PlayerId}): the first string was not 'IR' nor 'CR', found '{Role[SearchIndex]}'!\nPlease see our documentation: https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki/Specifics#role-after-escape");
                 else
                     LogManager.Debug($"Error while parsing role_after_escape: index is out of range!\nExpected to found {SearchIndex}, total: {Role.Count}!");
             }
@@ -253,7 +257,7 @@ namespace UncomplicatedCustomRoles.Manager
 #pragma warning disable CS8602 // <Element> can be null at this point! (added a check!)
         public static ICustomRole? DoEvaluateSpawnForPlayer(Player player, RoleTypeId? role = null)
         {
-            role ??= player.Role.Type;
+            role ??= player.Role;
 
             RoleTypeId NewRole = (RoleTypeId)role;
 
@@ -282,14 +286,8 @@ namespace UncomplicatedCustomRoles.Manager
             };
 
             foreach (ICustomRole Role in CustomRole.CustomRoles.Values.Where(cr => cr.SpawnSettings is not null))
-                if (!Role.IgnoreSpawnSystem && Player.List.Count() >= Role.SpawnSettings.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
+                if (!Role.IgnoreSpawnSystem && Player.GetPlayers().Count >= Role.SpawnSettings.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
                 {
-                    if (Role.SpawnSettings.RequiredPermission != null && Role.SpawnSettings.RequiredPermission != string.Empty && !player.CheckPermission(Role.SpawnSettings.RequiredPermission))
-                    {
-                        LogManager.Debug($"[NOTICE] Ignoring the role {Role.Id} [{Role.Name}] while creating the list for the player {player.Nickname} due to: cannot [permissions].");
-                        continue;
-                    }
-
                     foreach (RoleTypeId RoleType in Role.SpawnSettings.CanReplaceRoles)
                         for (int a = 0; a < Role.SpawnSettings.SpawnChance; a++)
                             RolePercentage[RoleType].Add(Role);
@@ -301,7 +299,7 @@ namespace UncomplicatedCustomRoles.Manager
                 return null;
             }
 
-            if (RolePercentage.ContainsKey(player.Role.Type))
+            if (RolePercentage.ContainsKey(player.Role))
                 if (new System.Random().Next(0, 100) < RolePercentage[NewRole].Count())
                     return CustomRole.CustomRoles[RolePercentage[NewRole].RandomItem().Id];
 

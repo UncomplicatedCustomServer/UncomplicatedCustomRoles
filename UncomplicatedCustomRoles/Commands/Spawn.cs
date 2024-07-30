@@ -1,11 +1,11 @@
 ﻿using CommandSystem;
-using Exiled.API.Features;
 using MEC;
+using PluginAPI.Core;
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
-using Handler = UncomplicatedCustomRoles.Events.EventHandler;
+using Handler = UncomplicatedCustomRoles.Handlers.EventHandler;
 
 namespace UncomplicatedCustomRoles.Commands
 {
@@ -15,7 +15,7 @@ namespace UncomplicatedCustomRoles.Commands
 
         public string Description { get; } = "Spawn a player with a UCR Role";
 
-        public string RequiredPermission { get; } = "ucr.spawn";
+        public PlayerPermissions RequiredPermission { get; } = PlayerPermissions.ForceclassWithoutRestrictions;
 
         public bool Executor(List<string> arguments, ICommandSender sender, out string response)
         {
@@ -25,7 +25,7 @@ namespace UncomplicatedCustomRoles.Commands
                 return false;
             }
 
-            if (!Round.IsStarted)
+            if (!Round.IsRoundStarted)
             {
                 response = "Sorry but you can't use this command if the round is not started!";
                 return false;

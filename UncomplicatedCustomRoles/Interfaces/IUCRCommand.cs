@@ -9,7 +9,7 @@ namespace UncomplicatedCustomRoles.Interfaces
 
         public string Description { get; }
 
-        public string RequiredPermission { get; }
+        public PlayerPermissions RequiredPermission { get; }
 
         public bool Executor(List<string> arguments, ICommandSender sender, out string response);
     }

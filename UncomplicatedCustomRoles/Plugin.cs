@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using UncomplicatedCustomRoles.Integrations;
 using UncomplicatedCustomRoles.Manager;
 using Handler = UncomplicatedCustomRoles.Handlers.EventHandler;
 using UncomplicatedCustomRoles.API.Features;
@@ -9,14 +8,12 @@ using PluginAPI.Helpers;
 using PluginAPI.Enums;
 using PluginAPI.Events;
 using PluginAPI.Core;
+using HarmonyLib;
 
 namespace UncomplicatedCustomRoles
 {
     internal class Plugin
     {
-        [PluginConfig]
-        internal Config Config;
-
         public readonly static Version Version = new(3, 4, 2);
 
         internal static Plugin Instance;
@@ -28,6 +25,8 @@ namespace UncomplicatedCustomRoles
         internal static HttpManager HttpManager;
 
         internal static FileConfigs FileConfigs;
+
+        private Harmony _harmony;
 
         [PluginEntryPoint("UncomplicatedCustomRoles", "3.4.2", "UncomplicatedCustomRoles is a plugin that allow you to create custom roles for SCP:SL", "FoxWorn3365")]
         [PluginPriority(LoadPriority.High)]
@@ -42,7 +41,11 @@ namespace UncomplicatedCustomRoles
             FileConfigs = new();
             HttpManager = new("ucr", int.MaxValue);
 
-            CustomRole.List.Clear();
+            _harmony = new("com.ucs.ucr_nwapi");
+            Harmony.DEBUG = true;
+            _harmony.PatchAll();
+
+            CustomRole.CustomRoles.Clear();
             
             if (!File.Exists(Path.Combine(Paths.Configs, "UncomplicatedCustomRoles", ".nohttp")))
                 HttpManager.Start();
@@ -71,30 +74,28 @@ namespace UncomplicatedCustomRoles
             EventManager.RegisterEvents(this, Handler);
             Events.EventManager.RegisterEvents(Handler);
 
-            FileConfigs.Welcome();
+            /*FileConfigs.Welcome();
             FileConfigs.Welcome(Server.Port.ToString());
             FileConfigs.LoadAll();
-            FileConfigs.LoadAll(Server.Port.ToString());
-
-            // Register ScriptedEvents and RespawnTimer integration
-            ScriptedEvents.RegisterCustomActions();
-            RespawnTimer.Enable();
+            FileConfigs.LoadAll(Server.Port.ToString());*/
         }
 
         [PluginUnload]
         public void OnDisabled()
         {
-            RespawnTimer.Disable();
-            ScriptedEvents.UnregisterCustomActions();
-
             Events.EventManager.Events.Clear();
             EventManager.UnregisterAllEvents(this);
 
             HttpManager.Stop();
 
+            _harmony.UnpatchAll();
+            _harmony = null;
+
             Handler = null;
 
             Instance = null;
         }
+
+        [PluginConfig] internal Config Config = new();
     }
 }

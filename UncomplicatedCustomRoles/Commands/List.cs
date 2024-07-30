@@ -11,7 +11,7 @@ namespace UncomplicatedCustomRoles.Commands
 
         public string Description { get; } = "List all registered custom roles";
 
-        public string RequiredPermission { get; } = "ucr.list";
+        public PlayerPermissions RequiredPermission { get; } = PlayerPermissions.LongTermBanning;
 
         public bool Executor(List<string> arguments, ICommandSender sender, out string response)
         {

@@ -1,13 +1,11 @@
 ﻿using Discord;
-using Exiled.API.Features;
-using Exiled.Loader;
+using PluginAPI.Core;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Interfaces;
-using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -34,7 +32,7 @@ namespace UncomplicatedCustomRoles.Manager
         {
             message = $"[{error}] {message}";
             History.Add(new(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Warn.ToString()), message));
-            Log.Warn(message);
+            Log.Warning(message);
         }
 
         public static void Error(string message, string error = "CS0000")
@@ -71,7 +69,7 @@ namespace UncomplicatedCustomRoles.Manager
 
             foreach (ICustomRole Role in CustomRole.CustomRoles.Values)
             {
-                Content += $"{Loader.Serializer.Serialize(Role)}\n\n---\n\n";
+                Content += $"{YamlHelper.Serializer.Serialize(Role)}\n\n---\n\n";
             }
 
             HttpStatusCode Response = Plugin.HttpManager.ShareLogs(Content, out content);

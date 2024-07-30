@@ -7,6 +7,7 @@
 
 namespace UncomplicatedCustomRoles.API.Helpers.Imports.EXILED.YAML.Configs
 {
+    using Serialization;
     using YamlDotNet.Core;
     using YamlDotNet.Core.Events;
     using YamlDotNet.Serialization;

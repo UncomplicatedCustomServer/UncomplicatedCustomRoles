@@ -1,10 +1,8 @@
-﻿using Exiled.API.Enums;
-    
-namespace UncomplicatedCustomRoles.Interfaces
+﻿namespace UncomplicatedCustomRoles.Interfaces
 {
     public interface IEffect
     {
-        public abstract EffectType EffectType { get; set; }
+        public abstract string EffectType { get; set; }
 
         public abstract float Duration { get; set; }
 

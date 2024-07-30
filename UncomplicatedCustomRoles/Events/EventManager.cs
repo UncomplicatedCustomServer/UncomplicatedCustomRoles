@@ -7,7 +7,7 @@ using UncomplicatedCustomRoles.Events.Interfaces;
 
 namespace UncomplicatedCustomRoles.Events
 {
-    internal class EventManager
+    public class EventManager
     {
         public static readonly Dictionary<string, List<MethodInfo>> Events = new();
 
@@ -25,16 +25,11 @@ namespace UncomplicatedCustomRoles.Events
             }
         }
 
-        public static KeyValuePair<bool, T> InvokeEvent<T>(string name, T param) where T : EventArgs
+        public static void InvokeEvent(string name, EventArgs param)
         {
             if (Events.ContainsKey(name) && Events[name].Count() > 0)
                 foreach (MethodInfo Method in Events[name])
                     Method.Invoke(null, new object[] { param });
-
-            if (param is IDeniableEvent deniableEvent && !deniableEvent.IsAllowed)
-                return new(false, null);
-
-            return new(true, param);
         }
     }
 }

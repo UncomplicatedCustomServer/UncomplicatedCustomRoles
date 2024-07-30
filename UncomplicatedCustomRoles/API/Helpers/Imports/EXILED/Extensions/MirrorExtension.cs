@@ -8,7 +8,7 @@ using UnityEngine;
 using RelativePositioning;
 using System.Linq;
 
-namespace UncomplicatedCustomRoles.API.Helpers.Imports.EXILED
+namespace UncomplicatedCustomRoles.API.Helpers.Imports.EXILED.Extensions
 {
     public static class MirrorExtension
     {

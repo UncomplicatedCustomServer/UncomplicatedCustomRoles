@@ -1,5 +1,4 @@
-﻿using Exiled.API.Enums;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using UncomplicatedCustomRoles.Interfaces;
 
 namespace UncomplicatedCustomRoles.Manager
@@ -7,7 +6,7 @@ namespace UncomplicatedCustomRoles.Manager
     public class Effect : IEffect
     {
         [Description("The effect EffectType found on the EXILED discord server")]
-        public EffectType EffectType { get; set; } = EffectType.MovementBoost;
+        public string EffectType { get; set; } = "MovementBoost";
 
         [Description("The duration of the effect, -1 if you want to have an infinite effect")]
         public float Duration { get; set; } = -1;

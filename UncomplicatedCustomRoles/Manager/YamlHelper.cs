@@ -25,10 +25,6 @@ namespace UncomplicatedCustomRoles.Manager
             .WithTypeConverter(new VectorsConverter())
             .WithTypeConverter(new ColorConverter())
             .WithNamingConvention(UnderscoredNamingConvention.Instance)
-            .WithNodeDeserializer((INodeDeserializer inner) => new ValidatingNodeDeserializer(inner), delegate (ITrackingRegistrationLocationSelectionSyntax<INodeDeserializer> deserializer)
-            {
-                deserializer.InsteadOf<ObjectNodeDeserializer>();
-            })
             .IgnoreFields()
             .IgnoreUnmatchedProperties()
             .Build();

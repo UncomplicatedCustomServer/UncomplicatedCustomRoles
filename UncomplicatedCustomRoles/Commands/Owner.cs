@@ -1,5 +1,4 @@
 ﻿using CommandSystem;
-using Exiled.Permissions.Extensions;
 using System.Collections.Generic;
 using System.Net;
 using UncomplicatedCustomRoles.Interfaces;
@@ -12,7 +11,7 @@ namespace UncomplicatedCustomRoles.Commands
 
         public string Description { get; } = "Get the 'Server Owner' role on our Discord server";
 
-        public string RequiredPermission { get; } = "ucr.owner";
+        public PlayerPermissions RequiredPermission { get; } = PlayerPermissions.LongTermBanning;
 
         public bool Executor(List<string> arguments, ICommandSender sender, out string response)
         {

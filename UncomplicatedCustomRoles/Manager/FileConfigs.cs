@@ -1,5 +1,4 @@
-﻿using Exiled.API.Features;
-using Exiled.Loader;
+﻿using PluginAPI.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,7 +9,7 @@ namespace UncomplicatedCustomRoles.Manager
 {
     internal class FileConfigs
     {
-        internal string Dir = Path.Combine(Paths.Configs, "UncomplicatedCustomRoles");
+        internal string Dir = Path.Combine(Paths.Plugins, "UncomplicatedCustomRoles");
 
         public bool Is(string localDir = "")
         {
@@ -26,7 +25,7 @@ namespace UncomplicatedCustomRoles.Manager
         {
             LoadAction((CustomRole Role) =>
             {
-                API.Features.CustomRole.Register(Role);
+                CustomRole.Register(Role);
             }, localDir);
         }
 
@@ -42,7 +41,7 @@ namespace UncomplicatedCustomRoles.Manager
                     if (FileName.Split().First() == ".")
                         return;
 
-                    Dictionary<string, List<CustomRole>> Roles = Loader.Deserializer.Deserialize<Dictionary<string, List<CustomRole>>>(File.ReadAllText(FileName));
+                    Dictionary<string, List<CustomRole>> Roles = YamlHelper.Deserializer.Deserialize<Dictionary<string, List<CustomRole>>>(File.ReadAllText(FileName));
 
                     if (!Roles.ContainsKey("custom_roles"))
                     {
@@ -74,7 +73,7 @@ namespace UncomplicatedCustomRoles.Manager
             if (!Is(localDir))
             {
                 Directory.CreateDirectory(Path.Combine(Dir, localDir));
-                File.WriteAllText(Path.Combine(Dir, localDir, "example-role.yml"), Loader.Serializer.Serialize(new Dictionary<string, List<CustomRole>>() {
+                File.WriteAllText(Path.Combine(Dir, localDir, "example-role.yml"), YamlHelper.Serializer.Serialize(new Dictionary<string, List<CustomRole>>() {
                   {
                     "custom_roles", new List<CustomRole>()
                     {

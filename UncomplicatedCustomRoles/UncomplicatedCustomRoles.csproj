@@ -59,7 +59,8 @@
     <Compile Include="API\Features\Spawn.cs" />
     <Compile Include="API\Features\SummonedCustomRole.cs" />
     <Compile Include="API\Helpers\HealthHelper.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\MirrorExtension.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\Extensions\MirrorExtension.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\Extensions\StringExtension.cs" />
     <Compile Include="API\Helpers\Imports\EXILED\Pools\DictionaryPool.cs" />
     <Compile Include="API\Helpers\Imports\EXILED\Pools\HashSetPool.cs" />
     <Compile Include="API\Helpers\Imports\EXILED\Pools\IPool.cs" />
@@ -68,12 +69,14 @@
     <Compile Include="API\Helpers\Imports\EXILED\Pools\StringBuilderPool.cs" />
     <Compile Include="API\Helpers\Imports\EXILED\YAML\ColorConverter.cs" />
     <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\CommentGatheringTypeInspector.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\CommentsObjectDescriptor.cs" />
     <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\CommentsObjectGraphVisitor.cs" />
+    <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\CommentsPropertyDescriptor.cs" />
     <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\TypeAssigningEventEmitter.cs" />
     <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\UnderscoredNamingConvention.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\ValidatingNodeDeserializer.cs" />
     <Compile Include="API\Helpers\Imports\EXILED\YAML\VectorsConverter.cs" />
     <Compile Include="Commands\CommandParent.cs" />
+    <Compile Include="Commands\ForceNextWave.cs" />
     <Compile Include="Commands\List.cs" />
     <Compile Include="Commands\LogShare.cs" />
     <Compile Include="Commands\Owner.cs" />
@@ -102,7 +105,6 @@
     <Compile Include="HarmonyElements\Patch\RespawningTeamHandler.cs" />
     <Compile Include="HarmonyElements\Patch\StaminaRegenHandler.cs" />
     <Compile Include="HarmonyElements\Patch\StaminaUsageHandler.cs" />
-    <Compile Include="Integrations\ScriptedEvents.cs" />
     <Compile Include="Interfaces\IUCRCommand.cs" />
     <Compile Include="Manager\FileConfigs.cs" />
     <Compile Include="API\Features\Effect.cs" />
@@ -113,7 +115,6 @@
     <Compile Include="Plugin.cs" />
     <Compile Include="Interfaces\ICustomRole.cs" />
     <Compile Include="Interfaces\IEffect.cs" />
-    <Compile Include="Integrations\RespawnTimer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -534,6 +535,9 @@
     <PackageReference Include="System.ComponentModel">
       <Version>4.3.0</Version>
     </PackageReference>
+    <PackageReference Include="System.Core">
+      <Version>3.5.21022.801</Version>
+    </PackageReference>
     <PackageReference Include="System.Net.Http">
       <Version>4.3.4</Version>
     </PackageReference>
@@ -546,6 +550,9 @@
     <PackageReference Include="System.Security.Cryptography.X509Certificates">
       <Version>4.3.2</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Integrations\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -10,7 +10,7 @@ using UncomplicatedCustomRoles.Events;
 
 namespace UncomplicatedCustomRoles.HarmonyElements.Patch
 {
-    [HarmonyPatch(typeof(Escape), nameof(Escape.ServerHandlePlayer))]
+    //[HarmonyPatch(typeof(Escape), nameof(Escape.ServerHandlePlayer))]
     internal class EscapeHandler
     {
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)

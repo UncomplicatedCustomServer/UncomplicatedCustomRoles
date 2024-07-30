@@ -1,4 +1,5 @@
-﻿using Mirror;
+﻿using CustomPlayerEffects;
+using Mirror;
 using PluginAPI.Core;
 using System;
 using System.Collections.Generic;
@@ -121,7 +122,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public static SummonedCustomRole Get(Player player) => List.Where(scr => scr.Player.Id == player.Id).FirstOrDefault();
+        public static SummonedCustomRole Get(Player player) => List.Where(scr => scr.Player.PlayerId == player.PlayerId).FirstOrDefault();
 
         /// <summary>
         /// Try to get a <see cref="SummonedCustomRole"/> by the <see cref="Exiled.API.Features.Player"/>
@@ -154,8 +155,8 @@ namespace UncomplicatedCustomRoles.API.Features
             foreach (SummonedCustomRole Role in List)
                 if (Role.InfiniteEffects.Count() > 0)
                     foreach (IEffect Effect in Role.InfiniteEffects)
-                        if (!Role.Player.ReferenceHub.playerEffectsController.AllEffects.Where(e => e.Intensity > 0).Contains(Role.Player.EffectsManager.GetEffect(Effect.EffectType)))
-                            Role.Player.EffectsManager.EnableEffect(Effect.EffectType, Effect.Intensity, float.MaxValue);
+                        if (!Role.Player.ReferenceHub.playerEffectsController.AllEffects.Contains(Role.Player.EffectsManager.GetEffect<SeveredHands>()))
+                            Role.Player.EffectsManager.EnableEffect<SeveredHands>(Effect.Intensity, false);
         }
     }
 }
