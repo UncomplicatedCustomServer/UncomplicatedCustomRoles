@@ -10,6 +10,7 @@ using PluginAPI.Core.Attributes;
 using PluginAPI.Enums;
 using PluginAPI.Events;
 using PluginAPI.Core;
+using PlayerRoles;
 
 namespace UncomplicatedCustomRoles.Events
 {
