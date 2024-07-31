@@ -25,7 +25,7 @@ namespace UncomplicatedCustomRoles.Commands
 
             if (arguments.Count == 1)
             {
-                Player Player = Player.Get(arguments[0]);
+                Player Player = PlayerExtension.Get(arguments[0]);
 
                 if (Player is null)
                 {

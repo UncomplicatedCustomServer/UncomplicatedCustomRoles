@@ -2,6 +2,7 @@
 using PlayerRoles;
 using PluginAPI.Core;
 using System;
+using System.Linq;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
@@ -130,6 +131,17 @@ namespace UncomplicatedCustomRoles.Extensions
             }
 
             return false;
+        }
+
+        public static Player Get(string id)
+        {
+            return Player.GetPlayers().Where(p => p.PlayerId == int.Parse(id)).FirstOrDefault();
+        }
+
+        public static bool TryGet(string id, out Player player)
+        {
+            player = Get(id);
+            return player != null;
         }
     }
 }
