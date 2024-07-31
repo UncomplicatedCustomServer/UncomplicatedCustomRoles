@@ -75,7 +75,7 @@ namespace UncomplicatedCustomRoles.HarmonyElements.Patch
                     new(OpCodes.Callvirt, PropertyGetter(typeof(EscapingEventArgs), nameof(EscapingEventArgs.Hub))),
                     new(OpCodes.Starg_S, 0),
 
-                    /*new(OpCodes.Ldloc_S, ev.LocalIndex),
+                    new(OpCodes.Ldloc_S, ev.LocalIndex),
                     new(OpCodes.Callvirt, PropertyGetter(typeof(EscapingEventArgs), nameof(EscapingEventArgs.NewRole))),
                     new(OpCodes.Stloc_0),
 
@@ -89,7 +89,7 @@ namespace UncomplicatedCustomRoles.HarmonyElements.Patch
 
                     new(OpCodes.Ldloc_S, ev.LocalIndex),
                     new(OpCodes.Callvirt, PropertyGetter(typeof(EscapingEventArgs), nameof(EscapingEventArgs.Tokens))),
-                    new(OpCodes.Stloc_3),*/
+                    new(OpCodes.Stloc_3),
                 }); ;
             }
 

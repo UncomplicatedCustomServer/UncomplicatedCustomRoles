@@ -1,6 +1,4 @@
-﻿using PluginAPI.Core;
-
-namespace UncomplicatedCustomRoles.Events.Interfaces
+﻿namespace UncomplicatedCustomRoles.Events.Interfaces
 {
     public interface IPlayerEvent
     {

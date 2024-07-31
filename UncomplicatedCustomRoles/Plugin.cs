@@ -14,7 +14,15 @@ namespace UncomplicatedCustomRoles
 {
     internal class Plugin
     {
-        public readonly static Version Version = new(3, 4, 2);
+        public const string Name = "UncomplicatedCustomRoles";
+
+        public const string Author = "FoxWorn3365";
+
+        public const string Description = "UncomplicatedCustomRoles allows you to create custom roles for your SCP:SL server";
+
+        public const string StringVersion = "3.2.5";
+
+        public static Version Version = new(StringVersion);
 
         internal static Plugin Instance;
 
@@ -28,7 +36,7 @@ namespace UncomplicatedCustomRoles
 
         private Harmony _harmony;
 
-        [PluginEntryPoint("UncomplicatedCustomRoles", "3.4.2", "UncomplicatedCustomRoles is a plugin that allow you to create custom roles for SCP:SL", "FoxWorn3365")]
+        [PluginEntryPoint(Name, StringVersion, Description, Author)]
         [PluginPriority(LoadPriority.High)]
         public void OnEnabled()
         {
@@ -52,13 +60,13 @@ namespace UncomplicatedCustomRoles
 
             if (Config.EnableBasicLogs)
             {
-                LogManager.Info("===========================================");
-                LogManager.Info(" Thanks for using UncomplicatedCustomRoles");
-                LogManager.Info("        by FoxWorn3365 & Dr.Agenda");
-                LogManager.Info("===========================================");
+                LogManager.Info(">=========================================================<");
+                LogManager.Info(" Thanks for using UncomplicatedCustomRoles - NWAPI Version");
+                LogManager.Info("                 by FoxWorn3365 & Dr.Agenda");
+                LogManager.Info(">=========================================================<");
                 LogManager.Info("             Special thanks to:");
-                LogManager.Info("  >>  @timmeyxd - They gave me money in order to continue to develop this plugin while keeping it free");
-                LogManager.Info("  >>  @naxefir - They tested hundred of test versions in order to help me relasing the most bug-free versions");
+                LogManager.Info("  -> @timmeyxd - They gave me money in order to continue to develop this plugin while keeping it free");
+                LogManager.Info("  -> @naxefir - They tested hundred of test versions in order to help me relasing the most bug-free versions");
                 LogManager.Info("                   ");
                 LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
             }
