@@ -11,7 +11,7 @@ namespace UncomplicatedCustomRoles.Events.Args
         /// <summary>
         /// Gets the <see cref="ReferenceHub"/> of the hurted player
         /// </summary>
-        public ReferenceHub Hub { get; }
+        internal ReferenceHub Hub { get; }
 
         /// <summary>
         /// Gets the hurted <see cref="PluginAPI.Core.Player"/>
@@ -42,6 +42,8 @@ namespace UncomplicatedCustomRoles.Events.Args
         /// Gets or sets the amout of tokens that the escape would grant
         /// </summary>
         public float Tokens { get; set; }
+
+        ReferenceHub IPlayerEvent.Hub => throw new System.NotImplementedException();
 
         public EscapingEventArgs(ReferenceHub hub, RoleTypeId role, EscapeScenarioType scenarioType, SpawnableTeamType team, float tokens)
         {

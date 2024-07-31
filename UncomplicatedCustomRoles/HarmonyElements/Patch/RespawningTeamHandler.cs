@@ -1,6 +1,4 @@
-﻿using GameCore;
-using HarmonyLib;
-using PluginAPI.Core;
+﻿using HarmonyLib;
 using Respawning;
 using System.Collections.Generic;
 using System.Linq;

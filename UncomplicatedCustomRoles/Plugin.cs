@@ -74,10 +74,10 @@ namespace UncomplicatedCustomRoles
             EventManager.RegisterEvents(this, Handler);
             Events.EventManager.RegisterEvents(Handler);
 
-            /*FileConfigs.Welcome();
+            FileConfigs.Welcome();
             FileConfigs.Welcome(Server.Port.ToString());
             FileConfigs.LoadAll();
-            FileConfigs.LoadAll(Server.Port.ToString());*/
+            FileConfigs.LoadAll(Server.Port.ToString());
         }
 
         [PluginUnload]
