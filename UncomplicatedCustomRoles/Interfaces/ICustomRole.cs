@@ -1,7 +1,6 @@
 ﻿using Exiled.API.Enums;
 using PlayerRoles;
 using System.Collections.Generic;
-using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
@@ -27,7 +26,7 @@ namespace UncomplicatedCustomRoles.Interfaces
 
         public abstract RoleTypeId RoleAppearance { get; set; }
 
-        public abstract Team? IsFriendOf { get; set; }
+        public abstract List<Team> IsFriendOf { get; set; }
 
         public abstract HealthBehaviour Health { get; set; }
 
@@ -64,5 +63,7 @@ namespace UncomplicatedCustomRoles.Interfaces
         public abstract SpawnBehaviour? SpawnSettings { get; set; }
 
         public abstract bool IgnoreSpawnSystem { get; set; }
+
+        public abstract bool HasTeam(Team team);
     }
 }

@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using PlayerRoles;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -53,6 +54,11 @@ namespace UncomplicatedCustomRoles.Manager
         /// The UCS APIs endpoint
         /// </summary>
         public string Endpoint { get; } = "https://ucs.fcosma.it/api/v2";
+
+        /// <summary>
+        /// Store every credit tag for UCS
+        /// </summary>
+        public Dictionary<string, KeyValuePair<string, string>> Credits { get; internal set; }
 
         /// <summary>
         /// An array of response times
@@ -136,6 +142,37 @@ namespace UncomplicatedCustomRoles.Manager
                 return new(Version);
 
             return Plugin.Instance.Version;
+        }
+
+        public void LoadCreditTags()
+        {
+            Credits = new();
+            try
+            {
+                Dictionary<string, Dictionary<string, string>> Data = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(RetriveString(HttpGetRequest("https://ucs.fcosma.it/api/credits.json")));
+
+                foreach (KeyValuePair<string, Dictionary<string, string>> kvp in Data.Where(kvp => kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color")))
+                    Credits.Add(kvp.Key, new(kvp.Value["role"], kvp.Value["color"]));
+            }
+            catch (Exception) { }
+        }
+
+        public KeyValuePair<string, string> GetCreditTag(Player player)
+        {
+            if (Credits.ContainsKey(player.UserId))
+                return Credits[player.UserId];
+
+            return new(null, null);
+        }
+
+        public void ApplyCreditTag(Player player)
+        {
+            KeyValuePair<string, string> Tag = GetCreditTag(player);
+            if (Tag.Key is not null && Tag.Value is not null)
+            {
+                player.RankName = Tag.Key;
+                player.RankColor = Tag.Value;
+            }
         }
 
         public bool IsLatestVersion(out Version latest)

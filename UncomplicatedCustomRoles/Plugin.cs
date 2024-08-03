@@ -53,6 +53,7 @@ namespace UncomplicatedCustomRoles
             ServerHandler.RespawningTeam += Handler.OnRespawningWave;
             ServerHandler.RoundStarted += Handler.OnRoundStarted;
             ServerHandler.RoundEnded += Handler.OnRoundEnded;
+            PlayerHandler.Verified += Handler.OnVerified;
             PlayerHandler.Died += Handler.OnDied;
             PlayerHandler.Spawning += Handler.OnSpawning;
             PlayerHandler.Spawned += Handler.OnPlayerSpawned;
@@ -108,6 +109,7 @@ namespace UncomplicatedCustomRoles
             ServerHandler.RespawningTeam -= Handler.OnRespawningWave;
             ServerHandler.RoundEnded -= Handler.OnRoundEnded;
             ServerHandler.RoundStarted -= Handler.OnRoundStarted;
+            PlayerHandler.Verified -= Handler.OnVerified;
             PlayerHandler.Died -= Handler.OnDied;
             PlayerHandler.Spawning -= Handler.OnSpawning;
             PlayerHandler.Spawned -= Handler.OnPlayerSpawned;

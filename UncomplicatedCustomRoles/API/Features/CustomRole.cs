@@ -70,7 +70,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets or sets the <see cref="Team"/>(s) that will be "friends" with this custom role
         /// </summary>
-        public Team? IsFriendOf { get; set; } = null;
+        public List<Team> IsFriendOf { get; set; } = new();
 
         /// <summary>
         /// Gets or sets the <see cref="HealthBehaviour"/>
@@ -173,7 +173,7 @@ namespace UncomplicatedCustomRoles.API.Features
         public bool HasTeam(Team team)
         {
             if (IsFriendOf is not null)
-                return (IsFriendOf & team) == team;
+                return IsFriendOf.Contains(team);
 
             return false;
         }
