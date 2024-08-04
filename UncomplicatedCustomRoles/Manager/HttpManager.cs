@@ -58,7 +58,7 @@ namespace UncomplicatedCustomRoles.Manager
         /// <summary>
         /// Store every credit tag for UCS
         /// </summary>
-        public Dictionary<string, KeyValuePair<string, string>> Credits { get; internal set; }
+        public Dictionary<string, KeyValuePair<string, string>> Credits { get; internal set; } = new();
 
         /// <summary>
         /// An array of response times
@@ -75,6 +75,7 @@ namespace UncomplicatedCustomRoles.Manager
             Prefix = prefix;
             MaxErrors = maxErrors;
             HttpClient = new();
+            LoadCreditTags();
         }
 
         internal HttpResponseMessage HttpGetRequest(string url)
