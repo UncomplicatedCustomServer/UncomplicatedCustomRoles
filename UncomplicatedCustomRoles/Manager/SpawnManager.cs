@@ -94,6 +94,8 @@ namespace UncomplicatedCustomRoles.Manager
         {
             Timing.CallDelayed(0.75f, () =>
             {
+                Player.ResetInventory(Role.Inventory);
+
                 LogManager.Silent($"Can we assign custom roles? Let's see: {Role.CustomItemsInventory.Count()}");
                 if (Role.CustomItemsInventory.Count() > 0)
                     foreach (uint ItemId in Role.CustomItemsInventory)
@@ -122,6 +124,7 @@ namespace UncomplicatedCustomRoles.Manager
                                 LogManager.Debug($"Error while giving a custom item.\nError: {ex.Message}");
                             }
 
+                Player.ClearAmmo();
                 if (Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
                     foreach (KeyValuePair<AmmoType, ushort> Ammo in Role.Ammo)
                         Player.AddAmmo(Ammo.Key, Ammo.Value);
@@ -146,8 +149,6 @@ namespace UncomplicatedCustomRoles.Manager
                         Player.ChangeAppearance(Role.RoleAppearance, true);
                     });
                 }
-
-                Player.ResetInventory(Role.Inventory);
             });
 
             List<IEffect> PermanentEffects = new();
