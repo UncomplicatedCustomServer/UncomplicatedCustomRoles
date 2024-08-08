@@ -130,7 +130,7 @@ namespace UncomplicatedCustomRoles.Manager
                         Player.AddAmmo(Ammo.Key, Ammo.Value);
 
                 if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
-                    Player.CustomInfo += $"\n{Role.CustomInfo}";
+                    Player.ApplyCustomInfo(Role.CustomInfo);
 
                 // Apply every required stats
                 Role.Health?.Apply(Player);
@@ -185,6 +185,9 @@ namespace UncomplicatedCustomRoles.Manager
                 Player.RankName = Role.BadgeName;
                 Player.RankColor = Role.BadgeColor;
             }
+
+            if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
+                Player.ApplyCustomInfo(Role.CustomInfo);
 
             // Changing nickname if needed
             bool ChangedNick = false;

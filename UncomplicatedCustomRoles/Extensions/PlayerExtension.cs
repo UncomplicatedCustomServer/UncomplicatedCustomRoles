@@ -131,5 +131,11 @@ namespace UncomplicatedCustomRoles.Extensions
 
             return false;
         }
+
+        public static void ApplyCustomInfo(this Player player, string value)
+        {
+            player.InfoArea = string.IsNullOrEmpty(value) ? player.InfoArea & ~PlayerInfoArea.CustomInfo : player.InfoArea |= PlayerInfoArea.CustomInfo;
+            player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = value;
+        }
     }
 }
