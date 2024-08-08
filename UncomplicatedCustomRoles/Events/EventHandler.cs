@@ -171,7 +171,7 @@ namespace UncomplicatedCustomRoles.Events
                     return;
                 }
 
-                if (summoned.Role.CanEscape && (summoned.Role.RoleAfterEscape is null || summoned.Role.RoleAfterEscape.Length < 2))
+                if (summoned.Role.CanEscape && (summoned.Role.RoleAfterEscape is null || summoned.Role.RoleAfterEscape.Count < 1))
                 {
                     LogManager.Debug($"Player with the role {summoned.Role.Id} ({summoned.Role.Name}) evaluated for a natural respawn!");
                     Escaping.IsAllowed = true;

@@ -105,7 +105,17 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets or sets the role after escape
         /// </summary>
-        public string? RoleAfterEscape { get; set; } = "IR:Spectator,IR:NtfCaptain";
+        public Dictionary<string, string> RoleAfterEscape { get; set; } = new()
+        {
+            {
+                "default",
+                "InternalRole Spectator"
+            },
+            {
+                "cuffed by InternalTeam ChaosInsurgency",
+                "InternalRole ClassD"
+            }
+        };
 
         /// <summary>
         /// Gets or sets the scale of the player

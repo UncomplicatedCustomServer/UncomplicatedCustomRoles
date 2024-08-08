@@ -40,7 +40,7 @@ namespace UncomplicatedCustomRoles.Interfaces
 
         public abstract bool CanEscape { get; set; }
 
-        public abstract string? RoleAfterEscape { get; set; }
+        public abstract Dictionary<string, string> RoleAfterEscape { get; set; }
 
         public abstract Vector3 Scale { get; set; }
 
