@@ -46,6 +46,7 @@ namespace UncomplicatedCustomRoles
 
             // QoL things
             LogManager.History.Clear();
+            API.Features.Escape.Bucket.Clear();
 
             Handler = new();
             FileConfigs = new();

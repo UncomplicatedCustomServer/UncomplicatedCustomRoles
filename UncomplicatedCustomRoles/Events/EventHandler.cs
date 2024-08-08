@@ -194,8 +194,8 @@ namespace UncomplicatedCustomRoles.Events
                     {
                         if (role is not RoleTypeId.None)
                         {
-                            Escaping.IsAllowed = true;
                             Escaping.NewRole = role;
+                            Escaping.IsAllowed = true;
                         }
                     }
                 } 
@@ -204,7 +204,14 @@ namespace UncomplicatedCustomRoles.Events
                     if (int.TryParse(NewRole.Value.ToString(), out int id) && CustomRole.TryGet(id, out ICustomRole role))
                     {
                         Escaping.IsAllowed = false;
-                        SpawnManager.SummonCustomSubclass(Escaping.Player, role.Id);
+                        if (!API.Features.Escape.Bucket.Contains(Escaping.Player.Id))
+                        {
+                            LogManager.Silent($"Successfully activated the call to method SpawnManager::SummonCustomSubclass(<...>) as the player is not inside the Escape::Bucket bucket! - Adding it...");
+                            API.Features.Escape.Bucket.Add(Escaping.Player.Id);
+                            SpawnManager.SummonCustomSubclass(Escaping.Player, role.Id);
+                        }
+                        else
+                            LogManager.Silent($"Canceled call to method SpawnManager::SummonCustomSubclass(<...>) due to the presence of the player inside the Escape::Bucket! - Event already fired!");
                     }
 
                 }

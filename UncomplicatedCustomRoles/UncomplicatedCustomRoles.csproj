@@ -53,6 +53,7 @@
     <Compile Include="API\Features\Behaviour\AhpBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\HealthBehaviour.cs" />
     <Compile Include="API\Features\CustomRole.cs" />
+    <Compile Include="API\Features\Escape.cs" />
     <Compile Include="API\Features\InfiniteEffect.cs" />
     <Compile Include="API\Features\Behaviour\SpawnBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\StaminaBehaviour.cs" />
