@@ -13,6 +13,7 @@ using UncomplicatedCustomRoles.API.Features;
 using MEC;
 using System.Threading.Tasks;
 using UncomplicatedCustomRoles.Extensions;
+using HarmonyLib;
 
 namespace UncomplicatedCustomRoles
 {
@@ -39,6 +40,8 @@ namespace UncomplicatedCustomRoles
         internal static HttpManager HttpManager;
 
         internal static FileConfigs FileConfigs;
+
+        private Harmony _harmony;
 
         public override void OnEnabled()
         {
@@ -102,11 +105,17 @@ namespace UncomplicatedCustomRoles
             ScriptedEvents.RegisterCustomActions();
             RespawnTimer.Enable();
 
+            // Patch with Harmony
+            _harmony = new("com.ucs.ucr_exiled");
+            _harmony.PatchAll();
+
             base.OnEnabled();
         }
 
         public override void OnDisabled()
         {
+            _harmony.UnpatchAll();
+
             RespawnTimer.Disable();
             ScriptedEvents.UnregisterCustomActions();
 

@@ -80,6 +80,7 @@
     <Compile Include="Manager\HttpManager.cs" />
     <Compile Include="Manager\LogManager.cs" />
     <Compile Include="Manager\SpawnManager.cs" />
+    <Compile Include="Patches\ServerNamePostfix.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Interfaces\ICustomRole.cs" />
     <Compile Include="Interfaces\IEffect.cs" />
@@ -92,6 +93,9 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>$(EXILED_REFERENCES)\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-firstpass.dll</HintPath>

@@ -12,6 +12,7 @@ using UncomplicatedCustomRoles.Extensions;
 using System;
 using UncomplicatedCustomRoles.API.Features;
 using Exiled.Events.EventArgs.Scp330;
+using CustomPlayerEffects;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -58,7 +59,7 @@ namespace UncomplicatedCustomRoles.Events
             if (!ev.IsAllowed)
                 return;
 
-            if (ev.Effect.name is "SeveredHands" && SummonedCustomRole.TryGet(ev.Player, out SummonedCustomRole Role) && Role.Role.MaxScp330Candies >= Role.Scp330Count)
+            if (ev.Effect is SeveredHands && SummonedCustomRole.TryGet(ev.Player, out SummonedCustomRole Role) && Role.Role.MaxScp330Candies >= Role.Scp330Count)
             {
                 LogManager.Debug($"Tried to add the {ev.Effect.name} but was not allowed due to {Role.Scp330Count} <= {Role.Role.MaxScp330Candies}");
                 ev.IsAllowed = false;
@@ -135,11 +136,14 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnHurting(HurtingEventArgs Hurting)
         {
+            LogManager.Silent($"DamageHandler of Hurting: {Hurting.Player} {Hurting.Attacker}");
+
             if (Hurting.Attacker is not null && Hurting.Attacker.TryGetSummonedInstance(out SummonedCustomRole AttackerRole))
             {
                 // Let's first check if the thing is allowed!
-                if (Hurting.Player is not null && AttackerRole.Role is CustomRole Role && Role.HasTeam(Hurting.Player.Role.Team))
+                if (Hurting.Player is not null && AttackerRole.Role is CustomRole Role && Role.IsFriendOf.Contains(Hurting.Player.Role.Team))
                 {
+                    LogManager.Silent($"Player {Hurting.Attacker} can't hurt {Hurting.Player} due to is_friend_of");
                     Hurting.IsAllowed = false;
                     return;
                 }
@@ -148,8 +152,9 @@ namespace UncomplicatedCustomRoles.Events
             }
             else if (Hurting.Player is not null && Hurting.Attacker is not null && Hurting.Player.TryGetSummonedInstance(out SummonedCustomRole PlayerRole))
             {
-                if (PlayerRole.Role is CustomRole Role && Role.HasTeam(Hurting.Attacker.Role.Team))
+                if (PlayerRole.Role is CustomRole Role && Role.IsFriendOf.Contains(Hurting.Attacker.Role.Team))
                 {
+                    LogManager.Silent($"Player {Hurting.Attacker} can't hurt {Hurting.Player} due to is_friend_of");
                     Hurting.IsAllowed = false;
                     return;
                 }
