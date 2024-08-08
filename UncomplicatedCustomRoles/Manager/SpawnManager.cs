@@ -193,11 +193,11 @@ namespace UncomplicatedCustomRoles.Manager
             bool ChangedNick = false;
             if (Plugin.Instance.Config.AllowNicknameEdit && Role.Nickname is not null && Role.Nickname != string.Empty)
             {
-                Role.Nickname = Role.Nickname.Replace("%dnumber%", new System.Random().Next(1000, 9999).ToString()).Replace("%nick%", Player.Nickname).Replace("%rand%", new System.Random().Next(0, 9).ToString()).Replace("%unitid%", Player.UnitId.ToString()).Replace("%unitname%", Player.UnitName);
+                string Nick = Role.Nickname.Replace("%dnumber%", new System.Random().Next(1000, 9999).ToString()).Replace("%nick%", Player.Nickname).Replace("%rand%", new System.Random().Next(0, 9).ToString()).Replace("%unitid%", Player.UnitId.ToString()).Replace("%unitname%", Player.UnitName);
                 if (Role.Nickname.Contains(","))
-                    Player.DisplayNickname = Role.Nickname.Split(',').RandomItem();
+                    Player.DisplayNickname = Nick.Split(',').RandomItem();
                 else
-                    Player.DisplayNickname = Role.Nickname;
+                    Player.DisplayNickname = Nick;
 
                 ChangedNick = true;
             }
