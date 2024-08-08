@@ -10,6 +10,9 @@ using Scp049Handler = Exiled.Events.Handlers.Scp049;
 using ServerHandler = Exiled.Events.Handlers.Server;
 using Scp330Handler = Exiled.Events.Handlers.Scp330;
 using UncomplicatedCustomRoles.API.Features;
+using MEC;
+using System.Threading.Tasks;
+using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles
 {
@@ -21,7 +24,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(3, 4, 3);
+        public override Version Version { get; } = new(3, 4, 5);
 
         public override Version RequiredExiledVersion { get; } = new(8, 9, 6);
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UncomplicatedCustomRoles.Commands;
 
 namespace UncomplicatedCustomRoles.Extensions
 {
@@ -34,6 +35,21 @@ namespace UncomplicatedCustomRoles.Extensions
 
             if (dictionary.ContainsKey(key))
                 dictionary.Remove(key);
+        }
+
+        public static string ToRealString<TKey, TValue>(this Dictionary<TKey, TValue> dictionary)
+        {
+            if (dictionary is null)
+                return string.Empty;
+
+            string Data = $"[{dictionary.GetType().FullName}] Dictionary<{dictionary.GetType().GetGenericArguments()[0].FullName}, {dictionary.GetType().GetGenericArguments()[1].FullName}> ({dictionary.Count}) [\n";
+
+            foreach (KeyValuePair<TKey, TValue> kvp in dictionary)
+                Data += $"{kvp.Key}: {kvp.Value},\n";
+
+            Data += "];";
+
+            return Data;
         }
     }
 }

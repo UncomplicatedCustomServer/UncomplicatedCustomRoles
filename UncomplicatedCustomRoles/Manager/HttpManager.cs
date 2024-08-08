@@ -230,7 +230,8 @@ namespace UncomplicatedCustomRoles.Manager
                     {
                         Dictionary<string, string> Response = JsonConvert.DeserializeObject<Dictionary<string, string>>(RetriveString(content));
                         Errors++;
-                        LogManager.Warn($"[UCS HTTP Manager] >> Error while trying to put data inside our APIs.\nThe endpoint say: {Response["message"]} ({Response["status"]})");
+                        if (Plugin.Instance.Config.EnableBasicLogs)
+                            LogManager.Warn($"[UCS HTTP Manager] >> Error while trying to put data inside our APIs.\nThe endpoint say: {Response["message"]} ({Response["status"]})");
                     }
                     catch (Exception) { }
                 }

@@ -65,11 +65,7 @@ namespace UncomplicatedCustomRoles.Events
             }
         }
 
-        public void OnPlayerSpawned(SpawnedEventArgs Spawned)
-        {
-            if (Spawned.Player.HasCustomRole() && Spawn.Spawning.Contains(Spawned.Player.Id))
-                Spawn.Spawning.Remove(Spawned.Player.Id);
-        }
+        public void OnPlayerSpawned(SpawnedEventArgs _) { }
 
         public void OnFinishingRecall(FinishingRecallEventArgs ev)
         {
@@ -217,6 +213,7 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnRespawningWave(RespawningTeamEventArgs Respawn)
         {
+            LogManager.Silent("Respawning wave");
             if (Spawn.DoHandleWave)
                 foreach (Player Player in Respawn.Players)
                     Spawn.SpawnQueue.Add(Player.Id);
