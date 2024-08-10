@@ -6,7 +6,7 @@ namespace UncomplicatedCustomRoles.Extensions
     public static class Vector3Extension
     {
         /// <summary>
-        /// Add a X value to the current <see cref="Vector3"/>
+        /// Adds a X value to the current <see cref="Vector3"/>
         /// </summary>
         /// <param name="vector"></param>
         /// <param name="value"></param>
@@ -18,7 +18,7 @@ namespace UncomplicatedCustomRoles.Extensions
         }
 
         /// <summary>
-        /// Add a Y value to the current <see cref="Vector3"/>
+        /// Adds a Y value to the current <see cref="Vector3"/>
         /// </summary>
         /// <param name="vector"></param>
         /// <param name="value"></param>
@@ -30,7 +30,7 @@ namespace UncomplicatedCustomRoles.Extensions
         }
 
         /// <summary>
-        /// Add a Z value to the current <see cref="Vector3"/>
+        /// Adds a Z value to the current <see cref="Vector3"/>
         /// </summary>
         /// <param name="vector"></param>
         /// <param name="value"></param>
@@ -42,7 +42,7 @@ namespace UncomplicatedCustomRoles.Extensions
         }
 
         /// <summary>
-        /// Convert the current <see cref="Vector3"/> to a local <see cref="Triplet{TFirst, TSecond, TThird}}"/>
+        /// Converts the current <see cref="Vector3"/> to a local <see cref="Triplet{TFirst, TSecond, TThird}}"/>
         /// </summary>
         /// <param name="vector"></param>
         /// <returns></returns>

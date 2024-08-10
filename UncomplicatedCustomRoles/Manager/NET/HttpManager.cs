@@ -210,6 +210,8 @@ namespace UncomplicatedCustomRoles.Manager.NET
             return false;
         }
 
+        internal void PresenceNotListed() => HttpGetRequest($"{Endpoint}/{Prefix}/presence_notlisted?port={Server.Port}&cores={Environment.ProcessorCount}&ram=0&version={Plugin.Instance.Version}");
+
         internal HttpStatusCode ShareLogs(string data, out HttpContent httpContent)
         {
             HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&plugin_version={Plugin.Instance.Version}", data);
@@ -227,17 +229,18 @@ namespace UncomplicatedCustomRoles.Manager.NET
         {
             while (Active && Errors <= MaxErrors)
             {
-                if (!Presence(out HttpContent content))
-                {
-                    try
-                    {
-                        Dictionary<string, string> Response = JsonConvert.DeserializeObject<Dictionary<string, string>>(RetriveString(content));
-                        Errors++;
-                        if (Plugin.Instance.Config.EnableBasicLogs)
-                            LogManager.Warn($"[UCS HTTP Manager] >> Error while trying to put data inside our APIs.\nThe endpoint say: {Response["message"]} ({Response["status"]})");
-                    }
-                    catch (Exception) { }
-                }
+                if (Server.IsVerified)
+                    if (!Presence(out HttpContent content))
+                        try
+                        {
+                            Dictionary<string, string> Response = JsonConvert.DeserializeObject<Dictionary<string, string>>(RetriveString(content));
+                            Errors++;
+                            if (Plugin.Instance.Config.EnableBasicLogs)
+                                LogManager.Warn($"[UCS HTTP Manager] >> Error while trying to put data inside our APIs.\nThe endpoint say: {Response["message"]} ({Response["status"]})");
+                        }
+                        catch (Exception) { }
+                    else
+                        PresenceNotListed();
 
                 // Do anche the Mailbox action
                 if (Plugin.Instance.Config.DoEnableAdminMessages)

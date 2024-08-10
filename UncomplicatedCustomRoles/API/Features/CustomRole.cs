@@ -135,7 +135,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets or sets the hint that will be shown to the player when spawned
         /// </summary>
-        public string SpawnHint { get; set; } = "This hint will be shown when you'll spawn as a Janitor!";
+        public string SpawnHint { get; set; } = "This hint will be shown when you will spawn as a Janitor!";
 
         /// <summary>
         /// Gets or sets hint duration
@@ -149,7 +149,7 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             {
                 ItemCategory.Medical,
-                5
+                2
             }
         };
 

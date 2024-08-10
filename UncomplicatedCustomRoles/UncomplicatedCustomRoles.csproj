@@ -58,6 +58,7 @@
     <Compile Include="API\Features\InfiniteEffect.cs" />
     <Compile Include="API\Features\Behaviour\SpawnBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\StaminaBehaviour.cs" />
+    <Compile Include="API\Features\LogEntry.cs" />
     <Compile Include="API\Features\Spawn.cs" />
     <Compile Include="API\Features\SpawnPoint.cs" />
     <Compile Include="API\Features\SummonedCustomRole.cs" />

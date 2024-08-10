@@ -23,9 +23,9 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(3, 4, 9);
+        public override Version Version { get; } = new(3, 5, 0);
 
-        public override Version RequiredExiledVersion { get; } = new(8, 9, 6);
+        public override Version RequiredExiledVersion { get; } = new(8, 11, 0);
 
         public override PluginPriority Priority => PluginPriority.Higher;
 

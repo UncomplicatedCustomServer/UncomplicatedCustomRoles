@@ -27,7 +27,7 @@ namespace UncomplicatedCustomRoles.Events
                 Plugin.Instance.DoSpawnBasicRoles = true;
             });
 
-            foreach (Player Player in Player.List.Where(player => !player.IsNPC))
+            foreach (Player Player in Player.List.Where(player => !player.IsNPC && player is not null))
             {
                 ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(Player);
 

@@ -38,6 +38,12 @@ namespace UncomplicatedCustomRoles.Manager
 
             ICustomRole Role = CustomRole.CustomRoles[id];
 
+            if (Role is null)
+            {
+                LogManager.Warn($"Tried to spawn a custom role with the Id {id} but it seems to not exists!");
+                return;
+            }
+
             if (Role.SpawnSettings is null)
             {
                 LogManager.Warn($"Tried to spawn a custom role without spawn_settings, aborting the SummonCustomSubclass(...) action!\nRole: {Role.Name} ({Role.Id})", "CR0093");
@@ -161,7 +167,7 @@ namespace UncomplicatedCustomRoles.Manager
                 {
                     if (effect.Duration < 0)
                     {
-                        effect.Duration = 15f;
+                        effect.Duration = int.MaxValue;
                         PermanentEffects.Add(effect);
                         continue;
                     }
