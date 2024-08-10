@@ -52,6 +52,8 @@ namespace UncomplicatedCustomRoles.Interfaces
 
         public abstract float SpawnHintDuration { get; set; }
 
+        public abstract Dictionary<ItemCategory, sbyte> CustomInventoryLimits { get; set; }
+
         public abstract List<ItemType> Inventory { get; set; }
 
         public abstract List<uint> CustomItemsInventory { get; set; }

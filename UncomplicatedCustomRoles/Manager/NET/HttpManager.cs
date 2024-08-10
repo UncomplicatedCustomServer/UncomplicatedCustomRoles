@@ -2,7 +2,6 @@
 using Exiled.Loader;
 using MEC;
 using Newtonsoft.Json;
-using PlayerRoles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,8 +9,9 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using UncomplicatedCustomRoles.API.Struct;
 
-namespace UncomplicatedCustomRoles.Manager
+namespace UncomplicatedCustomRoles.Manager.NET
 {
     internal class HttpManager
     {
@@ -58,7 +58,7 @@ namespace UncomplicatedCustomRoles.Manager
         /// <summary>
         /// Store every credit tag for UCS
         /// </summary>
-        public Dictionary<string, KeyValuePair<string, string>> Credits { get; internal set; } = new();
+        public Dictionary<string, Triplet<string, string, bool>> Credits { get; internal set; } = new();
 
         /// <summary>
         /// An array of response times
@@ -78,7 +78,7 @@ namespace UncomplicatedCustomRoles.Manager
             LoadCreditTags();
         }
 
-        internal HttpResponseMessage HttpGetRequest(string url)
+        public HttpResponseMessage HttpGetRequest(string url)
         {
             try
             {
@@ -94,7 +94,7 @@ namespace UncomplicatedCustomRoles.Manager
             }
         }
 
-        internal HttpResponseMessage HttpPutRequest(string url, string content)
+        public HttpResponseMessage HttpPutRequest(string url, string content)
         {
             try
             {
@@ -110,7 +110,7 @@ namespace UncomplicatedCustomRoles.Manager
             }
         }
 
-        internal string RetriveString(HttpResponseMessage response)
+        public string RetriveString(HttpResponseMessage response)
         {
             if (response is null)
                 return string.Empty;
@@ -118,7 +118,7 @@ namespace UncomplicatedCustomRoles.Manager
             return RetriveString(response.Content);
         }
 
-        internal string RetriveString(HttpContent response)
+        public string RetriveString(HttpContent response)
         {
             if (response is null)
                 return string.Empty;
@@ -152,27 +152,30 @@ namespace UncomplicatedCustomRoles.Manager
             {
                 Dictionary<string, Dictionary<string, string>> Data = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(RetriveString(HttpGetRequest("https://ucs.fcosma.it/api/credits.json")));
 
-                foreach (KeyValuePair<string, Dictionary<string, string>> kvp in Data.Where(kvp => kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color")))
-                    Credits.Add(kvp.Key, new(kvp.Value["role"], kvp.Value["color"]));
+                foreach (KeyValuePair<string, Dictionary<string, string>> kvp in Data.Where(kvp => kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") && kvp.Value.ContainsKey("override")))
+                    Credits.Add(kvp.Key, new(kvp.Value["role"], kvp.Value["color"], bool.Parse(kvp.Value["ovveride"])));
             }
             catch (Exception) { }
         }
 
-        public KeyValuePair<string, string> GetCreditTag(Player player)
+        public Triplet<string, string, bool> GetCreditTag(Player player)
         {
             if (Credits.ContainsKey(player.UserId))
                 return Credits[player.UserId];
 
-            return new(null, null);
+            return new(null, null, false);
         }
 
         public void ApplyCreditTag(Player player)
         {
-            KeyValuePair<string, string> Tag = GetCreditTag(player);
-            if (Tag.Key is not null && Tag.Value is not null)
+            Triplet<string, string, bool> Tag = GetCreditTag(player);
+            if (player.RankName is not null && player.RankName != string.Empty && !Tag.Third)
+                return; // Do not override
+
+            if (Tag.First is not null && Tag.Second is not null)
             {
-                player.RankName = Tag.Key;
-                player.RankColor = Tag.Value;
+                player.RankName = Tag.First;
+                player.RankColor = Tag.Second;
             }
         }
 

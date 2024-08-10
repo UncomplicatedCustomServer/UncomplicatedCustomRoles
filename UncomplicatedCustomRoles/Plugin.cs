@@ -10,10 +10,8 @@ using Scp049Handler = Exiled.Events.Handlers.Scp049;
 using ServerHandler = Exiled.Events.Handlers.Server;
 using Scp330Handler = Exiled.Events.Handlers.Scp330;
 using UncomplicatedCustomRoles.API.Features;
-using MEC;
-using System.Threading.Tasks;
-using UncomplicatedCustomRoles.Extensions;
 using HarmonyLib;
+using UncomplicatedCustomRoles.Manager.NET;
 
 namespace UncomplicatedCustomRoles
 {
@@ -25,7 +23,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(3, 4, 7);
+        public override Version Version { get; } = new(3, 4, 9);
 
         public override Version RequiredExiledVersion { get; } = new(8, 9, 6);
 
@@ -105,9 +103,16 @@ namespace UncomplicatedCustomRoles
             ScriptedEvents.RegisterCustomActions();
             RespawnTimer.Enable();
 
+            // Start communicating with the endpoint API
+            SpawnPointApiCommunicator.Init();
+
             // Patch with Harmony
+            Harmony.DEBUG = true;
             _harmony = new("com.ucs.ucr_exiled");
             _harmony.PatchAll();
+
+            // Run the import managet
+            ImportManager.Init();
 
             base.OnEnabled();
         }

@@ -1,7 +1,6 @@
 ﻿using Exiled.API.Enums;
 using PlayerRoles;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace UncomplicatedCustomRoles.API.Features.Behaviour
 {
@@ -29,9 +28,7 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
             RoomType.LczClassDSpawn
         };
 
-        public Vector3 SpawnPosition { get; set; } = new();
-
-        public Vector3 SpawnOffset { get; set; } = new();
+        public string? SpawnPoint { get; set; } = null;
 
         public string? RequiredPermission { get; set; } = string.Empty;
     }

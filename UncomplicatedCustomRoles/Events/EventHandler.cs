@@ -16,7 +16,7 @@ using CustomPlayerEffects;
 
 namespace UncomplicatedCustomRoles.Events
 {
-    public class EventHandler
+    internal class EventHandler
     {
         public void OnRoundStarted()
         {

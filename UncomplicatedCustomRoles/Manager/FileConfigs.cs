@@ -47,7 +47,7 @@ namespace UncomplicatedCustomRoles.Manager
                     if (Content.Contains("custom_roles:") && Content.Contains("- id:"))
                         LoadLegacyRoles(FileName, Content, action);
                     else
-                        LoadRoles(Content, action);
+                        LoadRoles(FileName, Content, action);
                 }
                 catch (Exception ex)
                 {
@@ -86,10 +86,10 @@ namespace UncomplicatedCustomRoles.Manager
                     File.WriteAllText(fileName.Replace(".yml", $"-{i}.yml"), Loader.Serializer.Serialize(Roles["custom_roles"][i]));
         }
 
-        private void LoadRoles(string content, Action<CustomRole> action)
+        private void LoadRoles(string fileName, string content, Action<CustomRole> action)
         {
             CustomRole Role = Loader.Deserializer.Deserialize<CustomRole>(content);
-            LogManager.Debug($"Proposed to the registerer the external LEGACY role {Role.Id} [{Role.Name}] from file:\n{fileName}");
+            LogManager.Debug($"Proposed to the registerer the external role {Role.Id} [{Role.Name}] from file:\n{fileName}");
             action(Role);
         }
 

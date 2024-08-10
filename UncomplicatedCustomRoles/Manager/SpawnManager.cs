@@ -12,6 +12,7 @@ using UncomplicatedCustomRoles.Extensions;
 using MEC;
 using Exiled.Permissions.Extensions;
 using UncomplicatedCustomRoles.API.Features;
+using UncomplicatedCustomRoles.API.Struct;
 
 // Mormora, la gente mormora
 // falla tacere praticando l'allegria
@@ -76,13 +77,15 @@ namespace UncomplicatedCustomRoles.Manager
                         break;
                     case SpawnLocationType.RoomsSpawn:
                         player.Position = Room.Get(Role.SpawnSettings.SpawnRooms.RandomItem()).Position.AddY(1.5f);
-
-                        if (Role.SpawnSettings.SpawnOffset != new Vector3())
-                            player.Position += Role.SpawnSettings.SpawnOffset;
-
                         break;
-                    case SpawnLocationType.PositionSpawn:
-                        player.Position = Role.SpawnSettings.SpawnPosition;
+                    case SpawnLocationType.SpawnPointSpawn:
+                        if (Role.SpawnSettings.SpawnPoint is not null && SpawnPoint.TryGet(Role.SpawnSettings.SpawnPoint, out SpawnPoint spawn))
+                            spawn.Spawn(player);
+                        else
+                        {
+                            LogManager.Warn($"Failed to spawn player {player.Nickname} ({player.Id}) as CustomRole {Role.Name} ({Role.Id}): selected SpawnPoint '{Role.SpawnSettings.SpawnPoint}' does not exists, set the spawn position to the previous one...");
+                            player.Position = BasicPosition;
+                        }
                         break;
                 };
             }
@@ -176,14 +179,18 @@ namespace UncomplicatedCustomRoles.Manager
             if (Role.SpawnHint != string.Empty)
                 Player.ShowHint(Role.SpawnHint, Role.SpawnHintDuration);
 
-            KeyValuePair<string, string>? Badge = null;
+            Triplet<string, string, bool>? Badge = null;
             if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null && Role.BadgeColor.Length > 2)
             {
-                Badge = new(Player.RankName ?? "", Player.RankColor ?? "");
+                Badge = new(Player.RankName ?? "", Player.RankColor ?? "", Player.ReferenceHub.serverRoles.HasBadgeHidden);
                 LogManager.Debug($"Badge detected, putting {Role.BadgeName}@{Role.BadgeColor} to player {Player.Id}");
 
-                Player.RankName = Role.BadgeName;
+                Player.RankName = Role.BadgeName.Replace("@hidden", "");
                 Player.RankColor = Role.BadgeColor;
+
+                if (Role.BadgeName.Contains("@hidden"))
+                    if (Player.ReferenceHub.serverRoles.TryHideTag())
+                        LogManager.Debug("Tag successfully hidden!");
             }
 
             if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)

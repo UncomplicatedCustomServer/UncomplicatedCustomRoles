@@ -22,7 +22,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Get a list of every <see cref="ICustomRole"/> registered.
         /// </summary>
-        public static List<ICustomRole> List { get; } = CustomRoles.Values.ToList();
+        public static List<ICustomRole> List => CustomRoles.Values.ToList();
 
         /// <summary>
         /// Gets or sets the <see cref="ICustomRole"/> unique Id
@@ -138,9 +138,20 @@ namespace UncomplicatedCustomRoles.API.Features
         public string SpawnHint { get; set; } = "This hint will be shown when you'll spawn as a Janitor!";
 
         /// <summary>
-        /// The hint duration
+        /// Gets or sets hint duration
         /// </summary>
         public float SpawnHintDuration { get; set; } = 5;
+
+        /// <summary>
+        /// Gets or sets the custom inventory limits to override the default ones
+        /// </summary>
+        public Dictionary<ItemCategory, sbyte> CustomInventoryLimits { get; set; } = new()
+        {
+            {
+                ItemCategory.Medical,
+                5
+            }
+        };
 
         /// <summary>
         /// Gets or sets the inventory of the player
@@ -290,9 +301,9 @@ namespace UncomplicatedCustomRoles.API.Features
                 LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the RoomSpawn as SpawnType the List SpawnRooms can't be empty!");
                 return false;
             }
-            else if (Role.SpawnSettings.Spawn == SpawnLocationType.PositionSpawn && Role.SpawnSettings.SpawnPosition == new Vector3(0, 0, 0))
+            else if (Role.SpawnSettings.Spawn == SpawnLocationType.SpawnPointSpawn && (Role.SpawnSettings.SpawnPoint is null || Role.SpawnSettings.SpawnPoint == string.Empty))
             {
-                LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the PositionSpawn as SpawnType the Vector3 SpawnPosition can't be empty!");
+                LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the SpawnPointSpawn as SpawnType the SpawnPoint can't be empty or null!");
                 return false;
             }
 
