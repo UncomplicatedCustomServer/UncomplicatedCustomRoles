@@ -1,7 +1,6 @@
 ﻿using Exiled.API.Enums;
 using PlayerRoles;
 using System.Collections.Generic;
-using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
@@ -27,13 +26,13 @@ namespace UncomplicatedCustomRoles.Interfaces
 
         public abstract RoleTypeId RoleAppearance { get; set; }
 
-        public abstract Team? IsFriendOf { get; set; }
+        public abstract List<Team> IsFriendOf { get; set; }
 
         public abstract HealthBehaviour Health { get; set; }
 
         public abstract AhpBehaviour Ahp { get; set; }
 
-        public abstract List<UCREffect>? Effects { get; set; }
+        public abstract List<Effect>? Effects { get; set; }
 
         public abstract StaminaBehaviour Stamina { get; set; }
 
@@ -41,7 +40,7 @@ namespace UncomplicatedCustomRoles.Interfaces
 
         public abstract bool CanEscape { get; set; }
 
-        public abstract string? RoleAfterEscape { get; set; }
+        public abstract Dictionary<string, string> RoleAfterEscape { get; set; }
 
         public abstract Vector3 Scale { get; set; }
 
@@ -52,6 +51,8 @@ namespace UncomplicatedCustomRoles.Interfaces
         public abstract string SpawnHint { get; set; }
 
         public abstract float SpawnHintDuration { get; set; }
+
+        public abstract Dictionary<ItemCategory, sbyte> CustomInventoryLimits { get; set; }
 
         public abstract List<ItemType> Inventory { get; set; }
 
@@ -64,5 +65,7 @@ namespace UncomplicatedCustomRoles.Interfaces
         public abstract SpawnBehaviour? SpawnSettings { get; set; }
 
         public abstract bool IgnoreSpawnSystem { get; set; }
+
+        public abstract bool HasTeam(Team team);
     }
 }

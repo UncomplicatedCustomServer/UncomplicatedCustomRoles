@@ -1,5 +1,6 @@
 ﻿using Exiled.API.Features;
 using MEC;
+using PlayerRoles;
 using System;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Interfaces;
@@ -21,7 +22,7 @@ namespace UncomplicatedCustomRoles.Extensions
         /// <returns><see cref="true"/> if the player is a custom role.</returns>
         public static bool HasCustomRole(this Player player)
         {
-            return Plugin.PlayerRegistry.ContainsKey(player.Id);
+            return SummonedCustomRole.TryGet(player, out _);
         }
 
         /// <summary>
@@ -82,32 +83,25 @@ namespace UncomplicatedCustomRoles.Extensions
         }
 
         /// <summary>
-        /// Try to get the current <see cref="ICustomRole"/> of a <see cref="Player"/> if it's one.
+        /// Try to get the current <see cref="SummonedCustomRole"/> of a <see cref="Player"/> if it's one.
         /// </summary>
         /// <param name="player"></param>
         /// <param name="role"></param>
-        /// <returns>true if the player is currently <see cref="ICustomRole"/></returns>
-        public static bool TryGetCustomRole(this Player player, out ICustomRole role)
+        /// <returns>true if the player is currently <see cref="SummonedCustomRole"/></returns>
+        public static bool TryGetSummonedInstance(this Player player, out SummonedCustomRole summonedInstance)
         {
-            if (player.HasCustomRole())
-            {
-                role = Plugin.CustomRoles[Plugin.PlayerRegistry[player.Id]];
-                return true;
-            }
-
-            role = null;
-            return false;
+            summonedInstance = GetSummonedInstance(player);
+            return summonedInstance != null;
         }
 
         /// <summary>
-        /// Get the current <see cref="ICustomRole"/> of a <see cref="Player"/> if it's one.
+        /// Get the current <see cref="SummonedCustomRole"/> of a <see cref="Player"/> if it's one.
         /// </summary>
         /// <param name="player"></param>
-        /// <returns>The current <see cref="ICustomRole"/> if the player has one, otherwise <see cref="null"/></returns>
-        public static ICustomRole GetCustomRole(this Player player)
+        /// <returns>The current <see cref="SummonedCustomRole"/> if the player has one, otherwise <see cref="null"/></returns>
+        public static SummonedCustomRole GetSummonedInstance(this Player player)
         {
-            player.TryGetCustomRole(out ICustomRole role);
-            return role;
+            return SummonedCustomRole.Get(player);
         }
 
         /// <summary>
@@ -118,27 +112,30 @@ namespace UncomplicatedCustomRoles.Extensions
         /// <returns>True if success</returns>
         public static bool TryRemoveCustomRole(this Player player, bool doResetRole = false)
         {
-            if (player.TryGetCustomRole(out ICustomRole role))
+            if (SummonedCustomRole.TryGet(player, out SummonedCustomRole result))
             {
-                InfiniteEffect.Remove(player);
+                RoleTypeId Role = result.Role.Role;
+                result.Destroy();
 
                 if (doResetRole)
                 {
                     Vector3 OriginalPosition = player.Position;
 
-                    player.Role.Set(role.Role, PlayerRoles.RoleSpawnFlags.AssignInventory);
+                    player.Role.Set(Role, RoleSpawnFlags.AssignInventory);
 
                     player.Position = OriginalPosition;
-
-                    return true;
                 }
-
-                Plugin.PlayerRegistry.Remove(player.Id);
-                Plugin.RolesCount[role.Id].Remove(player.Id);
 
                 return true;
             }
+
             return false;
+        }
+
+        public static void ApplyCustomInfo(this Player player, string value)
+        {
+            player.InfoArea = string.IsNullOrEmpty(value) ? player.InfoArea & ~PlayerInfoArea.CustomInfo : player.InfoArea |= PlayerInfoArea.CustomInfo;
+            player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = value;
         }
     }
 }

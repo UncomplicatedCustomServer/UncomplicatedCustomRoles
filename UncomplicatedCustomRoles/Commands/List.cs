@@ -1,5 +1,6 @@
 ﻿using CommandSystem;
 using System.Collections.Generic;
+using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Interfaces;
 
 namespace UncomplicatedCustomRoles.Commands
@@ -15,7 +16,7 @@ namespace UncomplicatedCustomRoles.Commands
         public bool Executor(List<string> arguments, ICommandSender sender, out string response)
         {
             response = "List of all registered CustomRoles:";
-            foreach (KeyValuePair<int, ICustomRole> Role in Plugin.CustomRoles)
+            foreach (KeyValuePair<int, ICustomRole> Role in CustomRole.CustomRoles)
             {
                 response += $"\n[{Role.Key}] '{Role.Value.Name}' ({Role.Value.Role})";
             }

@@ -3,10 +3,8 @@ using Exiled.API.Interfaces;
 using Exiled.Loader;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
@@ -59,10 +57,10 @@ namespace UncomplicatedCustomRoles.Integrations
                 if (Player is null)
                     return new(false, $"Error: the given Player ({int.Parse(args[0])}) does not exists!");
 
-                if (!Plugin.CustomRoles.ContainsKey(int.Parse(args[1])))
+                if (!CustomRole.CustomRoles.ContainsKey(int.Parse(args[1])))
                     return new(false, $"Error: the given CustomRole ({int.Parse(args[1])}) does not exists!");
 
-                ICustomRole Role = Plugin.CustomRoles[int.Parse(args[1])];
+                ICustomRole Role = CustomRole.CustomRoles[int.Parse(args[1])];
 
                 Player.SetCustomRoleSync(Role);
 
@@ -80,7 +78,7 @@ namespace UncomplicatedCustomRoles.Integrations
                 if (Player is null)
                     return new(false, $"Error: the given Player ({int.Parse(args[0])}) does not exists!");
 
-                if (Player.TryGetCustomRole(out _))
+                if (Player.HasCustomRole())
                     Player.TryRemoveCustomRole();
 
                 return new(true, string.Empty);

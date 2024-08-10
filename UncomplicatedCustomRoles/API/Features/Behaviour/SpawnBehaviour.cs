@@ -1,16 +1,12 @@
 ﻿using Exiled.API.Enums;
 using PlayerRoles;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace UncomplicatedCustomRoles.API.Features.Behaviour
 {
 #nullable enable
     public class SpawnBehaviour
     {
-        // Spawn Behaviour for the plugin (global)
-        public static bool DoHandleWave { get; internal set; } = true;
-
         // Spawn Behaviour for the roles (role-based)
         public List<RoleTypeId> CanReplaceRoles { get; set; } = new()
         {
@@ -32,17 +28,8 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
             RoomType.LczClassDSpawn
         };
 
-        public Vector3 SpawnPosition { get; set; } = new();
-
-        public Vector3 SpawnOffset { get; set; } = new();
+        public string? SpawnPoint { get; set; } = null;
 
         public string? RequiredPermission { get; set; } = string.Empty;
-
-        // You can use this class to handle the RespawnWave like to disable it
-        public static void DisableSpawnWave()
-        {
-            DoHandleWave = false;
-            Plugin.RoleSpawnQueue.Clear();
-        }
     }
 }

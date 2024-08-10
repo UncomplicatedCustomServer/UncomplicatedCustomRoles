@@ -1,11 +1,12 @@
-﻿using UnityEngine;
+﻿using UncomplicatedCustomRoles.API.Struct;
+using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Extensions
 {
     public static class Vector3Extension
     {
         /// <summary>
-        /// Add a X value to the current <see cref="Vector3"/>
+        /// Adds a X value to the current <see cref="Vector3"/>
         /// </summary>
         /// <param name="vector"></param>
         /// <param name="value"></param>
@@ -17,7 +18,7 @@ namespace UncomplicatedCustomRoles.Extensions
         }
 
         /// <summary>
-        /// Add a Y value to the current <see cref="Vector3"/>
+        /// Adds a Y value to the current <see cref="Vector3"/>
         /// </summary>
         /// <param name="vector"></param>
         /// <param name="value"></param>
@@ -29,7 +30,7 @@ namespace UncomplicatedCustomRoles.Extensions
         }
 
         /// <summary>
-        /// Add a Z value to the current <see cref="Vector3"/>
+        /// Adds a Z value to the current <see cref="Vector3"/>
         /// </summary>
         /// <param name="vector"></param>
         /// <param name="value"></param>
@@ -38,6 +39,16 @@ namespace UncomplicatedCustomRoles.Extensions
         {
             vector.z += value;
             return vector;
+        }
+
+        /// <summary>
+        /// Converts the current <see cref="Vector3"/> to a local <see cref="Triplet{TFirst, TSecond, TThird}}"/>
+        /// </summary>
+        /// <param name="vector"></param>
+        /// <returns></returns>
+        public static Triplet<float, float, float> ToTriplet(this Vector3 vector)
+        {
+            return new(vector.x, vector.y, vector.z);
         }
     }
 }

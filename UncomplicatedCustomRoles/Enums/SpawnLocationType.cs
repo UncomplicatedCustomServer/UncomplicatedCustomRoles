@@ -3,7 +3,7 @@
     CompleteRandomSpawn,
     ZoneSpawn,
     RoomsSpawn,
-    PositionSpawn,
+    SpawnPointSpawn,
     KeepRoleSpawn,
     KeepCurrentPositionSpawn
 }

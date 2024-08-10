@@ -50,12 +50,20 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="API\Attributes\PluginCustomRole.cs" />
     <Compile Include="API\Features\Behaviour\AhpBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\HealthBehaviour.cs" />
     <Compile Include="API\Features\CustomRole.cs" />
+    <Compile Include="API\Features\Escape.cs" />
     <Compile Include="API\Features\InfiniteEffect.cs" />
     <Compile Include="API\Features\Behaviour\SpawnBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\StaminaBehaviour.cs" />
+    <Compile Include="API\Features\LogEntry.cs" />
+    <Compile Include="API\Features\Spawn.cs" />
+    <Compile Include="API\Features\SpawnPoint.cs" />
+    <Compile Include="API\Features\SummonedCustomRole.cs" />
+    <Compile Include="API\Struct\Quadruple.cs" />
+    <Compile Include="API\Struct\Triplet.cs" />
     <Compile Include="Commands\CommandParent.cs" />
     <Compile Include="Commands\List.cs" />
     <Compile Include="Commands\LogShare.cs" />
@@ -63,23 +71,27 @@
     <Compile Include="Commands\Role.cs" />
     <Compile Include="Commands\Reload.cs" />
     <Compile Include="Commands\Spawn.cs" />
+    <Compile Include="Commands\SpawnPoint.cs" />
     <Compile Include="Config.cs" />
-    <Compile Include="Elements\CustomRole.cs" />
     <Compile Include="Enums\SpawnLocationType.cs" />
     <Compile Include="Events\EventHandler.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
+    <Compile Include="Extensions\ListExtension.cs" />
     <Compile Include="Extensions\PlayerExtension.cs" />
     <Compile Include="Extensions\Vector3Extension.cs" />
     <Compile Include="Integrations\ScriptedEvents.cs" />
     <Compile Include="Interfaces\IUCRCommand.cs" />
     <Compile Include="Manager\FileConfigs.cs" />
-    <Compile Include="Elements\UCREffect.cs" />
-    <Compile Include="Manager\HttpManager.cs" />
+    <Compile Include="API\Features\Effect.cs" />
+    <Compile Include="Manager\NET\HttpManager.cs" />
+    <Compile Include="Manager\ImportManager.cs" />
     <Compile Include="Manager\LogManager.cs" />
+    <Compile Include="Manager\NET\SpawnPointApiCommunicator.cs" />
     <Compile Include="Manager\SpawnManager.cs" />
+    <Compile Include="Patches\InventoryLimitsPrefix.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Interfaces\ICustomRole.cs" />
-    <Compile Include="Interfaces\IUCREffect.cs" />
+    <Compile Include="Interfaces\IEffect.cs" />
     <Compile Include="Integrations\RespawnTimer.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -89,6 +101,9 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>$(EXILED_REFERENCES)\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-firstpass.dll</HintPath>
@@ -472,8 +487,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="EXILED">
-      <Version>8.9.6</Version>
+    <PackageReference Include="EXILEDOFFICIAL">
+      <Version>8.11.0</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.3</Version>

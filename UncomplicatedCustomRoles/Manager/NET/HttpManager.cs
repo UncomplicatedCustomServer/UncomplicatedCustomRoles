@@ -2,15 +2,16 @@
 using Exiled.Loader;
 using MEC;
 using Newtonsoft.Json;
-using PlayerRoles;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using UncomplicatedCustomRoles.API.Struct;
 
-namespace UncomplicatedCustomRoles.Manager
+namespace UncomplicatedCustomRoles.Manager.NET
 {
     internal class HttpManager
     {
@@ -55,6 +56,11 @@ namespace UncomplicatedCustomRoles.Manager
         public string Endpoint { get; } = "https://ucs.fcosma.it/api/v2";
 
         /// <summary>
+        /// Store every credit tag for UCS
+        /// </summary>
+        public Dictionary<string, Triplet<string, string, bool>> Credits { get; internal set; } = new();
+
+        /// <summary>
         /// An array of response times
         /// </summary>
         public List<float> ResponseTimes { get; } = new();
@@ -69,9 +75,10 @@ namespace UncomplicatedCustomRoles.Manager
             Prefix = prefix;
             MaxErrors = maxErrors;
             HttpClient = new();
+            LoadCreditTags();
         }
 
-        internal HttpResponseMessage HttpGetRequest(string url)
+        public HttpResponseMessage HttpGetRequest(string url)
         {
             try
             {
@@ -87,7 +94,7 @@ namespace UncomplicatedCustomRoles.Manager
             }
         }
 
-        internal HttpResponseMessage HttpPutRequest(string url, string content)
+        public HttpResponseMessage HttpPutRequest(string url, string content)
         {
             try
             {
@@ -103,7 +110,7 @@ namespace UncomplicatedCustomRoles.Manager
             }
         }
 
-        internal string RetriveString(HttpResponseMessage response)
+        public string RetriveString(HttpResponseMessage response)
         {
             if (response is null)
                 return string.Empty;
@@ -111,7 +118,7 @@ namespace UncomplicatedCustomRoles.Manager
             return RetriveString(response.Content);
         }
 
-        internal string RetriveString(HttpContent response)
+        public string RetriveString(HttpContent response)
         {
             if (response is null)
                 return string.Empty;
@@ -136,6 +143,40 @@ namespace UncomplicatedCustomRoles.Manager
                 return new(Version);
 
             return Plugin.Instance.Version;
+        }
+
+        public void LoadCreditTags()
+        {
+            Credits = new();
+            try
+            {
+                Dictionary<string, Dictionary<string, string>> Data = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(RetriveString(HttpGetRequest("https://ucs.fcosma.it/api/credits.json")));
+
+                foreach (KeyValuePair<string, Dictionary<string, string>> kvp in Data.Where(kvp => kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") && kvp.Value.ContainsKey("override")))
+                    Credits.Add(kvp.Key, new(kvp.Value["role"], kvp.Value["color"], bool.Parse(kvp.Value["ovveride"])));
+            }
+            catch (Exception) { }
+        }
+
+        public Triplet<string, string, bool> GetCreditTag(Player player)
+        {
+            if (Credits.ContainsKey(player.UserId))
+                return Credits[player.UserId];
+
+            return new(null, null, false);
+        }
+
+        public void ApplyCreditTag(Player player)
+        {
+            Triplet<string, string, bool> Tag = GetCreditTag(player);
+            if (player.RankName is not null && player.RankName != string.Empty && !Tag.Third)
+                return; // Do not override
+
+            if (Tag.First is not null && Tag.Second is not null)
+            {
+                player.RankName = Tag.First;
+                player.RankColor = Tag.Second;
+            }
         }
 
         public bool IsLatestVersion(out Version latest)
@@ -169,6 +210,8 @@ namespace UncomplicatedCustomRoles.Manager
             return false;
         }
 
+        internal void PresenceNotListed() => HttpGetRequest($"{Endpoint}/{Prefix}/presence_notlisted?port={Server.Port}&cores={Environment.ProcessorCount}&ram=0&version={Plugin.Instance.Version}");
+
         internal HttpStatusCode ShareLogs(string data, out HttpContent httpContent)
         {
             HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&plugin_version={Plugin.Instance.Version}", data);
@@ -186,16 +229,18 @@ namespace UncomplicatedCustomRoles.Manager
         {
             while (Active && Errors <= MaxErrors)
             {
-                if (!Presence(out HttpContent content))
-                {
-                    try
-                    {
-                        Dictionary<string, string> Response = JsonConvert.DeserializeObject<Dictionary<string, string>>(RetriveString(content));
-                        Errors++;
-                        LogManager.Warn($"[UCS HTTP Manager] >> Error while trying to put data inside our APIs.\nThe endpoint say: {Response["message"]} ({Response["status"]})");
-                    }
-                    catch (Exception) { }
-                }
+                if (Server.IsVerified)
+                    if (!Presence(out HttpContent content))
+                        try
+                        {
+                            Dictionary<string, string> Response = JsonConvert.DeserializeObject<Dictionary<string, string>>(RetriveString(content));
+                            Errors++;
+                            if (Plugin.Instance.Config.EnableBasicLogs)
+                                LogManager.Warn($"[UCS HTTP Manager] >> Error while trying to put data inside our APIs.\nThe endpoint say: {Response["message"]} ({Response["status"]})");
+                        }
+                        catch (Exception) { }
+                    else
+                        PresenceNotListed();
 
                 // Do anche the Mailbox action
                 if (Plugin.Instance.Config.DoEnableAdminMessages)
