@@ -82,6 +82,7 @@ namespace UncomplicatedCustomRoles.Manager
                         player.Position = Room.List.Where(room => room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
                         break;
                     case SpawnLocationType.RoomsSpawn:
+                        LogManager.Silent($"Going to spawn CR {Role.Name} ({Role.Id}) ({player.Nickname}) at a Room - Count: {Role.SpawnSettings.SpawnRooms.Count}");
                         player.Position = Room.Get(Role.SpawnSettings.SpawnRooms.RandomItem()).Position.AddY(1.5f);
                         break;
                     case SpawnLocationType.SpawnPointSpawn:
