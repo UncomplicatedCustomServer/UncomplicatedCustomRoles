@@ -33,7 +33,7 @@ Potrai configurare il <ins>ruolo</ins>, la <ins>vitah</ins>, il <ins>ruolo dopo 
 - Comandi in-game per la gestione dei ruoli
 
 ## Installation
-Scarica il file `UncomplicatedCustomRoles.dll` dall'[ultimo relase](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/releases/latest) ed inseriscilo nella cartella `EXILED/Plugins`.
+Scarica il file `UncomplicatedCustomRoles.dll` dall'[ultimo release](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/releases/latest) ed inseriscilo nella cartella `EXILED/Plugins`.
 
 ## Developers
 UncomplicatedCustomRoles ha un facile e comprensibile sistema di API per permettere agli sviluppatori di essere usato al meglio.
