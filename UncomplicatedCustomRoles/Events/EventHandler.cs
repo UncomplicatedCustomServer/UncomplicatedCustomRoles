@@ -70,12 +70,12 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnFinishingRecall(FinishingRecallEventArgs ev)
         {
-            ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(ev.Player, RoleTypeId.Scp0492);
+            ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(ev.Target, RoleTypeId.Scp0492);
 
             if (Role is not null)
             {
                 ev.IsAllowed = false;
-                ev.Player.SetCustomRole(Role);
+                ev.Target.SetCustomRole(Role);
             }
         }
 

@@ -65,6 +65,7 @@
     <Compile Include="API\Struct\Quadruple.cs" />
     <Compile Include="API\Struct\Triplet.cs" />
     <Compile Include="Commands\CommandParent.cs" />
+    <Compile Include="Commands\Generate.cs" />
     <Compile Include="Commands\List.cs" />
     <Compile Include="Commands\LogShare.cs" />
     <Compile Include="Commands\Owner.cs" />
