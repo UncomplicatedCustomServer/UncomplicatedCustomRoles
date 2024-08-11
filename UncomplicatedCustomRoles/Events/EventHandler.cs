@@ -126,7 +126,7 @@ namespace UncomplicatedCustomRoles.Events
             if (Role is not null)
             {
                 LogManager.Debug($"Summoning player {ev.Player.Nickname} ({ev.Player.Id}) as {Role.Name} ({Role.Id})");
-                Timing.CallDelayed(0.5f, () => SpawnManager.SummonCustomSubclass(ev.Player, Role.Id));
+                Timing.CallDelayed(0.3f, () => SpawnManager.SummonCustomSubclass(ev.Player, Role.Id));
             }
 
             LogManager.Debug($"Evaluated custom role for player {ev.Player.Nickname} - found: {Role?.Id} ({Role?.Name})");
