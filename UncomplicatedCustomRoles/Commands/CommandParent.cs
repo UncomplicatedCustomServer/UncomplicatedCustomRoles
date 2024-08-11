@@ -40,7 +40,7 @@ namespace UncomplicatedCustomRoles.Commands
 
                 foreach (IUCRCommand Command in RegisteredCommands)
                 {
-                    response += $"\n- ucr {Command.Name}  ->  {Command.Description}";
+                    response += $"\n- ucr {Command.Name}  ->  {Command.Description}  [{Command.RequiredPermission}]";
                 }
 
                 return true;
