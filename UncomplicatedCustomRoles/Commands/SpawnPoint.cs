@@ -86,12 +86,6 @@ namespace UncomplicatedCustomRoles.Commands
                             return false;
                         }
 
-                        if (Player.CurrentRoom is null)
-                        {
-                            response = "You are not inside a room!\nPlease go to the SpawnPoint position!";
-                            return false;
-                        }
-
                         if (SpawnPointInstance.TryGet(arguments[1], out _))
                         {
                             response = $"A SpawnPoint with the name '{arguments[1]}' is already registered!";

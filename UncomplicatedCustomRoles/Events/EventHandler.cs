@@ -138,26 +138,26 @@ namespace UncomplicatedCustomRoles.Events
         {
             LogManager.Silent($"DamageHandler of Hurting: {Hurting.Player} {Hurting.Attacker}");
 
-            if (Hurting.Attacker is not null && Hurting.Attacker.TryGetSummonedInstance(out SummonedCustomRole AttackerRole))
-            {
-                // Let's first check if the thing is allowed!
-                if (Hurting.Player is not null && AttackerRole.Role is CustomRole Role && Role.IsFriendOf.Contains(Hurting.Player.Role.Team))
-                {
-                    LogManager.Silent($"Player {Hurting.Attacker} can't hurt {Hurting.Player} due to is_friend_of");
-                    Hurting.IsAllowed = false;
-                    return;
-                }
+            if (!Hurting.IsAllowed)
+                return;
 
-                Hurting.DamageHandler.Damage *= AttackerRole.Role.DamageMultiplier;
-            }
-            else if (Hurting.Player is not null && Hurting.Attacker is not null && Hurting.Player.TryGetSummonedInstance(out SummonedCustomRole PlayerRole))
+            if (Hurting.Player is not null && Hurting.Attacker is not null && Hurting.Player.IsAlive && Hurting.Attacker.IsAlive)
             {
-                if (PlayerRole.Role is CustomRole Role && Role.IsFriendOf.Contains(Hurting.Attacker.Role.Team))
+                // If the attacker is a custom role we don't check for damage_multiplier but only the thing to avoid -> is_friend_of
+                if (Hurting.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole) && attackerCustomRole.Role.IsFriendOf is not null && attackerCustomRole.Role.IsFriendOf.Contains(Hurting.Player.Role.Team))
                 {
-                    LogManager.Silent($"Player {Hurting.Attacker} can't hurt {Hurting.Player} due to is_friend_of");
                     Hurting.IsAllowed = false;
-                    return;
+                    LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - A");
                 }
+                else if (Hurting.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole))
+                    if (playerCustomRole.Role.IsFriendOf is not null && playerCustomRole.Role.IsFriendOf.Contains(Hurting.Attacker.Role.Team))
+                    {
+                        Hurting.IsAllowed = false;
+                        LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - B");
+                        return;
+                    }
+                    else
+                        Hurting.DamageHandler.Damage *= playerCustomRole.Role.DamageMultiplier;
             }
         }
 
