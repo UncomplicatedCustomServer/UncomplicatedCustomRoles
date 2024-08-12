@@ -396,7 +396,7 @@ namespace UncomplicatedCustomRoles.Manager
             }
 
             if (RolePercentage.ContainsKey(player.Role.Type))
-                if (new System.Random().Next(0, 100) < RolePercentage[NewRole].Count())
+                if (UnityEngine.Random.Range(0, 100) < RolePercentage[NewRole].Count())
                     return CustomRole.CustomRoles[RolePercentage[NewRole].RandomItem().Id];
 
             return null;
