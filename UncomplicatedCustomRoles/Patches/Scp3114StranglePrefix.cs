@@ -7,12 +7,12 @@ namespace UncomplicatedCustomRoles.Patches
     [HarmonyPatch(typeof(Scp3114Strangle), nameof(Scp3114Strangle.ValidateTarget))]
     internal class Scp3114StranglePrefix
     {
-        private static bool Prefix(ReferenceHub hub, ref bool __result, Scp3114Strangle __instance)
+        private static bool Prefix(ReferenceHub player, ref bool __result, Scp3114Strangle __instance)
         {
-            if (hub.roleManager.CurrentRole is null)
+            if (player.roleManager.CurrentRole is null)
                 return true;
 
-            if (SummonedCustomRole.TryGet(hub, out SummonedCustomRole playerRole) && playerRole.Role.IsFriendOf is not null && playerRole.Role.IsFriendOf.Contains(__instance.Owner.roleManager.CurrentRole.Team))
+            if (SummonedCustomRole.TryGet(player, out SummonedCustomRole playerRole) && playerRole.Role.IsFriendOf is not null && playerRole.Role.IsFriendOf.Contains(__instance.Owner.roleManager.CurrentRole.Team))
             {
                 // Attacked player can't be strangled by SCP-3114 as it's his friend :)
                 __result = false;
