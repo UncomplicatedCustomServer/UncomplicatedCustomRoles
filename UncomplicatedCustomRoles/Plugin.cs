@@ -23,7 +23,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(3, 6, 2);
+        public override Version Version { get; } = new(3, 6, 3);
 
         public override Version RequiredExiledVersion { get; } = new(8, 11, 0);
 
@@ -108,7 +108,7 @@ namespace UncomplicatedCustomRoles
 
             // Patch with Harmony
             Harmony.DEBUG = true;
-            _harmony = new("com.ucs.ucr_exiled");
+            _harmony = new($"com.ucs.ucr_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
 
             // Run the import managet

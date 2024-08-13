@@ -19,7 +19,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
         public static string Endpoint => "https://ucs.fcosma.it/api/spawnpoints";
 
         /// <summary>
-        /// The maximum number of SpawnPoints per server
+        /// Gets the  maximum number of SpawnPoints per server
         /// </summary>
         public const int MaxSpawnPoints = 35; // Don't worry, the check is also in the APIs backend :wink:
 
@@ -28,6 +28,9 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// </summary>
         public static void Init()
         {
+            if (!Plugin.HttpManager.IsAllowed)
+                return;
+
             Task.Run(LoadFromCloud);
         }
 

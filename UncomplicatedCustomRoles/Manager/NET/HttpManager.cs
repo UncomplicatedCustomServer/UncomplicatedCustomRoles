@@ -16,52 +16,57 @@ namespace UncomplicatedCustomRoles.Manager.NET
     internal class HttpManager
     {
         /// <summary>
-        /// The <see cref="CoroutineHandle"/> of the presence coroutine.
+        /// Gets the <see cref="CoroutineHandle"/> of the presence coroutine.
         /// </summary>
         public CoroutineHandle PresenceCoroutine { get; internal set; }
 
         /// <summary>
-        /// If <see cref="true"/> the message that confirm that the server is communicating correctly with our APIs has been sent in the console.
+        /// Gets the <see cref="true"/> the message that confirm that the server is communicating correctly with our APIs has been sent in the console.
         /// </summary>
         public bool SentConfirmationMessage { get; internal set; } = false;
 
         /// <summary>
-        /// The number of errors that has occurred. If this number exceed the <see cref="MaxErrors"/> quote then this feature will be deactivated.
+        /// Gets the number of errors that has occurred. If this number exceed the <see cref="MaxErrors"/> quote then this feature will be deactivated.
         /// </summary>
         public uint Errors { get; internal set; } = 0;
 
         /// <summary>
-        /// The maximum number of errors that can occur before deactivating the function.
+        /// Gets the maximum number of errors that can occur before deactivating the function.
         /// </summary>
         public uint MaxErrors { get; }
 
         /// <summary>
-        /// If <see cref="true"/> this feature is active.
+        /// Gets whether <see cref="true"/> this feature is active.
         /// </summary>
         public bool Active { get; internal set; } = false;
 
         /// <summary>
-        /// The prefix of the plugin for our APIs
+        /// Gets if the feature can be activated - missing library
+        /// </summary>
+        public bool IsAllowed { get; internal set; } = true;
+
+        /// <summary>
+        /// Gets the prefix of the plugin for our APIs
         /// </summary>
         public string Prefix { get; }
 
         /// <summary>
-        /// The <see cref="HttpClient"/> public istance
+        /// Gets the <see cref="HttpClient"/> public istance
         /// </summary>
         public HttpClient HttpClient { get; }
 
         /// <summary>
-        /// The UCS APIs endpoint
+        /// Gets the UCS APIs endpoint
         /// </summary>
         public string Endpoint { get; } = "https://ucs.fcosma.it/api/v2";
 
         /// <summary>
-        /// Store every credit tag for UCS
+        /// Gets the CreditTag storage for the plugin, downloaded from our central server
         /// </summary>
         public Dictionary<string, Triplet<string, string, bool>> Credits { get; internal set; } = new();
 
         /// <summary>
-        /// An array of response times
+        /// Gets the List of the ResponseTimes
         /// </summary>
         public List<float> ResponseTimes { get; } = new();
 
@@ -72,6 +77,13 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// <param name="maxErrors"></param>
         public HttpManager(string prefix, uint maxErrors = 5)
         {
+            if (Type.GetType("Newtonsoft.Json.JsonConvert") is null)
+            {
+                LogManager.Error($"Failed to load the HttpManager of {prefix.ToUpper()}: Missing library Newtonsoft.Json v13.0.3\nPlease install it AS SOON AS POSSIBLE!");
+                IsAllowed = false;
+                return;
+            }
+
             Prefix = prefix;
             MaxErrors = maxErrors;
             HttpClient = new();
@@ -258,6 +270,9 @@ namespace UncomplicatedCustomRoles.Manager.NET
         public void Start()
         {
             if (Active)
+                return;
+
+            if (!IsAllowed)
                 return;
 
             Active = true;
