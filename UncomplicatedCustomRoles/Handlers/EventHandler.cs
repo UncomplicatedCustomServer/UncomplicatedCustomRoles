@@ -12,6 +12,10 @@ using PluginAPI.Core;
 using PlayerRoles;
 using UncomplicatedCustomRoles.Events.Attributes;
 using UncomplicatedCustomRoles.Events.Args;
+using UnityEngine;
+using System.Threading.Tasks;
+using System.Linq;
+using UnityEngine.UI;
 
 namespace UncomplicatedCustomRoles.Handlers
 {
@@ -21,6 +25,8 @@ namespace UncomplicatedCustomRoles.Handlers
         public void OnRoundStarted()
         {
             Plugin.Instance.DoSpawnBasicRoles = false;
+
+            GameObject.Find("You are").GetComponent<Text>().text = "PORCO DIO CANE";
 
             Timing.CallDelayed(1.5f, () =>
             {
@@ -131,6 +137,9 @@ namespace UncomplicatedCustomRoles.Handlers
         [InternalPluginEvent("HurtingPlayer")]
         public static void OnHurting(HurtingEventArgs ev)
         {
+            if (ev.Attacker is null)
+                return;
+
             if (ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole AttackerRole))
             {
                 // Let's first check if the thing is allowed!

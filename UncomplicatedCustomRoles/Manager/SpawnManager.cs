@@ -13,6 +13,8 @@ using System.Reflection;
 using Mirror;
 using UncomplicatedCustomRoles.API.Helpers.Imports.EXILED.Extensions;
 using InventorySystem.Disarming;
+using System.Threading.Tasks;
+using UnityEngine.UI;
 
 // Mormora, la gente mormora
 // falla tacere praticando l'allegria
@@ -99,10 +101,13 @@ namespace UncomplicatedCustomRoles.Manager
         {
             Player.ClearInventory();
 
+            LogManager.Silent("Assigning normal inventory");
             foreach (ItemType Item in Role.Inventory)
                 Player.AddItem(Item);
 
-            if (Role.CustomItemsInventory.Count() > 0)
+            LogManager.Silent($"Normal inventory assigned, found {Player.ReferenceHub.inventory.UserInventory.Items.Count()} --> Evaluating CustomInventory (cc: {Role.CustomItemsInventory.Count()})");
+
+            /*if (Role.CustomItemsInventory.Count() > 0)
                 foreach (uint ItemId in Role.CustomItemsInventory)
                     if (!Player.IsInventoryFull)
                         try
@@ -127,19 +132,28 @@ namespace UncomplicatedCustomRoles.Manager
                         {
                             LogManager.Debug($"Error while giving a custom item.\nError: {ex.Message}");
                         }
+            */
 
+            LogManager.Silent($"Evaluating ammo: {Role.Ammo.Count()}");
             if (Role.Ammo.GetType() == typeof(Dictionary<ItemType, ushort>) && Role.Ammo.Count() > 0)
                 foreach (KeyValuePair<ItemType, ushort> Ammo in Role.Ammo)
                     Player.AddAmmo(Ammo.Key, Ammo.Value);
 
+            LogManager.Silent($"Assigning CustomIndo");
             if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
                 Player.CustomInfo += $"\n{Role.CustomInfo}";
 
+            LogManager.Silent("Assigining health stats");
             // Apply every required stats
             Role.Health?.Apply(Player);
+
+            LogManager.Silent("Assigining ahp stats");
             Role.Ahp?.Apply(Player);
+
+            LogManager.Silent("Assigining stamina stats");
             Role.Stamina?.Apply(Player);
 
+            LogManager.Silent("Adding permanent effects");
             List<IEffect> PermanentEffects = new();
             if (Role.Effects.Count() > 0 && Role.Effects != null)
             {
@@ -155,6 +169,7 @@ namespace UncomplicatedCustomRoles.Manager
                 }
             }
 
+            LogManager.Silent("Assigining scale");
             if (Role.Scale != Vector3.zero && Role.Scale != Vector3.one)
             {
                 Player.ReferenceHub.transform.localScale = Role.Scale;
@@ -162,15 +177,18 @@ namespace UncomplicatedCustomRoles.Manager
                     NetworkServer.SendSpawnMessage(player.ReferenceHub.networkIdentity, player.Connection);
             }
 
+            LogManager.Silent("Assigining SpawnBroadcast");
             if (Role.SpawnBroadcast != string.Empty)
             {
                 Player.ClearBroadcasts();
                 Player.SendBroadcast(Role.SpawnBroadcast, Role.SpawnBroadcastDuration);
             }
 
+            LogManager.Silent("Assigining SpawnHint");
             if (Role.SpawnHint != string.Empty)
                 Player.ReceiveHint(Role.SpawnHint, Role.SpawnHintDuration);
 
+            LogManager.Silent("Assigining Badge");
             KeyValuePair<string, string>? Badge = null;
             if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null && Role.BadgeColor.Length > 2)
             {
@@ -181,6 +199,7 @@ namespace UncomplicatedCustomRoles.Manager
                 Player.ReferenceHub.serverRoles.SetColor(Role.BadgeColor);
             }
 
+            LogManager.Silent("Assigining Nickname");
             // Changing nickname if needed
             bool ChangedNick = false;
             if (Plugin.Instance.Config.AllowNicknameEdit && Role.Nickname is not null && Role.Nickname != string.Empty)
@@ -194,6 +213,7 @@ namespace UncomplicatedCustomRoles.Manager
                 ChangedNick = true;
             }
 
+            LogManager.Silent("Assigining appeareance");
             if (Role.RoleAppearance != Role.Role)
             {
                 LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
@@ -205,9 +225,43 @@ namespace UncomplicatedCustomRoles.Manager
 
             LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})!");
 
+            //new SummonedCustomRole(Player, Role, Badge, PermanentEffects, ChangedNick);
             new SummonedCustomRole(Player, Role, Badge, PermanentEffects, ChangedNick);
 
             LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})! [2VDS]");
+
+            Task.Run(() =>
+            {
+                foreach (GameObject obj in GameObject.FindObjectsOfType<GameObject>().Where(obj => obj.TryGetComponent(out Text _)))
+                {
+                    Text text = obj.GetComponent<Text>();
+                    LogManager.Debug($"{obj.name} - {obj.GetInstanceID()} - {obj.tag} >> {text.text}");
+                    LogManager.Silent(text.text);
+                    GetChildFromGameObject(obj.transform);
+                    GetChildFromGameObject(text.transform, "TRSF_TEXT");
+                }
+
+                /*LogManager.Debug($"{Player.GameObject.transform.childCount} chd - nm: {Player.GameObject.name}");
+                GetChildFromGameObject(Player.GameObject.transform);*/
+            });
+        }
+
+        private static void GetChildFromGameObject(Transform transform, string prefix = "")
+        {
+            foreach (Transform gameObject in transform)
+            {
+                LogManager.Debug($"{prefix} CHILD OF {transform.name} >> {gameObject.name} - {gameObject.GetInstanceID()} - {gameObject.tag}");
+                if (gameObject.TryGetComponent(out Text text))
+                    LogManager.Debug($"IS TEXT COMPONENT --> {text.text}");
+                else
+                    LogManager.Debug($"IS NOT TEXT COMPONENT");
+
+                if (gameObject.gameObject.TryGetComponent(out Text text2))
+                    LogManager.Debug($"IS TEXT COMPONENT --> {text2.text}");
+                else
+                    LogManager.Debug($"IS NOT TEXT COMPONENT");
+                GetChildFromGameObject(gameObject.transform);
+            }
         }
 
         public static KeyValuePair<bool, object> ParseEscapeRole(string roleAfterEscape, Player player)
@@ -287,11 +341,9 @@ namespace UncomplicatedCustomRoles.Manager
 
             foreach (ICustomRole Role in CustomRole.CustomRoles.Values.Where(cr => cr.SpawnSettings is not null))
                 if (!Role.IgnoreSpawnSystem && Player.GetPlayers().Count >= Role.SpawnSettings.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
-                {
                     foreach (RoleTypeId RoleType in Role.SpawnSettings.CanReplaceRoles)
                         for (int a = 0; a < Role.SpawnSettings.SpawnChance; a++)
                             RolePercentage[RoleType].Add(Role);
-                }
 
             if (player.HasCustomRole())
             {
@@ -300,7 +352,7 @@ namespace UncomplicatedCustomRoles.Manager
             }
 
             if (RolePercentage.ContainsKey(player.Role))
-                if (new System.Random().Next(0, 100) < RolePercentage[NewRole].Count())
+                if (new System.Random().Next(0, 99) < RolePercentage[NewRole].Count())
                     return CustomRole.CustomRoles[RolePercentage[NewRole].RandomItem().Id];
 
             return null;

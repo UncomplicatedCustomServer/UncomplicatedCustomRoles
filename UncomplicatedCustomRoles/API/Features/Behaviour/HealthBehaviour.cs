@@ -1,6 +1,7 @@
 ﻿using PlayerStatsSystem;
 using PluginAPI.Core;
 using UncomplicatedCustomRoles.API.Helpers;
+using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.API.Features.Behaviour
 {
@@ -14,12 +15,18 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
 
         public void Apply(Player player)
         {
+            LogManager.Silent("[HP] AM");
             player.Health = Amount;
+            LogManager.Silent("[HP] AS1");
             HealthHelper health = player.ReferenceHub.playerStats.GetModule<HealthStat>() as HealthHelper;
-            health._MaxValue = Maximum;
+            LogManager.Silent("[HP] AS2");
+            //health._MaxValue = Maximum;
 
             if (HumeShield > 0)
+            {
+                LogManager.Silent("[HP] HS");
                 player.ReferenceHub.playerStats.GetModule<HumeShieldStat>().CurValue = HumeShield;
+            }
         }
     }
 }
