@@ -99,15 +99,11 @@ namespace UncomplicatedCustomRoles.Manager
 
         public static void SummonSubclassApplier(Player Player, ICustomRole Role)
         {
-            Player.ClearInventory();
+            LogManager.Silent("Replacing player inventory with defined ones!");
+            Player.ResetInventory(Role.Inventory);
 
-            LogManager.Silent("Assigning normal inventory");
-            foreach (ItemType Item in Role.Inventory)
-                Player.AddItem(Item);
-
-            LogManager.Silent($"Normal inventory assigned, found {Player.ReferenceHub.inventory.UserInventory.Items.Count()} --> Evaluating CustomInventory (cc: {Role.CustomItemsInventory.Count()})");
-
-            /*if (Role.CustomItemsInventory.Count() > 0)
+            LogManager.Silent($"Can we assign custom roles? Let's see: {Role.CustomItemsInventory.Count()}");
+            if (Role.CustomItemsInventory.Count() > 0)
                 foreach (uint ItemId in Role.CustomItemsInventory)
                     if (!Player.IsInventoryFull)
                         try
