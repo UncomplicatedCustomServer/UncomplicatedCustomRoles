@@ -190,14 +190,6 @@ namespace UncomplicatedCustomRoles.API.Features
 
         public bool IgnoreSpawnSystem { get; set; } = false;
 
-        public bool HasTeam(Team team)
-        {
-            if (IsFriendOf is not null)
-                return IsFriendOf.Contains(team);
-
-            return false;
-        }
-
 #nullable disable
         /// <summary>
         /// Try to get a registered <see cref="ICustomRole"/> by it's Id.

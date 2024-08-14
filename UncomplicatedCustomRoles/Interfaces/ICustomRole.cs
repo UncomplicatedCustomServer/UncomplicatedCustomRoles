@@ -64,7 +64,5 @@ namespace UncomplicatedCustomRoles.Interfaces
         public abstract SpawnBehaviour? SpawnSettings { get; set; }
 
         public abstract bool IgnoreSpawnSystem { get; set; }
-
-        public abstract bool HasTeam(Team team);
     }
 }

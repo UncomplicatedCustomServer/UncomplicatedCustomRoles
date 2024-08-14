@@ -3,7 +3,6 @@ using Mirror;
 using PlayerRoles;
 using PluginAPI.Core;
 using System;
-using System.Linq;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
@@ -142,7 +141,7 @@ namespace UncomplicatedCustomRoles.Extensions
         public static void ApplyClearCustomInfo(this Player player, string value)
         {
             player.ReferenceHub.nicknameSync.Network_playerInfoToShow = string.IsNullOrEmpty(value) ? player.ReferenceHub.nicknameSync.Network_playerInfoToShow & ~PlayerInfoArea.CustomInfo : player.ReferenceHub.nicknameSync.Network_playerInfoToShow |= PlayerInfoArea.CustomInfo;
-            player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = value;
+            player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = ProcessCustomInfo(value);
         }
 
         /// <summary>
@@ -156,9 +155,8 @@ namespace UncomplicatedCustomRoles.Extensions
             player.ReferenceHub.nicknameSync.Network_playerInfoToShow |= PlayerInfoArea.CustomInfo;
             player.ReferenceHub.nicknameSync.Network_playerInfoToShow &= ~PlayerInfoArea.Role; // Hide role
 
-            player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = $"{role}\n{customInfo}";
+            player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = $"{role}\n{ProcessCustomInfo(customInfo)}";
         }
-
 
         /// <summary>
         /// Changes the scale of a <see cref="Player"/>
@@ -172,5 +170,7 @@ namespace UncomplicatedCustomRoles.Extensions
             foreach (Player target in Player.GetPlayers())
                 NetworkServer.SendSpawnMessage(player.ReferenceHub.netIdentity, target.Connection);
         }
+
+        private static string ProcessCustomInfo(string customInfo) => customInfo.Replace("[br]", "\n");
     }
 }
