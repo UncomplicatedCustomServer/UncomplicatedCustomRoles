@@ -1,7 +1,6 @@
 ﻿using UncomplicatedCustomRoles.API.Helpers.Imports.EXILED.YAML;
 using UncomplicatedCustomRoles.API.Helpers.Imports.EXILED.YAML.Configs;
 using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NodeDeserializers;
 
 namespace UncomplicatedCustomRoles.Manager
 {
