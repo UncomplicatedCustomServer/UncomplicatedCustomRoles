@@ -31,10 +31,10 @@ namespace UncomplicatedCustomRoles.Commands
                 return false;
             }
 
-            Player Player = Player.Get(arguments[0]);
+            Player Player = Player.Get(int.Parse(arguments[0]));
             if (Player is null)
             {
-                response = $"Player not found: {arguments[0]}";
+                response = $"Player not found: {int.Parse(arguments[0])}";
                 return false;
             }
 

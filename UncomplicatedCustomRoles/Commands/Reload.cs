@@ -40,9 +40,7 @@ namespace UncomplicatedCustomRoles.Commands
                     Roles.Add(Role.Id, Role);
 
                     if (Plugin.Instance.Config.EnableBasicLogs)
-                    {
                         LogManager.Info($"[RL] Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
-                    }
 
                     return;
                 }
@@ -52,7 +50,7 @@ namespace UncomplicatedCustomRoles.Commands
 
             Plugin.FileConfigs.LoadAction((CustomRole Role) =>
             {
-                if (!API.Features.CustomRole.Validate(Role))
+                if (!CustomRole.Validate(Role))
                 {
                     LogManager.Warn($"[RL] Failed to register the UCR role with the ID {Role.Id} due to the validator check!");
                     return;
@@ -63,9 +61,7 @@ namespace UncomplicatedCustomRoles.Commands
                     Roles.Add(Role.Id, Role);
 
                     if (Plugin.Instance.Config.EnableBasicLogs)
-                    {
                         LogManager.Info($"[RL] Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
-                    }
 
                     return;
                 }

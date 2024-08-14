@@ -330,7 +330,7 @@ namespace UncomplicatedCustomRoles.Manager
                 return null;
             }
 
-            if (RolePercentage.ContainsKey(player.ReferenceHub.roleManager.CurrentRole.RoleTypeId))
+            if (RolePercentage.ContainsKey(player.Role))
                 if (UnityEngine.Random.Range(0, 100) < RolePercentage[NewRole].Count())
                     return CustomRole.CustomRoles[RolePercentage[NewRole].RandomItem().Id];
 

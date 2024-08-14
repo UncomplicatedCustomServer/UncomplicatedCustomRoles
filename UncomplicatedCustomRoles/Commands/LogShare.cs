@@ -34,6 +34,12 @@ namespace UncomplicatedCustomRoles.Commands
             long Start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             response = "Loading the JSON content to share with the developers...";
 
+            if (!Plugin.HttpManager.IsAllowed)
+            {
+                response = "Can't share the UCR logs with the developers: Newtonsoft.Json not found!";
+                return false;
+            }
+
             Task.Run(() =>
             {
                 HttpStatusCode Response = LogManager.SendReport(out HttpContent Content);

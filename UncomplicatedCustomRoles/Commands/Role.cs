@@ -25,11 +25,11 @@ namespace UncomplicatedCustomRoles.Commands
 
             if (arguments.Count == 1)
             {
-                Player Player = Player.Get(arguments[0]);
+                Player Player = Player.Get(int.Parse(arguments[0]));
 
                 if (Player is null)
                 {
-                    response = $"Sorry but the player {arguments[0]} does not exists!";
+                    response = $"Sorry but the player {int.Parse(arguments[0])} does not exists!";
                     return false;
                 }
 

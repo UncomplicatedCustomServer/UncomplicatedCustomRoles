@@ -49,7 +49,7 @@ namespace UncomplicatedCustomRoles.API.Features
             List.Add(this);
         }
 
-        public SpawnPoint(string name, Player player) : this(name, Features.Room.FindParentRoom(player.GameObject).Identifier.name ?? string.Empty, (Features.Room.FindParentRoom(player.GameObject) is not null ? Features.Room.FindParentRoom(player.GameObject).Position - player.Position : player.Position).ToTriplet(), new(player.Rotation.x, player.Rotation.y, player.Rotation.z), Features.Room.FindParentRoom(player.GameObject)?.Rotation.eulerAngles.ToTriplet() ?? new(0f, 0f, 0f)) { }
+        public SpawnPoint(string name, Player player) : this(name, Features.Room.FindParentRoom(player.GameObject)?.Identifier.name ?? string.Empty, (Features.Room.FindParentRoom(player.GameObject) is not null ? Features.Room.FindParentRoom(player.GameObject).Position - player.Position : player.Position).ToTriplet(), new(player.Rotation.x, player.Rotation.y, player.Rotation.z), Features.Room.FindParentRoom(player.GameObject)?.Rotation.eulerAngles.ToTriplet() ?? new(0f, 0f, 0f)) { }
 
         public void Destroy() => List.Remove(this);
 

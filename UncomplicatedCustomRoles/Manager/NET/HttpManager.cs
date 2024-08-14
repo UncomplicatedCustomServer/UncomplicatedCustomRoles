@@ -76,12 +76,12 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// <param name="maxErrors"></param>
         public HttpManager(string prefix, uint maxErrors = 5)
         {
-            if (Type.GetType("Newtonsoft.Json.JsonConvert") is null)
+            /*if (Type.GetType("Newtonsoft.Json.JsonConvert") is null)
             {
                 LogManager.Error($"Failed to load the HttpManager of {prefix.ToUpper()}: Missing library Newtonsoft.Json v13.0.3\nPlease install it AS SOON AS POSSIBLE!");
                 IsAllowed = false;
                 return;
-            }
+            }*/
 
             Prefix = prefix;
             MaxErrors = maxErrors;

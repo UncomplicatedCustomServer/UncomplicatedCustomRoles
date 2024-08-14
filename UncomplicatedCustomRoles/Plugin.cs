@@ -103,8 +103,6 @@ namespace UncomplicatedCustomRoles
         [PluginUnload]
         public void OnDisabled()
         {
-            _harmony.UnpatchAll();
-
             HttpManager.Stop();
 
             _harmony.UnpatchAll();
