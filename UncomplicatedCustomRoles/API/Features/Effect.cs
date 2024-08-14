@@ -1,5 +1,4 @@
-﻿using Exiled.API.Enums;
-using UncomplicatedCustomRoles.Interfaces;
+﻿using UncomplicatedCustomRoles.Interfaces;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -8,7 +7,7 @@ namespace UncomplicatedCustomRoles.Manager
         /// <summary>
         /// Gets or sets the <see cref="EffectType"/> of the effect
         /// </summary>
-        public EffectType EffectType { get; set; } = EffectType.MovementBoost;
+        public string EffectName { get; set; } = "MovementBoost";
 
         /// <summary>
         /// Gets or sets the duration of the effect

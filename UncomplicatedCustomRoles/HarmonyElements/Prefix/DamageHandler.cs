@@ -2,8 +2,9 @@
 using PlayerStatsSystem;
 using UncomplicatedCustomRoles.Events;
 using UncomplicatedCustomRoles.Events.Args;
+using UncomplicatedCustomRoles.Events.Enums;
 
-namespace UncomplicatedCustomRoles.HarmonyElements.Patch
+namespace UncomplicatedCustomRoles.HarmonyElements.Prefix
 {
     [HarmonyPatch(typeof(PlayerStats), nameof(PlayerStats.DealDamage))]
     internal class DamageHandler
@@ -14,7 +15,7 @@ namespace UncomplicatedCustomRoles.HarmonyElements.Patch
             AttackerDamageHandler attackerDamageHandler = handler as AttackerDamageHandler;
             HurtingEventArgs EventArgs = new(__instance._hub, attackerDamageHandler);
 
-            EventManager.InvokeEvent("HurtingPlayer", EventArgs);
+            EventManager.InvokeEventClear(EventName.PlayerHurting, EventArgs);
 
             handler = EventArgs.DamageHandler;
             return EventArgs.IsAllowed;

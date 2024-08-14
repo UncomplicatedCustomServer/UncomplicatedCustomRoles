@@ -1,4 +1,5 @@
 ﻿using MEC;
+using Mirror;
 using PlayerRoles;
 using PluginAPI.Core;
 using System;
@@ -133,10 +134,43 @@ namespace UncomplicatedCustomRoles.Extensions
             return false;
         }
 
-        public static void ApplyCustomInfo(this Player player, string value)
+        /// <summary>
+        /// Changes the CustomInfo of a <see cref="Player"/>
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="value"></param>
+        public static void ApplyClearCustomInfo(this Player player, string value)
         {
-            player.InfoArea = string.IsNullOrEmpty(value) ? player.InfoArea & ~PlayerInfoArea.CustomInfo : player.InfoArea |= PlayerInfoArea.CustomInfo;
+            player.ReferenceHub.nicknameSync.Network_playerInfoToShow = string.IsNullOrEmpty(value) ? player.ReferenceHub.nicknameSync.Network_playerInfoToShow & ~PlayerInfoArea.CustomInfo : player.ReferenceHub.nicknameSync.Network_playerInfoToShow |= PlayerInfoArea.CustomInfo;
             player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = value;
+        }
+
+        /// <summary>
+        /// Changes the CustomInfo of a <see cref="Player"/> overriding also the player Role
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="customInfo"></param>
+        /// <param name="role"></param>
+        public static void ApplyCustomInfoAndRoleName(this Player player, string customInfo, string role)
+        {
+            player.ReferenceHub.nicknameSync.Network_playerInfoToShow |= PlayerInfoArea.CustomInfo;
+            player.ReferenceHub.nicknameSync.Network_playerInfoToShow &= ~PlayerInfoArea.Role; // Hide role
+
+            player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = $"{role}\n{customInfo}";
+        }
+
+
+        /// <summary>
+        /// Changes the scale of a <see cref="Player"/>
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="value"></param>
+        public static void ApplyScale(this Player player, Vector3 value)
+        {
+            player.ReferenceHub.transform.localScale = value;
+
+            foreach (Player target in Player.GetPlayers())
+                NetworkServer.SendSpawnMessage(player.ReferenceHub.netIdentity, target.Connection);
         }
     }
 }

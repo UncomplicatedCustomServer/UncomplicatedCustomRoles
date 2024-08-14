@@ -1,5 +1,5 @@
-﻿using Exiled.API.Features;
-using MEC;
+﻿using MEC;
+using PluginAPI.Core;
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.Extensions;
 
@@ -14,8 +14,8 @@ namespace UncomplicatedCustomRoles.API.Features
 
         public static void AddBucket(Player player, float waitingTime = 5f)
         {
-            Bucket.TryAdd(player.Id);
-            Timing.CallDelayed(waitingTime, () => Bucket.Remove(player.Id));
+            Bucket.TryAdd(player.PlayerId);
+            Timing.CallDelayed(waitingTime, () => Bucket.Remove(player.PlayerId));
         }
     }
 }

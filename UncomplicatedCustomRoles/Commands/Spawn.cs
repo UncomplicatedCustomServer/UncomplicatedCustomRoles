@@ -3,7 +3,6 @@ using MEC;
 using PluginAPI.Core;
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.API.Features;
-using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
 using Handler = UncomplicatedCustomRoles.Handlers.EventHandler;
@@ -32,7 +31,7 @@ namespace UncomplicatedCustomRoles.Commands
                 return false;
             }
 
-            Player Player = PlayerExtension.Get(arguments[0]);
+            Player Player = Player.Get(arguments[0]);
             if (Player is null)
             {
                 response = $"Player not found: {arguments[0]}";

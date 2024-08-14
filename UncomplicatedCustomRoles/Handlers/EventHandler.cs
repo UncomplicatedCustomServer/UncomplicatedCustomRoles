@@ -1,23 +1,26 @@
-﻿using Exiled.API.Features;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.Manager;
 using UncomplicatedCustomRoles.Interfaces;
 using MEC;
-using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
-using Exiled.Events.EventArgs.Server;
-using Exiled.Events.EventArgs.Scp049;
 using UncomplicatedCustomRoles.Extensions;
 using System;
 using UncomplicatedCustomRoles.API.Features;
-using Exiled.Events.EventArgs.Scp330;
 using CustomPlayerEffects;
+using PluginAPI.Core.Attributes;
+using PluginAPI.Enums;
+using PluginAPI.Core;
+using PluginAPI.Events;
+using UncomplicatedCustomRoles.Events.Attributes;
+using UncomplicatedCustomRoles.Events.Args;
+using UncomplicatedCustomRoles.Events.Enums;
 
-namespace UncomplicatedCustomRoles.Events
+namespace UncomplicatedCustomRoles.Handlers
 {
     internal class EventHandler
     {
+        [PluginEvent(ServerEventType.RoundStart)]
         public void OnRoundStarted()
         {
             Plugin.Instance.DoSpawnBasicRoles = false;
@@ -27,7 +30,7 @@ namespace UncomplicatedCustomRoles.Events
                 Plugin.Instance.DoSpawnBasicRoles = true;
             });
 
-            foreach (Player Player in Player.List.Where(player => !player.IsNPC && player is not null))
+            foreach (Player Player in Player.GetPlayers().Where(player => player is not null))
             {
                 ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(Player);
 
@@ -38,9 +41,10 @@ namespace UncomplicatedCustomRoles.Events
             }
         }
 
-        public void OnInteractingScp330(InteractingScp330EventArgs ev)
+        [PluginEvent(ServerEventType.PlayerInteractScp330)]
+        public void OnInteractingScp330(PlayerInteractScp330Event ev)
         {
-            if (!ev.IsAllowed)
+            if (!ev.AllowPunishment)
                 return;
 
             if (SummonedCustomRole.TryGet(ev.Player, out SummonedCustomRole role))
@@ -51,48 +55,46 @@ namespace UncomplicatedCustomRoles.Events
             }
         }
 
-        public void OnReceivingEffect(ReceivingEffectEventArgs ev)
+        [PluginEvent(ServerEventType.PlayerReceiveEffect)]
+        public void OnReceivingEffect(PlayerReceiveEffectEvent ev)
         {
             if (ev.Player is null)
-                return;
-
-            if (!ev.IsAllowed)
                 return;
 
             if (ev.Effect is SeveredHands && SummonedCustomRole.TryGet(ev.Player, out SummonedCustomRole Role) && Role.Role.MaxScp330Candies >= Role.Scp330Count)
             {
                 LogManager.Debug($"Tried to add the {ev.Effect.name} but was not allowed due to {Role.Scp330Count} <= {Role.Role.MaxScp330Candies}");
-                ev.IsAllowed = false;
+                ev.Player.EffectsManager.DisableEffect<SeveredHands>();
             }
         }
 
-        public void OnPlayerSpawned(SpawnedEventArgs _) { }
-
-        public void OnFinishingRecall(FinishingRecallEventArgs ev)
+        [PluginEvent(ServerEventType.Scp049ResurrectBody)]
+        public void OnFinishingRecall(Scp049ResurrectBodyEvent ev)
         {
             ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(ev.Target, RoleTypeId.Scp0492);
 
             if (Role is not null)
-            {
-                ev.IsAllowed = false;
                 ev.Target.SetCustomRole(Role);
-            }
         }
 
-        public void OnDied(DiedEventArgs ev) => SpawnManager.ClearCustomTypes(ev.Player);
+        [PluginEvent(ServerEventType.PlayerDeath)]
+        public void OnDied(PlayerDeathEvent ev) => SpawnManager.ClearCustomTypes(ev.Player);
 
-        public void OnRoundEnded(RoundEndedEventArgs _) => InfiniteEffect.Terminate();
+        [PluginEvent(ServerEventType.RoundEnd)]
+        public void OnRoundEnded(RoundEndEvent _) => InfiniteEffect.Terminate();
 
-        public void OnChangingRole(ChangingRoleEventArgs ev) => SpawnManager.ClearCustomTypes(ev.Player);
+        [PluginEvent(ServerEventType.PlayerChangeRole)]
+        public void OnChangingRole(PlayerChangeRoleEvent ev) => SpawnManager.ClearCustomTypes(ev.Player);
 
-        public void OnSpawning(SpawningEventArgs ev)
+        [PluginEvent(ServerEventType.PlayerSpawn)]
+        public void OnSpawning(PlayerSpawnEvent ev)
         {
             if (ev.Player is null)
                 return;
 
             LogManager.Debug("Called SPAWNING event");
 
-            if (Spawn.Spawning.Contains(ev.Player.Id))
+            if (Spawn.Spawning.Contains(ev.Player.PlayerId))
                 return;
 
             if (ev.Player.HasCustomRole())
@@ -101,18 +103,15 @@ namespace UncomplicatedCustomRoles.Events
             if (!Plugin.Instance.DoSpawnBasicRoles)
                 return;
 
-            if (ev.Player.IsNPC)
-                return;
-
             string LogReason = string.Empty;
-            if (Plugin.Instance.Config.AllowOnlyNaturalSpawns && !Spawn.SpawnQueue.Contains(ev.Player.Id))
+            if (Plugin.Instance.Config.AllowOnlyNaturalSpawns && !Spawn.SpawnQueue.Contains(ev.Player.PlayerId))
             {
                 LogManager.Debug("The player is not in the queue for respawning!");
                 return;
             }
-            else if (Spawn.SpawnQueue.Contains(ev.Player.Id))
+            else if (Spawn.SpawnQueue.Contains(ev.Player.PlayerId))
             {
-                Spawn.SpawnQueue.Remove(ev.Player.Id);
+                Spawn.SpawnQueue.Remove(ev.Player.PlayerId);
                 LogReason = " [WITH a respawn wave - VANILLA]";
             }
 
@@ -125,15 +124,17 @@ namespace UncomplicatedCustomRoles.Events
 
             if (Role is not null)
             {
-                LogManager.Debug($"Summoning player {ev.Player.Nickname} ({ev.Player.Id}) as {Role.Name} ({Role.Id})");
+                LogManager.Debug($"Summoning player {ev.Player.Nickname} ({ev.Player.PlayerId}) as {Role.Name} ({Role.Id})");
                 Timing.CallDelayed(0.3f, () => SpawnManager.SummonCustomSubclass(ev.Player, Role.Id));
             }
 
             LogManager.Debug($"Evaluated custom role for player {ev.Player.Nickname} - found: {Role?.Id} ({Role?.Name})");
         }
 
-        public void OnVerified(VerifiedEventArgs ev) => Plugin.HttpManager.ApplyCreditTag(ev.Player);
+        [PluginEvent(ServerEventType.PlayerJoined)]
+        public void OnVerified(PlayerJoinedEvent ev) => Plugin.HttpManager.ApplyCreditTag(ev.Player);
 
+        [InternalPluginEvent(EventName.PlayerHurting)]
         public void OnHurting(HurtingEventArgs Hurting)
         {
             LogManager.Silent($"DamageHandler of Hurting: {Hurting.Player} {Hurting.Attacker}");
@@ -144,13 +145,13 @@ namespace UncomplicatedCustomRoles.Events
             if (Hurting.Player is not null && Hurting.Attacker is not null && Hurting.Player.IsAlive && Hurting.Attacker.IsAlive)
             {
                 // If the attacker is a custom role we don't check for damage_multiplier but only the thing to avoid -> is_friend_of
-                if (Hurting.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole) && attackerCustomRole.Role.IsFriendOf is not null && attackerCustomRole.Role.IsFriendOf.Contains(Hurting.Player.Role.Team))
+                if (Hurting.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole) && attackerCustomRole.Role.IsFriendOf is not null && attackerCustomRole.Role.IsFriendOf.Contains(Hurting.Player.Team))
                 {
                     Hurting.IsAllowed = false;
                     LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - A");
                 }
                 else if (Hurting.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole))
-                    if (playerCustomRole.Role.IsFriendOf is not null && playerCustomRole.Role.IsFriendOf.Contains(Hurting.Attacker.Role.Team))
+                    if (playerCustomRole.Role.IsFriendOf is not null && playerCustomRole.Role.IsFriendOf.Contains(Hurting.Attacker.Team))
                     {
                         Hurting.IsAllowed = false;
                         LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - B");
@@ -161,9 +162,10 @@ namespace UncomplicatedCustomRoles.Events
             }
         }
 
+        [InternalPluginEvent(EventName.PlayerEscaping)]
         public void OnEscaping(EscapingEventArgs Escaping)
         {
-            LogManager.Debug($"Player {Escaping.Player.Nickname} triggered the escaping event as {Escaping.Player.Role.Name}");
+            LogManager.Debug($"Player {Escaping.Player.Nickname} triggered the escaping event as {Escaping.Player.Role}");
 
             if (Escaping.Player.TryGetSummonedInstance(out SummonedCustomRole summoned))
             {
@@ -209,10 +211,10 @@ namespace UncomplicatedCustomRoles.Events
                     if (int.TryParse(NewRole.Value.ToString(), out int id) && CustomRole.TryGet(id, out ICustomRole role))
                     {
                         Escaping.IsAllowed = false;
-                        if (!API.Features.Escape.Bucket.Contains(Escaping.Player.Id))
+                        if (!API.Features.Escape.Bucket.Contains(Escaping.Player.PlayerId))
                         {
                             LogManager.Silent($"Successfully activated the call to method SpawnManager::SummonCustomSubclass(<...>) as the player is not inside the Escape::Bucket bucket! - Adding it...");
-                            API.Features.Escape.Bucket.Add(Escaping.Player.Id);
+                            API.Features.Escape.Bucket.Add(Escaping.Player.PlayerId);
                             SpawnManager.SummonCustomSubclass(Escaping.Player, role.Id);
                         }
                         else
@@ -223,19 +225,21 @@ namespace UncomplicatedCustomRoles.Events
             }
         }
 
+        [InternalPluginEvent(EventName.RespawningTeam)]
         public void OnRespawningWave(RespawningTeamEventArgs Respawn)
         {
             LogManager.Silent("Respawning wave");
             if (Spawn.DoHandleWave)
-                foreach (Player Player in Respawn.Players)
-                    Spawn.SpawnQueue.Add(Player.Id);
+                foreach (ReferenceHub Player in Respawn.RespawnQueue)
+                    Spawn.SpawnQueue.Add(Player.PlayerId);
             else
                 Spawn.DoHandleWave = true;
         }
 
-        public void OnItemUsed(UsedItemEventArgs UsedItem)
+        [PluginEvent(ServerEventType.PlayerUsedItem)]
+        public void OnItemUsed(PlayerUsedItemEvent UsedItem)
         {
-            if (UsedItem.Player is not null && UsedItem.Player.TryGetSummonedInstance(out SummonedCustomRole summoned) && UsedItem.Item.Type == ItemType.SCP500)
+            if (UsedItem.Player is not null && UsedItem.Player.TryGetSummonedInstance(out SummonedCustomRole summoned) && UsedItem.Item.ItemTypeId == ItemType.SCP500)
                 foreach (IEffect Effect in summoned.InfiniteEffects)
                     if (Effect.Removable)
                         summoned.InfiniteEffects.Remove(Effect);

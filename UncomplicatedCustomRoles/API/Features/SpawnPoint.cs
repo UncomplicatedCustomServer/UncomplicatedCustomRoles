@@ -1,9 +1,9 @@
-﻿using Exiled.API.Features;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using PluginAPI.Core;
+using PluginAPI.Core.Zones;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.API.Struct;
-using UncomplicatedCustomRoles.Commands;
 using UncomplicatedCustomRoles.Extensions;
 using UnityEngine;
 
@@ -19,7 +19,7 @@ namespace UncomplicatedCustomRoles.API.Features
 
         public Triplet<float, float, float> PositionBase { get; }
 
-        public Quadruple<float, float, float, float> RotationBase { get; }
+        public Triplet<float, float, float> RotationBase { get; }
 
         public Triplet<float, float, float> RoomRotationBase { get; }
 
@@ -27,19 +27,19 @@ namespace UncomplicatedCustomRoles.API.Features
         public Vector3 Position => new(PositionBase.First, PositionBase.Second, PositionBase.Third);
 
         [JsonIgnore]
-        public Quaternion Rotation => new(RotationBase.First, RotationBase.Second, RotationBase.Third, RotationBase.Fourth);
+        public Vector3 Rotation => new(RotationBase.First, RotationBase.Second, RotationBase.Third);
 
         [JsonIgnore]
         public Vector3 RoomRotation => new(RoomRotationBase.First, RoomRotationBase.Second, RoomRotationBase.Third);
 
         [JsonIgnore]
-        public Room Room => RoomId != "" ? Room.List.Where(room => room.Identifier.name == RoomId).FirstOrDefault() : null;
+        public FacilityRoom Room => RoomId != "" ? Map.Rooms.Where(room => room.name == RoomId).FirstOrDefault()?.ApiRoom : null;
 
         [JsonIgnore]
         public bool HasRoom => Room is not null;
 
         [JsonConstructor]
-        public SpawnPoint(string name, string roomId, Triplet<float, float, float> positionBase, Quadruple<float, float, float, float> rotationBase, Triplet<float, float, float> roomRotationBase)
+        public SpawnPoint(string name, string roomId, Triplet<float, float, float> positionBase, Triplet<float, float, float> rotationBase, Triplet<float, float, float> roomRotationBase)
         {
             Name = name;
             RoomId = roomId;
@@ -49,7 +49,7 @@ namespace UncomplicatedCustomRoles.API.Features
             List.Add(this);
         }
 
-        public SpawnPoint(string name, Player player) : this(name, player.CurrentRoom?.Identifier.name ?? string.Empty, (player.CurrentRoom is not null ? player.CurrentRoom.Position - player.Position : player.Position).ToTriplet(), new(player.Rotation.x, player.Rotation.y, player.Rotation.z, player.Rotation.w), player.CurrentRoom?.Rotation.eulerAngles.ToTriplet() ?? new(0f, 0f, 0f)) { }
+        public SpawnPoint(string name, Player player) : this(name, Features.Room.FindParentRoom(player.GameObject).Identifier.name ?? string.Empty, (Features.Room.FindParentRoom(player.GameObject) is not null ? Features.Room.FindParentRoom(player.GameObject).Position - player.Position : player.Position).ToTriplet(), new(player.Rotation.x, player.Rotation.y, player.Rotation.z), Features.Room.FindParentRoom(player.GameObject)?.Rotation.eulerAngles.ToTriplet() ?? new(0f, 0f, 0f)) { }
 
         public void Destroy() => List.Remove(this);
 
@@ -71,7 +71,7 @@ namespace UncomplicatedCustomRoles.API.Features
             player.Rotation = Rotation;
         }
 
-        public override string ToString() => $"SpawnPoint '{Name}' at {Room.Name} ({Position} @ {RoomRotation}) [{HasRoom}]";
+        public override string ToString() => $"SpawnPoint '{Name}' at {Room.Identifier.name} ({Position} @ {RoomRotation}) [{HasRoom}]";
 
         public static SpawnPoint Get(string name) => List.Where(sp => sp.Name == name).FirstOrDefault();
 

@@ -13,7 +13,7 @@ namespace UncomplicatedCustomRoles.Commands
 
         public string Description { get; } = "Generate another default CustomRole inside a given file, creating it";
 
-        public string RequiredPermission { get; } = "ucr.generate";
+        public PlayerPermissions RequiredPermission { get; } = PlayerPermissions.LongTermBanning;
 
         public bool Executor(List<string> arguments, ICommandSender sender, out string response)
         {

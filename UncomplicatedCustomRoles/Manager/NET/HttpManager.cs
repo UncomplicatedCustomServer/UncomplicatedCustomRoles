@@ -1,5 +1,6 @@
 ﻿using MEC;
 using Newtonsoft.Json;
+using PluginAPI.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,12 +58,6 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// Gets the UCS APIs endpoint
         /// </summary>
         public string Endpoint { get; } = "https://ucs.fcosma.it/api/v2";
-
-
-        /// <summary>
-        /// Store every credit tag for UCS
-        /// </summary>
-        public Dictionary<string, KeyValuePair<string, string>> Credits { get; internal set; } = new();
 
         /// <summary>
         /// Gets the CreditTag storage for the plugin, downloaded from our central server
@@ -185,13 +180,13 @@ namespace UncomplicatedCustomRoles.Manager.NET
         public void ApplyCreditTag(Player player)
         {
             Triplet<string, string, bool> Tag = GetCreditTag(player);
-            if (player.RankName is not null && player.RankName != string.Empty && !Tag.Third)
+            if (player.ReferenceHub.serverRoles.Network_myText is not null && player.ReferenceHub.serverRoles.Network_myText != string.Empty && !Tag.Third)
                 return; // Do not override
 
             if (Tag.First is not null && Tag.Second is not null)
             {
-                player.RankName = Tag.First;
-                player.RankColor = Tag.Second;
+                player.ReferenceHub.serverRoles.SetText(Tag.First);
+                player.ReferenceHub.serverRoles.SetColor(Tag.Second);
             }
         }
 
@@ -213,37 +208,6 @@ namespace UncomplicatedCustomRoles.Manager.NET
             return true;
         }
 
-        public void LoadCreditTags()
-        {
-            Credits = new();
-            try
-            {
-                Dictionary<string, Dictionary<string, string>> Data = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(RetriveString(HttpGetRequest("https://ucs.fcosma.it/api/credits.json")));
-
-                foreach (KeyValuePair<string, Dictionary<string, string>> kvp in Data.Where(kvp => kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color")))
-                    Credits.Add(kvp.Key, new(kvp.Value["role"], kvp.Value["color"]));
-            }
-            catch (Exception) { }
-        }
-
-        public KeyValuePair<string, string> GetCreditTag(Player player)
-        {
-            if (Credits.ContainsKey(player.UserId))
-                return Credits[player.UserId];
-
-            return new(null, null);
-        }
-
-        public void ApplyCreditTag(Player player)
-        {
-            KeyValuePair<string, string> Tag = GetCreditTag(player);
-            if (Tag.Key is not null && Tag.Value is not null)
-            {
-                player.ReferenceHub.serverRoles.SetText(Tag.Key);
-                player.ReferenceHub.serverRoles.SetColor(Tag.Value);
-            }
-        }
-
         internal bool Presence(out HttpContent httpContent)
         {
             float Start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
@@ -257,7 +221,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
             return false;
         }
 
-        internal void PresenceNotListed() => HttpGetRequest($"{Endpoint}/{Prefix}/presence_notlisted?port={Server.Port}&cores={Environment.ProcessorCount}&ram=0&version={Plugin.Instance.Version}");
+        internal void PresenceNotListed() => HttpGetRequest($"{Endpoint}/{Prefix}/presence_notlisted?port={Server.Port}&cores={Environment.ProcessorCount}&ram=0&version={Plugin.Version}");
 
         internal HttpStatusCode ShareLogs(string data, out HttpContent httpContent)
         {
@@ -276,7 +240,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
         {
             while (Active && Errors <= MaxErrors)
             {
-                if (Server.IsVerified)
+                if (CustomNetworkManager.IsVerified)
                     if (!Presence(out HttpContent content))
                         try
                         {

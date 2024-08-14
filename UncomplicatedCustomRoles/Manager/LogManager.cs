@@ -32,7 +32,7 @@ namespace UncomplicatedCustomRoles.Manager
         public static void Warn(string message, string error = "CS0000")
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Warn.ToString(), message, error));
-            Log.Warn(message);
+            Log.Warning(message);
         }
 
         public static void Error(string message, string error = "CS0000")

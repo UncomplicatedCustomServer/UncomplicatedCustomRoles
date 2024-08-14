@@ -1,5 +1,4 @@
 ﻿using Discord;
-using Exiled.API.Features.Doors;
 using Newtonsoft.Json;
 using System;
 

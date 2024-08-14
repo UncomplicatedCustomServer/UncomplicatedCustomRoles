@@ -8,13 +8,14 @@ using static HarmonyLib.AccessTools;
 using static Escape;
 using UncomplicatedCustomRoles.Events;
 using System.Linq;
+using UncomplicatedCustomRoles.Events.Enums;
 
 namespace UncomplicatedCustomRoles.HarmonyElements.Patch
 {
     [HarmonyPatch(typeof(Escape), nameof(Escape.ServerHandlePlayer))]
     internal class EscapeHandler
     {
-        public const string eventName = "PlayerEscaping";
+        public static string ActorEventName => EventName.PlayerEscaping.ToString();
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
             List<CodeInstruction> Instructions = new(instructions);
@@ -60,7 +61,7 @@ namespace UncomplicatedCustomRoles.HarmonyElements.Patch
                     new(OpCodes.Newobj, typeof(EscapingEventArgs).GetConstructor(new[] { typeof(ReferenceHub), typeof(RoleTypeId), typeof(EscapeScenarioType), typeof(SpawnableTeamType), typeof(float) })),
                     new(OpCodes.Stloc_S, ev.LocalIndex),
 
-                    new(OpCodes.Ldstr, eventName),
+                    new(OpCodes.Ldstr, ActorEventName),
                     new(OpCodes.Ldloc_S, ev.LocalIndex),
                     new(OpCodes.Call, Method(typeof(EventManager), nameof(EventManager.InvokeEvent))),
 

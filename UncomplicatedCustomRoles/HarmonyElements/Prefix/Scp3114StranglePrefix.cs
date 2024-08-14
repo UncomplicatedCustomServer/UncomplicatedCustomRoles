@@ -2,7 +2,7 @@
 using PlayerRoles.PlayableScps.Scp3114;
 using UncomplicatedCustomRoles.API.Features;
 
-namespace UncomplicatedCustomRoles.Patches
+namespace UncomplicatedCustomRoles.HarmonyElements.Prefix
 {
     [HarmonyPatch(typeof(Scp3114Strangle), nameof(Scp3114Strangle.ValidateTarget))]
     internal class Scp3114StranglePrefix
@@ -17,7 +17,7 @@ namespace UncomplicatedCustomRoles.Patches
                 // Attacked player can't be strangled by SCP-3114 as it's his friend :)
                 __result = false;
                 return false; // Skip
-            } else if (SummonedCustomRole.TryGet(__instance.Owner, out SummonedCustomRole scpRole) && scpRole.Role.IsFriendOf is not null && scpRole.Role.IsFriendOf.Contains(hub.roleManager.CurrentRole.Team))
+            } else if (SummonedCustomRole.TryGet(__instance.Owner, out SummonedCustomRole scpRole) && scpRole.Role.IsFriendOf is not null && scpRole.Role.IsFriendOf.Contains(player.roleManager.CurrentRole.Team))
             {
                 // Attacked player can't be strangled by SCP-3114 as it's his friend :)
                 __result = false;

@@ -92,8 +92,8 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null && Role.BadgeColor.Length > 2 && Badge is not null && Badge is Triplet<string, string, bool> badge)
             {
-                Player.RankName = badge.First;
-                Player.RankColor = badge.Second;
+                Player.ReferenceHub.serverRoles.SetText(badge.First);
+                Player.ReferenceHub.serverRoles.SetColor(badge.Second);
                 Player.ReferenceHub.serverRoles.RefreshLocalTag();
 
                 LogManager.Debug($"Badge detected, fixed");
@@ -131,7 +131,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public static SummonedCustomRole Get(ReferenceHub player) => List.Where(scr => scr.Player.Id == player.PlayerId).FirstOrDefault();
+        public static SummonedCustomRole Get(ReferenceHub player) => List.Where(scr => scr.Player.PlayerId == player.PlayerId).FirstOrDefault();
 
         /// <summary>
         /// Try to get a <see cref="SummonedCustomRole"/> by the <see cref="Exiled.API.Features.Player"/>
@@ -198,7 +198,7 @@ namespace UncomplicatedCustomRoles.API.Features
 
         public static int TryGetInventoryLimitForGivenCategory(ItemCategory category, ReferenceHub player, int original)
         {
-            SummonedCustomRole Role = List.Where(scr => scr.Player.Id == player.PlayerId).FirstOrDefault();
+            SummonedCustomRole Role = List.Where(scr => scr.Player.PlayerId == player.PlayerId).FirstOrDefault();
 
             if (Role is null)
                 return original;
@@ -216,7 +216,7 @@ namespace UncomplicatedCustomRoles.API.Features
         public static bool EvaluateInventoryLimit(ItemCategory category, ReferenceHub player, int count, sbyte categoryCount)
         {
             LogManager.Info($"Player {player.PlayerId} might be a customRole, {count}, {categoryCount}");
-            SummonedCustomRole Role = List.Where(scr => scr.Player.Id == player.PlayerId).FirstOrDefault();
+            SummonedCustomRole Role = List.Where(scr => scr.Player.PlayerId == player.PlayerId).FirstOrDefault();
 
             if (Role is null || Role.Role.CustomInventoryLimits is null || !Role.Role.CustomInventoryLimits.ContainsKey(category))
                 return count >= categoryCount;

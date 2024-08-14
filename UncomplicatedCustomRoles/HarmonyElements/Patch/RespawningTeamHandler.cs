@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using UncomplicatedCustomRoles.Events;
 using UncomplicatedCustomRoles.Events.Args;
+using UncomplicatedCustomRoles.Events.Enums;
 using UncomplicatedCustomRoles.Manager;
 using static HarmonyLib.AccessTools;
 
@@ -14,7 +15,7 @@ namespace UncomplicatedCustomRoles.HarmonyElements.Patch
     [HarmonyPatch(typeof(RespawnManager), nameof(RespawnManager.Spawn))]
     internal class RespawningTeamHandler
     {
-        public const string eventName = "RespawningTeam";
+        public static string ActorEventName => EventName.RespawningTeam.ToString();
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
             int Index = -1;
@@ -59,7 +60,7 @@ namespace UncomplicatedCustomRoles.HarmonyElements.Patch
                     new(OpCodes.Stloc_S, ev.LocalIndex),
 
                     // Get args for the event - name
-                    new(OpCodes.Ldstr, eventName),
+                    new(OpCodes.Ldstr, ActorEventName),
                     
                     // Object
                     new(OpCodes.Ldloc_S, ev.LocalIndex),
@@ -92,7 +93,7 @@ namespace UncomplicatedCustomRoles.HarmonyElements.Patch
                 });
             }
 
-            LogManager.System($"Successfully patched the {eventName} event!");
+            LogManager.System($"Successfully patched the {ActorEventName} event!");
 
             return Instructions;
         }

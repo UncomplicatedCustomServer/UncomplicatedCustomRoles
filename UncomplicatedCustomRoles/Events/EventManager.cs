@@ -3,13 +3,13 @@ using System.Linq;
 using System.Reflection;
 using UncomplicatedCustomRoles.Events.Args;
 using UncomplicatedCustomRoles.Events.Attributes;
-using UncomplicatedCustomRoles.Events.Interfaces;
+using UncomplicatedCustomRoles.Events.Enums;
 
 namespace UncomplicatedCustomRoles.Events
 {
     public class EventManager
     {
-        public static readonly Dictionary<string, List<MethodInfo>> Events = new();
+        public static readonly Dictionary<EventName, List<MethodInfo>> Events = new();
 
         public static void RegisterEvents(object handler)
         {
@@ -25,11 +25,17 @@ namespace UncomplicatedCustomRoles.Events
             }
         }
 
-        public static void InvokeEvent(string name, EventArgs param)
+        public static void InvokeEventClear(EventName name, EventArgs param)
         {
             if (Events.ContainsKey(name) && Events[name].Count() > 0)
                 foreach (MethodInfo Method in Events[name])
                     Method.Invoke(null, new object[] { param });
+        }
+
+        public static void InvokeEvent(string name, EventArgs param)
+        {
+            if (System.Enum.TryParse(name, out EventName eventName))
+                InvokeEventClear(eventName, param);
         }
     }
 }

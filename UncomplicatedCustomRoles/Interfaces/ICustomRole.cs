@@ -13,6 +13,8 @@ namespace UncomplicatedCustomRoles.Interfaces
 
         public abstract string Name { get; set; }
 
+        public abstract bool OverrideRoleName { get; set; }
+
         public abstract string? Nickname { get; set; }
 
         public abstract string CustomInfo { get; set; }
@@ -54,8 +56,6 @@ namespace UncomplicatedCustomRoles.Interfaces
         public abstract Dictionary<ItemCategory, sbyte> CustomInventoryLimits { get; set; }
 
         public abstract List<ItemType> Inventory { get; set; }
-
-        public abstract List<uint> CustomItemsInventory { get; set; }
 
         public abstract Dictionary<ItemType, ushort> Ammo { get; set; }
 

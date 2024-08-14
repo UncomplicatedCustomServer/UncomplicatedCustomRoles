@@ -4,7 +4,7 @@ using PluginAPI.Core;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Extensions;
 
-namespace UncomplicatedCustomRoles.HarmonyElements.Patch
+namespace UncomplicatedCustomRoles.HarmonyElements.Postfix
 {
 #pragma warning disable IDE0051 // Method is not called
     [HarmonyPatch(typeof(Inventory), nameof(Inventory.StaminaRegenMultiplier), MethodType.Getter)]

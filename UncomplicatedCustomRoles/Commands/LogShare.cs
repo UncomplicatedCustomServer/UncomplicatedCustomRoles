@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
-using Exiled.API.Features;
+using PluginAPI.Core;
 
 namespace UncomplicatedCustomRoles.Commands
 {

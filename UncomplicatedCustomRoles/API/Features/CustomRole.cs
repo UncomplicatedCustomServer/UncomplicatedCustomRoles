@@ -35,6 +35,11 @@ namespace UncomplicatedCustomRoles.API.Features
         public string Name { get; set; } = "Janitor";
 
         /// <summary>
+        /// Gets or sets whether the default role name can be overwritten by the plugin with the <see cref="CustomRole"/> <see cref="Name"/>
+        /// </summary>
+        public bool OverrideRoleName { get; set; } = false;
+
+        /// <summary>
         /// Gets or sets the nickname that will be set to the player if not null.
         /// </summary>
         public string? Nickname { get; set; } = "D-%dnumber%";
@@ -160,11 +165,6 @@ namespace UncomplicatedCustomRoles.API.Features
             ItemType.Flashlight,
             ItemType.KeycardJanitor
         };
-
-        /// <summary>
-        /// Gets or sets the custom items inventory of the player
-        /// </summary>
-        public List<uint> CustomItemsInventory { get; set; } = new();
 
         /// <summary>
         /// Gets or sets the ammo inventory of the player

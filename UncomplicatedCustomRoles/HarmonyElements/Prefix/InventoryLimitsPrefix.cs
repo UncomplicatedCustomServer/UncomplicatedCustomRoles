@@ -1,10 +1,10 @@
-﻿using Exiled.API.Features;
-using HarmonyLib;
+﻿using HarmonyLib;
+using PluginAPI.Core;
 using System;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Extensions;
 
-namespace UncomplicatedCustomRoles.Patches
+namespace UncomplicatedCustomRoles.HarmonyElements.Prefix
 {
     [HarmonyPatch(typeof(InventorySystem.Configs.InventoryLimits), nameof(InventorySystem.Configs.InventoryLimits.GetCategoryLimit), new Type[] { typeof(ItemCategory), typeof(ReferenceHub)})]
     internal class InventoryLimitsPrefix

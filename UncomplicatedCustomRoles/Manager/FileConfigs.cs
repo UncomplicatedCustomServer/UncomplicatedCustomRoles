@@ -52,7 +52,7 @@ namespace UncomplicatedCustomRoles.Manager
                 {
                     if (!Plugin.Instance.Config.Debug)
                     {
-                        LogManager.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.");
+                        LogManager.Error($"Failed to parse {FileName} - {ex.GetType().FullName}. YAML Exception: {ex.Message}.");
                     }
                     else
                     {
@@ -64,7 +64,7 @@ namespace UncomplicatedCustomRoles.Manager
 
         private void LoadLegacyRoles(string fileName, string content, Action<CustomRole> action)
         {
-            Dictionary<string, List<CustomRole>> Roles = Loader.Deserializer.Deserialize<Dictionary<string, List<CustomRole>>>(content);
+            Dictionary<string, List<CustomRole>> Roles = YamlHelper.Deserializer.Deserialize<Dictionary<string, List<CustomRole>>>(content);
 
             if (!Roles.ContainsKey("custom_roles"))
             {
@@ -79,15 +79,15 @@ namespace UncomplicatedCustomRoles.Manager
 
             // Convert the role to a decent thing
             if (Roles["custom_roles"].Count == 1)
-                File.WriteAllText(fileName, Loader.Serializer.Serialize(Roles["custom_roles"][0]));
+                File.WriteAllText(fileName,YamlHelper.Serializer.Serialize(Roles["custom_roles"][0]));
             else
                 for (int i = 0; i < Roles["custom_roles"].Count; i++)
-                    File.WriteAllText(fileName.Replace(".yml", $"-{i}.yml"), Loader.Serializer.Serialize(Roles["custom_roles"][i]));
+                    File.WriteAllText(fileName.Replace(".yml", $"-{i}.yml"), YamlHelper.Serializer.Serialize(Roles["custom_roles"][i]));
         }
 
         private void LoadRoles(string fileName, string content, Action<CustomRole> action)
         {
-            CustomRole Role = Loader.Deserializer.Deserialize<CustomRole>(content);
+            CustomRole Role = YamlHelper.Deserializer.Deserialize<CustomRole>(content);
             LogManager.Debug($"Proposed to the registerer the external role {Role.Id} [{Role.Name}] from file:\n{fileName}");
             action(Role);
         }
@@ -97,7 +97,7 @@ namespace UncomplicatedCustomRoles.Manager
             if (!Is(localDir))
             {
                 Directory.CreateDirectory(Path.Combine(Dir, localDir));
-                File.WriteAllText(Path.Combine(Dir, localDir, "example-role.yml"), Loader.Serializer.Serialize(new CustomRole()
+                File.WriteAllText(Path.Combine(Dir, localDir, "example-role.yml"), YamlHelper.Serializer.Serialize(new CustomRole()
                 {
                     Id = CustomRole.GetFirstFreeID(1)
                 }));

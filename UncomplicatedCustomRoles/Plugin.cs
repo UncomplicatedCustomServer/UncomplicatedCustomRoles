@@ -5,6 +5,10 @@ using Handler = UncomplicatedCustomRoles.Handlers.EventHandler;
 using UncomplicatedCustomRoles.API.Features;
 using HarmonyLib;
 using UncomplicatedCustomRoles.Manager.NET;
+using PluginAPI.Core.Attributes;
+using PluginAPI.Events;
+using PluginAPI.Core;
+using PluginAPI.Helpers;
 
 namespace UncomplicatedCustomRoles
 {
@@ -16,13 +20,14 @@ namespace UncomplicatedCustomRoles
 
         public const string Description = "UncomplicatedCustomRoles allows you to create custom roles for your SCP:SL server";
 
-        public override Version Version { get; } = new(3, 6, 3);
+        public const string StringVersion = "4.0.0";
 
-        public override Version RequiredExiledVersion { get; } = new(8, 11, 0);
-
-        public override PluginPriority Priority => PluginPriority.Higher;
+        public static Version Version => new(StringVersion);
 
         internal static Plugin Instance;
+
+        [PluginConfig]
+        public Config Config;
 
         internal Handler Handler;
 
@@ -34,8 +39,11 @@ namespace UncomplicatedCustomRoles
 
         private Harmony _harmony;
 
-        public override void OnEnabled()
+        [PluginEntryPoint(Name, StringVersion, Description, Author)]
+        public void OnEnabled()
         {
+            Config ??= new();
+
             Instance = this;
 
             // QoL things
@@ -47,22 +55,6 @@ namespace UncomplicatedCustomRoles
             HttpManager = new("ucr", int.MaxValue);
 
             CustomRole.List.Clear();
-
-            ServerHandler.RespawningTeam += Handler.OnRespawningWave;
-            ServerHandler.RoundStarted += Handler.OnRoundStarted;
-            ServerHandler.RoundEnded += Handler.OnRoundEnded;
-            PlayerHandler.Verified += Handler.OnVerified;
-            PlayerHandler.Died += Handler.OnDied;
-            PlayerHandler.Spawning += Handler.OnSpawning;
-            PlayerHandler.Spawned += Handler.OnPlayerSpawned;
-            PlayerHandler.ChangingRole += Handler.OnChangingRole;
-            PlayerHandler.ReceivingEffect += Handler.OnReceivingEffect;
-            Scp330Handler.InteractingScp330 += Handler.OnInteractingScp330;
-            //PlayerHandler.Spawned += Handler.OnSpawning;
-            PlayerHandler.Escaping += Handler.OnEscaping;
-            PlayerHandler.UsedItem += Handler.OnItemUsed;
-            PlayerHandler.Hurting += Handler.OnHurting;
-            Scp049Handler.FinishingRecall += Handler.OnFinishingRecall;
             
             if (!File.Exists(Path.Combine(Paths.Configs, "UncomplicatedCustomRoles", ".nohttp")))
                 HttpManager.Start();
@@ -96,10 +88,6 @@ namespace UncomplicatedCustomRoles
             FileConfigs.LoadAll();
             FileConfigs.LoadAll(Server.Port.ToString());
 
-            // Register ScriptedEvents and RespawnTimer integration
-            ScriptedEvents.RegisterCustomActions();
-            RespawnTimer.Enable();
-
             // Start communicating with the endpoint API
             SpawnPointApiCommunicator.Init();
 
@@ -110,33 +98,12 @@ namespace UncomplicatedCustomRoles
 
             // Run the import managet
             ImportManager.Init();
-
-            base.OnEnabled();
         }
 
         [PluginUnload]
         public void OnDisabled()
         {
             _harmony.UnpatchAll();
-
-            RespawnTimer.Disable();
-            ScriptedEvents.UnregisterCustomActions();
-
-            ServerHandler.RespawningTeam -= Handler.OnRespawningWave;
-            ServerHandler.RoundEnded -= Handler.OnRoundEnded;
-            ServerHandler.RoundStarted -= Handler.OnRoundStarted;
-            PlayerHandler.Verified -= Handler.OnVerified;
-            PlayerHandler.Died -= Handler.OnDied;
-            PlayerHandler.Spawning -= Handler.OnSpawning;
-            PlayerHandler.Spawned -= Handler.OnPlayerSpawned;
-            PlayerHandler.ChangingRole -= Handler.OnChangingRole;
-            PlayerHandler.ReceivingEffect -= Handler.OnReceivingEffect;
-            Scp330Handler.InteractingScp330 -= Handler.OnInteractingScp330;
-            //PlayerHandler.Spawned -= Handler.OnSpawning;
-            PlayerHandler.Escaping -= Handler.OnEscaping;
-            PlayerHandler.UsedItem -= Handler.OnItemUsed;
-            PlayerHandler.Hurting -= Handler.OnHurting;
-            Scp049Handler.FinishingRecall -= Handler.OnFinishingRecall;
 
             HttpManager.Stop();
 
@@ -147,7 +114,5 @@ namespace UncomplicatedCustomRoles
 
             Instance = null;
         }
-
-        [PluginConfig] internal Config Config = new();
     }
 }

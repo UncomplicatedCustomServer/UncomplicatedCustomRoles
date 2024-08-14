@@ -1,6 +1,6 @@
 ﻿using CommandSystem;
-using Exiled.API.Features;
 using System.Collections.Generic;
+using PluginAPI.Core;
 using SpawnPointInstance = UncomplicatedCustomRoles.API.Features.SpawnPoint;
 using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager.NET;
@@ -15,7 +15,7 @@ namespace UncomplicatedCustomRoles.Commands
 
         public string Description { get; } = "Add, remove or list spawnpoints for customroles";
 
-        public string RequiredPermission { get; } = "ucr.spawnpoint";
+        public PlayerPermissions RequiredPermission { get; } = PlayerPermissions.LongTermBanning;
 
         public const string CommandHeader = "UncomplicatedCustomRoles - SpawnPoint Feature\n";
 
