@@ -41,18 +41,12 @@ namespace UncomplicatedCustomRoles.Manager
                     if (FileName.Split().First() == ".")
                         return;
 
-                    Dictionary<string, List<CustomRole>> Roles = YamlHelper.Deserializer.Deserialize<Dictionary<string, List<CustomRole>>>(File.ReadAllText(FileName));
+                    string Content = File.ReadAllText(FileName);
 
-                    if (!Roles.ContainsKey("custom_roles"))
-                    {
-                        LogManager.Error($"Error during the deserialization of file {FileName}: Node name 'custom_roles' not found!");
-                        return;
-                    }
-                    foreach (CustomRole Role in Roles["custom_roles"])
-                    {
-                        LogManager.Debug($"Proposed to the registerer the external role {Role.Id} [{Role.Name}] from file:\n{FileName}");
-                        action(Role);
-                    }
+                    if (Content.Contains("custom_roles:") && Content.Contains("- id:"))
+                        LoadLegacyRoles(FileName, Content, action);
+                    else
+                        LoadRoles(FileName, Content, action);
                 }
                 catch (Exception ex)
                 {
@@ -68,21 +62,44 @@ namespace UncomplicatedCustomRoles.Manager
             }
         }
 
+        private void LoadLegacyRoles(string fileName, string content, Action<CustomRole> action)
+        {
+            Dictionary<string, List<CustomRole>> Roles = Loader.Deserializer.Deserialize<Dictionary<string, List<CustomRole>>>(content);
+
+            if (!Roles.ContainsKey("custom_roles"))
+            {
+                LogManager.Error($"Error during the deserialization of file {fileName}: Node name 'custom_roles' not found!");
+                return;
+            }
+            foreach (CustomRole Role in Roles["custom_roles"])
+            {
+                LogManager.Debug($"Proposed to the registerer the external LEGACY role {Role.Id} [{Role.Name}] from file:\n{fileName}");
+                action(Role);
+            }
+
+            // Convert the role to a decent thing
+            if (Roles["custom_roles"].Count == 1)
+                File.WriteAllText(fileName, Loader.Serializer.Serialize(Roles["custom_roles"][0]));
+            else
+                for (int i = 0; i < Roles["custom_roles"].Count; i++)
+                    File.WriteAllText(fileName.Replace(".yml", $"-{i}.yml"), Loader.Serializer.Serialize(Roles["custom_roles"][i]));
+        }
+
+        private void LoadRoles(string fileName, string content, Action<CustomRole> action)
+        {
+            CustomRole Role = Loader.Deserializer.Deserialize<CustomRole>(content);
+            LogManager.Debug($"Proposed to the registerer the external role {Role.Id} [{Role.Name}] from file:\n{fileName}");
+            action(Role);
+        }
+
         public void Welcome(string localDir = "")
         {
             if (!Is(localDir))
             {
                 Directory.CreateDirectory(Path.Combine(Dir, localDir));
-                File.WriteAllText(Path.Combine(Dir, localDir, "example-role.yml"), YamlHelper.Serializer.Serialize(new Dictionary<string, List<CustomRole>>() {
-                  {
-                    "custom_roles", new List<CustomRole>()
-                    {
-                        new()
-                        {
-                            Id = CustomRole.GetFirstFreeID(1)
-                        }
-                    }
-                  }
+                File.WriteAllText(Path.Combine(Dir, localDir, "example-role.yml"), Loader.Serializer.Serialize(new CustomRole()
+                {
+                    Id = CustomRole.GetFirstFreeID(1)
                 }));
 
                 LogManager.Info($"Plugin does not have a role folder, generated one in {Path.Combine(Dir, localDir)}");

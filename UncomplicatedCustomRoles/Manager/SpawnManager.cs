@@ -8,13 +8,7 @@ using UncomplicatedCustomRoles.Extensions;
 using MEC;
 using PluginAPI.Core;
 using UncomplicatedCustomRoles.API.Features;
-using MapGeneration;
-using System.Reflection;
-using Mirror;
-using UncomplicatedCustomRoles.API.Helpers.Imports.EXILED.Extensions;
-using InventorySystem.Disarming;
-using System.Threading.Tasks;
-using UnityEngine.UI;
+using UncomplicatedCustomRoles.API.Struct;
 
 // Mormora, la gente mormora
 // falla tacere praticando l'allegria
@@ -39,6 +33,12 @@ namespace UncomplicatedCustomRoles.Manager
             }
 
             ICustomRole Role = CustomRole.CustomRoles[id];
+
+            if (Role is null)
+            {
+                LogManager.Warn($"Tried to spawn a custom role with the Id {id} but it seems to not exists!");
+                return;
+            }
 
             if (Role.SpawnSettings is null)
             {
@@ -83,10 +83,17 @@ namespace UncomplicatedCustomRoles.Manager
                         player.Position = RoomIdentifier.AllRoomIdentifiers.Where(room => !OffLimitsRooms.Contains(room)).RandomValue().ApiRoom.Position.AddY(1f);
                         break;
                     case SpawnLocationType.RoomsSpawn:
-                        player.Position = Map.Rooms.Where(room => Role.SpawnSettings.SpawnRooms.Contains(room.Name)).RandomValue().ApiRoom.Position.AddY(1.5f);
+                        LogManager.Silent($"Going to spawn CR {Role.Name} ({Role.Id}) ({player.Nickname}) at a Room - Count: {Role.SpawnSettings.SpawnRooms.Count}");
+                        player.Position = Room.Get(Role.SpawnSettings.SpawnRooms.RandomItem()).Position.AddY(1.5f);
                         break;
-                    case SpawnLocationType.PositionSpawn:
-                        player.Position = Role.SpawnSettings.SpawnPosition;
+                    case SpawnLocationType.SpawnPointSpawn:
+                        if (Role.SpawnSettings.SpawnPoint is not null && SpawnPoint.TryGet(Role.SpawnSettings.SpawnPoint, out SpawnPoint spawn))
+                            spawn.Spawn(player);
+                        else
+                        {
+                            LogManager.Warn($"Failed to spawn player {player.Nickname} ({player.Id}) as CustomRole {Role.Name} ({Role.Id}): selected SpawnPoint '{Role.SpawnSettings.SpawnPoint}' does not exists, set the spawn position to the previous one...");
+                            player.Position = BasicPosition;
+                        }
                         break;
                 };
 
@@ -99,55 +106,64 @@ namespace UncomplicatedCustomRoles.Manager
 
         public static void SummonSubclassApplier(Player Player, ICustomRole Role)
         {
-            LogManager.Silent("Replacing player inventory with defined ones!");
-            Player.ResetInventory(Role.Inventory);
+            Timing.CallDelayed(0.75f, () =>
+            {
+                Player.ResetInventory(Role.Inventory);
 
-            LogManager.Silent($"Can we assign custom roles? Let's see: {Role.CustomItemsInventory.Count()}");
-            if (Role.CustomItemsInventory.Count() > 0)
-                foreach (uint ItemId in Role.CustomItemsInventory)
-                    if (!Player.IsInventoryFull)
-                        try
-                        {
-                            if (PluginAPI.Loader.AssemblyLoader.InstalledPlugins.Where(pl => pl.PluginName == "UncomplicatedCustomItems").Count() > 0)
+                LogManager.Silent($"Can we assign custom roles? Let's see: {Role.CustomItemsInventory.Count()}");
+                if (Role.CustomItemsInventory.Count() > 0)
+                    foreach (uint ItemId in Role.CustomItemsInventory)
+                        if (!Player.IsInventoryFull)
+                            try
                             {
-                                PluginHandler PluginType = PluginAPI.Loader.AssemblyLoader.InstalledPlugins.Where(pl => pl.PluginName == "UncomplicatedCustomItems").First();
-                                Assembly PluginAssembly = PluginAPI.Loader.AssemblyLoader.Plugins.Where(pl => pl.Value.ContainsKey(PluginType.GetType())).FirstOrDefault().Key;
-                                if (PluginAssembly is not null && (bool)PluginAssembly.GetType("UncomplicatedCustomItems.API.Utilities")?.GetMethod("IsCustomItem")?.Invoke(null, new object[] { ItemId }))
+                                if (Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems") is not null)
                                 {
-                                    object CustomItem = PluginAssembly.GetType("UncomplicatedCustomItems.API.Utilities")?.GetMethod("GetCustomItem")?.Invoke(null, new object[] { ItemId });
-
-                                    PluginAssembly.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem")?.GetMethods().Where(method => method.Name == "Summon" && method.GetParameters().Length == 2).FirstOrDefault()?.Invoke(null, new object[]
+                                    Type AssemblyType = Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems").Assembly.GetType("UncomplicatedCustomItems.API.Utilities");
+                                    if ((bool)AssemblyType?.GetMethod("IsCustomItem")?.Invoke(null, new object[] { ItemId }))
                                     {
+                                        object CustomItem = AssemblyType?.GetMethod("GetCustomItem")?.Invoke(null, new object[] { ItemId });
+
+                                        Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems").Assembly.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem")?.GetMethods().Where(method => method.Name == "Summon" && method.GetParameters().Length == 2).FirstOrDefault()?.Invoke(null, new object[]
+                                        {
                                         CustomItem,
                                         Player
-                                    });
+                                        });
+                                    }
                                 }
+                                else
+                                    CustomItem.Get(ItemId)?.Give(Player);
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            LogManager.Debug($"Error while giving a custom item.\nError: {ex.Message}");
-                        }
-            */
+                            catch (Exception ex)
+                            {
+                                LogManager.Debug($"Error while giving a custom item.\nError: {ex.Message}");
+                            }
 
-            LogManager.Silent($"Evaluating ammo: {Role.Ammo.Count()}");
-            if (Role.Ammo.GetType() == typeof(Dictionary<ItemType, ushort>) && Role.Ammo.Count() > 0)
-                foreach (KeyValuePair<ItemType, ushort> Ammo in Role.Ammo)
-                    Player.AddAmmo(Ammo.Key, Ammo.Value);
+                Player.ClearAmmo();
+                if (Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
+                    foreach (KeyValuePair<AmmoType, ushort> Ammo in Role.Ammo)
+                        Player.AddAmmo(Ammo.Key, Ammo.Value);
 
-            LogManager.Silent($"Assigning CustomIndo");
-            if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
-                Player.CustomInfo += $"\n{Role.CustomInfo}";
+                if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
+                    Player.ApplyCustomInfo(Role.CustomInfo);
 
-            LogManager.Silent("Assigining health stats");
-            // Apply every required stats
-            Role.Health?.Apply(Player);
+                // Apply every required stats
+                Role.Health?.Apply(Player);
+                Role.Ahp?.Apply(Player);
+                Role.Stamina?.Apply(Player);
 
-            LogManager.Silent("Assigining ahp stats");
-            Role.Ahp?.Apply(Player);
+                if (Role.Scale != Vector3.zero && Role.Scale != Vector3.one)
+                    Player.Scale = Role.Scale;
 
-            LogManager.Silent("Assigining stamina stats");
-            Role.Stamina?.Apply(Player);
+
+                if (Role.RoleAppearance != Role.Role)
+                {
+                    LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
+                    Timing.CallDelayed(1f, () =>
+                    {
+                        Player.ChangeAppearance(Role.RoleAppearance, true);
+                    });
+                }
+            });
 
             LogManager.Silent("Adding permanent effects");
             List<IEffect> PermanentEffects = new();
@@ -157,7 +173,7 @@ namespace UncomplicatedCustomRoles.Manager
                 {
                     if (effect.Duration < 0)
                     {
-                        effect.Duration = 15f;
+                        effect.Duration = int.MaxValue;
                         PermanentEffects.Add(effect);
                         continue;
                     }
@@ -165,15 +181,6 @@ namespace UncomplicatedCustomRoles.Manager
                 }
             }
 
-            LogManager.Silent("Assigining scale");
-            if (Role.Scale != Vector3.zero && Role.Scale != Vector3.one)
-            {
-                Player.ReferenceHub.transform.localScale = Role.Scale;
-                foreach (Player player in Player.GetPlayers())
-                    NetworkServer.SendSpawnMessage(player.ReferenceHub.networkIdentity, player.Connection);
-            }
-
-            LogManager.Silent("Assigining SpawnBroadcast");
             if (Role.SpawnBroadcast != string.Empty)
             {
                 Player.ClearBroadcasts();
@@ -184,45 +191,43 @@ namespace UncomplicatedCustomRoles.Manager
             if (Role.SpawnHint != string.Empty)
                 Player.ReceiveHint(Role.SpawnHint, Role.SpawnHintDuration);
 
-            LogManager.Silent("Assigining Badge");
-            KeyValuePair<string, string>? Badge = null;
+            Triplet<string, string, bool>? Badge = null;
             if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null && Role.BadgeColor.Length > 2)
             {
-                Badge = new(Player.ReferenceHub.serverRoles.Network_myText ?? "", Player.ReferenceHub.serverRoles.Network_myColor ?? "");
-                LogManager.Debug($"Badge detected, putting {Role.BadgeName}@{Role.BadgeColor} to player {Player.PlayerId}");
+                Badge = new(Player.RankName ?? "", Player.RankColor ?? "", Player.ReferenceHub.serverRoles.HasBadgeHidden);
+                LogManager.Debug($"Badge detected, putting {Role.BadgeName}@{Role.BadgeColor} to player {Player.Id}");
 
-                Player.ReferenceHub.serverRoles.SetText(Role.BadgeName);
-                Player.ReferenceHub.serverRoles.SetColor(Role.BadgeColor);
+                Player.RankName = Role.BadgeName.Replace("@hidden", "");
+                Player.RankColor = Role.BadgeColor;
+
+                if (Role.BadgeName.Contains("@hidden"))
+                    if (Player.ReferenceHub.serverRoles.TryHideTag())
+                        LogManager.Debug("Tag successfully hidden!");
             }
 
-            LogManager.Silent("Assigining Nickname");
+            if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
+                Player.ApplyCustomInfo(Role.CustomInfo);
+
             // Changing nickname if needed
             bool ChangedNick = false;
             if (Plugin.Instance.Config.AllowNicknameEdit && Role.Nickname is not null && Role.Nickname != string.Empty)
             {
-                Role.Nickname = Role.Nickname.Replace("%dnumber%", new System.Random().Next(1000, 9999).ToString()).Replace("%nick%", Player.Nickname).Replace("%rand%", new System.Random().Next(0, 9).ToString()).Replace("%unitid%", Player.UnitId.ToString());
+                string Nick = Role.Nickname.Replace("%dnumber%", new System.Random().Next(1000, 9999).ToString()).Replace("%nick%", Player.Nickname).Replace("%rand%", new System.Random().Next(0, 9).ToString()).Replace("%unitid%", Player.UnitId.ToString()).Replace("%unitname%", Player.UnitName);
                 if (Role.Nickname.Contains(","))
-                    Player.DisplayNickname = Role.Nickname.Split(',').RandomItem();
+                    Player.DisplayNickname = Nick.Split(',').RandomItem();
                 else
-                    Player.DisplayNickname = Role.Nickname;
+                    Player.DisplayNickname = Nick;
 
                 ChangedNick = true;
-            }
-
-            LogManager.Silent("Assigining appeareance");
-            if (Role.RoleAppearance != Role.Role)
-            {
-                LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
-                Timing.CallDelayed(1f, () =>
-                {
-                    Player.ChangeAppearance(Role.RoleAppearance, true);
-                });
             }
 
             LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})!");
 
             //new SummonedCustomRole(Player, Role, Badge, PermanentEffects, ChangedNick);
             new SummonedCustomRole(Player, Role, Badge, PermanentEffects, ChangedNick);
+
+            if (Spawn.Spawning.Contains(Player.Id))
+                Spawn.Spawning.Remove(Player.Id);
 
             LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})! [2VDS]");
 
@@ -260,6 +265,7 @@ namespace UncomplicatedCustomRoles.Manager
             }
         }
 
+        /*
         public static KeyValuePair<bool, object> ParseEscapeRole(string roleAfterEscape, Player player)
         {
             List<string> Role = new();
@@ -301,6 +307,81 @@ namespace UncomplicatedCustomRoles.Manager
             }
 
             return new(false, null);
+        }*/
+
+        public static KeyValuePair<bool, object> ParseEscapeRole(Dictionary<string, string> roleAfterEscape, Player player)
+        {
+            Dictionary<Team, KeyValuePair<bool, object>> AsCuffedByInternalTeam = new();
+            // Dictionary<uint, KeyValuePair<bool, object>> AsCuffedByCustomTeam = new(); we will add the support to UCT and UIU-RS
+            Dictionary<int, KeyValuePair<bool, object>> AsCuffedByCustomRole = new();
+            KeyValuePair<bool, object> Default = new(false, RoleTypeId.Spectator);
+
+            foreach (KeyValuePair<string, string> kvp in roleAfterEscape)
+            {
+                KeyValuePair<bool, object> Data = ParseEscapeString(kvp.Value);
+                if (kvp.Key is "default")
+                    Default = Data;
+                else
+                {
+                    List<string> Elements = kvp.Key.Split(' ').ToList();
+
+                    if (Elements.Count != 4)
+                    {
+                        LogManager.Warn($"Failed to parse an EscapeRole[key]: syntax should be cuffed by <source> <id>, found {Elements.Count} args!\nSource: {kvp.Key}");
+                        return new(false, RoleTypeId.Spectator);
+                    }
+
+                    if (Elements[0] is not "cuffed")
+                    {
+                        LogManager.Warn($"Failed to parse an EscapeRole[key]: syntax should be cuffed by <source> <id>, found {Elements.Count} args!\nSource: {kvp.Key}");
+                        return new(false, RoleTypeId.Spectator);
+                    }
+
+                    if (Elements[1] is not "by")
+                    {
+                        LogManager.Warn($"Failed to parse an EscapeRole[key]: syntax should be cuffed by <source> <id>, found {Elements.Count} args!\nSource: {kvp.Key}");
+                        return new(false, RoleTypeId.Spectator);
+                    }
+
+                    if ((Elements[2] is "InternalTeam" || Elements[2] is "IT") && Enum.TryParse(Elements[3], out Team team))
+                        AsCuffedByInternalTeam.TryAdd(team, Data);
+                    else if ((Elements[2] is "CustomRole" || Elements[2] is "CR") && int.TryParse(Elements[3], out int id) && CustomRole.CustomRoles.ContainsKey(id))
+                        AsCuffedByCustomRole.TryAdd(id, Data);
+                    else
+                        LogManager.Warn($"Function SpawnManager::ParseEscapeRole[2](<...>) failed!\nPossible causes can be:\n- The source is not valid. Allowed: InternalTeam / IT / CustomRole / CR. Found: {Elements[2]}\n- The target is not a CustomRole / InternalRole. Found: {Elements[3]} (int32: {int.Parse(Elements[3])}");
+                }
+            }
+
+            // Now let's assign
+            if (!player.IsCuffed)
+                return Default;
+            else if (player.IsCuffed && player.Cuffer is not null)
+                if (player.Cuffer.TryGetSummonedInstance(out SummonedCustomRole role) && AsCuffedByCustomRole.ContainsKey(role.Role.Id))
+                    return AsCuffedByCustomRole[role.Role.Id];
+                else if (AsCuffedByInternalTeam.ContainsKey(player.Cuffer.Role.Team))
+                    return AsCuffedByInternalTeam[player.Cuffer.Role.Team];
+
+            LogManager.Silent($"Returing default type for escaping evaluation of player {player.Id} who's cuffed by {player.Cuffer?.Role.Team}");
+            return Default;
+        }
+
+        public static KeyValuePair<bool, object> ParseEscapeString(string escape)
+        {
+            List<string> Elements = escape.Split(' ').ToList();
+            if (Elements.Count != 2)
+            {
+                LogManager.Warn($"Failed to parse an EscapeString[value]: syntax should be <source> <id> (2 args), found {Elements.Count} args!\nSource: {escape}");
+                return new(false, RoleTypeId.Spectator);
+            }
+
+            if (Elements[0] is "CustomRole" || Elements[0] is "CR")
+                return new(true, int.Parse(Elements[1]));
+            else if ((Elements[0] is "InternalRole" || Elements[0] is "IR") && Enum.TryParse(Elements[1], out RoleTypeId role))
+                return new(false, role);
+            else
+                LogManager.Warn($"Function SpawnManager::ParseEscapeString(string escape) failed!\nPossible causes can be:\n- The source is not valid. Allowed: InternalRole / IR / CustomRole / CR. Found: {Elements[0]}\n- The target is not a CustomRole / InternalRole. Found: {Elements[1]} (int32: {int.Parse(Elements[1])}");
+
+            return new(false, RoleTypeId.Spectator);
         }
 
 #nullable enable
@@ -347,8 +428,8 @@ namespace UncomplicatedCustomRoles.Manager
                 return null;
             }
 
-            if (RolePercentage.ContainsKey(player.Role))
-                if (new System.Random().Next(0, 99) < RolePercentage[NewRole].Count())
+            if (RolePercentage.ContainsKey(player.Role.Type))
+                if (UnityEngine.Random.Range(0, 100) < RolePercentage[NewRole].Count())
                     return CustomRole.CustomRoles[RolePercentage[NewRole].RandomItem().Id];
 
             return null;

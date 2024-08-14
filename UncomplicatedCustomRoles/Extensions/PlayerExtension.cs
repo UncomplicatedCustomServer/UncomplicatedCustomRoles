@@ -133,15 +133,10 @@ namespace UncomplicatedCustomRoles.Extensions
             return false;
         }
 
-        public static Player Get(string id)
+        public static void ApplyCustomInfo(this Player player, string value)
         {
-            return Player.GetPlayers().Where(p => p.PlayerId == int.Parse(id)).FirstOrDefault();
-        }
-
-        public static bool TryGet(string id, out Player player)
-        {
-            player = Get(id);
-            return player != null;
+            player.InfoArea = string.IsNullOrEmpty(value) ? player.InfoArea & ~PlayerInfoArea.CustomInfo : player.InfoArea |= PlayerInfoArea.CustomInfo;
+            player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = value;
         }
     }
 }

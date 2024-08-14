@@ -51,39 +51,29 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="API\Attributes\PluginCustomRole.cs" />
     <Compile Include="API\Features\Behaviour\AhpBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\HealthBehaviour.cs" />
     <Compile Include="API\Features\CustomRole.cs" />
+    <Compile Include="API\Features\Escape.cs" />
     <Compile Include="API\Features\InfiniteEffect.cs" />
     <Compile Include="API\Features\Behaviour\SpawnBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\StaminaBehaviour.cs" />
+    <Compile Include="API\Features\LogEntry.cs" />
     <Compile Include="API\Features\Spawn.cs" />
+    <Compile Include="API\Features\SpawnPoint.cs" />
     <Compile Include="API\Features\SummonedCustomRole.cs" />
-    <Compile Include="API\Helpers\HealthHelper.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\Extensions\MirrorExtension.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\Extensions\StringExtension.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\Pools\DictionaryPool.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\Pools\HashSetPool.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\Pools\IPool.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\Pools\ListPool.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\Pools\QueuePool.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\Pools\StringBuilderPool.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\YAML\ColorConverter.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\CommentGatheringTypeInspector.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\CommentsObjectDescriptor.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\CommentsObjectGraphVisitor.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\CommentsPropertyDescriptor.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\TypeAssigningEventEmitter.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\YAML\Configs\UnderscoredNamingConvention.cs" />
-    <Compile Include="API\Helpers\Imports\EXILED\YAML\VectorsConverter.cs" />
+    <Compile Include="API\Struct\Quadruple.cs" />
+    <Compile Include="API\Struct\Triplet.cs" />
     <Compile Include="Commands\CommandParent.cs" />
-    <Compile Include="Commands\ForceNextWave.cs" />
+    <Compile Include="Commands\Generate.cs" />
     <Compile Include="Commands\List.cs" />
     <Compile Include="Commands\LogShare.cs" />
     <Compile Include="Commands\Owner.cs" />
     <Compile Include="Commands\Role.cs" />
     <Compile Include="Commands\Reload.cs" />
     <Compile Include="Commands\Spawn.cs" />
+    <Compile Include="Commands\SpawnPoint.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Enums\SpawnLocationType.cs" />
     <Compile Include="Events\Args\EscapingEventArgs.cs" />
@@ -109,10 +99,13 @@
     <Compile Include="Interfaces\IUCRCommand.cs" />
     <Compile Include="Manager\FileConfigs.cs" />
     <Compile Include="API\Features\Effect.cs" />
-    <Compile Include="Manager\HttpManager.cs" />
+    <Compile Include="Manager\NET\HttpManager.cs" />
+    <Compile Include="Manager\ImportManager.cs" />
     <Compile Include="Manager\LogManager.cs" />
+    <Compile Include="Manager\NET\SpawnPointApiCommunicator.cs" />
     <Compile Include="Manager\SpawnManager.cs" />
-    <Compile Include="Manager\YamlHelper.cs" />
+    <Compile Include="Patches\InventoryLimitsPrefix.cs" />
+    <Compile Include="Patches\Scp3114StranglePrefix.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Interfaces\ICustomRole.cs" />
     <Compile Include="Interfaces\IEffect.cs" />
@@ -125,13 +118,11 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\..\..\Desktop\EXILED_REF\References\0Harmony.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\0Harmony.dll</HintPath>
     </Reference>
-    <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\..\..\..\Desktop\EXILED_REF\References\Assembly-CSharp-firstpass.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp-Publicized">
-      <HintPath>..\..\..\..\Desktop\EXILED_REF\References\Assembly-CSharp-Publicized.dll</HintPath>
+    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="BouncyCastle.Cryptography, Version=2.0.0.0, Culture=neutral, PublicKeyToken=072edcf4a5328938, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

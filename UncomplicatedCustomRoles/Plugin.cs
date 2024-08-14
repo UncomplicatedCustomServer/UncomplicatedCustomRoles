@@ -3,12 +3,8 @@ using System.IO;
 using UncomplicatedCustomRoles.Manager;
 using Handler = UncomplicatedCustomRoles.Handlers.EventHandler;
 using UncomplicatedCustomRoles.API.Features;
-using PluginAPI.Core.Attributes;
-using PluginAPI.Helpers;
-using PluginAPI.Enums;
-using PluginAPI.Events;
-using PluginAPI.Core;
 using HarmonyLib;
+using UncomplicatedCustomRoles.Manager.NET;
 
 namespace UncomplicatedCustomRoles
 {
@@ -20,9 +16,11 @@ namespace UncomplicatedCustomRoles
 
         public const string Description = "UncomplicatedCustomRoles allows you to create custom roles for your SCP:SL server";
 
-        public const string StringVersion = "3.2.5";
+        public override Version Version { get; } = new(3, 6, 3);
 
-        public static Version Version = new(StringVersion);
+        public override Version RequiredExiledVersion { get; } = new(8, 11, 0);
+
+        public override PluginPriority Priority => PluginPriority.Higher;
 
         internal static Plugin Instance;
 
@@ -36,24 +34,35 @@ namespace UncomplicatedCustomRoles
 
         private Harmony _harmony;
 
-        [PluginEntryPoint(Name, StringVersion, Description, Author)]
-        [PluginPriority(LoadPriority.High)]
-        public void OnEnabled()
+        public override void OnEnabled()
         {
             Instance = this;
 
             // QoL things
             LogManager.History.Clear();
+            API.Features.Escape.Bucket.Clear();
 
             Handler = new();
             FileConfigs = new();
             HttpManager = new("ucr", int.MaxValue);
 
-            _harmony = new("com.ucs.ucr_nwapi");
-            Harmony.DEBUG = true;
-            _harmony.PatchAll();
+            CustomRole.List.Clear();
 
-            CustomRole.CustomRoles.Clear();
+            ServerHandler.RespawningTeam += Handler.OnRespawningWave;
+            ServerHandler.RoundStarted += Handler.OnRoundStarted;
+            ServerHandler.RoundEnded += Handler.OnRoundEnded;
+            PlayerHandler.Verified += Handler.OnVerified;
+            PlayerHandler.Died += Handler.OnDied;
+            PlayerHandler.Spawning += Handler.OnSpawning;
+            PlayerHandler.Spawned += Handler.OnPlayerSpawned;
+            PlayerHandler.ChangingRole += Handler.OnChangingRole;
+            PlayerHandler.ReceivingEffect += Handler.OnReceivingEffect;
+            Scp330Handler.InteractingScp330 += Handler.OnInteractingScp330;
+            //PlayerHandler.Spawned += Handler.OnSpawning;
+            PlayerHandler.Escaping += Handler.OnEscaping;
+            PlayerHandler.UsedItem += Handler.OnItemUsed;
+            PlayerHandler.Hurting += Handler.OnHurting;
+            Scp049Handler.FinishingRecall += Handler.OnFinishingRecall;
             
             if (!File.Exists(Path.Combine(Paths.Configs, "UncomplicatedCustomRoles", ".nohttp")))
                 HttpManager.Start();
@@ -86,13 +95,48 @@ namespace UncomplicatedCustomRoles
             FileConfigs.Welcome(Server.Port.ToString());
             FileConfigs.LoadAll();
             FileConfigs.LoadAll(Server.Port.ToString());
+
+            // Register ScriptedEvents and RespawnTimer integration
+            ScriptedEvents.RegisterCustomActions();
+            RespawnTimer.Enable();
+
+            // Start communicating with the endpoint API
+            SpawnPointApiCommunicator.Init();
+
+            // Patch with Harmony
+            Harmony.DEBUG = true;
+            _harmony = new($"com.ucs.ucr_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+            _harmony.PatchAll();
+
+            // Run the import managet
+            ImportManager.Init();
+
+            base.OnEnabled();
         }
 
         [PluginUnload]
         public void OnDisabled()
         {
-            Events.EventManager.Events.Clear();
-            EventManager.UnregisterAllEvents(this);
+            _harmony.UnpatchAll();
+
+            RespawnTimer.Disable();
+            ScriptedEvents.UnregisterCustomActions();
+
+            ServerHandler.RespawningTeam -= Handler.OnRespawningWave;
+            ServerHandler.RoundEnded -= Handler.OnRoundEnded;
+            ServerHandler.RoundStarted -= Handler.OnRoundStarted;
+            PlayerHandler.Verified -= Handler.OnVerified;
+            PlayerHandler.Died -= Handler.OnDied;
+            PlayerHandler.Spawning -= Handler.OnSpawning;
+            PlayerHandler.Spawned -= Handler.OnPlayerSpawned;
+            PlayerHandler.ChangingRole -= Handler.OnChangingRole;
+            PlayerHandler.ReceivingEffect -= Handler.OnReceivingEffect;
+            Scp330Handler.InteractingScp330 -= Handler.OnInteractingScp330;
+            //PlayerHandler.Spawned -= Handler.OnSpawning;
+            PlayerHandler.Escaping -= Handler.OnEscaping;
+            PlayerHandler.UsedItem -= Handler.OnItemUsed;
+            PlayerHandler.Hurting -= Handler.OnHurting;
+            Scp049Handler.FinishingRecall -= Handler.OnFinishingRecall;
 
             HttpManager.Stop();
 

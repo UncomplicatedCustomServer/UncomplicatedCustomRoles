@@ -1,20 +1,28 @@
-﻿using System.ComponentModel;
+﻿using Exiled.API.Enums;
 using UncomplicatedCustomRoles.Interfaces;
 
 namespace UncomplicatedCustomRoles.Manager
 {
     public class Effect : IEffect
     {
-        [Description("The effect EffectType found on the EXILED discord server")]
-        public string EffectType { get; set; } = "MovementBoost";
+        /// <summary>
+        /// Gets or sets the <see cref="EffectType"/> of the effect
+        /// </summary>
+        public EffectType EffectType { get; set; } = EffectType.MovementBoost;
 
-        [Description("The duration of the effect, -1 if you want to have an infinite effect")]
+        /// <summary>
+        /// Gets or sets the duration of the effect
+        /// </summary>
         public float Duration { get; set; } = -1;
 
-        [Description("The intensity of the effect from 1 to 255")]
+        /// <summary>
+        /// Gets or sets the intensity of the effect
+        /// </summary>
         public byte Intensity { get; set; } = 1;
 
-        [Description("Can the effect be removed with SCP-500?")]
+        /// <summary>
+        /// Gets or sets whether the effect can be removed by using SCP-500
+        /// </summary>
         public bool Removable { get; set; } = false;
     }
 }

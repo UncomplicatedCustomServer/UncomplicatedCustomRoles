@@ -4,6 +4,7 @@ using PluginAPI.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Commands;
 using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
@@ -46,7 +47,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets the badge of the player if it has one
         /// </summary>
-        public KeyValuePair<string, string>? Badge { get; internal set; }
+        public Triplet<string, string, bool>? Badge { get; internal set; }
 
         /// <summary>
         /// Gets the list of infinite <see cref="IEffect"/>
@@ -65,7 +66,7 @@ namespace UncomplicatedCustomRoles.API.Features
 
         private bool _InternalValid { get; set; }
 
-        public SummonedCustomRole(Player player, ICustomRole role, KeyValuePair<string, string>? badge, List<IEffect> infiniteEffects, bool isCustomNickname = false)
+        public SummonedCustomRole(Player player, ICustomRole role, Triplet<string, string, bool>? badge, List<IEffect> infiniteEffects, bool isCustomNickname = false)
         {
             Player = player;
             Role = role;
@@ -89,10 +90,11 @@ namespace UncomplicatedCustomRoles.API.Features
 
         public void Remove()
         {
-            if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null && Role.BadgeColor.Length > 2 && Badge is not null)
+            if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null && Role.BadgeColor.Length > 2 && Badge is not null && Badge is Triplet<string, string, bool> badge)
             {
-                Player.ReferenceHub.serverRoles.SetText(((KeyValuePair<string, string>)Badge).Key);
-                Player.ReferenceHub.serverRoles.SetColor(((KeyValuePair<string, string>)Badge).Value);
+                Player.RankName = badge.First;
+                Player.RankColor = badge.Second;
+                Player.ReferenceHub.serverRoles.RefreshLocalTag();
 
                 LogManager.Debug($"Badge detected, fixed");
             }
@@ -125,12 +127,31 @@ namespace UncomplicatedCustomRoles.API.Features
         public static SummonedCustomRole Get(Player player) => List.Where(scr => scr.Player.PlayerId == player.PlayerId).FirstOrDefault();
 
         /// <summary>
+        /// Gets a <see cref="SummonedCustomRole"/> by the <see cref="ReferenceHub"/>
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
+        public static SummonedCustomRole Get(ReferenceHub player) => List.Where(scr => scr.Player.Id == player.PlayerId).FirstOrDefault();
+
+        /// <summary>
         /// Try to get a <see cref="SummonedCustomRole"/> by the <see cref="Exiled.API.Features.Player"/>
         /// </summary>
         /// <param name="player"></param>
         /// <param name="role"></param>
         /// <returns></returns>
         public static bool TryGet(Player player, out SummonedCustomRole role)
+        {
+            role = Get(player);
+            return role != null;
+        }
+
+        /// <summary>
+        /// Try to get a <see cref="SummonedCustomRole"/> by the <see cref="ReferenceHub"/>
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="role"></param>
+        /// <returns></returns>
+        public static bool TryGet(ReferenceHub player, out SummonedCustomRole role)
         {
             role = Get(player);
             return role != null;
@@ -150,6 +171,22 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <returns></returns>
         public static int Count(int id) => List.Where(scr => scr.Role.Id == id).Count();
 
+        /// <summary>
+        /// Summon a new instance of <see cref="SummonedCustomRole"/> by spawning a player
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="role"></param>
+        /// <returns></returns>
+        public static SummonedCustomRole Summon(Player player, ICustomRole role)
+        {
+            if (role.SpawnSettings is not null)
+                SpawnManager.SummonCustomSubclass(player, role.Id);
+            else
+                SpawnManager.SummonSubclassApplier(player, role);
+
+            return Get(player);
+        }
+
         internal static void InfiniteEffectActor()
         {
             foreach (SummonedCustomRole Role in List)
@@ -157,6 +194,35 @@ namespace UncomplicatedCustomRoles.API.Features
                     foreach (IEffect Effect in Role.InfiniteEffects)
                         if (!Role.Player.ReferenceHub.playerEffectsController.AllEffects.Contains(Role.Player.EffectsManager.GetEffect<SeveredHands>()))
                             Role.Player.EffectsManager.EnableEffect<SeveredHands>(Effect.Intensity, false);
+        }
+
+        public static int TryGetInventoryLimitForGivenCategory(ItemCategory category, ReferenceHub player, int original)
+        {
+            SummonedCustomRole Role = List.Where(scr => scr.Player.Id == player.PlayerId).FirstOrDefault();
+
+            if (Role is null)
+                return original;
+
+            LogManager.Info($"Player {player.PlayerId} is customrole");
+
+            if (Role.Role.CustomInventoryLimits is null || !Role.Role.CustomInventoryLimits.ContainsKey(category))
+                return original;
+
+            LogManager.Info($"Put maximum: {Role.Role.CustomInventoryLimits[category]} for {category} instead of {original}");
+            return Role.Role.CustomInventoryLimits[category];
+        }
+
+#nullable enable
+        public static bool EvaluateInventoryLimit(ItemCategory category, ReferenceHub player, int count, sbyte categoryCount)
+        {
+            LogManager.Info($"Player {player.PlayerId} might be a customRole, {count}, {categoryCount}");
+            SummonedCustomRole Role = List.Where(scr => scr.Player.Id == player.PlayerId).FirstOrDefault();
+
+            if (Role is null || Role.Role.CustomInventoryLimits is null || !Role.Role.CustomInventoryLimits.ContainsKey(category))
+                return count >= categoryCount;
+
+            LogManager.Info($"Updated categoryCount to {Role.Role.CustomInventoryLimits[category]}");
+            return count >= Role.Role.CustomInventoryLimits[category];
         }
     }
 }
