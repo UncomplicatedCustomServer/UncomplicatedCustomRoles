@@ -324,6 +324,8 @@ namespace UncomplicatedCustomRoles.Manager
                         for (int a = 0; a < Role.SpawnSettings.SpawnChance; a++)
                             RolePercentage[RoleType].Add(Role);
 
+            LogManager.Silent($"RLC {RolePercentage.Count} ppts {RolePercentage[NewRole]?.Count} for {NewRole}");
+
             if (player.HasCustomRole())
             {
                 LogManager.Debug("Was evalutating role select for an already custom role player, stopping");
