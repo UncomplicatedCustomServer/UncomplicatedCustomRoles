@@ -7,6 +7,7 @@ using UncomplicatedCustomRoles.Manager.NET;
 using System.Net;
 using System.Threading.Tasks;
 using UncomplicatedCustomRoles.Manager;
+using System.Linq;
 
 namespace UncomplicatedCustomRoles.Commands
 {
