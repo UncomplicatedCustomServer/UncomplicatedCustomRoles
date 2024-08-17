@@ -109,6 +109,8 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// <returns></returns>
         public static string AskDownloadUrl() => Plugin.HttpManager.RetriveString(Plugin.HttpManager.HttpGetRequest($"{Endpoint}/download?port={Server.Port}"));
 
+        public static string AskIp() => Plugin.HttpManager.RetriveString(Plugin.HttpManager.HttpGetRequest($"{Endpoint}/ip"));
+
         /// <summary>
         /// Check every <see cref="ICustomRole"/> in order to find if any of them are with an invalid (non-existing) SpawnPoint
         /// </summary>

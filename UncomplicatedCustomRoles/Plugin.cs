@@ -12,6 +12,7 @@ using Scp330Handler = Exiled.Events.Handlers.Scp330;
 using UncomplicatedCustomRoles.API.Features;
 using HarmonyLib;
 using UncomplicatedCustomRoles.Manager.NET;
+using CustomPlayerEffects;
 
 namespace UncomplicatedCustomRoles
 {

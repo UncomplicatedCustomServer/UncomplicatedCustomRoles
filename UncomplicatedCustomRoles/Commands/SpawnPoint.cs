@@ -7,7 +7,6 @@ using UncomplicatedCustomRoles.Manager.NET;
 using System.Net;
 using System.Threading.Tasks;
 using UncomplicatedCustomRoles.Manager;
-using System.Linq;
 
 namespace UncomplicatedCustomRoles.Commands
 {
@@ -50,8 +49,12 @@ namespace UncomplicatedCustomRoles.Commands
             {
                 "download",
                 new("", "Get a link to download the current SpawnPoint list from the UCS cloud")
+            },
+            {
+                "ip",
+                new("", "Get your current IPv4/IPv6")
             }
-        };
+        }; 
 
         public bool Executor(List<string> arguments, ICommandSender sender, out string response)
         {
@@ -170,6 +173,9 @@ namespace UncomplicatedCustomRoles.Commands
                         }
                         else
                             response = "SpawnPoint not found!";
+                        break;
+                    case "ip":
+                        response = $"Your IPv4/IPv6 is: {SpawnPointApiCommunicator.AskIp()}";
                         break;
                     case "sync":
                         response = "Sync done!";
