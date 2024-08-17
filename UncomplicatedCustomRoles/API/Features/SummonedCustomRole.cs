@@ -211,34 +211,5 @@ namespace UncomplicatedCustomRoles.API.Features
                         if (!Role.Player.ReferenceHub.playerEffectsController.AllEffects.Contains(Role.Player.EffectsManager.GetEffect<SeveredHands>()))
                             Role.Player.EffectsManager.EnableEffect<SeveredHands>(Effect.Intensity, false);
         }
-
-        public static int TryGetInventoryLimitForGivenCategory(ItemCategory category, ReferenceHub player, int original)
-        {
-            SummonedCustomRole Role = List.Where(scr => scr.Player.PlayerId == player.PlayerId).FirstOrDefault();
-
-            if (Role is null)
-                return original;
-
-            LogManager.Info($"Player {player.PlayerId} is customrole");
-
-            if (Role.Role.CustomInventoryLimits is null || !Role.Role.CustomInventoryLimits.ContainsKey(category))
-                return original;
-
-            LogManager.Info($"Put maximum: {Role.Role.CustomInventoryLimits[category]} for {category} instead of {original}");
-            return Role.Role.CustomInventoryLimits[category];
-        }
-
-#nullable enable
-        public static bool EvaluateInventoryLimit(ItemCategory category, ReferenceHub player, int count, sbyte categoryCount)
-        {
-            LogManager.Info($"Player {player.PlayerId} might be a customRole, {count}, {categoryCount}");
-            SummonedCustomRole Role = List.Where(scr => scr.Player.PlayerId == player.PlayerId).FirstOrDefault();
-
-            if (Role is null || Role.Role.CustomInventoryLimits is null || !Role.Role.CustomInventoryLimits.ContainsKey(category))
-                return count >= categoryCount;
-
-            LogManager.Info($"Updated categoryCount to {Role.Role.CustomInventoryLimits[category]}");
-            return count >= Role.Role.CustomInventoryLimits[category];
-        }
     }
 }
