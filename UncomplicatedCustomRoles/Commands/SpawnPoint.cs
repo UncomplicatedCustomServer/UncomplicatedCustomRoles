@@ -68,7 +68,7 @@ namespace UncomplicatedCustomRoles.Commands
             {
                 response = CommandHeader;
                 foreach (KeyValuePair<string, KeyValuePair<string, string>> command in SubCommands)
-                    response += $"{command.Key} {command.Value.Key}-> {command.Value.Value}";
+                    response += $"{command.Key} {command.Value.Key}-> {command.Value.Value}\n";
             }
             else
                 switch (arguments[0])
