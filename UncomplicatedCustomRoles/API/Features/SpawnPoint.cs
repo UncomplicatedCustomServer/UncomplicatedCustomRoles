@@ -71,7 +71,7 @@ namespace UncomplicatedCustomRoles.API.Features
             player.Rotation = Rotation;
         }
 
-        public override string ToString() => $"SpawnPoint '{Name}' at {Room.Identifier.name} ({Position} @ {RoomRotation}) [{HasRoom}]";
+        public override string ToString() => $"SpawnPoint '{Name}' at {Room?.Identifier.name ?? "Fixed Position"} ({Position} @ {RoomRotation}) [{HasRoom}]";
 
         public static SpawnPoint Get(string name) => List.Where(sp => sp.Name == name).FirstOrDefault();
 

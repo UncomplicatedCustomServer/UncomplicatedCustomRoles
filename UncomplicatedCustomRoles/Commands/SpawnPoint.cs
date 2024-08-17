@@ -6,6 +6,7 @@ using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager.NET;
 using System.Net;
 using System.Threading.Tasks;
+using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Commands
 {
@@ -144,6 +145,8 @@ namespace UncomplicatedCustomRoles.Commands
                         }
                         break;
                     case "download":
+                        string url = SpawnPointApiCommunicator.AskDownloadUrl();
+                        LogManager.Info($"Download your SpawnPoint settings with this URL:\n{SpawnPointApiCommunicator.AskDownloadUrl()}");
                         response = $"Download URL:\n{SpawnPointApiCommunicator.AskDownloadUrl()}";
                         break;
                     case "goto":

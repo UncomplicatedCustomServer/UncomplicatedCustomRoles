@@ -61,11 +61,14 @@ namespace UncomplicatedCustomRoles.Handlers
             if (ev.Player is null)
                 return;
 
-            if (ev.Effect is SeveredHands && SummonedCustomRole.TryGet(ev.Player, out SummonedCustomRole Role) && Role.Role.MaxScp330Candies >= Role.Scp330Count)
-            {
-                LogManager.Debug($"Tried to add the {ev.Effect.name} but was not allowed due to {Role.Scp330Count} <= {Role.Role.MaxScp330Candies}");
-                ev.Player.EffectsManager.DisableEffect<SeveredHands>();
-            }
+            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole role))
+                if (ev.Effect is SeveredHands && role.Role.MaxScp330Candies >= role.Scp330Count)
+                {
+                    LogManager.Debug($"Tried to add the {ev.Effect.name} but was not allowed due to {role.Scp330Count} <= {role.Role.MaxScp330Candies}");
+                    ev.Player.EffectsManager.DisableEffect<SeveredHands>();
+                }
+                else if (ev.Effect is CardiacArrest && role.Role.IsFriendOf is not null && role.Role.IsFriendOf.Contains(Team.SCPs))
+                    ev.Player.EffectsManager.DisableEffect<CardiacArrest>();
         }
 
         [PluginEvent(ServerEventType.Scp049ResurrectBody)]
