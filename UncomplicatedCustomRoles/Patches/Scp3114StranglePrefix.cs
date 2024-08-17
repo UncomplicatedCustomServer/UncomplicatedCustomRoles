@@ -9,6 +9,9 @@ namespace UncomplicatedCustomRoles.Patches
     {
         private static bool Prefix(ReferenceHub player, ref bool __result, Scp3114Strangle __instance)
         {
+            if (player is null)
+                return true;
+
             if (player.roleManager.CurrentRole is null)
                 return true;
 
@@ -17,7 +20,7 @@ namespace UncomplicatedCustomRoles.Patches
                 // Attacked player can't be strangled by SCP-3114 as it's his friend :)
                 __result = false;
                 return false; // Skip
-            } else if (SummonedCustomRole.TryGet(__instance.Owner, out SummonedCustomRole scpRole) && scpRole.Role.IsFriendOf is not null && scpRole.Role.IsFriendOf.Contains(hub.roleManager.CurrentRole.Team))
+            } else if (SummonedCustomRole.TryGet(__instance.Owner, out SummonedCustomRole scpRole) && scpRole.Role.IsFriendOf is not null && scpRole.Role.IsFriendOf.Contains(player.roleManager.CurrentRole.Team))
             {
                 // Attacked player can't be strangled by SCP-3114 as it's his friend :)
                 __result = false;

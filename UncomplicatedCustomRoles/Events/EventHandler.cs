@@ -59,11 +59,14 @@ namespace UncomplicatedCustomRoles.Events
             if (!ev.IsAllowed)
                 return;
 
-            if (ev.Effect is SeveredHands && SummonedCustomRole.TryGet(ev.Player, out SummonedCustomRole Role) && Role.Role.MaxScp330Candies >= Role.Scp330Count)
-            {
-                LogManager.Debug($"Tried to add the {ev.Effect.name} but was not allowed due to {Role.Scp330Count} <= {Role.Role.MaxScp330Candies}");
-                ev.IsAllowed = false;
-            }
+            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole role))
+                if (ev.Effect is SeveredHands && role.Role.MaxScp330Candies >= role.Scp330Count)
+                {
+                    LogManager.Debug($"Tried to add the {ev.Effect.name} but was not allowed due to {role.Scp330Count} <= {role.Role.MaxScp330Candies}");
+                    ev.IsAllowed = false;
+                }
+                else if (ev.Effect is CardiacArrest && role.Role.IsFriendOf is not null && role.Role.IsFriendOf.Contains(Team.SCPs))
+                    ev.IsAllowed = false;
         }
 
         public void OnPlayerSpawned(SpawnedEventArgs _) { }
@@ -136,28 +139,26 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnHurting(HurtingEventArgs Hurting)
         {
-            LogManager.Silent($"DamageHandler of Hurting: {Hurting.Player} {Hurting.Attacker}");
-
             if (!Hurting.IsAllowed)
                 return;
 
+            LogManager.Silent($"DamageHandler of Hurting: {Hurting.Player} {Hurting.Attacker}");
+
             if (Hurting.Player is not null && Hurting.Attacker is not null && Hurting.Player.IsAlive && Hurting.Attacker.IsAlive)
             {
-                // If the attacker is a custom role we don't check for damage_multiplier but only the thing to avoid -> is_friend_of
-                if (Hurting.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole) && attackerCustomRole.Role.IsFriendOf is not null && attackerCustomRole.Role.IsFriendOf.Contains(Hurting.Player.Role.Team))
-                {
-                    Hurting.IsAllowed = false;
-                    LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - A");
-                }
-                else if (Hurting.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole))
-                    if (playerCustomRole.Role.IsFriendOf is not null && playerCustomRole.Role.IsFriendOf.Contains(Hurting.Attacker.Role.Team))
+                if (Hurting.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole))
+                    if (attackerCustomRole.Role.IsFriendOf is not null && attackerCustomRole.Role.IsFriendOf.Contains(Hurting.Player.Role.Team))
                     {
                         Hurting.IsAllowed = false;
-                        LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - B");
-                        return;
+                        LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - FROM ATTACKER");
                     }
                     else
-                        Hurting.DamageHandler.Damage *= playerCustomRole.Role.DamageMultiplier;
+                        Hurting.DamageHandler.Damage *= attackerCustomRole.Role.DamageMultiplier;
+                else if (Hurting.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole) && playerCustomRole.Role.IsFriendOf is not null && playerCustomRole.Role.IsFriendOf.Contains(Hurting.Attacker.Role.Team))
+                {
+                    Hurting.IsAllowed = false;
+                    LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - FROM HURTED");
+                }
             }
         }
 

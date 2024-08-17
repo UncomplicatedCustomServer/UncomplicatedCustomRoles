@@ -183,6 +183,16 @@ namespace UncomplicatedCustomRoles.Manager
                 Player.Broadcast(Role.SpawnBroadcastDuration, Role.SpawnBroadcast);
             }
 
+            // We need the role appereance also here!
+            if (Role.RoleAppearance != Role.Role)
+            {
+                LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
+                Timing.CallDelayed(1f, () =>
+                {
+                    Player.ChangeAppearance(Role.RoleAppearance, true);
+                });
+            }
+
             if (Role.SpawnHint != string.Empty)
                 Player.ShowHint(Role.SpawnHint, Role.SpawnHintDuration);
 

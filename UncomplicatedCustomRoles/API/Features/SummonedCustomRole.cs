@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Commands;
+using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
 
@@ -191,35 +192,6 @@ namespace UncomplicatedCustomRoles.API.Features
                     foreach (IEffect Effect in Role.InfiniteEffects)
                         if (!Role.Player.ActiveEffects.Contains(Role.Player.GetEffect(Effect.EffectType)))
                             Role.Player.EnableEffect(Effect.EffectType, Effect.Intensity, float.MaxValue);
-        }
-
-        public static int TryGetInventoryLimitForGivenCategory(ItemCategory category, ReferenceHub player, int original)
-        {
-            SummonedCustomRole Role = List.Where(scr => scr.Player.Id == player.PlayerId).FirstOrDefault();
-
-            if (Role is null)
-                return original;
-
-            LogManager.Info($"Player {player.PlayerId} is customrole");
-
-            if (Role.Role.CustomInventoryLimits is null || !Role.Role.CustomInventoryLimits.ContainsKey(category))
-                return original;
-
-            LogManager.Info($"Put maximum: {Role.Role.CustomInventoryLimits[category]} for {category} instead of {original}");
-            return Role.Role.CustomInventoryLimits[category];
-        }
-
-#nullable enable
-        public static bool EvaluateInventoryLimit(ItemCategory category, ReferenceHub player, int count, sbyte categoryCount)
-        {
-            LogManager.Info($"Player {player.PlayerId} might be a customRole, {count}, {categoryCount}");
-            SummonedCustomRole Role = List.Where(scr => scr.Player.Id == player.PlayerId).FirstOrDefault();
-
-            if (Role is null || Role.Role.CustomInventoryLimits is null || !Role.Role.CustomInventoryLimits.ContainsKey(category))
-                return count >= categoryCount;
-
-            LogManager.Info($"Updated categoryCount to {Role.Role.CustomInventoryLimits[category]}");
-            return count >= Role.Role.CustomInventoryLimits[category];
         }
     }
 }
