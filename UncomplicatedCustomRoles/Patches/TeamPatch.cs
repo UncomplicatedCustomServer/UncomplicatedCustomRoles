@@ -1,4 +1,5 @@
-﻿using Footprinting;
+﻿using Achievements.Handlers;
+using Footprinting;
 using HarmonyLib;
 using InventorySystem.Items.ThrowableProjectiles;
 using PlayerRoles;
@@ -44,7 +45,7 @@ namespace UncomplicatedCustomRoles.Patches
         static bool Prefix(Player __instance, ref bool __result) => !SummonedCustomRole.TryCheckForCustomTeam(__instance.ReferenceHub, Team.FoundationForces, out __result);
     }
 
-    [HarmonyPatch(typeof(Achievements.Handlers.GeneralKillsHandler), nameof(Achievements.Handlers.GeneralKillsHandler.HandleAttackerKill))]
+    [HarmonyPatch(typeof(GeneralKillsHandler), nameof(GeneralKillsHandler.HandleAttackerKill))]
     internal class HandleAttackerKillPatch
     {
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
@@ -198,6 +199,72 @@ namespace UncomplicatedCustomRoles.Patches
             }
 
             return newInstructions;
+        }
+    }
+
+    [HarmonyPatch(typeof(BePoliteBeEfficientHandler), nameof(BePoliteBeEfficientHandler.HandleDeath))]
+    internal class BePoliteBeEfficientPatch
+    {
+        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> newInstructions = new(instructions);
+            int index = -1;
+
+            for (int i = 0; i < newInstructions.Count; i++)
+                if (newInstructions[i].opcode == OpCodes.Ldfld && newInstructions[i].operand is FieldInfo fieldInfo && fieldInfo == Field(typeof(Footprint), nameof(Footprint.Role)))
+                {
+                    index = i;
+                    break;
+                }
+
+            if (index != -1)
+            {
+                newInstructions[index] = new(OpCodes.Ldfld, Field(typeof(Footprint), nameof(Footprint.Hub)));
+                newInstructions.Insert(index + 1, new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) })));
+                newInstructions[index + 3] = new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) }));
+                newInstructions[index + 4] = new(OpCodes.Call, Method(typeof(HitboxIdentity), nameof(HitboxIdentity.IsEnemy), new Type[] { typeof(Team), typeof(Team) }));
+            }
+
+            return newInstructions;
+        }
+    }
+
+    [HarmonyPatch(typeof(AttackerDamageHandler), nameof(AttackerDamageHandler.ProcessDamage))]
+    internal class AttackerDamagePatch
+    {
+        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> newInstructions = new(instructions);
+            int index = -1;
+
+            for (int i = 0; i < newInstructions.Count; i++)
+                if (newInstructions[i].opcode == OpCodes.Ldfld && newInstructions[i].operand is FieldInfo fieldInfo && fieldInfo == Field(typeof(Footprint), nameof(Footprint.Role)))
+                {
+                    index = i;
+                    break;
+                }
+
+            if (index != -1)
+            {
+                newInstructions[index] = new(OpCodes.Ldfld, Field(typeof(Footprint), nameof(Footprint.Hub)));
+                newInstructions.Insert(index + 1, new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) })));
+                newInstructions[index + 3] = new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) }));
+                newInstructions[index + 4] = new(OpCodes.Call, Method(typeof(HitboxIdentity), nameof(HitboxIdentity.IsEnemy), new Type[] { typeof(Team), typeof(Team) }));
+            }
+
+            return newInstructions;
+        }
+    }
+
+    // Most important patch
+    [HarmonyPatch(typeof(PlayerRoleBase), nameof(PlayerRoleBase.Team))]
+    internal class RolesUtilsHumanPatch
+    {
+        static bool Prefix(PlayerRoleBase __instance, ref Team __result)
+        {
+            if (SummonedCustomRole.TryPatchCustomRole(__instance._lastOwner, out __result))
+                return false;
+            return true;
         }
     }
 }
