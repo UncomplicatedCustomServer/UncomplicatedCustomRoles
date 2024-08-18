@@ -1,4 +1,5 @@
 ﻿using Exiled.API.Features;
+using PlayerRoles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,7 @@ using UncomplicatedCustomRoles.Commands;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
+using static PlayerList;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
@@ -87,6 +89,9 @@ namespace UncomplicatedCustomRoles.API.Features
             List.Remove(this);
         }
 
+        /// <summary>
+        /// Remove the current CustomRole from the player without destroying the instance
+        /// </summary>
         public void Remove()
         {
             if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null && Role.BadgeColor.Length > 2 && Badge is not null && Badge is Triplet<string, string, bool> badge)
@@ -183,6 +188,56 @@ namespace UncomplicatedCustomRoles.API.Features
                 SpawnManager.SummonSubclassApplier(player, role);
 
             return Get(player);
+        }
+
+        /// <summary>
+        /// Try to get the custom <see cref="Team"/> of the <see cref="ICustomRole"/> of the found <see cref="SummonedCustomRole"/>
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="team"></param>
+        /// <returns></returns>
+        public static bool TryPatchCustomRole(ReferenceHub player, out Team team)
+        {
+            if (TryGet(player, out SummonedCustomRole customRole) && customRole.Role.Team != customRole.Role.Role.GetTeam())
+            {
+                team = customRole.Role.Team;
+                return true;
+            }
+
+            team = customRole.Role.Role.GetTeam();
+            return false;
+        }
+
+        /// <summary>
+        /// Try to check if the custom <see cref="Team"/> of the <see cref="ICustomRole"/> of the found <see cref="SummonedCustomRole"/> is equal to the given <see cref="Team"/>
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="team"></param>
+        /// <returns></returns>
+        public static bool TryCheckForCustomTeam(ReferenceHub player, Team teamCheck, out bool result)
+        {
+            if (TryPatchCustomRole(player, out Team customTeam))
+            {
+                result = customTeam == teamCheck;
+                return true;
+            }
+
+            result = false;
+            return false;
+        }
+
+        /// <summary>
+        /// Try to get the custom <see cref="Team"/> of the <see cref="ICustomRole"/> of the found <see cref="SummonedCustomRole"/>, otherwise return the given default <see cref="Team"/>
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="def"></param>
+        /// <returns></returns>
+        public static Team TryGetCusomTeam(ReferenceHub player, Team? def = null)
+        {
+            if (TryGet(player, out SummonedCustomRole customRole) && customRole.Role.Team != customRole.Role.Role.GetTeam())
+                return customRole.Role.Team;
+
+            return def ?? player.GetTeam();
         }
 
         internal static void InfiniteEffectActor()

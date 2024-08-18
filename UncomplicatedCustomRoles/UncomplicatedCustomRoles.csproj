@@ -91,6 +91,7 @@
     <Compile Include="Manager\SpawnManager.cs" />
     <Compile Include="Patches\InventoryLimitsPrefix.cs" />
     <Compile Include="Patches\Scp3114StranglePrefix.cs" />
+    <Compile Include="Patches\TeamPatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Interfaces\ICustomRole.cs" />
     <Compile Include="Interfaces\IEffect.cs" />

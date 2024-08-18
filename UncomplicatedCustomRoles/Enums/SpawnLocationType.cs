@@ -5,5 +5,6 @@
     RoomsSpawn,
     SpawnPointSpawn,
     KeepRoleSpawn,
-    KeepCurrentPositionSpawn
+    KeepCurrentPositionSpawn,
+    ClassDCell
 }

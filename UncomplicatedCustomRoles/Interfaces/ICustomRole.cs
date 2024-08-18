@@ -24,6 +24,8 @@ namespace UncomplicatedCustomRoles.Interfaces
 
         public abstract RoleTypeId Role { get; set; }
 
+        public abstract Team Team { get; set; }
+
         public abstract RoleTypeId RoleAppearance { get; set; }
 
         public abstract List<Team> IsFriendOf { get; set; }

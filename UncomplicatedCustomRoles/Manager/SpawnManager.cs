@@ -94,6 +94,9 @@ namespace UncomplicatedCustomRoles.Manager
                             player.Position = BasicPosition;
                         }
                         break;
+                    case SpawnLocationType.ClassDCell:
+                        player.Position = RoleTypeId.ClassD.GetRandomSpawnLocation().Position;
+                        break;
                 };
             }
 
@@ -236,52 +239,12 @@ namespace UncomplicatedCustomRoles.Manager
             LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})! [2VDS]");
         }
 
-        /*
-        public static KeyValuePair<bool, object> ParseEscapeRole(string roleAfterEscape, Player player)
-        {
-            List<string> Role = new();
-
-            if (roleAfterEscape is not null && roleAfterEscape != string.Empty)
-            {
-                if (roleAfterEscape.Contains(","))
-                {
-                    string[] roles = roleAfterEscape.Split(',');
-                    foreach (string role in roles)
-                        foreach (string rolePart in role.Split(':')) 
-                            Role.Add(rolePart);
-                }
-
-                int SearchIndex = 0;
-
-                if (player.IsCuffed && player.Cuffer is not null)
-                    SearchIndex = player.Cuffer.Role.Team switch
-                    {
-                        Team.FoundationForces => 2,
-                        Team.ChaosInsurgency => 4,
-                        Team.Scientists => 6,
-                        Team.ClassD => 8,
-                        _ => 0
-                    };
-
-                // Let's proceed
-                if (Role.Count >= SearchIndex + 2)
-                    if (Role[SearchIndex] is "IR")
-                        return new(false, Role[SearchIndex + 1]);
-                    else if (Role[SearchIndex] is "CR")
-                        return new(true, Role[SearchIndex + 1]);
-                    else
-                        LogManager.Error($"Error while parsing role_after_escape for player {player.Nickname} ({player.Id}): the first string was not 'IR' nor 'CR', found '{Role[SearchIndex]}'!\nPlease see our documentation: https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki/Specifics#role-after-escape");
-                else
-                    LogManager.Debug($"Error while parsing role_after_escape: index is out of range!\nExpected to found {SearchIndex}, total: {Role.Count}!");
-            }
-
-            return new(false, null);
-        }*/
-
         public static KeyValuePair<bool, object> ParseEscapeRole(Dictionary<string, string> roleAfterEscape, Player player)
         {
             Dictionary<Team, KeyValuePair<bool, object>> AsCuffedByInternalTeam = new();
             // Dictionary<uint, KeyValuePair<bool, object>> AsCuffedByCustomTeam = new(); we will add the support to UCT and UIU-RS
+            // cuffed by InternalTeam FoundationForces
+            //   0     1       2             3           = 4
             Dictionary<int, KeyValuePair<bool, object>> AsCuffedByCustomRole = new();
             KeyValuePair<bool, object> Default = new(false, RoleTypeId.Spectator);
 

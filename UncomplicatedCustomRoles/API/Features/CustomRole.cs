@@ -62,6 +62,11 @@ namespace UncomplicatedCustomRoles.API.Features
         public RoleTypeId Role { get; set; } = RoleTypeId.ClassD;
 
         /// <summary>
+        /// Gets or sets the <see cref="PlayerRoles.Team"/> of the player
+        /// </summary>
+        public Team Team { get; set; } = RoleTypeId.ClassD.GetTeam();
+
+        /// <summary>
         /// Gets or sets the the Role Appeareance for the player.<br></br>
         /// If it's equal to <see cref="Role"/> then won't be applied
         /// </summary>
