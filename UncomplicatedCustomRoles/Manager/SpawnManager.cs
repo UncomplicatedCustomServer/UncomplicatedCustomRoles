@@ -13,6 +13,7 @@ using MEC;
 using Exiled.Permissions.Extensions;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Struct;
+using UncomplicatedCustomRoles.API.Enums;
 
 // Mormora, la gente mormora
 // falla tacere praticando l'allegria
@@ -63,29 +64,29 @@ namespace UncomplicatedCustomRoles.Manager
 
             RoleSpawnFlags SpawnFlag = RoleSpawnFlags.None;
 
-            if (Role.SpawnSettings.Spawn == SpawnLocationType.KeepRoleSpawn)
+            if (Role.SpawnSettings.Spawn == SpawnType.KeepRoleSpawn)
                 SpawnFlag = RoleSpawnFlags.UseSpawnpoint;
 
             player.Role.Set(Role.Role, SpawnFlag);
 
-            if (Role.SpawnSettings.Spawn == SpawnLocationType.KeepCurrentPositionSpawn)
+            if (Role.SpawnSettings.Spawn == SpawnType.KeepCurrentPositionSpawn)
                 player.Position = BasicPosition;
 
             if (SpawnFlag == RoleSpawnFlags.None)
             {
                 switch (Role.SpawnSettings.Spawn)
                 {
-                    case SpawnLocationType.ZoneSpawn:
+                    case SpawnType.ZoneSpawn:
                         player.Position = Room.List.Where(room => room.Zone == Role.SpawnSettings.SpawnZones.RandomItem() && room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
                         break;
-                    case SpawnLocationType.CompleteRandomSpawn:
+                    case SpawnType.CompleteRandomSpawn:
                         player.Position = Room.List.Where(room => room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
                         break;
-                    case SpawnLocationType.RoomsSpawn:
+                    case SpawnType.RoomsSpawn:
                         LogManager.Silent($"Going to spawn CR {Role.Name} ({Role.Id}) ({player.Nickname}) at a Room - Count: {Role.SpawnSettings.SpawnRooms.Count}");
                         player.Position = Room.Get(Role.SpawnSettings.SpawnRooms.RandomItem()).Position.AddY(1.5f);
                         break;
-                    case SpawnLocationType.SpawnPointSpawn:
+                    case SpawnType.SpawnPointSpawn:
                         if (Role.SpawnSettings.SpawnPoint is not null && SpawnPoint.TryGet(Role.SpawnSettings.SpawnPoint, out SpawnPoint spawn))
                             spawn.Spawn(player);
                         else
@@ -94,7 +95,7 @@ namespace UncomplicatedCustomRoles.Manager
                             player.Position = BasicPosition;
                         }
                         break;
-                    case SpawnLocationType.ClassDCell:
+                    case SpawnType.ClassDCell:
                         player.Position = RoleTypeId.ClassD.GetRandomSpawnLocation().Position;
                         break;
                 };

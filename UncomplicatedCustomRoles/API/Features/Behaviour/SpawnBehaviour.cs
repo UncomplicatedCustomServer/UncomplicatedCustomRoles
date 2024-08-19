@@ -1,6 +1,7 @@
 ﻿using Exiled.API.Enums;
 using PlayerRoles;
 using System.Collections.Generic;
+using UncomplicatedCustomRoles.API.Enums;
 
 namespace UncomplicatedCustomRoles.API.Features.Behaviour
 {
@@ -19,7 +20,7 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
 
         public int SpawnChance { get; set; } = 60;
 
-        public SpawnLocationType Spawn { get; set; } = SpawnLocationType.RoomsSpawn;
+        public SpawnType Spawn { get; set; } = SpawnType.RoomsSpawn;
 
         public List<ZoneType> SpawnZones { get; set; } = new();
 

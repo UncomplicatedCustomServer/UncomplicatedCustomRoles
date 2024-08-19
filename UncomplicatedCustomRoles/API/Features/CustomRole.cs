@@ -3,6 +3,7 @@ using PlayerRoles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
@@ -301,17 +302,17 @@ namespace UncomplicatedCustomRoles.API.Features
                 return false;
             }
 
-            if (Role.SpawnSettings.Spawn == SpawnLocationType.ZoneSpawn && Role.SpawnSettings.SpawnZones.Count() < 1)
+            if (Role.SpawnSettings.Spawn == SpawnType.ZoneSpawn && Role.SpawnSettings.SpawnZones.Count() < 1)
             {
                 LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the ZoneSpawn as SpawnType the List SpawnZones can't be empty!");
                 return false;
             }
-            else if (Role.SpawnSettings.Spawn == SpawnLocationType.RoomsSpawn && Role.SpawnSettings.SpawnRooms.Count() < 1)
+            else if (Role.SpawnSettings.Spawn == SpawnType.RoomsSpawn && Role.SpawnSettings.SpawnRooms.Count() < 1)
             {
                 LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the RoomSpawn as SpawnType the List SpawnRooms can't be empty!");
                 return false;
             }
-            else if (Role.SpawnSettings.Spawn == SpawnLocationType.SpawnPointSpawn && (Role.SpawnSettings.SpawnPoint is null || Role.SpawnSettings.SpawnPoint == string.Empty))
+            else if (Role.SpawnSettings.Spawn == SpawnType.SpawnPointSpawn && (Role.SpawnSettings.SpawnPoint is null || Role.SpawnSettings.SpawnPoint == string.Empty))
             {
                 LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the SpawnPointSpawn as SpawnType the SpawnPoint can't be empty or null!");
                 return false;

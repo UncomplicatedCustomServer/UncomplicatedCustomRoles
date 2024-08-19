@@ -74,7 +74,8 @@
     <Compile Include="Commands\Spawn.cs" />
     <Compile Include="Commands\SpawnPoint.cs" />
     <Compile Include="Config.cs" />
-    <Compile Include="Enums\SpawnLocationType.cs" />
+    <Compile Include="API\Enums\CustomFlags.cs" />
+    <Compile Include="API\Enums\SpawnType.cs" />
     <Compile Include="Events\EventHandler.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
     <Compile Include="Extensions\ListExtension.cs" />
