@@ -143,7 +143,10 @@ namespace UncomplicatedCustomRoles.Manager
                         Player.AddAmmo(Ammo.Key, Ammo.Value);
 
                 if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
-                    Player.ApplyCustomInfo(Role.CustomInfo);
+                    if (Role.OverrideRoleName)
+                        Player.ApplyCustomInfoAndRoleName(Role.CustomInfo, Role.Name);
+                    else
+                        Player.ApplyClearCustomInfo(Role.CustomInfo);
 
                 // Apply every required stats
                 Role.Health?.Apply(Player);
@@ -214,7 +217,10 @@ namespace UncomplicatedCustomRoles.Manager
             }
 
             if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
-                Player.ApplyCustomInfo(Role.CustomInfo);
+                if (Role.OverrideRoleName)
+                    Player.ApplyCustomInfoAndRoleName(Role.CustomInfo, Role.Name);
+                else
+                    Player.ApplyClearCustomInfo(Role.CustomInfo);
 
             // Changing nickname if needed
             bool ChangedNick = false;

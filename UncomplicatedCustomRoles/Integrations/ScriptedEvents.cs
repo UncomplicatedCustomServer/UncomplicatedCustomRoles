@@ -8,6 +8,7 @@ using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace UncomplicatedCustomRoles.Integrations
 {
@@ -27,7 +28,7 @@ namespace UncomplicatedCustomRoles.Integrations
 
         internal static List<string> CustomActions { get; } = new();
 
-        public static void RegisterCustomAction(string name, Func<string[], Tuple<bool, string>> action)
+        public static void RegisterCustomAction(string name, Func<Tuple<string[], object>, Tuple<bool, string, object[]>> action)
         {
             if (CanInvoke)
             {
@@ -47,41 +48,57 @@ namespace UncomplicatedCustomRoles.Integrations
         public static void RegisterCustomActions()
         {
             // Set custom role
-            RegisterCustomAction("SET_CUSTOM_ROLE", (string[] args) =>
+            RegisterCustomAction("SET_CUSTOM_ROLE", (Tuple<string[], object> args) =>
             {
-                if (args.Length < 2)
-                    return new(false, "Error: the function SET_CUSTOM_ROLE requires 2 args: SET_CUSTOM_ROLE <PlayerId> <RoleId>");
+                if (args.Item1.Length < 2)
+                    return new(false, "Error: the function SET_CUSTOM_ROLE requires 2 args: SET_CUSTOM_ROLE <PlayerId> <RoleId>", new object[] { });
 
-                Player Player = Player.Get(int.Parse(args[0]));
+                Player Player = Player.Get(int.Parse(args.Item1[0]));
 
                 if (Player is null)
-                    return new(false, $"Error: the given Player ({int.Parse(args[0])}) does not exists!");
+                    return new(false, $"Error: the given Player ({int.Parse(args.Item1[0])}) does not exists!", new object[] { });
 
-                if (!CustomRole.CustomRoles.ContainsKey(int.Parse(args[1])))
-                    return new(false, $"Error: the given CustomRole ({int.Parse(args[1])}) does not exists!");
+                if (!CustomRole.CustomRoles.ContainsKey(int.Parse(args.Item1[1])))
+                    return new(false, $"Error: the given CustomRole ({int.Parse(args.Item1[1])}) does not exists!", new object[] { });
 
-                ICustomRole Role = CustomRole.CustomRoles[int.Parse(args[1])];
+                ICustomRole Role = CustomRole.CustomRoles[int.Parse(args.Item1[1])];
 
                 Player.SetCustomRoleSync(Role);
 
-                return new(true, string.Empty);
+                return new(true, string.Empty, new object[] { });
             });
 
             // Remove custom role
-            RegisterCustomAction("REMOVE_CUSTOM_ROLE", (string[] args) =>
+            RegisterCustomAction("REMOVE_CUSTOM_ROLE", (Tuple<string[], object> args) =>
             {
-                if (args.Length < 1)
-                    return new(false, "Error: the function REMOVE_CUSTOM_ROLE requires 1 args: REMOVE_CUSTOM_ROLE <PlayerId>");
+                if (args.Item1.Length < 1)
+                    return new(false, "Error: the function REMOVE_CUSTOM_ROLE requires 1 args: REMOVE_CUSTOM_ROLE <PlayerId>", new object[] { });
 
-                Player Player = Player.Get(int.Parse(args[0]));
+                Player Player = Player.Get(int.Parse(args.Item1[0]));
 
                 if (Player is null)
-                    return new(false, $"Error: the given Player ({int.Parse(args[0])}) does not exists!");
+                    return new(false, $"Error: the given Player ({int.Parse(args.Item1[0])}) does not exists!", new object[] { });
 
                 if (Player.HasCustomRole())
                     Player.TryRemoveCustomRole();
 
-                return new(true, string.Empty);
+                return new(true, string.Empty, new object[] { });
+            });
+
+            RegisterCustomAction("GET_CUSTOM_ROLE", (Tuple<string[], object> args) =>
+            {
+                if (args.Item1.Length < 1)
+                    return new(false, "Error: the function HAS_CUSTOM_ROLE requires 1 args: HAS_CUSTOM_ROLE <PlayerId>", new object[] { });
+
+                Player Player = Player.Get(int.Parse(args.Item1[0]));
+
+                if (Player is null)
+                    return new(false, $"Error: the given Player ({int.Parse(args.Item1[0])}) does not exists!", new object[] { });
+
+                if (Player.TryGetSummonedInstance(out SummonedCustomRole role))
+                    return new(true, string.Empty, new object[] { role.Role.Id.ToString() });
+
+                return new(true, string.Empty, new object[] { string.Empty });
             });
         }
 

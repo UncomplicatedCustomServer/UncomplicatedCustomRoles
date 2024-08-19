@@ -88,8 +88,17 @@ namespace UncomplicatedCustomRoles
                 LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
             }
 
-            if (!HttpManager.IsLatestVersion(out Version latest))
-                LogManager.Warn($"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Version} | Latest available: v{latest}\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
+            if (HttpManager.LatestVersion.CompareTo(Version) > 0)
+                LogManager.Warn($"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Version} | Latest available: v{HttpManager.LatestVersion}\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
+            else if (HttpManager.LatestVersion.CompareTo(Version) < 0)
+            {
+                LogManager.Info($"You are using an EXPERIMENTAL or PRE-RELEASE version of UncomplicatedCustomRoles!\nLatest stable release: {HttpManager.LatestVersion}\nWe do not assure that this version won't make your SCP:SL server crash! - Debug log has been enabled!");
+                if (!Log.DebugEnabled.Contains(Assembly))
+                {
+                    Config.Debug = true;
+                    Log.DebugEnabled.Add(Assembly);
+                }
+            }
 
             InfiniteEffect.Stop();
             InfiniteEffect.EffectAssociationAllowed = true;

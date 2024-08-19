@@ -14,6 +14,8 @@ namespace UncomplicatedCustomRoles.Interfaces
 
         public abstract string Name { get; set; }
 
+        public abstract bool OverrideRoleName { get; set; }
+
         public abstract string? Nickname { get; set; }
 
         public abstract string CustomInfo { get; set; }

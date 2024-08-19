@@ -36,6 +36,11 @@ namespace UncomplicatedCustomRoles.API.Features
         public string Name { get; set; } = "Janitor";
 
         /// <summary>
+        /// Gets or sets whether the <see cref="RoleTypeId"/> name should be hidden in favor of the <see cref="Name"/>
+        /// </summary>
+        public bool OverrideRoleName { get; set; } = false;
+
+        /// <summary>
         /// Gets or sets the nickname that will be set to the player if not null.
         /// </summary>
         public string? Nickname { get; set; } = "D-%dnumber%";

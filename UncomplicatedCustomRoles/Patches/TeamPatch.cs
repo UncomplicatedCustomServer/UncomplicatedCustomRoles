@@ -3,6 +3,8 @@ using Footprinting;
 using HarmonyLib;
 using InventorySystem.Items.ThrowableProjectiles;
 using PlayerRoles;
+using PlayerRoles.PlayableScps;
+using PlayerRoles.PlayableScps.Scp079;
 using PlayerRoles.PlayableScps.Scp079.Rewards;
 using PlayerRoles.PlayableScps.Scp939.Mimicry;
 using PlayerStatsSystem;
@@ -21,25 +23,25 @@ namespace UncomplicatedCustomRoles.Patches
 {
 #pragma warning disable IDE0051
 
-    [HarmonyPatch(typeof(Player), nameof(Player.Team))]
+    [HarmonyPatch(typeof(Player), nameof(Player.Team), MethodType.Getter)]
     internal class TeamPatch
     {
         static bool Prefix(Player __instance, ref Team __result) => !SummonedCustomRole.TryPatchCustomRole(__instance.ReferenceHub, out __result);
     }
 
-    [HarmonyPatch(typeof(Player), nameof(Player.IsSCP))]
+    [HarmonyPatch(typeof(Player), nameof(Player.IsSCP), MethodType.Getter)]
     internal class IsScpPatch
     {
         static bool Prefix(Player __instance, ref bool __result) => !SummonedCustomRole.TryCheckForCustomTeam(__instance.ReferenceHub, Team.SCPs, out __result);
     }
 
-    [HarmonyPatch(typeof(Player), nameof(Player.IsChaos))]
+    [HarmonyPatch(typeof(Player), nameof(Player.IsChaos), MethodType.Getter)]
     internal class IsChaosPatch
     {
         static bool Prefix(Player __instance, ref bool __result) => !SummonedCustomRole.TryCheckForCustomTeam(__instance.ReferenceHub, Team.ChaosInsurgency, out __result);
     }
 
-    [HarmonyPatch(typeof(Player), nameof(Player.IsNTF))]
+    [HarmonyPatch(typeof(Player), nameof(Player.IsNTF), MethodType.Getter)]
     internal class IsNtfPatch
     {
         static bool Prefix(Player __instance, ref bool __result) => !SummonedCustomRole.TryCheckForCustomTeam(__instance.ReferenceHub, Team.FoundationForces, out __result);
@@ -54,13 +56,13 @@ namespace UncomplicatedCustomRoles.Patches
             int index = -1;
 
             for (int i = 0; i < newInstructions.Count; i++)
-                if (newInstructions[i].opcode == OpCodes.Stloc_2)
+                if (newInstructions[i].opcode == OpCodes.Ldfld && newInstructions[i].operand is FieldInfo fieldInfo && fieldInfo == Field(typeof(Footprint), nameof(Footprint.Role)))
                 {
-                    index = i+1; 
+                    index = i; 
                     break;
                 }
 
-            if (index != -1)
+            /*if (index != -1)
                 newInstructions.InsertRange(index, new CodeInstruction[]
                 {
                     // ReferenceHub
@@ -77,6 +79,13 @@ namespace UncomplicatedCustomRoles.Patches
                     // Save the new role
                     new(OpCodes.Stloc_2),
                 });
+            */
+
+            if (index != 1)
+            {
+                newInstructions[index] = new(OpCodes.Ldfld, Field(typeof(Footprint), nameof(Footprint.Hub)));
+                newInstructions[index + 1] = new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) }));
+            }
 
             return newInstructions;
         }
@@ -257,14 +266,21 @@ namespace UncomplicatedCustomRoles.Patches
     }
 
     // Most important patch
-    [HarmonyPatch(typeof(PlayerRoleBase), nameof(PlayerRoleBase.Team))]
-    internal class RolesUtilsHumanPatch
+    [HarmonyPatch(typeof(HumanRole), nameof(HumanRole.Team), MethodType.Getter)]
+    internal class RoleHumanPatch
     {
-        static bool Prefix(PlayerRoleBase __instance, ref Team __result)
-        {
-            if (SummonedCustomRole.TryPatchCustomRole(__instance._lastOwner, out __result))
-                return false;
-            return true;
-        }
+        static bool Prefix(HumanRole __instance, ref Team __result) => !SummonedCustomRole.TryPatchCustomRole(__instance._lastOwner, out __result);
+    }
+
+    [HarmonyPatch(typeof(FpcStandardScp), nameof(FpcStandardScp.Team), MethodType.Getter)]
+    internal class RoleScpPatch
+    {
+        static bool Prefix(FpcStandardScp __instance, ref Team __result) => !SummonedCustomRole.TryPatchCustomRole(__instance._lastOwner, out __result);
+    }
+
+    [HarmonyPatch(typeof(Scp079Role), nameof(Scp079Role.Team), MethodType.Getter)]
+    internal class RoleScp079Patch
+    {
+        static bool Prefix(Scp079Role __instance, ref Team __result) => !SummonedCustomRole.TryPatchCustomRole(__instance._lastOwner, out __result);
     }
 }

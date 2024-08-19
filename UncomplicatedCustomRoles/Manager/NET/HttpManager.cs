@@ -13,6 +13,8 @@ using UncomplicatedCustomRoles.API.Struct;
 
 namespace UncomplicatedCustomRoles.Manager.NET
 {
+#pragma warning disable IDE1006
+
     internal class HttpManager
     {
         /// <summary>
@@ -71,17 +73,35 @@ namespace UncomplicatedCustomRoles.Manager.NET
         public List<float> ResponseTimes { get; } = new();
 
         /// <summary>
+        /// Gets the latest <see cref="Version"/> of the plugin, loaded by the UCS cloud
+        /// </summary>
+        public Version LatestVersion { get
+            {
+                if (_latestVersion is null)
+                    LoadLatestVersion();
+                return _latestVersion;
+            }
+        }
+
+        private Version _latestVersion { get; set; } = null;
+
+        /// <summary>
         /// Create a new istance of the HttpManager
         /// </summary>
         /// <param name="prefix"></param>
         /// <param name="maxErrors"></param>
         public HttpManager(string prefix, uint maxErrors = 5)
         {
+            if (!CheckForDependency())
+                Timing.CallContinuously(15f, () => LogManager.Error("You don't have the dependency Newtonsoft.Json installed!\nPlease install it AS SOON AS POSSIBLE!\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV");
+
             Prefix = prefix;
             MaxErrors = maxErrors;
             HttpClient = new();
             LoadCreditTags();
         }
+
+        private bool CheckForDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "Newtonsoft.Json");
 
         public HttpResponseMessage HttpGetRequest(string url)
         {
@@ -140,14 +160,14 @@ namespace UncomplicatedCustomRoles.Manager.NET
             return HttpGetRequest($"{Endpoint}/owners/add?discordid={discordId}")?.StatusCode ?? HttpStatusCode.InternalServerError;
         }
 
-        public Version LatestVersion()
+        public void LoadLatestVersion()
         {
             string Version = RetriveString(HttpGetRequest($"{Endpoint}/{Prefix}/version?vts=5"));
-            
-            if (Version is not null && Version != string.Empty)
-                return new(Version);
 
-            return Plugin.Instance.Version;
+            if (Version is not null && Version != string.Empty && Version.Contains("."))
+                _latestVersion = new(Version);
+
+            _latestVersion = Plugin.Instance.Version;
         }
 
         public void LoadCreditTags()
@@ -186,7 +206,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         public bool IsLatestVersion(out Version latest)
         {
-            latest = LatestVersion();
+            latest = LatestVersion;
             if (latest.CompareTo(Plugin.Instance.Version) > 0)
                 return false;
 
@@ -196,7 +216,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         public bool IsLatestVersion()
         {
-            if (LatestVersion().CompareTo(Plugin.Instance.Version) > 0)
+            if (LatestVersion.CompareTo(Plugin.Instance.Version) > 0)
                 return false;
 
             return true;
