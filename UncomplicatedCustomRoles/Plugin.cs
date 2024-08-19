@@ -109,10 +109,6 @@ namespace UncomplicatedCustomRoles
             FileConfigs.LoadAll();
             FileConfigs.LoadAll(Server.Port.ToString());
 
-            // Register ScriptedEvents and RespawnTimer integration
-            ScriptedEvents.RegisterCustomActions();
-            RespawnTimer.Enable();
-
             // Start communicating with the endpoint API
             SpawnPointApiCommunicator.Init();
 
@@ -120,9 +116,6 @@ namespace UncomplicatedCustomRoles
             Harmony.DEBUG = true;
             _harmony = new($"com.ucs.ucr_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
-
-            // Run the import managet
-            ImportManager.Init();
 
             base.OnEnabled();
         }
@@ -157,6 +150,19 @@ namespace UncomplicatedCustomRoles
             Instance = null;
 
             base.OnDisabled();
+        }
+
+        /// <summary>
+        /// Invoked after <see cref="Exiled.Loader"/> finish to load every plugin
+        /// </summary>
+        public void OnFinishedLoadingPlugins()
+        {
+            // Register ScriptedEvents and RespawnTimer integration
+            ScriptedEvents.RegisterCustomActions();
+            RespawnTimer.Enable();
+
+            // Run the import managet
+            ImportManager.Init();
         }
     }
 }

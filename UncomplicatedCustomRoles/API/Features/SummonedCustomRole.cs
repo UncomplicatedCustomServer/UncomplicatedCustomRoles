@@ -21,14 +21,14 @@ namespace UncomplicatedCustomRoles.API.Features
         public static List<SummonedCustomRole> List { get; } = new();
 
         /// <summary>
-        /// Gets the summon queue in order to keep trace of summoning players
-        /// </summary>
-        internal static List<int> SummonQueue { get; } = new();
-
-        /// <summary>
         /// Gets if the current SummonedCustomRole is valid or not
         /// </summary>
         public bool IsValid => _InternalValid && Player.IsAlive;
+
+        /// <summary>
+        /// The unique identifier for this instance of <see cref="SummonedCustomRole"/>
+        /// </summary>
+        public string Id { get; }
 
         /// <summary>
         /// Gets the <see cref="Exiled.API.Features.Player"/>
@@ -69,6 +69,7 @@ namespace UncomplicatedCustomRoles.API.Features
 
         public SummonedCustomRole(Player player, ICustomRole role, Triplet<string, string, bool>? badge, List<IEffect> infiniteEffects, bool isCustomNickname = false)
         {
+            Id = Guid.NewGuid().ToString();
             Player = player;
             Role = role;
             SpawnTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
@@ -123,18 +124,25 @@ namespace UncomplicatedCustomRoles.API.Features
         public static List<SummonedCustomRole> Get(ICustomRole role) => List.Where(scr => scr.Role == role).ToList();
 
         /// <summary>
-        /// Gets a <see cref="SummonedCustomRole"/> by the <see cref="Exiled.API.Features.Player"/>
+        /// Gets a <see cref="SummonedCustomRole"/> instance by the <see cref="Exiled.API.Features.Player"/>
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
         public static SummonedCustomRole Get(Player player) => List.Where(scr => scr.Player.Id == player.Id).FirstOrDefault();
 
         /// <summary>
-        /// Gets a <see cref="SummonedCustomRole"/> by the <see cref="ReferenceHub"/>
+        /// Gets a <see cref="SummonedCustomRole"/> instance by the <see cref="ReferenceHub"/>
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
         public static SummonedCustomRole Get(ReferenceHub player) => List.Where(scr => scr.Player.Id == player.PlayerId).FirstOrDefault();
+
+        /// <summary>
+        /// Gets a <see cref="SummonedCustomRole"/> instance by the Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public static SummonedCustomRole Get(string id) => List.Where(scr => scr.Id == id).FirstOrDefault();
 
         /// <summary>
         /// Try to get a <see cref="SummonedCustomRole"/> by the <see cref="Exiled.API.Features.Player"/>

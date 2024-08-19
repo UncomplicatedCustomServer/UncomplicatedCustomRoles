@@ -93,7 +93,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
         public HttpManager(string prefix, uint maxErrors = 5)
         {
             if (!CheckForDependency())
-                Timing.CallContinuously(15f, () => LogManager.Error("You don't have the dependency Newtonsoft.Json installed!\nPlease install it AS SOON AS POSSIBLE!\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV");
+                Timing.CallContinuously(15f, () => LogManager.Error("You don't have the dependency Newtonsoft.Json installed!\nPlease install it AS SOON AS POSSIBLE!\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV"));
 
             Prefix = prefix;
             MaxErrors = maxErrors;

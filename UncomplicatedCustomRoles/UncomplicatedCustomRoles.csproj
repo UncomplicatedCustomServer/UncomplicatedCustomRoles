@@ -90,6 +90,7 @@
     <Compile Include="Manager\NET\SpawnPointApiCommunicator.cs" />
     <Compile Include="Manager\SpawnManager.cs" />
     <Compile Include="Patches\InventoryLimitsPrefix.cs" />
+    <Compile Include="Patches\PluginsLoaded.cs" />
     <Compile Include="Patches\Scp3114StranglePrefix.cs" />
     <Compile Include="Patches\TeamPatch.cs" />
     <Compile Include="Plugin.cs" />
