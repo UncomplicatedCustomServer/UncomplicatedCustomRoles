@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using Exiled.Permissions.Extensions;
 using System.Linq;
-using UncomplicatedCustomRoles.Interfaces;
+using UncomplicatedCustomRoles.API.Interfaces;
 
 namespace UncomplicatedCustomRoles.Commands
 {

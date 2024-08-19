@@ -3,7 +3,7 @@ using MEC;
 using PlayerRoles;
 using System;
 using UncomplicatedCustomRoles.API.Features;
-using UncomplicatedCustomRoles.Interfaces;
+using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 

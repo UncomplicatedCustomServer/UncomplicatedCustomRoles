@@ -2,5 +2,6 @@
 
 namespace UncomplicatedCustomRoles.API.Attributes
 {
-    internal class PluginCustomRole : Attribute { }
+    [AttributeUsage(AttributeTargets.Class)]
+    public class PluginCustomRole : Attribute { }
 }

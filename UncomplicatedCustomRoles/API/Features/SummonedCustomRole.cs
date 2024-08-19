@@ -3,12 +3,10 @@ using PlayerRoles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Commands;
-using UncomplicatedCustomRoles.Extensions;
-using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
-using static PlayerList;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
@@ -72,7 +70,7 @@ namespace UncomplicatedCustomRoles.API.Features
 
         private bool _InternalValid { get; set; }
 
-        public SummonedCustomRole(Player player, ICustomRole role, Triplet<string, string, bool>? badge, List<IEffect> infiniteEffects, bool isCustomNickname = false)
+        internal SummonedCustomRole(Player player, ICustomRole role, Triplet<string, string, bool>? badge, List<IEffect> infiniteEffects, bool isCustomNickname = false)
         {
             Id = Guid.NewGuid().ToString();
             Player = player;
@@ -218,7 +216,7 @@ namespace UncomplicatedCustomRoles.API.Features
                 return true;
             }
 
-            team = player?.GetTeam() ?? Team.OtherAlive;
+            team = player?.GetRoleId().GetTeam() ?? Team.OtherAlive;
             return false;
         }
 
@@ -251,7 +249,7 @@ namespace UncomplicatedCustomRoles.API.Features
             if (TryGet(player, out SummonedCustomRole customRole) && customRole.Role.Team != customRole.Role.Role.GetTeam())
                 return customRole.Role.Team;
 
-            return def ?? player.GetTeam();
+            return def ?? player.GetRoleId().GetTeam();
         }
 
         internal static void InfiniteEffectActor()

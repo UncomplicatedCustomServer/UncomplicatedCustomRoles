@@ -57,7 +57,7 @@
     <Compile Include="API\Features\Behaviour\HealthBehaviour.cs" />
     <Compile Include="API\Features\CustomRole.cs" />
     <Compile Include="API\Features\CustomRoleEventHandler.cs" />
-    <Compile Include="API\Features\CustomRoleEvents.cs" />
+    <Compile Include="API\Features\EventCustomRole.cs" />
     <Compile Include="API\Features\Escape.cs" />
     <Compile Include="API\Features\InfiniteEffect.cs" />
     <Compile Include="API\Features\Behaviour\SpawnBehaviour.cs" />
@@ -86,8 +86,8 @@
     <Compile Include="Extensions\PlayerExtension.cs" />
     <Compile Include="Extensions\Vector3Extension.cs" />
     <Compile Include="Integrations\ScriptedEvents.cs" />
-    <Compile Include="Interfaces\ICustomRoleEvents.cs" />
-    <Compile Include="Interfaces\IUCRCommand.cs" />
+    <Compile Include="API\Interfaces\ICustomRoleEvents.cs" />
+    <Compile Include="API\Interfaces\IUCRCommand.cs" />
     <Compile Include="Manager\FileConfigs.cs" />
     <Compile Include="API\Features\Effect.cs" />
     <Compile Include="Manager\NET\HttpManager.cs" />
@@ -100,8 +100,8 @@
     <Compile Include="Patches\Scp3114StranglePrefix.cs" />
     <Compile Include="Patches\TeamPatch.cs" />
     <Compile Include="Plugin.cs" />
-    <Compile Include="Interfaces\ICustomRole.cs" />
-    <Compile Include="Interfaces\IEffect.cs" />
+    <Compile Include="API\Interfaces\ICustomRole.cs" />
+    <Compile Include="API\Interfaces\IEffect.cs" />
     <Compile Include="Integrations\RespawnTimer.cs" />
   </ItemGroup>
   <ItemGroup>

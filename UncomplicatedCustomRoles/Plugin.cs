@@ -12,7 +12,6 @@ using Scp330Handler = Exiled.Events.Handlers.Scp330;
 using UncomplicatedCustomRoles.API.Features;
 using HarmonyLib;
 using UncomplicatedCustomRoles.Manager.NET;
-using CustomPlayerEffects;
 
 namespace UncomplicatedCustomRoles
 {
@@ -24,7 +23,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(4, 0, 0, 2);
+        public override Version Version { get; } = new(4, 0, 0, 3);
 
         public override Version RequiredExiledVersion { get; } = new(8, 11, 0);
 
@@ -117,11 +116,16 @@ namespace UncomplicatedCustomRoles
             _harmony = new($"com.ucs.ucr_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
 
+            // Register custom event handlers for custom roles
+            CustomRoleEventHandler.RegisterEvents();
+
             base.OnEnabled();
         }
 
         public override void OnDisabled()
         {
+            CustomRoleEventHandler.UnregisterEvents();
+
             _harmony.UnpatchAll();
 
             RespawnTimer.Disable();

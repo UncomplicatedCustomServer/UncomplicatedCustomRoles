@@ -1,11 +1,10 @@
 ﻿using Exiled.Events.EventArgs.Player;
+using UncomplicatedCustomRoles.API.Features;
 
-namespace UncomplicatedCustomRoles.Interfaces
+namespace UncomplicatedCustomRoles.API.Interfaces
 {
-    internal interface ICustomRoleEvents
+    public interface ICustomRoleEvents
     {
-        public abstract void OnReservedSlot(ReservedSlotsCheckEventArgs ev);
-
         public abstract void OnKicking(KickingEventArgs ev);
 
         public abstract void OnKicked(KickedEventArgs ev);
@@ -158,8 +157,6 @@ namespace UncomplicatedCustomRoles.Interfaces
 
         public abstract void OnPlayerDamageWindow(DamagingWindowEventArgs ev);
 
-        public abstract void OnDamagingDoor(DamagingDoorEventArgs ev);
-
         public abstract void OnUnlockingGenerator(UnlockingGeneratorEventArgs ev);
 
         public abstract void OnOpeningGenerator(OpeningGeneratorEventArgs ev);
@@ -191,12 +188,6 @@ namespace UncomplicatedCustomRoles.Interfaces
         public abstract void OnHealed(HealedEventArgs ev);
 
         public abstract void OnDying(DyingEventArgs ev);
-
-        public abstract void OnJoined(JoinedEventArgs ev);
-
-        public abstract void OnVerified(VerifiedEventArgs ev);
-
-        public abstract void OnDestroying(DestroyingEventArgs ev);
 
         public abstract void OnChangingNickname(ChangingNicknameEventArgs ev);
     }

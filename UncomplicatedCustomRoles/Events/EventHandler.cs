@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.Manager;
-using UncomplicatedCustomRoles.Interfaces;
 using MEC;
 using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
@@ -13,6 +12,7 @@ using System;
 using UncomplicatedCustomRoles.API.Features;
 using Exiled.Events.EventArgs.Scp330;
 using CustomPlayerEffects;
+using UncomplicatedCustomRoles.API.Interfaces;
 
 namespace UncomplicatedCustomRoles.Events
 {

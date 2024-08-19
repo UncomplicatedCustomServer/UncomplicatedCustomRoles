@@ -1,9 +1,9 @@
 ﻿using CommandSystem;
-using Newtonsoft.Json;
+using Exiled.Loader;
 using System.Collections.Generic;
 using System.IO;
 using UncomplicatedCustomRoles.API.Features;
-using UncomplicatedCustomRoles.Interfaces;
+using UncomplicatedCustomRoles.API.Interfaces;
 
 namespace UncomplicatedCustomRoles.Commands
 {
@@ -31,9 +31,7 @@ namespace UncomplicatedCustomRoles.Commands
             if (port > 0)
                 path = Path.Combine(path, port.ToString());
 
-            Path.Combine(path, $"{arguments[0].Replace(".yml", "")}.yml");
-
-            File.WriteAllText(path, JsonConvert.SerializeObject(new CustomRole()));
+            File.WriteAllText(Path.Combine(path, $"{arguments[0].Replace(".yml", "")}.yml"), Loader.Serializer.Serialize(new CustomRole()));
 
             response = $"New default role generated at {path} but has not been loaded!";
             return true;

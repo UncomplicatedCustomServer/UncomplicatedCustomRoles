@@ -6,8 +6,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using UncomplicatedCustomRoles.API.Attributes;
 using UncomplicatedCustomRoles.API.Features;
+using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Extensions;
-using UncomplicatedCustomRoles.Interfaces;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -33,7 +33,7 @@ namespace UncomplicatedCustomRoles.Manager
                     try
                     {
                         object[] attribs = type.GetCustomAttributes(typeof(PluginCustomRole), false);
-                        if (attribs != null && attribs.Length > 0 && type == typeof(ICustomRole) || type == typeof(CustomRole))
+                        if (attribs != null && attribs.Length > 0 && (type == typeof(ICustomRole) || type == typeof(CustomRole)))
                         {
                             ActivePlugins.TryAdd(plugin);
 

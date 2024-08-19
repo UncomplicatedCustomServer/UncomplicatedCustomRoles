@@ -1,17 +1,11 @@
 ﻿using Exiled.API.Features;
 using Exiled.Events.EventArgs.Player;
-using UncomplicatedCustomRoles.Interfaces;
+using UncomplicatedCustomRoles.API.Interfaces;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
-    internal class CustomRoleEvents : ICustomRoleEvents
+    public class EventCustomRole : CustomRole, ICustomRoleEvents
     {
-        /// <summary>
-        /// Called before reserved slot is resolved for a <see cref="API.Features.Player"/>.
-        /// </summary>
-        /// <param name="ev">The <see cref="ReservedSlotsCheckEventArgs"/> instance.</param>
-        public virtual void OnReservedSlot(ReservedSlotsCheckEventArgs ev) { }
-
         /// <summary>
         /// Called before kicking a <see cref="API.Features.Player"/> from the server.
         /// </summary>
@@ -436,17 +430,13 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Called after a <see cref="T:Exiled.API.Features.Player" /> has an item added to their inventory.
         /// </summary>
-        /// <param name="referenceHub">The <see cref="ReferenceHub"/> the item was added to.</param>
-        /// <param name="itemBase">The added <see cref="InventorySystem.Items.ItemBase"/>.</param>
-        /// <param name="pickupBase">The <see cref="InventorySystem.Items.Pickups.ItemPickupBase"/> the <see cref="InventorySystem.Items.ItemBase"/> originated from, or <see langword="null"/> if the item was not picked up.</param>
+        /// <param name="ev">The <see cref="ItemAddedEventArgs"/> event handler. </param>
         public virtual void OnItemAdded(ItemAddedEventArgs ev) { }
 
         /// <summary>
         /// Called after a <see cref="T:Exiled.API.Features.Player" /> has an item removed from their inventory.
         /// </summary>
-        /// <param name="referenceHub">The <see cref="ReferenceHub"/> the item was removed from.</param>
-        /// <param name="itemBase">The removed <see cref="InventorySystem.Items.ItemBase"/>.</param>
-        /// <param name="pickupBase">The <see cref="InventorySystem.Items.Pickups.ItemPickupBase"/> the <see cref="InventorySystem.Items.ItemBase"/> originated from, or <see langword="null"/> if the item was not picked up.</param>
+        /// <param name="ev">The <see cref="ItemRemovedEventArgs"/> event handler. </param>
         public virtual void OnItemRemoved(ItemRemovedEventArgs ev) { }
 
         /// <summary>
@@ -472,12 +462,6 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         /// <param name="ev">The <see cref="DamagingWindowEventArgs"/> instance. </param>
         public virtual void OnPlayerDamageWindow(DamagingWindowEventArgs ev) { }
-
-        /// <summary>
-        /// Called before a <see cref="API.Features.Player"/> damage a window.
-        /// </summary>
-        /// <param name="ev">The <see cref="DamagingDoorEventArgs"/> instance. </param>
-        public virtual void OnDamagingDoor(DamagingDoorEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> unlocks a generator.
@@ -574,24 +558,6 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         /// <param name="ev">The <see cref="DyingEventArgs"/> instance. </param>
         public virtual void OnDying(DyingEventArgs ev) { }
-
-        /// <summary>
-        /// Called after a <see cref="API.Features.Player"/> has joined the server.
-        /// </summary>
-        /// <param name="ev">The <see cref="JoinedEventArgs"/> instance. </param>
-        public virtual void OnJoined(JoinedEventArgs ev) { }
-
-        /// <summary>
-        /// Called after a <see cref="API.Features.Player"/> has been verified.
-        /// </summary>
-        /// <param name="ev">The <see cref="VerifiedEventArgs"/> instance. </param>
-        public virtual void OnVerified(VerifiedEventArgs ev) { }
-
-        /// <summary>
-        /// Called before destroying a <see cref="API.Features.Player"/>.
-        /// </summary>
-        /// <param name="ev">The <see cref="DestroyingEventArgs"/> instance. </param>
-        public virtual void OnDestroying(DestroyingEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="Player"/>'s custom display name is changed.

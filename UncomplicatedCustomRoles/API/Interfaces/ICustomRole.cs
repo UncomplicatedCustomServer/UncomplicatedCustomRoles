@@ -6,7 +6,7 @@ using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 
-namespace UncomplicatedCustomRoles.Interfaces
+namespace UncomplicatedCustomRoles.API.Interfaces
 {
 #nullable enable
     public interface ICustomRole

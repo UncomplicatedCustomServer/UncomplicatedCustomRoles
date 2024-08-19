@@ -1,15 +1,13 @@
 ﻿using Exiled.API.Features;
-using Exiled.API.Interfaces;
 using Exiled.Loader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UncomplicatedCustomRoles.API.Features;
+using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Extensions;
-using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager;
-using Unity.Collections.LowLevel.Unsafe;
 
 namespace UncomplicatedCustomRoles.Integrations
 {
