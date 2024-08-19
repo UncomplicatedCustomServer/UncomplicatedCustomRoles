@@ -61,6 +61,11 @@ namespace UncomplicatedCustomRoles.API.Features
         public bool IsCustomNickname { get; }
 
         /// <summary>
+        /// Gets the <see cref="CustomRoleEventHandler"/> instance of the current <see cref="SummonedCustomRole"/> instance
+        /// </summary>
+        public CustomRoleEventHandler EventHandler { get; }
+
+        /// <summary>
         /// Gets or sets the number of candies taken by this player as this <see cref="ICustomRole"/>
         /// </summary>
         public uint Scp330Count { get; internal set; } = 0;
@@ -77,6 +82,7 @@ namespace UncomplicatedCustomRoles.API.Features
             InfiniteEffects = infiniteEffects;
             IsCustomNickname = isCustomNickname;
             _InternalValid = true;
+            EventHandler = new(this);
             List.Add(this);
         }
 
@@ -206,13 +212,13 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <returns></returns>
         public static bool TryPatchCustomRole(ReferenceHub player, out Team team)
         {
-            if (TryGet(player, out SummonedCustomRole customRole) && customRole.Role.Team != customRole.Role.Role.GetTeam())
+            if (player is not null && TryGet(player, out SummonedCustomRole customRole) && customRole.Role.Team != customRole.Role.Role.GetTeam())
             {
                 team = customRole.Role.Team;
                 return true;
             }
 
-            team = customRole.Role.Role.GetTeam();
+            team = player?.GetTeam() ?? Team.OtherAlive;
             return false;
         }
 

@@ -202,14 +202,6 @@ namespace UncomplicatedCustomRoles.API.Features
 
         public bool IgnoreSpawnSystem { get; set; } = false;
 
-        public bool HasTeam(Team team)
-        {
-            if (IsFriendOf is not null)
-                return IsFriendOf.Contains(team);
-
-            return false;
-        }
-
 #nullable disable
         /// <summary>
         /// Try to get a registered <see cref="ICustomRole"/> by it's Id.
@@ -312,7 +304,7 @@ namespace UncomplicatedCustomRoles.API.Features
                 LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the RoomSpawn as SpawnType the List SpawnRooms can't be empty!");
                 return false;
             }
-            else if (Role.SpawnSettings.Spawn == SpawnType.SpawnPointSpawn && (Role.SpawnSettings.SpawnPoint is null || Role.SpawnSettings.SpawnPoint == string.Empty))
+            else if (Role.SpawnSettings.Spawn == SpawnType.SpawnPointSpawn && (Role.SpawnSettings.SpawnPoints is null || Role.SpawnSettings.SpawnPoints.Count == 0))
             {
                 LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the SpawnPointSpawn as SpawnType the SpawnPoint can't be empty or null!");
                 return false;

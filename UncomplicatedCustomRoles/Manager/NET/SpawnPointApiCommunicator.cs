@@ -117,9 +117,10 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// </summary>
         private static void CustomRoleSpawnCompatibilityChecker()
         {
-            foreach (ICustomRole role in CustomRole.CustomRoles.Values.Where(role => role.SpawnSettings is not null && role.SpawnSettings.SpawnPoint is not null && role.SpawnSettings.Spawn is SpawnType.SpawnPointSpawn))
-                if (!SpawnPoint.Exists(role.SpawnSettings.SpawnPoint))
-                    LogManager.Warn($"CustomRole {role.Name} {role.Id} has an invalid SpawnPoint '{role.SpawnSettings.SpawnPoint}' inside it's configuration: the selected SpawnPoint does not exists!");
+            foreach (ICustomRole role in CustomRole.CustomRoles.Values.Where(role => role.SpawnSettings is not null && role.SpawnSettings.SpawnPoints is not null && role.SpawnSettings.Spawn is SpawnType.SpawnPointSpawn))
+                foreach (string spawnPoint in role.SpawnSettings.SpawnPoints)
+                    if (!SpawnPoint.Exists(spawnPoint))
+                        LogManager.Warn($"CustomRole {role.Name} {role.Id} has an invalid SpawnPoint '{role.SpawnSettings.SpawnPoints}' inside it's configuration: the selected SpawnPoint does not exists!");
         }
     }
 }

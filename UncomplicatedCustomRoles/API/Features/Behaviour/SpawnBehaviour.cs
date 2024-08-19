@@ -29,7 +29,7 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
             RoomType.LczClassDSpawn
         };
 
-        public string? SpawnPoint { get; set; } = null;
+        public List<string> SpawnPoints { get; set; } = new();
 
         public string? RequiredPermission { get; set; } = string.Empty;
     }

@@ -1,4 +1,5 @@
 ﻿using Exiled.API.Enums;
+using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
@@ -69,7 +70,5 @@ namespace UncomplicatedCustomRoles.Interfaces
         public abstract SpawnBehaviour? SpawnSettings { get; set; }
 
         public abstract bool IgnoreSpawnSystem { get; set; }
-
-        public abstract bool HasTeam(Team team);
     }
 }

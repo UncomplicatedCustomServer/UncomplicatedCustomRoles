@@ -13,6 +13,7 @@ using Respawning;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Reflection.Emit;
 using UncomplicatedCustomRoles.API.Features;
@@ -269,18 +270,27 @@ namespace UncomplicatedCustomRoles.Patches
     [HarmonyPatch(typeof(HumanRole), nameof(HumanRole.Team), MethodType.Getter)]
     internal class RoleHumanPatch
     {
-        static bool Prefix(HumanRole __instance, ref Team __result) => !SummonedCustomRole.TryPatchCustomRole(__instance._lastOwner, out __result);
+        static bool Prefix(HumanRole __instance, ref Team __result) => !SummonedCustomRole.TryPatchCustomRole(TeamPachUtils.WrapReferenceHub(__instance), out __result);
     }
 
     [HarmonyPatch(typeof(FpcStandardScp), nameof(FpcStandardScp.Team), MethodType.Getter)]
     internal class RoleScpPatch
     {
-        static bool Prefix(FpcStandardScp __instance, ref Team __result) => !SummonedCustomRole.TryPatchCustomRole(__instance._lastOwner, out __result);
+        static bool Prefix(FpcStandardScp __instance, ref Team __result) => !SummonedCustomRole.TryPatchCustomRole(TeamPachUtils.WrapReferenceHub(__instance), out __result);
     }
 
     [HarmonyPatch(typeof(Scp079Role), nameof(Scp079Role.Team), MethodType.Getter)]
     internal class RoleScp079Patch
     {
-        static bool Prefix(Scp079Role __instance, ref Team __result) => !SummonedCustomRole.TryPatchCustomRole(__instance._lastOwner, out __result);
+        static bool Prefix(Scp079Role __instance, ref Team __result) => !SummonedCustomRole.TryPatchCustomRole(TeamPachUtils.WrapReferenceHub(__instance), out __result);
+    }
+
+    internal class TeamPachUtils
+    {
+        public static ReferenceHub WrapReferenceHub(PlayerRoleBase instance)
+        {
+            instance.TryGetOwner(out ReferenceHub hub);
+            return hub;
+        }
     }
 }
