@@ -56,6 +56,7 @@
     <Compile Include="API\Features\CustomModules\CustomModule.cs" />
     <Compile Include="API\Features\Behaviour\AhpBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\HealthBehaviour.cs" />
+    <Compile Include="API\Features\CustomModules\CustomScpAnnouncer.cs" />
     <Compile Include="API\Features\CustomModules\DoNotTriggerTeslaGates.cs" />
     <Compile Include="API\Features\CustomModules\HalfLifeStealer.cs" />
     <Compile Include="API\Features\CustomModules\LifeStealer.cs" />
@@ -102,7 +103,9 @@
     <Compile Include="Manager\LogManager.cs" />
     <Compile Include="Manager\NET\SpawnPointApiCommunicator.cs" />
     <Compile Include="Manager\SpawnManager.cs" />
+    <Compile Include="Patches\Announcer.cs" />
     <Compile Include="Patches\InventoryLimitsPrefix.cs" />
+    <Compile Include="Patches\OnDisabledPatch.cs" />
     <Compile Include="Patches\PluginsLoaded.cs" />
     <Compile Include="Patches\Scp3114StranglePrefix.cs" />
     <Compile Include="Patches\TeamPatch.cs" />

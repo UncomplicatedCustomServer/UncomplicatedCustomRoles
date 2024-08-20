@@ -142,11 +142,14 @@ namespace UncomplicatedCustomRoles.Events
             if (ev.Player is null)
                 return;
 
+            // Let's clear for custom types
+            SpawnManager.ClearCustomTypes(ev.Player);
+
             if (!ev.IsAllowed)
                 return;
 
-            // Let's clear for custom types
-            SpawnManager.ClearCustomTypes(ev.Player);
+            if (ev.NewRole is RoleTypeId.Spectator || ev.NewRole is RoleTypeId.None || ev.NewRole is RoleTypeId.Filmmaker)
+                return;
 
             LogManager.Debug("Called CHANGINGROLE event");
 
@@ -234,14 +237,12 @@ namespace UncomplicatedCustomRoles.Events
 
                 if (summonedCustomRole.GetModule(out LifeStealer lifeStealer))
                 {
-                    LogManager.Silent("Module<LifeStealer>");
                     lifeStealer.Amount = ev.Amount;
                     lifeStealer.Execute();
                 }
 
                 if (summonedCustomRole.GetModule(out HalfLifeStealer halfLifeStealer))
                 {
-                    LogManager.Silent("Module<HalfLifeStealer>");
                     halfLifeStealer.Amount = ev.Amount;
                     halfLifeStealer.Execute();
                 }

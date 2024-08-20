@@ -14,7 +14,10 @@ using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Interfaces;
 using Exiled.API.Extensions;
 using PlayerRoles;
-using Respawning;
+using PlayerStatsSystem;
+using Subtitles;
+using Utils.Networking;
+using UncomplicatedCustomRoles.API.Features.CustomModules;
 
 // Mormora, la gente mormora
 // falla tacere praticando l'allegria
@@ -143,7 +146,12 @@ namespace UncomplicatedCustomRoles.Manager
                     Player.AddAmmo(Ammo.Key, Ammo.Value);
 
             Player.ReferenceHub.nicknameSync.Network_playerInfoToShow |= PlayerInfoArea.Nickname;
+
             PlayerInfoArea InfoArea = Player.ReferenceHub.nicknameSync.Network_playerInfoToShow;
+
+            if (!Role.OverrideRoleName && (Role.CustomFlags & CustomFlags.ShowOnlyCustomInfo) == CustomFlags.ShowOnlyCustomInfo)
+                Player.ReferenceHub.nicknameSync.Network_playerInfoToShow &= ~PlayerInfoArea.Role;
+
             if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
                 if (Role.OverrideRoleName)
                     Player.ApplyCustomInfoAndRoleName(Role.CustomInfo, Role.Name);
@@ -184,7 +192,7 @@ namespace UncomplicatedCustomRoles.Manager
             if (Role.RoleAppearance != Role.Role)
             {
                 LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
-                Timing.CallDelayed(0.1f, () => Player.ChangeAppearance(Role.RoleAppearance, true));
+                Timing.CallDelayed(0.1f, () => Player.ChangeAppearance(Role.RoleAppearance, LoadAppearanceAffectedPlayers(Player), true));
             }
 
             if (Role.SpawnHint != string.Empty)
@@ -375,6 +383,46 @@ namespace UncomplicatedCustomRoles.Manager
             }
 
             Round.ChaosTargetCount += diff;
+        }
+
+        public static void HandleRecontainmentAnnoucement(CustomScpAnnouncer element)
+        {
+            HandleRecontainmentAnnoucement(element.DamageHandler, element.Instance);
+            element.Execute();
+        }
+
+        public static void HandleRecontainmentAnnoucement(DamageHandlerBase baseHandler, SummonedCustomRole role)
+        {
+            float num = AlphaWarheadController.Detonated ? 3.5f : 1f;
+            NineTailedFoxAnnouncer.singleton.ServerOnlyAddGlitchyPhrase($"{ToCassieFormat(role.Role.Name)} {baseHandler.CassieDeathAnnouncement.Announcement}", UnityEngine.Random.Range(0.1f, 0.14f) * num, UnityEngine.Random.Range(0.07f, 0.08f) * num);
+            List<SubtitlePart> list = new()
+            {
+                new(SubtitleType.SCP, new string[] { ToPublicFormat(role.Role.Name) }),
+            };
+            list.AddRange(baseHandler.CassieDeathAnnouncement.SubtitleParts);
+            new SubtitleMessage(list.ToArray()).SendToAuthenticated(0);
+        }
+
+        private static string ToPublicFormat(string input) => input.Replace("SCP ", "SCP-").Replace(" ", "").ToUpper();
+
+        private static string ToCassieFormat(string input)
+        {
+            string output = string.Empty;
+            foreach (char c in ToPublicFormat(input).ToCharArray())
+                output += $" {c}";
+            return output;
+        }
+
+        private static IEnumerable<Player> LoadAppearanceAffectedPlayers(Player target)
+        {
+            List<Player> result = new();
+            foreach (Player player in Player.List.Where(p => p.Id != target.Id))
+                if (player.TryGetSummonedInstance(out SummonedCustomRole role) && !role.HasModule<NotAffectedByAppearance>())
+                    result.Add(player);
+                else if (!player.TryGetSummonedInstance(out _))
+                    result.Add(player);
+
+            return result;
         }
     }  
 }

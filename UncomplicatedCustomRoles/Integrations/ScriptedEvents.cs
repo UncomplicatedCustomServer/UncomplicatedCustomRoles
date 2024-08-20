@@ -18,6 +18,8 @@ namespace UncomplicatedCustomRoles.Integrations
         /// </summary>
         internal static Assembly Assembly => Loader.GetPlugin("ScriptedEvents")?.Assembly;
 
+        internal static Version Version => (Version)(Assembly?.GetType("ScriptedEvents.MainPlugin")?.GetProperty("Version").GetValue(Assembly, null) ?? new Version(0, 0, 0));
+
         /// <summary>
         /// Gets the <see cref="Type"/> of the API class
         /// </summary>
@@ -41,7 +43,9 @@ namespace UncomplicatedCustomRoles.Integrations
         /// <summary>
         /// Gets whether the integration can be invoked
         /// </summary>
-        internal static bool CanInvoke => AddMethod is not null && RemoveMethod is not null;
+        internal static bool CanInvoke => AddMethod is not null && RemoveMethod is not null && IsRightVersion;
+
+        internal static bool IsRightVersion { get; private set; } = true;
 
         /// <summary>
         /// Gets a list of every CustomAction registered by UCR
@@ -75,6 +79,13 @@ namespace UncomplicatedCustomRoles.Integrations
         /// </summary>
         public static void RegisterCustomActions()
         {
+            if (Version.CompareTo(new(3, 1, 7)) < 0)
+            {
+                IsRightVersion = false;
+                LogManager.Warn("Warning!\nThe ScriptedEvents integration of UCR can't be enabled as your version of ScriptedEvents is OUTDATED!\nRequired: >= 3.1.7 - Found: " + Version);
+                return;
+            }
+
             // Set custom role
             RegisterCustomAction("SET_CUSTOM_ROLE", (Tuple<string[], object> args) =>
             {
@@ -138,6 +149,8 @@ namespace UncomplicatedCustomRoles.Integrations
             if (CanInvoke)
                 foreach (string Name in CustomActions)
                     RemoveMethod.Invoke(null, new object[] { Name });
+
+            CustomActions.Clear();
         }
 
         /// <summary>

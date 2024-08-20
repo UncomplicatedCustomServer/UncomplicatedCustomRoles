@@ -23,7 +23,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(4, 0, 0, 5);
+        public override Version Version { get; } = new(4, 0, 0, 6);
 
         public override Version RequiredExiledVersion { get; } = new(8, 11, 0);
 
@@ -130,9 +130,6 @@ namespace UncomplicatedCustomRoles
 
             _harmony.UnpatchAll();
 
-            RespawnTimer.Disable();
-            ScriptedEvents.UnregisterCustomActions();
-
             ServerHandler.RespawningTeam -= Handler.OnRespawningWave;
             ServerHandler.RoundEnded -= Handler.OnRoundEnded;
             ServerHandler.RoundStarted -= Handler.OnRoundStarted;
@@ -171,6 +168,15 @@ namespace UncomplicatedCustomRoles
 
             // Run the import managet
             ImportManager.Init();
+        }
+
+        /// <summary>
+        /// Invoked before EXILED starts to unload every plugin
+        /// </summary>
+        public void OnStartingUnloadingPlugins()
+        {
+            RespawnTimer.Disable();
+            ScriptedEvents.UnregisterCustomActions();
         }
     }
 }

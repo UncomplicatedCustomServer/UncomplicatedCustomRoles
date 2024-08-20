@@ -1,5 +1,4 @@
 ﻿using UncomplicatedCustomRoles.API.Enums;
-using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
@@ -16,7 +15,6 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         {
             if (Amount > 0 && HasInstance)
                 Instance.Player.Heal(Amount);
-            LogManager.Debug($"{Amount} - {HasInstance} - {Instance?.Id}");
         }
     }
 }

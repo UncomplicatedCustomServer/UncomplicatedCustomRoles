@@ -12,5 +12,7 @@ namespace UncomplicatedCustomRoles.API.Enums
         HalfLifeStealer = 1 << 2,
         NotAffectedByAppearance = 1 << 3,
         PacifismUntilDamage = 1 << 4,
+        CustomScpAnnouncer = 1 << 5,
+        ShowOnlyCustomInfo = 1 << 6,
     }
 }
