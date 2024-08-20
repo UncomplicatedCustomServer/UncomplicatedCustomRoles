@@ -23,7 +23,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(4, 0, 0, 4);
+        public override Version Version { get; } = new(4, 0, 0, 5);
 
         public override Version RequiredExiledVersion { get; } = new(8, 11, 0);
 
@@ -69,6 +69,8 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Escaping += Handler.OnEscaping;
             PlayerHandler.UsedItem += Handler.OnItemUsed;
             PlayerHandler.Hurting += Handler.OnHurting;
+            PlayerHandler.Hurt += Handler.OnHurt;
+            PlayerHandler.TriggeringTesla += Handler.OnTriggeringTeslaGate;
             Scp049Handler.FinishingRecall += Handler.OnFinishingRecall;
             
             if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomRoles", ".nohttp")))
@@ -145,6 +147,8 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Escaping -= Handler.OnEscaping;
             PlayerHandler.UsedItem -= Handler.OnItemUsed;
             PlayerHandler.Hurting -= Handler.OnHurting;
+            PlayerHandler.Hurt -= Handler.OnHurt;
+            PlayerHandler.TriggeringTesla -= Handler.OnTriggeringTeslaGate;
             Scp049Handler.FinishingRecall -= Handler.OnFinishingRecall;
 
             HttpManager.Stop();
@@ -157,12 +161,10 @@ namespace UncomplicatedCustomRoles
         }
 
         /// <summary>
-        /// Invoked after <see cref="Exiled.Loader"/> finish to load every plugin
+        /// Invoked after the server finish to load every plugin
         /// </summary>
         public void OnFinishedLoadingPlugins()
         {
-            return;
-
             // Register ScriptedEvents and RespawnTimer integration
             ScriptedEvents.RegisterCustomActions();
             RespawnTimer.Enable();

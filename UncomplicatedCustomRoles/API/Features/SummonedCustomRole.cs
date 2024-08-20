@@ -1,9 +1,12 @@
 ﻿using Exiled.API.Features;
+using MEC;
 using PlayerRoles;
 using PlayerRoles.PlayableScps;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UncomplicatedCustomRoles.API.Enums;
+using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Commands;
@@ -47,7 +50,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets the badge of the player if it has one
         /// </summary>
-        public Triplet<string, string, bool>? Badge { get; internal set; }
+        public Triplet<string, string, bool>? Badge { get; private set; }
 
         /// <summary>
         /// Gets the list of infinite <see cref="IEffect"/>
@@ -75,13 +78,40 @@ namespace UncomplicatedCustomRoles.API.Features
         public PlayerInfoArea PlayerInfoArea { get; }
 
         /// <summary>
+        /// Gets the <see cref="CoroutineHandle"/> of a generic Coroutine that can be used by the custom role manager
+        /// </summary>
+        public CoroutineHandle GenericCoroutine { get; private set; }
+
+        /// <summary>
+        /// Gets the <see cref="CustomActions"/> <see cref="List{T}"/> where you'll be able to add custom actions that will be executed during the <see cref="GenericCoroutine"/> execution.<br></br>
+        /// You must return a <see cref="bool"/>: if false the coroutine will skip the precoded actions
+        /// </summary>
+        public List<Func<SummonedCustomRole, bool>> CustomActions { get; } = new();
+
+        /// <summary>
         /// Gets whether the current <see cref="ICustomRole"/> has a different team base with a different <see cref="PlayerRoleBase"/>
         /// </summary>
         public bool IsOverwrittenRole => _roleBase is not null;
 
+        /// <summary>
+        /// Gets whether the current <see cref="SummonedCustomRole"/> implements a coroutine 
+        /// </summary>
+        public bool IsCoroutineRole => (Role.Health?.HumeShield ?? 0) > 0 && (Role.Health?.HumeShieldRegenerationAmout ?? 0) > 0;
+
+        /// <summary>
+        /// Gets the time in UNIX timestamp (seconds) when the <see cref="Player"/> received the last damage
+        /// </summary>
+        public long LastDamageTime { get; internal set; }
+
         private PlayerRoleBase _roleBase { get; set; } = null;
 
         private bool _internalValid { get; set; }
+
+        private bool _isRegeneratingHume { get; set; }
+
+        private List<CustomModule> _customModules { get; }
+
+        public const float TickDuration = 0.25f;
 
         internal SummonedCustomRole(Player player, ICustomRole role, Triplet<string, string, bool>? badge, List<IEffect> infiniteEffects, PlayerInfoArea playerInfo, bool isCustomNickname = false)
         {
@@ -92,7 +122,11 @@ namespace UncomplicatedCustomRoles.API.Features
             Badge = badge;
             InfiniteEffects = infiniteEffects;
             IsCustomNickname = isCustomNickname;
+            PlayerInfoArea = playerInfo;
             _internalValid = true;
+            if (IsCoroutineRole)
+                GenericCoroutine = Timing.RunCoroutine(RoleTickCoroutine());
+            _customModules = CustomModule.Load(Role.CustomFlags ?? CustomFlags.None, this);
             EvaluateRoleBase();
             EventHandler = new(this);
             List.Add(this);
@@ -106,8 +140,20 @@ namespace UncomplicatedCustomRoles.API.Features
             if (Role.Role.GetTeam() != Role.Team && Role.Role.GetTeam() is not Team.SCPs && Role.Team is Team.SCPs)
                 _roleBase = Player.Role.Base as FpcStandardScp;
             else if (Role.Role.GetTeam() != Role.Team && Role.Role.GetTeam() is Team.SCPs && Role.Team is not Team.SCPs)
-                _roleBase = Player.Role.Base as PlayerRoles.HumanRole;
+                _roleBase = Player.Role.Base as HumanRole;
             SpawnManager.UpdateChaosModifier();
+        }
+
+        /// <summary>
+        /// Runs every custom action in <see cref="CustomActions"/> and evaluate their results
+        /// </summary>
+        /// <returns></returns>
+        private bool EvaluateCustomActions()
+        {
+            bool _result = false;
+            foreach (Func<SummonedCustomRole, bool> func in CustomActions)
+                _result &= func(this);
+            return _result;
         }
 
         /// <summary>
@@ -147,6 +193,62 @@ namespace UncomplicatedCustomRoles.API.Features
                 Player.DisplayNickname = null;
             }
         }
+
+        /// <summary>
+        /// If the role is <see cref="IsCoroutineRole"/> this coroutine will handle every functions that requires one
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerator<float> RoleTickCoroutine()
+        {
+            while (_internalValid && Player.IsAlive && IsCoroutineRole)
+            {
+                if (EvaluateCustomActions() && Player.HumeShield < Role.Health.HumeShield && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.Health.HumeShieldRegenerationDelay && !_isRegeneratingHume)
+                    Timing.RunCoroutine(HumeShieldCoroutine());
+
+                yield return Timing.WaitForSeconds(TickDuration);
+            }
+        }
+
+        /// <summary>
+        /// The coroutine to regenerate Hume Shield
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerator<float> HumeShieldCoroutine()
+        {
+            _isRegeneratingHume = true;
+            while (_internalValid && Player.IsAlive && Player.HumeShield < Role.Health.HumeShield && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.Health.HumeShieldRegenerationDelay)
+            {
+                Player.HumeShield += Role.Health.HumeShieldRegenerationAmout;
+                yield return Timing.WaitForSeconds(1f);
+            }
+            _isRegeneratingHume = false;
+        }
+
+        /// <summary>
+        /// Gets a <see cref="CustomModule"/> that this custom role implements
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T GetModule<T>() where T : CustomModule => _customModules.Where(cm => cm.GetType() == typeof(T)).FirstOrDefault() as T;
+
+        /// <summary>
+        /// Try to get a <see cref="CustomModule"/> if its implemented
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="module"></param>
+        /// <returns></returns>
+        public bool GetModule<T>(out T module) where T : CustomModule
+        {
+            module = GetModule<T>();
+            return module != null;
+        }
+
+        /// <summary>
+        /// Gets if the current <see cref="SummonedCustomRole"/> implements the given <see cref="CustomModule"/>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public bool HasModule<T>() where T : CustomModule => _customModules.Any(cm => cm.GetType() == typeof(T));
 
         /// <summary>
         /// Gets every <see cref="SummonedCustomRole"/> with the same <see cref="ICustomRole"/> as a <see cref="List{T}"/>

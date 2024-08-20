@@ -1,6 +1,7 @@
 ﻿using Exiled.API.Enums;
 using PlayerRoles;
 using System.Collections.Generic;
+using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
@@ -67,6 +68,8 @@ namespace UncomplicatedCustomRoles.API.Interfaces
         public abstract float DamageMultiplier { get; set; }
 
         public abstract SpawnBehaviour? SpawnSettings { get; set; }
+
+        public abstract CustomFlags? CustomFlags { get; set; }
 
         public abstract bool IgnoreSpawnSystem { get; set; }
     }

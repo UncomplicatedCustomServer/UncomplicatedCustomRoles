@@ -41,11 +41,11 @@ namespace UncomplicatedCustomRoles.Manager
             Log.Error(message);
         }
 
-        public static void Silent(string message) => History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "SILENT", message));
+        public static void Silent(string message) => History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "Silent", message));
 
-        public static void System(string message) => History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "SYSTEM", message));
+        public static void System(string message) => History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "System", message));
 
-        public static HttpStatusCode SendReport(out HttpContent content)
+        internal static HttpStatusCode SendReport(out HttpContent content)
         {
             content = null;
 

@@ -53,8 +53,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="API\Attributes\PluginCustomRole.cs" />
+    <Compile Include="API\Features\CustomModules\CustomModule.cs" />
     <Compile Include="API\Features\Behaviour\AhpBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\HealthBehaviour.cs" />
+    <Compile Include="API\Features\CustomModules\DoNotTriggerTeslaGates.cs" />
+    <Compile Include="API\Features\CustomModules\HalfLifeStealer.cs" />
+    <Compile Include="API\Features\CustomModules\LifeStealer.cs" />
+    <Compile Include="API\Features\CustomModules\NotAffectedByAppearance.cs" />
+    <Compile Include="API\Features\CustomModules\PacifismUntilDamage.cs" />
     <Compile Include="API\Features\CustomRole.cs" />
     <Compile Include="API\Features\CustomRoleEventHandler.cs" />
     <Compile Include="API\Features\EventCustomRole.cs" />
@@ -66,6 +72,7 @@
     <Compile Include="API\Features\Spawn.cs" />
     <Compile Include="API\Features\SpawnPoint.cs" />
     <Compile Include="API\Features\SummonedCustomRole.cs" />
+    <Compile Include="API\Interfaces\ICustomModule.cs" />
     <Compile Include="API\Struct\Quadruple.cs" />
     <Compile Include="API\Struct\Triplet.cs" />
     <Compile Include="Commands\CommandParent.cs" />

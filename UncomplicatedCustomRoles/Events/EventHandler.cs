@@ -13,6 +13,7 @@ using UncomplicatedCustomRoles.API.Features;
 using Exiled.Events.EventArgs.Scp330;
 using CustomPlayerEffects;
 using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.API.Features.CustomModules;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -74,6 +75,7 @@ namespace UncomplicatedCustomRoles.Events
         public void OnFinishingRecall(FinishingRecallEventArgs ev)
         {
             ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(ev.Target, RoleTypeId.Scp0492);
+            LogManager.Silent($"{ev.Target} recalled by {ev.Player}, found {Role?.Id} {Role?.Name}");
 
             if (Role is not null)
             {
@@ -198,17 +200,50 @@ namespace UncomplicatedCustomRoles.Events
             if (Hurting.Player is not null && Hurting.Attacker is not null && Hurting.Player.IsAlive && Hurting.Attacker.IsAlive)
             {
                 if (Hurting.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole))
+                {
                     if (attackerCustomRole.Role.IsFriendOf is not null && attackerCustomRole.Role.IsFriendOf.Contains(Hurting.Player.Role.Team))
                     {
                         Hurting.IsAllowed = false;
                         LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - FROM ATTACKER");
+                        return;
                     }
-                    else
-                        Hurting.DamageHandler.Damage *= attackerCustomRole.Role.DamageMultiplier;
-                else if (Hurting.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole) && playerCustomRole.Role.IsFriendOf is not null && playerCustomRole.Role.IsFriendOf.Contains(Hurting.Attacker.Role.Team))
+                    else if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
+                        pacifism.Execute();
+
+                    Hurting.DamageHandler.Damage *= attackerCustomRole.Role.DamageMultiplier;
+                }
+                else if (Hurting.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole))
                 {
-                    Hurting.IsAllowed = false;
-                    LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - FROM HURTED");
+                    if (playerCustomRole.Role.IsFriendOf is not null && playerCustomRole.Role.IsFriendOf.Contains(Hurting.Attacker.Role.Team))
+                    {
+                        Hurting.IsAllowed = false;
+                        LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - FROM HURTED");
+                    }
+
+                    if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
+                        Hurting.IsAllowed = false;
+                }
+            }
+        }
+
+        public void OnHurt(HurtEventArgs ev)
+        {
+            if (ev.Player is not null && ev.Player.IsAlive && ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedCustomRole))
+            {
+                summonedCustomRole.LastDamageTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+                if (summonedCustomRole.GetModule(out LifeStealer lifeStealer))
+                {
+                    LogManager.Silent("Module<LifeStealer>");
+                    lifeStealer.Amount = ev.Amount;
+                    lifeStealer.Execute();
+                }
+
+                if (summonedCustomRole.GetModule(out HalfLifeStealer halfLifeStealer))
+                {
+                    LogManager.Silent("Module<HalfLifeStealer>");
+                    halfLifeStealer.Amount = ev.Amount;
+                    halfLifeStealer.Execute();
                 }
             }
         }
@@ -273,6 +308,15 @@ namespace UncomplicatedCustomRoles.Events
 
                 }
             }
+        }
+
+        public void OnTriggeringTeslaGate(TriggeringTeslaEventArgs ev)
+        {
+            if (!ev.IsAllowed)
+                return;
+
+            if (ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole) && customRole.HasModule<DoNotTriggerTeslaGates>())
+                ev.IsAllowed = false;
         }
 
         public void OnRespawningWave(RespawningTeamEventArgs Respawn)

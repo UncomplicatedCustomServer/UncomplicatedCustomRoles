@@ -200,6 +200,14 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public SpawnBehaviour? SpawnSettings { get; set; } = new();
 
+        /// <summary>
+        /// Gets or sets the <see cref="Enums.CustomFlags"/> of the custom role
+        /// </summary>
+        public CustomFlags? CustomFlags { get; set; } = null;
+
+        /// <summary>
+        /// Gets or sets whether the custom role should be evaluated during normal spawn events or not
+        /// </summary>
         public bool IgnoreSpawnSystem { get; set; } = false;
 
 #nullable disable
