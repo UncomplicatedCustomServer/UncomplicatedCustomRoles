@@ -1,7 +1,5 @@
 ﻿using Exiled.API.Enums;
-using Exiled.API.Extensions;
 using Exiled.API.Features;
-using PlayerRoles;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -14,6 +12,9 @@ using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Interfaces;
+using Exiled.API.Extensions;
+using PlayerRoles;
+using Respawning;
 
 // Mormora, la gente mormora
 // falla tacere praticando l'allegria
@@ -360,6 +361,20 @@ namespace UncomplicatedCustomRoles.Manager
                     return CustomRole.CustomRoles[RolePercentage[NewRole].RandomItem().Id];
 
             return null;
+        }
+
+        public static void UpdateChaosModifier()
+        {
+            int diff = 0;
+            foreach (SummonedCustomRole role in SummonedCustomRole.List.Where(role => role.IsOverwrittenRole))
+            {
+                if (role.Role.Team is not Team.SCPs && PlayerRolesUtils.GetTeam(role.Role.Role) is Team.SCPs)
+                    diff--;
+                else if (role.Role.Team is Team.SCPs && PlayerRolesUtils.GetTeam(role.Role.Role) is not Team.SCPs)
+                    diff++;
+            }
+
+            Round.ChaosTargetCount += diff;
         }
     }  
 }

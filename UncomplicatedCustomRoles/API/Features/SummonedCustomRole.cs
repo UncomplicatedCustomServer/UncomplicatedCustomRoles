@@ -1,11 +1,8 @@
 ﻿using Exiled.API.Features;
-using Exiled.API.Features.Roles;
 using PlayerRoles;
-using PlayerRoles.FirstPersonControl;
 using PlayerRoles.PlayableScps;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Struct;
@@ -77,6 +74,11 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public PlayerInfoArea PlayerInfoArea { get; }
 
+        /// <summary>
+        /// Gets whether the current <see cref="ICustomRole"/> has a different team base with a different <see cref="PlayerRoleBase"/>
+        /// </summary>
+        public bool IsOverwrittenRole => _roleBase is not null;
+
         private PlayerRoleBase _roleBase { get; set; } = null;
 
         private bool _internalValid { get; set; }
@@ -105,6 +107,7 @@ namespace UncomplicatedCustomRoles.API.Features
                 _roleBase = Player.Role.Base as FpcStandardScp;
             else if (Role.Role.GetTeam() != Role.Team && Role.Role.GetTeam() is Team.SCPs && Role.Team is not Team.SCPs)
                 _roleBase = Player.Role.Base as PlayerRoles.HumanRole;
+            SpawnManager.UpdateChaosModifier();
         }
 
         /// <summary>
@@ -115,6 +118,7 @@ namespace UncomplicatedCustomRoles.API.Features
             Remove();
             _internalValid = false;
             List.Remove(this);
+            SpawnManager.UpdateChaosModifier();
         }
 
         /// <summary>
