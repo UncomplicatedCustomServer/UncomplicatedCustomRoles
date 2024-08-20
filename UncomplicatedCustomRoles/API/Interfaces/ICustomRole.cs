@@ -1,5 +1,4 @@
 ﻿using Exiled.API.Enums;
-using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
@@ -27,7 +26,7 @@ namespace UncomplicatedCustomRoles.API.Interfaces
 
         public abstract RoleTypeId Role { get; set; }
 
-        public abstract Team Team { get; set; }
+        public abstract Team? Team { get; set; }
 
         public abstract RoleTypeId RoleAppearance { get; set; }
 

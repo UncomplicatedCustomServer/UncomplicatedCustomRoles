@@ -70,7 +70,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets or sets the <see cref="PlayerRoles.Team"/> of the player
         /// </summary>
-        public Team Team { get; set; } = RoleTypeId.ClassD.GetTeam();
+        public Team? Team { get; set; } = null;
 
         /// <summary>
         /// Gets or sets the the Role Appeareance for the player.<br></br>

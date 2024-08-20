@@ -4,11 +4,11 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
 {
     public class HealthBehaviour
     {
-        public float Amount { get; set; } = 100;
+        public int Amount { get; set; } = 100;
 
-        public float Maximum { get; set; } = 100;
+        public int Maximum { get; set; } = 100;
 
-        public float HumeShield { get; set; } = 0;
+        public int HumeShield { get; set; } = 0;
 
         public void Apply(Player player)
         {

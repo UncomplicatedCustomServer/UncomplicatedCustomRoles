@@ -1,9 +1,8 @@
-﻿using Exiled.Loader;
-using HarmonyLib;
+﻿using HarmonyLib;
 
 namespace UncomplicatedCustomRoles.Patches
 {
-    [HarmonyPatch(typeof(Loader), nameof(Loader.LoadPlugins))]
+    [HarmonyPatch(typeof(CharacterClassManager), nameof(CharacterClassManager.Start))]
     internal class PluginsLoaded
     {
         static void Postfix() => Plugin.Instance.OnFinishedLoadingPlugins();

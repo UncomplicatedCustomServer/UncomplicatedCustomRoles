@@ -106,67 +106,56 @@ namespace UncomplicatedCustomRoles.Manager
 
         public static void SummonSubclassApplier(Player Player, ICustomRole Role)
         {
-            Timing.CallDelayed(0.75f, () =>
-            {
-                Player.ResetInventory(Role.Inventory);
+            Player.ResetInventory(Role.Inventory);
 
-                LogManager.Silent($"Can we assign custom roles? Let's see: {Role.CustomItemsInventory.Count()}");
-                if (Role.CustomItemsInventory.Count() > 0)
-                    foreach (uint ItemId in Role.CustomItemsInventory)
-                        if (!Player.IsInventoryFull)
-                            try
+            LogManager.Silent($"Can we assign custom roles? Let's see: {Role.CustomItemsInventory.Count()}");
+            if (Role.CustomItemsInventory.Count() > 0)
+                foreach (uint ItemId in Role.CustomItemsInventory)
+                    if (!Player.IsInventoryFull)
+                        try
+                        {
+                            if (Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems") is not null)
                             {
-                                if (Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems") is not null)
+                                Type AssemblyType = Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems").Assembly.GetType("UncomplicatedCustomItems.API.Utilities");
+                                if ((bool)AssemblyType?.GetMethod("IsCustomItem")?.Invoke(null, new object[] { ItemId }))
                                 {
-                                    Type AssemblyType = Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems").Assembly.GetType("UncomplicatedCustomItems.API.Utilities");
-                                    if ((bool)AssemblyType?.GetMethod("IsCustomItem")?.Invoke(null, new object[] { ItemId }))
+                                    object CustomItem = AssemblyType?.GetMethod("GetCustomItem")?.Invoke(null, new object[] { ItemId });
+
+                                    Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems").Assembly.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem")?.GetMethods().Where(method => method.Name == "Summon" && method.GetParameters().Length == 2).FirstOrDefault()?.Invoke(null, new object[]
                                     {
-                                        object CustomItem = AssemblyType?.GetMethod("GetCustomItem")?.Invoke(null, new object[] { ItemId });
-
-                                        Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems").Assembly.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem")?.GetMethods().Where(method => method.Name == "Summon" && method.GetParameters().Length == 2).FirstOrDefault()?.Invoke(null, new object[]
-                                        {
-                                        CustomItem,
-                                        Player
-                                        });
-                                    }
+                                    CustomItem,
+                                    Player
+                                    });
                                 }
-                                else
-                                    CustomItem.Get(ItemId)?.Give(Player);
                             }
-                            catch (Exception ex)
-                            {
-                                LogManager.Debug($"Error while giving a custom item.\nError: {ex.Message}");
-                            }
+                            else
+                                CustomItem.Get(ItemId)?.Give(Player);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogManager.Debug($"Error while giving a custom item.\nError: {ex.Message}");
+                        }
 
-                Player.ClearAmmo();
-                if (Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
-                    foreach (KeyValuePair<AmmoType, ushort> Ammo in Role.Ammo)
-                        Player.AddAmmo(Ammo.Key, Ammo.Value);
+            Player.ClearAmmo();
+            if (Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
+                foreach (KeyValuePair<AmmoType, ushort> Ammo in Role.Ammo)
+                    Player.AddAmmo(Ammo.Key, Ammo.Value);
 
-                if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
-                    if (Role.OverrideRoleName)
-                        Player.ApplyCustomInfoAndRoleName(Role.CustomInfo, Role.Name);
-                    else
-                        Player.ApplyClearCustomInfo(Role.CustomInfo);
+            Player.ReferenceHub.nicknameSync.Network_playerInfoToShow |= PlayerInfoArea.Nickname;
+            PlayerInfoArea InfoArea = Player.ReferenceHub.nicknameSync.Network_playerInfoToShow;
+            if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
+                if (Role.OverrideRoleName)
+                    Player.ApplyCustomInfoAndRoleName(Role.CustomInfo, Role.Name);
+                else
+                    Player.ApplyClearCustomInfo(Role.CustomInfo);
 
-                // Apply every required stats
-                Role.Health?.Apply(Player);
-                Role.Ahp?.Apply(Player);
-                Role.Stamina?.Apply(Player);
+            // Apply every required stats
+            Role.Health?.Apply(Player);
+            Role.Ahp?.Apply(Player);
+            Role.Stamina?.Apply(Player);
 
-                if (Role.Scale != Vector3.zero && Role.Scale != Vector3.one)
-                    Player.Scale = Role.Scale;
-
-
-                if (Role.RoleAppearance != Role.Role)
-                {
-                    LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
-                    Timing.CallDelayed(1f, () =>
-                    {
-                        Player.ChangeAppearance(Role.RoleAppearance, true);
-                    });
-                }
-            });
+            if (Role.Scale != Vector3.zero && Role.Scale != Vector3.one)
+                Player.Scale = Role.Scale;
 
             List<IEffect> PermanentEffects = new();
             if (Role.Effects.Count() > 0 && Role.Effects != null)
@@ -194,10 +183,7 @@ namespace UncomplicatedCustomRoles.Manager
             if (Role.RoleAppearance != Role.Role)
             {
                 LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
-                Timing.CallDelayed(1f, () =>
-                {
-                    Player.ChangeAppearance(Role.RoleAppearance, true);
-                });
+                Timing.CallDelayed(0.1f, () => Player.ChangeAppearance(Role.RoleAppearance, true));
             }
 
             if (Role.SpawnHint != string.Empty)
@@ -217,12 +203,6 @@ namespace UncomplicatedCustomRoles.Manager
                         LogManager.Debug("Tag successfully hidden!");
             }
 
-            if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
-                if (Role.OverrideRoleName)
-                    Player.ApplyCustomInfoAndRoleName(Role.CustomInfo, Role.Name);
-                else
-                    Player.ApplyClearCustomInfo(Role.CustomInfo);
-
             // Changing nickname if needed
             bool ChangedNick = false;
             if (Plugin.Instance.Config.AllowNicknameEdit && Role.Nickname is not null && Role.Nickname != string.Empty)
@@ -238,7 +218,7 @@ namespace UncomplicatedCustomRoles.Manager
 
             LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})!");
 
-            new SummonedCustomRole(Player, Role, Badge, PermanentEffects, ChangedNick);
+            new SummonedCustomRole(Player, Role, Badge, PermanentEffects, InfoArea, ChangedNick);
 
             if (Spawn.Spawning.Contains(Player.Id))
                 Spawn.Spawning.Remove(Player.Id);

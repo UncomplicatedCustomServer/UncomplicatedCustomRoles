@@ -86,9 +86,9 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnRoundEnded(RoundEndedEventArgs _) => InfiniteEffect.Terminate();
 
-        public void OnChangingRole(ChangingRoleEventArgs ev) => SpawnManager.ClearCustomTypes(ev.Player);
+        //public void OnChangingRole(ChangingRoleEventArgs ev) => SpawnManager.ClearCustomTypes(ev.Player);
 
-        public void OnSpawning(SpawningEventArgs ev)
+        /*public void OnSpawning(SpawningEventArgs ev)
         {
             if (ev.Player is null)
                 return;
@@ -133,6 +133,57 @@ namespace UncomplicatedCustomRoles.Events
             }
 
             LogManager.Debug($"Evaluated custom role for player {ev.Player.Nickname} - found: {Role?.Id} ({Role?.Name})");
+        }*/
+
+        public void OnChangingRole(ChangingRoleEventArgs ev)
+        {
+            if (ev.Player is null)
+                return;
+
+            if (!ev.IsAllowed)
+                return;
+
+            // Let's clear for custom types
+            SpawnManager.ClearCustomTypes(ev.Player);
+
+            LogManager.Debug("Called CHANGINGROLE event");
+
+            if (Spawn.Spawning.Contains(ev.Player.Id))
+                return;
+
+            if (ev.Player.HasCustomRole())
+                return;
+
+            if (!Plugin.Instance.DoSpawnBasicRoles)
+                return;
+
+            if (ev.Player.IsNPC)
+                return;
+
+            string LogReason = string.Empty;
+            if (Plugin.Instance.Config.AllowOnlyNaturalSpawns && !Spawn.SpawnQueue.Contains(ev.Player.Id))
+            {
+                LogManager.Debug("The player is not in the queue for respawning!");
+                return;
+            }
+            else if (Spawn.SpawnQueue.Contains(ev.Player.Id))
+            {
+                Spawn.SpawnQueue.Remove(ev.Player.Id);
+                LogReason = " [WITH a respawn wave - VANILLA]";
+            }
+
+            LogManager.Debug($"Player {ev.Player.Nickname} spawned{LogReason}, going to assign a role if needed!");
+
+            ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(ev.Player, ev.NewRole);
+
+            if (Role is not null)
+            {
+                LogManager.Debug($"Summoning player {ev.Player.Nickname} ({ev.Player.Id}) as {Role.Name} ({Role.Id})");
+                SpawnManager.SummonCustomSubclass(ev.Player, Role.Id);
+                ev.IsAllowed = false;
+            }
+
+            LogManager.Debug($"No CustomRole found for player {ev.Player.Nickname}, allowing natural spawn with {ev.NewRole}");
         }
 
         public void OnVerified(VerifiedEventArgs ev) => Plugin.HttpManager.ApplyCreditTag(ev.Player);

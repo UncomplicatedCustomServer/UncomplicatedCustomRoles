@@ -1,7 +1,11 @@
 ﻿using Exiled.API.Features;
+using Exiled.API.Features.Roles;
 using PlayerRoles;
+using PlayerRoles.FirstPersonControl;
+using PlayerRoles.PlayableScps;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Struct;
@@ -21,7 +25,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets if the current SummonedCustomRole is valid or not
         /// </summary>
-        public bool IsValid => _InternalValid && Player.IsAlive;
+        public bool IsValid => _internalValid && Player.IsAlive;
 
         /// <summary>
         /// The unique identifier for this instance of <see cref="SummonedCustomRole"/>
@@ -68,9 +72,16 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public uint Scp330Count { get; internal set; } = 0;
 
-        private bool _InternalValid { get; set; }
+        /// <summary>
+        /// Gets the original <see cref="PlayerInfoArea"/> of the player
+        /// </summary>
+        public PlayerInfoArea PlayerInfoArea { get; }
 
-        internal SummonedCustomRole(Player player, ICustomRole role, Triplet<string, string, bool>? badge, List<IEffect> infiniteEffects, bool isCustomNickname = false)
+        private PlayerRoleBase _roleBase { get; set; } = null;
+
+        private bool _internalValid { get; set; }
+
+        internal SummonedCustomRole(Player player, ICustomRole role, Triplet<string, string, bool>? badge, List<IEffect> infiniteEffects, PlayerInfoArea playerInfo, bool isCustomNickname = false)
         {
             Id = Guid.NewGuid().ToString();
             Player = player;
@@ -79,9 +90,21 @@ namespace UncomplicatedCustomRoles.API.Features
             Badge = badge;
             InfiniteEffects = infiniteEffects;
             IsCustomNickname = isCustomNickname;
-            _InternalValid = true;
+            _internalValid = true;
+            EvaluateRoleBase();
             EventHandler = new(this);
             List.Add(this);
+        }
+
+        /// <summary>
+        /// Try to set <see cref="_roleBase"/> in order to override the current Player.Role.Base to trick the server into thinking that the player is / is not an Human
+        /// </summary>
+        private void EvaluateRoleBase()
+        {
+            if (Role.Role.GetTeam() != Role.Team && Role.Role.GetTeam() is not Team.SCPs && Role.Team is Team.SCPs)
+                _roleBase = Player.Role.Base as FpcStandardScp;
+            else if (Role.Role.GetTeam() != Role.Team && Role.Role.GetTeam() is Team.SCPs && Role.Team is not Team.SCPs)
+                _roleBase = Player.Role.Base as PlayerRoles.HumanRole;
         }
 
         /// <summary>
@@ -90,7 +113,7 @@ namespace UncomplicatedCustomRoles.API.Features
         public void Destroy()
         {
             Remove();
-            _InternalValid = false;
+            _internalValid = false;
             List.Remove(this);
         }
 
@@ -108,6 +131,7 @@ namespace UncomplicatedCustomRoles.API.Features
                 LogManager.Debug($"Badge detected, fixed");
             }
 
+            Player.ReferenceHub.nicknameSync.Network_playerInfoToShow = PlayerInfoArea;
             Player.IsUsingStamina = true;
             Player.CustomInfo = string.Empty;
 
@@ -210,13 +234,31 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <returns></returns>
         public static bool TryPatchCustomRole(ReferenceHub player, out Team team)
         {
-            if (player is not null && TryGet(player, out SummonedCustomRole customRole) && customRole.Role.Team != customRole.Role.Role.GetTeam())
+            if (player is not null && TryGet(player, out SummonedCustomRole customRole) && customRole.Role.Team is not null && customRole.Role.Team != customRole.Role.Role.GetTeam())
             {
-                team = customRole.Role.Team;
+                team = (Team)customRole.Role.Team;
                 return true;
             }
 
             team = player?.GetRoleId().GetTeam() ?? Team.OtherAlive;
+            return false;
+        }
+
+        /// <summary>
+        /// Try to get the custom <see cref="PlayerRoleBase"/> of the <see cref="ICustomRole"/> of the found <see cref="SummonedCustomRole"/> and override it only if necessary
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="roleBase"></param>
+        /// <returns></returns>
+        public static bool TryPatchRoleBase(ReferenceHub player, out PlayerRoleBase roleBase)
+        {
+            if (player is not null && TryGet(player, out SummonedCustomRole customRole) && customRole._roleBase is not null)
+            {
+                roleBase = customRole._roleBase;
+                return true;
+            }
+
+            roleBase = null;
             return false;
         }
 
@@ -246,8 +288,8 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <returns></returns>
         public static Team TryGetCusomTeam(ReferenceHub player, Team? def = null)
         {
-            if (TryGet(player, out SummonedCustomRole customRole) && customRole.Role.Team != customRole.Role.Role.GetTeam())
-                return customRole.Role.Team;
+            if (TryGet(player, out SummonedCustomRole customRole) && customRole.Role.Team is not null && customRole.Role.Team != customRole.Role.Role.GetTeam())
+                return (Team)customRole.Role.Team;
 
             return def ?? player.GetRoleId().GetTeam();
         }

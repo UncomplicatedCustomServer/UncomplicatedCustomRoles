@@ -1,5 +1,4 @@
 ﻿using Exiled.Events.EventArgs.Player;
-using UncomplicatedCustomRoles.API.Features;
 
 namespace UncomplicatedCustomRoles.API.Interfaces
 {

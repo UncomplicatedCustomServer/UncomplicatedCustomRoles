@@ -13,7 +13,6 @@ using Respawning;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Reflection;
 using System.Reflection.Emit;
 using UncomplicatedCustomRoles.API.Features;
@@ -283,6 +282,12 @@ namespace UncomplicatedCustomRoles.Patches
     internal class RoleScp079Patch
     {
         static bool Prefix(Scp079Role __instance, ref Team __result) => !SummonedCustomRole.TryPatchCustomRole(TeamPachUtils.WrapReferenceHub(__instance), out __result);
+    }
+
+    [HarmonyPatch(typeof(PlayerRoleManager), nameof(PlayerRoleManager.CurrentRole), MethodType.Getter)]
+    internal class RoleCurrentPatch
+    {
+        static bool Prefix(PlayerRoleManager __instance, ref PlayerRoleBase __result) => !SummonedCustomRole.TryPatchRoleBase(__instance.Hub, out __result);
     }
 
     internal class TeamPachUtils

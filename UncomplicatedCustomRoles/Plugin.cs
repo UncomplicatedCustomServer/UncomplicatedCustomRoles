@@ -60,7 +60,7 @@ namespace UncomplicatedCustomRoles
             ServerHandler.RoundEnded += Handler.OnRoundEnded;
             PlayerHandler.Verified += Handler.OnVerified;
             PlayerHandler.Died += Handler.OnDied;
-            PlayerHandler.Spawning += Handler.OnSpawning;
+            // PlayerHandler.Spawning += Handler.OnSpawning;
             PlayerHandler.Spawned += Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole += Handler.OnChangingRole;
             PlayerHandler.ReceivingEffect += Handler.OnReceivingEffect;
@@ -136,7 +136,7 @@ namespace UncomplicatedCustomRoles
             ServerHandler.RoundStarted -= Handler.OnRoundStarted;
             PlayerHandler.Verified -= Handler.OnVerified;
             PlayerHandler.Died -= Handler.OnDied;
-            PlayerHandler.Spawning -= Handler.OnSpawning;
+            //PlayerHandler.Spawning -= Handler.OnSpawning;
             PlayerHandler.Spawned -= Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole -= Handler.OnChangingRole;
             PlayerHandler.ReceivingEffect -= Handler.OnReceivingEffect;
@@ -161,6 +161,8 @@ namespace UncomplicatedCustomRoles
         /// </summary>
         public void OnFinishedLoadingPlugins()
         {
+            return;
+
             // Register ScriptedEvents and RespawnTimer integration
             ScriptedEvents.RegisterCustomActions();
             RespawnTimer.Enable();
