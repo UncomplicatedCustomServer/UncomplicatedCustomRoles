@@ -23,7 +23,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(4, 0, 0, 6);
+        public override Version Version { get; } = new(4, 0, 0, 7);
 
         public override Version RequiredExiledVersion { get; } = new(8, 11, 0);
 
@@ -58,21 +58,23 @@ namespace UncomplicatedCustomRoles
             ServerHandler.RespawningTeam += Handler.OnRespawningWave;
             ServerHandler.RoundStarted += Handler.OnRoundStarted;
             ServerHandler.RoundEnded += Handler.OnRoundEnded;
+
             PlayerHandler.Verified += Handler.OnVerified;
             PlayerHandler.Died += Handler.OnDied;
-            // PlayerHandler.Spawning += Handler.OnSpawning;
             PlayerHandler.Spawned += Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole += Handler.OnChangingRole;
             PlayerHandler.ReceivingEffect += Handler.OnReceivingEffect;
-            Scp330Handler.InteractingScp330 += Handler.OnInteractingScp330;
-            //PlayerHandler.Spawned += Handler.OnSpawning;
             PlayerHandler.Escaping += Handler.OnEscaping;
             PlayerHandler.UsedItem += Handler.OnItemUsed;
             PlayerHandler.Hurting += Handler.OnHurting;
             PlayerHandler.Hurt += Handler.OnHurt;
             PlayerHandler.TriggeringTesla += Handler.OnTriggeringTeslaGate;
+            PlayerHandler.MakingNoise += Handler.OnMakingNoise;
+
             Scp049Handler.FinishingRecall += Handler.OnFinishingRecall;
-            
+
+            Scp330Handler.InteractingScp330 += Handler.OnInteractingScp330;
+
             if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomRoles", ".nohttp")))
                 HttpManager.Start();
 
@@ -133,20 +135,22 @@ namespace UncomplicatedCustomRoles
             ServerHandler.RespawningTeam -= Handler.OnRespawningWave;
             ServerHandler.RoundEnded -= Handler.OnRoundEnded;
             ServerHandler.RoundStarted -= Handler.OnRoundStarted;
+
             PlayerHandler.Verified -= Handler.OnVerified;
             PlayerHandler.Died -= Handler.OnDied;
-            //PlayerHandler.Spawning -= Handler.OnSpawning;
             PlayerHandler.Spawned -= Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole -= Handler.OnChangingRole;
             PlayerHandler.ReceivingEffect -= Handler.OnReceivingEffect;
-            Scp330Handler.InteractingScp330 -= Handler.OnInteractingScp330;
-            //PlayerHandler.Spawned -= Handler.OnSpawning;
             PlayerHandler.Escaping -= Handler.OnEscaping;
             PlayerHandler.UsedItem -= Handler.OnItemUsed;
             PlayerHandler.Hurting -= Handler.OnHurting;
             PlayerHandler.Hurt -= Handler.OnHurt;
             PlayerHandler.TriggeringTesla -= Handler.OnTriggeringTeslaGate;
+            PlayerHandler.MakingNoise -= Handler.OnMakingNoise;
+
             Scp049Handler.FinishingRecall -= Handler.OnFinishingRecall;
+
+            Scp330Handler.InteractingScp330 -= Handler.OnInteractingScp330;
 
             HttpManager.Stop();
 

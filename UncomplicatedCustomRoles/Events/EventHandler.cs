@@ -311,6 +311,15 @@ namespace UncomplicatedCustomRoles.Events
             }
         }
 
+        public void OnMakingNoise(MakingNoiseEventArgs ev)
+        {
+            if (!ev.IsAllowed)
+                return;
+
+            if (ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole) && customRole.HasModule<SilentWalker>())
+                ev.IsAllowed = false;
+        }
+
         public void OnTriggeringTeslaGate(TriggeringTeslaEventArgs ev)
         {
             if (!ev.IsAllowed)

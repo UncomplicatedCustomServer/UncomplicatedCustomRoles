@@ -14,5 +14,6 @@ namespace UncomplicatedCustomRoles.API.Enums
         PacifismUntilDamage = 1 << 4,
         CustomScpAnnouncer = 1 << 5,
         ShowOnlyCustomInfo = 1 << 6,
+        SilentWalker = 1 << 7,
     }
 }

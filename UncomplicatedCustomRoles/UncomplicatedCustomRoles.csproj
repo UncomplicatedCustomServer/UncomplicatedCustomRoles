@@ -62,6 +62,7 @@
     <Compile Include="API\Features\CustomModules\LifeStealer.cs" />
     <Compile Include="API\Features\CustomModules\NotAffectedByAppearance.cs" />
     <Compile Include="API\Features\CustomModules\PacifismUntilDamage.cs" />
+    <Compile Include="API\Features\CustomModules\SilentWalker.cs" />
     <Compile Include="API\Features\CustomRole.cs" />
     <Compile Include="API\Features\CustomRoleEventHandler.cs" />
     <Compile Include="API\Features\EventCustomRole.cs" />
