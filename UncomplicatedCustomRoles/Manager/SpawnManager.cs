@@ -408,7 +408,7 @@ namespace UncomplicatedCustomRoles.Manager
         private static string ToCassieFormat(string input)
         {
             string output = string.Empty;
-            foreach (char c in ToPublicFormat(input).ToCharArray())
+            foreach (char c in ToPublicFormat(input).Replace("-", " ").ToCharArray())
                 output += $" {c}";
             return output;
         }
