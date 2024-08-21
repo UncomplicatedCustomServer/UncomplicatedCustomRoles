@@ -37,7 +37,7 @@ namespace UncomplicatedCustomRoles.API.Features
 
         public ICustomRole Role => SummonedInstance.Role;
 
-        public Dictionary<Type, MethodInfo> Listeners { get; } = new();
+        public Dictionary<Type, Tuple<object, MethodInfo>> Listeners { get; } = new();
 
         internal CustomRoleEventHandler(SummonedCustomRole summonedInstance)
         {
@@ -47,20 +47,26 @@ namespace UncomplicatedCustomRoles.API.Features
 
         private void LoadListeners()
         {
-            if (Role is ICustomRoleEvents customRoleEventsRole)
+            try
             {
-                Type baseType = typeof(EventCustomRole);
-                Type declaredType = (customRoleEventsRole as EventCustomRole).GetType();
-
-                foreach (MethodInfo method in baseType.GetMethods())
+                if (Role is ICustomRoleEvents customRoleEventsRole)
                 {
-                    MethodInfo derivedMethod = declaredType.GetMethod(method.Name);
-                    bool isOverride = derivedMethod != null && derivedMethod.DeclaringType != baseType;
+                    Type baseType = typeof(EventCustomRole);
+                    Type declaredType = (customRoleEventsRole as EventCustomRole).GetType();
 
-                    LogManager.System($"Trying to push {derivedMethod.Name} and {derivedMethod.GetParameters().Length} and {derivedMethod.GetParameters()[0]?.ParameterType.FullName}");
-                    if (isOverride && derivedMethod.GetParameters().Length > 0)
-                        Listeners.Add(derivedMethod.GetParameters()[0].ParameterType, derivedMethod);
+                    foreach (MethodInfo method in baseType.GetMethods())
+                    {
+                        MethodInfo derivedMethod = declaredType.GetMethod(method.Name);
+                        bool isOverride = derivedMethod != null && derivedMethod.DeclaringType != baseType;
+
+                        if (isOverride && derivedMethod.GetParameters().Length > 0)
+                            Listeners.Add(derivedMethod.GetParameters()[0].ParameterType, new(customRoleEventsRole, derivedMethod));
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                LogManager.Error($"Failed to act CustomRoleEventHandler::LoadListeners() - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
             }
         }
 
@@ -72,9 +78,9 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             if (eventArgs is IPlayerEvent playerEventArgs && playerEventArgs.Player.Id == SummonedInstance.Player.Id && Role is ICustomRoleEvents && Listeners.ContainsKey(eventArgs.GetType()))
             {
-                MethodInfo method = Listeners[eventArgs.GetType()];
+                MethodInfo method = Listeners[eventArgs.GetType()].Item2;
                 object[] args = new[] { eventArgs };
-                method.Invoke(null, args);
+                method.Invoke(Listeners[eventArgs.GetType()].Item1, args);
                 eventArgs = args[0] as IPlayerEvent;
             }
         }
