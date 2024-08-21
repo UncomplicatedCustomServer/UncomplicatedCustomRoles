@@ -103,14 +103,22 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public long LastDamageTime { get; internal set; }
 
+        /// <summary>
+        /// Gets a <see cref="IReadOnlyCollection{T}"/> of every installed <see cref="CustomModule"/>
+        /// </summary>
+        public IReadOnlyCollection<ICustomModule> CustomModules => _customModules;
+
         private PlayerRoleBase _roleBase { get; set; } = null;
 
         private bool _internalValid { get; set; }
 
         private bool _isRegeneratingHume { get; set; }
 
-        private List<CustomModule> _customModules { get; }
+        private List<ICustomModule> _customModules { get; }
 
+        /// <summary>
+        /// The duration of a tick
+        /// </summary>
         public const float TickDuration = 0.25f;
 
         internal SummonedCustomRole(Player player, ICustomRole role, Triplet<string, string, bool>? badge, List<IEffect> infiniteEffects, PlayerInfoArea playerInfo, bool isCustomNickname = false)

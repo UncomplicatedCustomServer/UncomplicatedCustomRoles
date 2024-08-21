@@ -62,10 +62,10 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         }
 
 
-        public static List<CustomModule> Load(CustomFlags flags, SummonedCustomRole instance)
+        public static List<ICustomModule> Load(CustomFlags flags, SummonedCustomRole instance)
         {
             LogManager.Debug($"Loading custom modules for {instance.Player} - {instance.Role.Id} -- {flags} -- {_loaded.Count()}");
-            List<CustomModule> result = new();
+            List<ICustomModule> result = new();
 
             try
             {

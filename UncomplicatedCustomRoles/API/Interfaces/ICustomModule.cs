@@ -3,7 +3,7 @@ using UncomplicatedCustomRoles.API.Features;
 
 namespace UncomplicatedCustomRoles.API.Interfaces
 {
-    internal interface ICustomModule
+    public interface ICustomModule
     {
         public abstract SummonedCustomRole Instance { get; }
 
