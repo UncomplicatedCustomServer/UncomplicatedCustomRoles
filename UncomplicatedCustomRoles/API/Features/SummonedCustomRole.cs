@@ -288,16 +288,19 @@ namespace UncomplicatedCustomRoles.API.Features
             List<string> output = new();
 
             if (IsCoroutineRole || IsDefaultCoroutineRole)
-                output.Add("<b><color=#599e09>[COROUTINE]</color></b>");
+                output.Add("<color=#599e09>[COROUTINE]</color>");
 
             if (_customModules.Count > 0)
-                output.Add("<b><color=#a343f7>[CUSTOM MODULES]</color></b>");
+                output.Add("<color=#a343f7>[CUSTOM MODULES]</color>");
 
             if (Role.Role.GetTeam() != (Role?.Team ?? Role.Role.GetTeam()))
-                output.Add("<b><color=#eb441e>[TEAM OVERRIDE]</color></b>");
+                output.Add("<color=#eb441e>[TEAM OVERRIDE]</color>");
 
             if (output.Count > 0)
-                output.Insert(0, " -");
+            {
+                output.Insert(0, "<align=right>");
+                output.Add("</align>");
+            }
 
             return string.Join(" ", output);
         }
@@ -308,14 +311,14 @@ namespace UncomplicatedCustomRoles.API.Features
 
             if (Role.BadgeColor != string.Empty && Role.BadgeName != string.Empty)
                 if (SpawnManager.colorMap.ContainsKey(Role.BadgeColor))
-                    output += $"<b><color={SpawnManager.colorMap[Role.BadgeColor]}>{Role.BadgeName}</color></b>";
+                    output += $"<color={SpawnManager.colorMap[Role.BadgeColor]}>{Role.BadgeName}</color>";
                 else
-                    output += $"<b>{Role.BadgeName}</b>";
+                    output += $"{Role.BadgeName}";
             else
                 output += "None";
 
             if (IsEmployee && Plugin.HttpManager.Credits.TryGetValue(Player.UserId, out Triplet<string, string, bool> tag))
-                output += $" - <b><color=#168eba>[UCR EMPLOYEE]</color></b> <b><color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color></b>";
+                output += $"<align=right><color=#168eba>[UCR EMPLOYEE]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color></align>";
 
             return output;
         }
