@@ -102,6 +102,10 @@ namespace UncomplicatedCustomRoles
                     Log.DebugEnabled.Add(Assembly);
                 }
             }
+            else if (HttpManager.LatestVersion.CompareTo(Version) == 0)
+                LogManager.System($"User is using the latest version of UCR: {Version}");
+            else
+                LogManager.System("Error while evaluating version!");
 
             InfiniteEffect.Stop();
             InfiniteEffect.EffectAssociationAllowed = true;
