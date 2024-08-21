@@ -193,13 +193,6 @@ namespace UncomplicatedCustomRoles.Manager
                 Player.Broadcast(Role.SpawnBroadcastDuration, Role.SpawnBroadcast);
             }
 
-            // We need the role appereance also here!
-            if (Role.RoleAppearance != Role.Role)
-            {
-                LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
-                Timing.CallDelayed(0.1f, () => Player.ChangeAppearance(Role.RoleAppearance, LoadAppearanceAffectedPlayers(Player), true));
-            }
-
             if (Role.SpawnHint != string.Empty)
                 Player.ShowHint(Role.SpawnHint, Role.SpawnHintDuration);
 
@@ -228,6 +221,13 @@ namespace UncomplicatedCustomRoles.Manager
                     Player.DisplayNickname = Nick;
 
                 ChangedNick = true;
+            }
+
+            // We need the role appereance also here!
+            if (Role.RoleAppearance != Role.Role)
+            {
+                LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
+                Timing.CallDelayed(0.75f, () => Player.ChangeAppearance(Role.RoleAppearance, LoadAppearanceAffectedPlayers(Player), true));
             }
 
             LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})!");

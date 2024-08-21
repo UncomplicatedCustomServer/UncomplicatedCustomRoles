@@ -2,7 +2,7 @@
 
 namespace UncomplicatedCustomRoles.API.Interfaces
 {
-    public interface ICustomRoleEvents
+    public interface IEventRole
     {
         public abstract void OnKicking(KickingEventArgs ev);
 

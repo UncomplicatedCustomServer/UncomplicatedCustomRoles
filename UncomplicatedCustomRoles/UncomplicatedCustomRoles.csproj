@@ -53,6 +53,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="API\Attributes\PluginCustomRole.cs" />
+    <Compile Include="API\Features\CustomModules\CoroutineModule.cs" />
     <Compile Include="API\Features\CustomModules\CustomModule.cs" />
     <Compile Include="API\Features\Behaviour\AhpBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\HealthBehaviour.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="API\Features\Spawn.cs" />
     <Compile Include="API\Features\SpawnPoint.cs" />
     <Compile Include="API\Features\SummonedCustomRole.cs" />
+    <Compile Include="API\Interfaces\ICoroutineRole.cs" />
     <Compile Include="API\Interfaces\ICustomModule.cs" />
     <Compile Include="API\Struct\Quadruple.cs" />
     <Compile Include="API\Struct\Triplet.cs" />
@@ -95,7 +97,7 @@
     <Compile Include="Extensions\PlayerExtension.cs" />
     <Compile Include="Extensions\Vector3Extension.cs" />
     <Compile Include="Integrations\ScriptedEvents.cs" />
-    <Compile Include="API\Interfaces\ICustomRoleEvents.cs" />
+    <Compile Include="API\Interfaces\IEventRole.cs" />
     <Compile Include="API\Interfaces\IUCRCommand.cs" />
     <Compile Include="Manager\FileConfigs.cs" />
     <Compile Include="API\Features\Effect.cs" />
@@ -107,6 +109,7 @@
     <Compile Include="Patches\Announcer.cs" />
     <Compile Include="Patches\InventoryLimitsPrefix.cs" />
     <Compile Include="Patches\OnDisabledPatch.cs" />
+    <Compile Include="Patches\PlayerInfoPatch.cs" />
     <Compile Include="Patches\PluginsLoaded.cs" />
     <Compile Include="Patches\Scp3114StranglePrefix.cs" />
     <Compile Include="Patches\TeamPatch.cs" />

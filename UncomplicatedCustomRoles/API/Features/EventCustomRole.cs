@@ -4,7 +4,7 @@ using UncomplicatedCustomRoles.API.Interfaces;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
-    public class EventCustomRole : CustomRole, ICustomRoleEvents
+    public class EventCustomRole : CustomRole, IEventRole
     {
         /// <summary>
         /// Called before kicking a <see cref="API.Features.Player"/> from the server.

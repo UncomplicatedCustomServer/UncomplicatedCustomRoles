@@ -49,7 +49,7 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             try
             {
-                if (Role is ICustomRoleEvents customRoleEventsRole)
+                if (Role is IEventRole customRoleEventsRole)
                 {
                     Type baseType = typeof(EventCustomRole);
                     Type declaredType = (customRoleEventsRole as EventCustomRole).GetType();
@@ -76,7 +76,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <param name="eventArgs"></param>
         public void InvokeSafely(IExiledEvent eventArgs)
         {
-            if (eventArgs is IPlayerEvent playerEventArgs && playerEventArgs.Player.Id == SummonedInstance.Player.Id && Role is ICustomRoleEvents && Listeners.ContainsKey(eventArgs.GetType()))
+            if (eventArgs is IPlayerEvent playerEventArgs && playerEventArgs.Player.Id == SummonedInstance.Player.Id && Role is IEventRole && Listeners.ContainsKey(eventArgs.GetType()))
             {
                 MethodInfo method = Listeners[eventArgs.GetType()].Item2;
                 object[] args = new[] { eventArgs };

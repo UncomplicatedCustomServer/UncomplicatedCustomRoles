@@ -1,4 +1,5 @@
 ﻿using Exiled.API.Features;
+using HarmonyLib;
 using MEC;
 using PlayerRoles;
 using PlayerRoles.PlayableScps;
@@ -21,11 +22,6 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Gets every <see cref="SummonedCustomRole"/>
         /// </summary>
         public static List<SummonedCustomRole> List { get; } = new();
-
-        /// <summary>
-        /// Gets if the current SummonedCustomRole is valid or not
-        /// </summary>
-        public bool IsValid => _internalValid && Player.IsAlive;
 
         /// <summary>
         /// The unique identifier for this instance of <see cref="SummonedCustomRole"/>
@@ -94,9 +90,19 @@ namespace UncomplicatedCustomRoles.API.Features
         public bool IsOverwrittenRole => _roleBase is not null;
 
         /// <summary>
-        /// Gets whether the current <see cref="SummonedCustomRole"/> implements a coroutine 
+        /// Gets whether the current <see cref="SummonedCustomRole"/> implements a coroutine for handling basic plugin features
         /// </summary>
-        public bool IsCoroutineRole => (Role.Health?.HumeShield ?? 0) > 0 && (Role.Health?.HumeShieldRegenerationAmout ?? 0) > 0;
+        public bool IsDefaultCoroutineRole => (Role.Health?.HumeShield ?? 0) > 0 && (Role.Health?.HumeShieldRegenerationAmout ?? 0) > 0;
+
+        /// <summary>
+        /// Gets whether the current <see cref="ICustomRole"/> implements a custom coroutine
+        /// </summary>
+        public bool IsCoroutineRole => Role is ICoroutineRole;
+
+        /// <summary>
+        /// Gets if the current SummonedCustomRole is valid or not
+        /// </summary>
+        public bool IsValid => _internalValid && Player.IsAlive;
 
         /// <summary>
         /// Gets the time in UNIX timestamp (seconds) when the <see cref="Player"/> received the last damage
@@ -132,10 +138,24 @@ namespace UncomplicatedCustomRoles.API.Features
             IsCustomNickname = isCustomNickname;
             PlayerInfoArea = playerInfo;
             _internalValid = true;
-            if (IsCoroutineRole)
+
+            if (IsDefaultCoroutineRole)
                 GenericCoroutine = Timing.RunCoroutine(RoleTickCoroutine());
+
             _customModules = CustomModule.Load(Role.CustomFlags ?? CustomFlags.None, this);
+
+            if (Role is ICoroutineRole coroutineRole)
+                if (coroutineRole.TickRate > 0)
+                {
+                    coroutineRole.CoroutineHandler = Timing.RunCoroutine(CoroutineRoleCoroutine());
+                    coroutineRole.Frame = -1;
+                }
+
+            foreach (CoroutineModule coroutineModule in GetModules<CoroutineModule>())
+                coroutineModule.Execute();
+
             EvaluateRoleBase();
+
             EventHandler = new(this);
             List.Add(this);
         }
@@ -170,7 +190,6 @@ namespace UncomplicatedCustomRoles.API.Features
         public void Destroy()
         {
             Remove();
-            _internalValid = false;
             List.Remove(this);
             SpawnManager.UpdateChaosModifier();
         }
@@ -200,15 +219,28 @@ namespace UncomplicatedCustomRoles.API.Features
             {
                 Player.DisplayNickname = null;
             }
+
+            if (IsDefaultCoroutineRole && GenericCoroutine.IsRunning)
+                Timing.KillCoroutines(GenericCoroutine);
+
+            if (Role is ICoroutineRole role && role.CoroutineHandler.IsRunning)
+                Timing.KillCoroutines(role.CoroutineHandler);
+
+            foreach (CoroutineModule coroutineModule in GetModules<CoroutineModule>())
+                if (coroutineModule.CoroutineHandler.IsRunning)
+                    Timing.KillCoroutines(coroutineModule.CoroutineHandler);
+
+            _customModules.Clear();
+            _internalValid = false;
         }
 
         /// <summary>
-        /// If the role is <see cref="IsCoroutineRole"/> this coroutine will handle every functions that requires one
+        /// If the role is <see cref="IsDfaultCoroutineRole"/> this coroutine will handle every functions that requires one
         /// </summary>
         /// <returns></returns>
         private IEnumerator<float> RoleTickCoroutine()
         {
-            while (_internalValid && Player.IsAlive && IsCoroutineRole)
+            while (_internalValid && Player.IsAlive && IsDefaultCoroutineRole)
             {
                 if (EvaluateCustomActions() && Player.HumeShield < Role.Health.HumeShield && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.Health.HumeShieldRegenerationDelay && !_isRegeneratingHume)
                     Timing.RunCoroutine(HumeShieldCoroutine());
@@ -216,6 +248,27 @@ namespace UncomplicatedCustomRoles.API.Features
                 yield return Timing.WaitForSeconds(TickDuration);
             }
         }
+
+        /// <summary>
+        /// The custom coroutine actor for the <see cref="ICoroutineRole"/>
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerator<float> CoroutineRoleCoroutine()
+        {
+            while (_internalValid && Player.IsAlive && Role is ICoroutineRole coroutineRole)
+            {
+                coroutineRole.Frame++;
+                coroutineRole.Tick();
+
+                yield return Timing.WaitForSeconds(coroutineRole.TickRate);
+            }
+        }
+
+        /// <summary>
+        /// Parse the current <see cref="SummonedCustomRole"/> instance as a RemoteAdmin text part
+        /// </summary>
+        /// <returns></returns>
+        internal string ParseRemoteAdmin() => $"\nCustom Role: <color={Exiled.API.Extensions.RoleExtensions.GetColor(Role.Role)}>{Role.Name}</color> ({Role.Id})";
 
         /// <summary>
         /// The coroutine to regenerate Hume Shield
@@ -238,6 +291,19 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public T GetModule<T>() where T : CustomModule => _customModules.Where(cm => cm.GetType() == typeof(T)).FirstOrDefault() as T;
+
+        /// <summary>
+        /// Gets a <see cref="CustomModule"/> array that contains every custom module with the same type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T[] GetModules<T>() where T : CustomModule
+        {
+            T[] result = new T[] { };
+            foreach (ICustomModule module in _customModules.Where(cm => cm.GetType() == typeof(T)))
+                result.AddItem(module);
+            return result;
+        }
 
         /// <summary>
         /// Try to get a <see cref="CustomModule"/> if its implemented
@@ -408,6 +474,21 @@ namespace UncomplicatedCustomRoles.API.Features
             return def ?? player.GetRoleId().GetTeam();
         }
 
+        /// <summary>
+        /// Try to get the Remote Admin text from a <see cref="ReferenceHub"/>
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
+        public static string TryParseRemoteAdmin(ReferenceHub player)
+        {
+            if (TryGet(player, out SummonedCustomRole role))
+                return role.ParseRemoteAdmin();
+            return "\nCustom Role: None";
+        }
+
+        /// <summary>
+        /// Handle the infinite effects for every <see cref="SummonedCustomRole"/> instance
+        /// </summary>
         internal static void InfiniteEffectActor()
         {
             foreach (SummonedCustomRole Role in List)

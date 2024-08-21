@@ -204,7 +204,7 @@ namespace UncomplicatedCustomRoles.Events
             {
                 if (Hurting.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole))
                 {
-                    if (attackerCustomRole.Role.IsFriendOf is not null && attackerCustomRole.Role.IsFriendOf.Contains(Hurting.Player.Role.Team))
+                    if (attackerCustomRole.Role.IsFriendOf is not null && attackerCustomRole.Role.IsFriendOf.Contains(Hurting.Player.ReferenceHub.GetTeam()))
                     {
                         Hurting.IsAllowed = false;
                         LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - FROM ATTACKER");
@@ -217,7 +217,7 @@ namespace UncomplicatedCustomRoles.Events
                 }
                 else if (Hurting.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole))
                 {
-                    if (playerCustomRole.Role.IsFriendOf is not null && playerCustomRole.Role.IsFriendOf.Contains(Hurting.Attacker.Role.Team))
+                    if (playerCustomRole.Role.IsFriendOf is not null && playerCustomRole.Role.IsFriendOf.Contains(Hurting.Attacker.ReferenceHub.GetTeam()))
                     {
                         Hurting.IsAllowed = false;
                         LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - FROM HURTED");
