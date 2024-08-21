@@ -18,6 +18,11 @@ using PlayerStatsSystem;
 using Subtitles;
 using Utils.Networking;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
+using static NineTailedFoxAnnouncer;
+using System.Runtime.Remoting.Messaging;
+using System.Security.Cryptography;
+using UnityEngine.Windows;
+using System.Text.RegularExpressions;
 
 // Mormora, la gente mormora
 // falla tacere praticando l'allegria
@@ -394,24 +399,38 @@ namespace UncomplicatedCustomRoles.Manager
         public static void HandleRecontainmentAnnoucement(DamageHandlerBase baseHandler, SummonedCustomRole role)
         {
             float num = AlphaWarheadController.Detonated ? 3.5f : 1f;
-            NineTailedFoxAnnouncer.singleton.ServerOnlyAddGlitchyPhrase($"{ToCassieFormat(role.Role.Name)} {baseHandler.CassieDeathAnnouncement.Announcement}", UnityEngine.Random.Range(0.1f, 0.14f) * num, UnityEngine.Random.Range(0.07f, 0.08f) * num);
+            TryGetPublicFormat(role.Role.Name, role.Role.Role, out string cassie, out string subtitle);
+            NineTailedFoxAnnouncer.singleton.ServerOnlyAddGlitchyPhrase($"{cassie} {baseHandler.CassieDeathAnnouncement.Announcement}", UnityEngine.Random.Range(0.1f, 0.14f) * num, UnityEngine.Random.Range(0.07f, 0.08f) * num);
             List<SubtitlePart> list = new()
             {
-                new(SubtitleType.SCP, new string[] { ToPublicFormat(role.Role.Name) }),
+                new(SubtitleType.SCP, new string[] { subtitle }),
             };
             list.AddRange(baseHandler.CassieDeathAnnouncement.SubtitleParts);
             new SubtitleMessage(list.ToArray()).SendToAuthenticated(0);
         }
 
-        private static string ToPublicFormat(string input) => input.Replace("SCP ", "SCP-").Replace(" ", "").ToUpper();
-
-        private static string ToCassieFormat(string input)
+        private static void TryGetPublicFormat(string input, RoleTypeId def, out string cassie, out string subtitle)
         {
-            string output = string.Empty;
-            foreach (char c in ToPublicFormat(input).Replace("-", " ").ToCharArray())
-                output += $" {c}";
-            return output;
+            if (!input.Contains("SCP-"))
+                NineTailedFoxAnnouncer.ConvertSCP(def, out subtitle, out cassie);
+            else
+                TryExtractScpNumber(input, out cassie, out subtitle);
         }
+
+        private static void TryExtractScpNumber(string input, out string cassie, out string subtitle)
+        {
+            char[] allowed = new[] { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' }; 
+            cassie = string.Empty;
+            subtitle = string.Empty;
+            foreach (char c in ToPublicFormat(Regex.Replace(input, "<.*?>", string.Empty)).ToCharArray())
+                if (allowed.Contains(c))
+                {
+                    cassie += $"{c} ";
+                    subtitle += c;
+                }
+        }
+
+        private static string ToPublicFormat(string input) => input.Replace("SCP", "").Replace(" ", "").ToUpper();
 
         private static IEnumerable<Player> LoadAppearanceAffectedPlayers(Player target)
         {

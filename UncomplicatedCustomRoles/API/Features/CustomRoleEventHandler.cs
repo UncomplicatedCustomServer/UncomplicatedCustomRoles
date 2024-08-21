@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using Exiled.Events.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
@@ -53,10 +54,11 @@ namespace UncomplicatedCustomRoles.API.Features
 
                 foreach (MethodInfo method in baseType.GetMethods())
                 {
-                    var derivedMethod = declaredType.GetMethod(method.Name);
+                    MethodInfo derivedMethod = declaredType.GetMethod(method.Name);
                     bool isOverride = derivedMethod != null && derivedMethod.DeclaringType != baseType;
-                    
-                    if (isOverride)
+
+                    LogManager.System($"Trying to push {derivedMethod.Name} and {derivedMethod.GetParameters().Length} and {derivedMethod.GetParameters()[0]?.ParameterType.FullName}");
+                    if (isOverride && derivedMethod.GetParameters().Length > 0)
                         Listeners.Add(derivedMethod.GetParameters()[0].ParameterType, derivedMethod);
                 }
             }

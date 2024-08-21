@@ -28,95 +28,95 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets or sets the <see cref="ICustomRole"/> unique Id
         /// </summary>
-        public int Id { get; set; } = 1;
+        public virtual int Id { get; set; } = 1;
 
         /// <summary>
         /// Gets or sets the name of the custom role.<br></br>
         /// Thisn won't be shown to players, just a thing to help you recognize better your custom roles.
         /// </summary>
-        public string Name { get; set; } = "Janitor";
+        public virtual string Name { get; set; } = "Janitor";
 
         /// <summary>
         /// Gets or sets whether the <see cref="RoleTypeId"/> name should be hidden in favor of the <see cref="Name"/>
         /// </summary>
-        public bool OverrideRoleName { get; set; } = false;
+        public virtual bool OverrideRoleName { get; set; } = false;
 
         /// <summary>
         /// Gets or sets the nickname that will be set to the player if not null.
         /// </summary>
-        public string? Nickname { get; set; } = "D-%dnumber%";
+        public virtual string? Nickname { get; set; } = "D-%dnumber%";
 
         /// <summary>
         /// Gets or sets the CustomInfo that will be give to the player.<br></br>
         /// Will be visible only to other players
         /// </summary>
-        public string CustomInfo { get; set; } = "Janitor";
+        public virtual string CustomInfo { get; set; } = "Janitor";
 
         /// <summary>
         /// Gets or sets the badge name
         /// </summary>
-        public string BadgeName { get; set; } = "Janitor";
+        public virtual string BadgeName { get; set; } = "Janitor";
 
         /// <summary>
         /// Gets or sets the badge color
         /// </summary>
-        public string BadgeColor { get; set; } = "pumpkin";
+        public virtual string BadgeColor { get; set; } = "pumpkin";
 
         /// <summary>
         /// Gets or sets the <see cref="RoleTypeId"/> of the player
         /// </summary>
-        public RoleTypeId Role { get; set; } = RoleTypeId.ClassD;
+        public virtual RoleTypeId Role { get; set; } = RoleTypeId.ClassD;
 
         /// <summary>
         /// Gets or sets the <see cref="PlayerRoles.Team"/> of the player
         /// </summary>
-        public Team? Team { get; set; } = null;
+        public virtual Team? Team { get; set; } = null;
 
         /// <summary>
         /// Gets or sets the the Role Appeareance for the player.<br></br>
         /// If it's equal to <see cref="Role"/> then won't be applied
         /// </summary>
-        public RoleTypeId RoleAppearance { get; set; } = RoleTypeId.ClassD;
+        public virtual RoleTypeId RoleAppearance { get; set; } = RoleTypeId.ClassD;
 
         /// <summary>
         /// Gets or sets the <see cref="Team"/>(s) that will be "friends" with this custom role
         /// </summary>
-        public List<Team> IsFriendOf { get; set; } = new();
+        public virtual List<Team> IsFriendOf { get; set; } = new();
 
         /// <summary>
         /// Gets or sets the <see cref="HealthBehaviour"/>
         /// </summary>
-        public HealthBehaviour Health { get; set; } = new();
+        public virtual HealthBehaviour Health { get; set; } = new();
 
         /// <summary>
         /// Gets or sets the <see cref="AhpBehaviour"/>
         /// </summary>
-        public AhpBehaviour Ahp { get; set; } = new();
+        public virtual AhpBehaviour Ahp { get; set; } = new();
 
         /// <summary>
         /// Gets or sets the <see cref="IUCREffect"/>s
         /// </summary>
-        public List<Effect>? Effects { get; set; } = new();
+        public virtual List<Effect>? Effects { get; set; } = new();
 
         /// <summary>
         /// Gets or sets the <see cref="StaminaBehaviour"/>
         /// </summary>
-        public StaminaBehaviour Stamina { get; set; } = new();
+        public virtual StaminaBehaviour Stamina { get; set; } = new();
 
         /// <summary>
         /// Gets or sets the maximum number of candies that can be took by the player without losing hands
         /// </summary>
-        public int MaxScp330Candies { get; set; } = 2;
+        public virtual int MaxScp330Candies { get; set; } = 2;
 
         /// <summary>
         /// Gets or sets whether the player can escape or not
         /// </summary>
-        public bool CanEscape { get; set; } = true;
+        public virtual bool CanEscape { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the role after escape
         /// </summary>
-        public Dictionary<string, string> RoleAfterEscape { get; set; } = new()
+        public virtual Dictionary<string, string> RoleAfterEscape { get; set; } = new()
         {
             {
                 "default",
@@ -131,32 +131,32 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets or sets the scale of the player
         /// </summary>
-        public Vector3 Scale { get; set; } = Vector3.one;
+        public virtual Vector3 Scale { get; set; } = Vector3.one;
 
         /// <summary>
         /// Gets or sets the broadcast that will be shown to the player when spawned
         /// </summary>
-        public string SpawnBroadcast { get; set; } = "You are a <color=orange><b>Janitor</b></color>!\nClean the Light Containment Zone!";
+        public virtual string SpawnBroadcast { get; set; } = "You are a <color=orange><b>Janitor</b></color>!\nClean the Light Containment Zone!";
 
         /// <summary>
         /// Gets or sets the broadcast duration
         /// </summary>
-        public ushort SpawnBroadcastDuration { get; set; } = 5;
+        public virtual ushort SpawnBroadcastDuration { get; set; } = 5;
 
         /// <summary>
         /// Gets or sets the hint that will be shown to the player when spawned
         /// </summary>
-        public string SpawnHint { get; set; } = "This hint will be shown when you will spawn as a Janitor!";
+        public virtual string SpawnHint { get; set; } = "This hint will be shown when you will spawn as a Janitor!";
 
         /// <summary>
         /// Gets or sets hint duration
         /// </summary>
-        public float SpawnHintDuration { get; set; } = 5;
+        public virtual float SpawnHintDuration { get; set; } = 5;
 
         /// <summary>
         /// Gets or sets the custom inventory limits to override the default ones
         /// </summary>
-        public Dictionary<ItemCategory, sbyte> CustomInventoryLimits { get; set; } = new()
+        public virtual Dictionary<ItemCategory, sbyte> CustomInventoryLimits { get; set; } = new()
         {
             {
                 ItemCategory.Medical,
@@ -167,7 +167,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets or sets the inventory of the player
         /// </summary>
-        public List<ItemType> Inventory { get; set; } = new()
+        public virtual List<ItemType> Inventory { get; set; } = new()
         {
             ItemType.Flashlight,
             ItemType.KeycardJanitor
@@ -176,12 +176,12 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets or sets the custom items inventory of the player
         /// </summary>
-        public List<uint> CustomItemsInventory { get; set; } = new();
+        public virtual List<uint> CustomItemsInventory { get; set; } = new();
 
         /// <summary>
         /// Gets or sets the ammo inventory of the player
         /// </summary>
-        public Dictionary<AmmoType, ushort> Ammo { get; set; } = new()
+        public virtual Dictionary<AmmoType, ushort> Ammo { get; set; } = new()
         {
             {
                 AmmoType.Nato9,
@@ -193,22 +193,22 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Gets or sets the damage multiplier.<br></br>
         /// This will increase - keep normal - or decrease the damage that this role will do
         /// </summary>
-        public float DamageMultiplier { get; set; } = 1;
+        public virtual float DamageMultiplier { get; set; } = 1;
 
         /// <summary>
         /// Gets or sets the <see cref="SpawnBehaviour"/>
         /// </summary>
-        public SpawnBehaviour? SpawnSettings { get; set; } = new();
+        public virtual SpawnBehaviour? SpawnSettings { get; set; } = new();
 
         /// <summary>
         /// Gets or sets the <see cref="Enums.CustomFlags"/> of the custom role
         /// </summary>
-        public CustomFlags? CustomFlags { get; set; } = null;
+        public virtual CustomFlags? CustomFlags { get; set; } = null;
 
         /// <summary>
         /// Gets or sets whether the custom role should be evaluated during normal spawn events or not
         /// </summary>
-        public bool IgnoreSpawnSystem { get; set; } = false;
+        public virtual bool IgnoreSpawnSystem { get; set; } = false;
 
 #nullable disable
         /// <summary>

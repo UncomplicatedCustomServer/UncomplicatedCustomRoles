@@ -123,11 +123,15 @@ namespace UncomplicatedCustomRoles
             // Register custom event handlers for custom roles
             CustomRoleEventHandler.RegisterEvents();
 
+            RespawnTimer.Enable();
+
             base.OnEnabled();
         }
 
         public override void OnDisabled()
         {
+            RespawnTimer.Disable();
+
             CustomRoleEventHandler.UnregisterEvents();
 
             _harmony.UnpatchAll();
@@ -166,9 +170,8 @@ namespace UncomplicatedCustomRoles
         /// </summary>
         public void OnFinishedLoadingPlugins()
         {
-            // Register ScriptedEvents and RespawnTimer integration
+            // Register ScriptedEvents integration
             ScriptedEvents.RegisterCustomActions();
-            RespawnTimer.Enable();
 
             // Run the import managet
             ImportManager.Init();
@@ -179,7 +182,6 @@ namespace UncomplicatedCustomRoles
         /// </summary>
         public void OnStartingUnloadingPlugins()
         {
-            RespawnTimer.Disable();
             ScriptedEvents.UnregisterCustomActions();
         }
     }

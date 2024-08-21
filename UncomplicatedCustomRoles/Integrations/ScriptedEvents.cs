@@ -18,12 +18,20 @@ namespace UncomplicatedCustomRoles.Integrations
         /// </summary>
         internal static Assembly Assembly => Loader.GetPlugin("ScriptedEvents")?.Assembly;
 
-        internal static Version Version => (Version)(Assembly?.GetType("ScriptedEvents.MainPlugin")?.GetProperty("Version").GetValue(Assembly, null) ?? new Version(0, 0, 0));
-
         /// <summary>
         /// Gets the <see cref="Type"/> of the API class
         /// </summary>
         internal static Type Class => Assembly?.GetType("ScriptedEvents.API.Features.ApiHelper");
+
+        /// <summary>
+        /// Gets the main class of Scripted Events
+        /// </summary>
+        internal static object MainClass => Assembly?.GetType("ScriptedEvents.MainPlugin")?.GetProperty("Singleton").GetValue(null, null);
+
+        /// <summary>
+        /// Gets the current version of ScriptedEvents
+        /// </summary>
+        internal static Version Version => (Version)(Assembly?.GetType("ScriptedEvents.MainPlugin")?.GetProperty("Version")?.GetValue(MainClass, null) ?? new Version(0, 0, 0));
 
         /// <summary>
         /// Gets the RegisterCustomAction method
@@ -45,12 +53,17 @@ namespace UncomplicatedCustomRoles.Integrations
         /// </summary>
         internal static bool CanInvoke => AddMethod is not null && RemoveMethod is not null && IsRightVersion;
 
+        /// <summary>
+        /// Gets whether the version is correct or not
+        /// </summary>
         internal static bool IsRightVersion { get; private set; } = true;
 
         /// <summary>
         /// Gets a list of every CustomAction registered by UCR
         /// </summary>
         internal static List<string> CustomActions { get; } = new();
+
+        private static bool _alreadyLoaded = false;
 
         /// <summary>
         /// Register a new CustomAction
@@ -79,10 +92,13 @@ namespace UncomplicatedCustomRoles.Integrations
         /// </summary>
         public static void RegisterCustomActions()
         {
-            if (Version.CompareTo(new(3, 1, 7)) < 0)
+            if (_alreadyLoaded)
+                return;
+
+            if (CanInvoke && Version.CompareTo(new(3, 1, 6)) < 0)
             {
                 IsRightVersion = false;
-                LogManager.Warn("Warning!\nThe ScriptedEvents integration of UCR can't be enabled as your version of ScriptedEvents is OUTDATED!\nRequired: >= 3.1.7 - Found: " + Version);
+                LogManager.Warn("The ScriptedEvents integration of UCR can't be enabled as your version of ScriptedEvents is OUTDATED!\nRequired: >= 3.1.6 - Found: " + Version);
                 return;
             }
 
@@ -139,6 +155,8 @@ namespace UncomplicatedCustomRoles.Integrations
 
                 return new(true, string.Empty, null);
             });
+
+            _alreadyLoaded = true;
         }
 
         /// <summary>
@@ -160,10 +178,7 @@ namespace UncomplicatedCustomRoles.Integrations
         /// <param name="script"></param>
         /// <param name="max"></param>
         /// <returns></returns>
-        internal static Player GetPlayer(string input, object script)
-        {
-            return ((Player[])GetPlayerMethod.Invoke(null, new[] { input, script, 1 })).FirstOrDefault();
-        }
+        internal static Player GetPlayer(string input, object script) => ((Player[])GetPlayerMethod.Invoke(null, new[] { input, script, 1 })).FirstOrDefault();
 
         /// <summary>
         /// Try to get a Player from the given input, supposing the player is the first argument
@@ -172,9 +187,6 @@ namespace UncomplicatedCustomRoles.Integrations
         /// <param name="script"></param>
         /// <param name="max"></param>
         /// <returns></returns>
-        internal static Player GetPlayerFromArgs(Tuple<string[], object> args, int index = 0)
-        {
-            return GetPlayer(args.Item1.ElementAt(index), args.Item2);
-        }
+        internal static Player GetPlayerFromArgs(Tuple<string[], object> args, int index = 0) => GetPlayer(args.Item1.ElementAt(index), args.Item2);
     }
 }
