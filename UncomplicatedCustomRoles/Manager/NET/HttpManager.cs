@@ -166,8 +166,8 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
             if (Version is not null && Version != string.Empty && Version.Contains("."))
                 _latestVersion = new(Version);
-
-            _latestVersion = Plugin.Instance.Version;
+            else
+                _latestVersion = new();
         }
 
         public void LoadCreditTags()

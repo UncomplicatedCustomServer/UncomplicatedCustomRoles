@@ -1,9 +1,14 @@
-﻿using HarmonyLib;
+﻿using Exiled.Loader;
+using HarmonyLib;
 using RemoteAdmin.Communication;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using UncomplicatedCustomRoles.API.Features;
+
 using static HarmonyLib.AccessTools;
 
 namespace UncomplicatedCustomRoles.Patches
@@ -11,7 +16,7 @@ namespace UncomplicatedCustomRoles.Patches
     [HarmonyPatch(typeof(RaPlayer), nameof(RaPlayer.ReceiveData), typeof(CommandSender), typeof(string))]
     internal class PlayerInfoPatch
     {
-        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> newInstructions = new(instructions);
             bool found = false;
@@ -32,13 +37,22 @@ namespace UncomplicatedCustomRoles.Patches
                 newInstructions.InsertRange(index, new CodeInstruction[]
                 {
                     new(OpCodes.Ldloc_S, 14),
-                    new(OpCodes.Ldloc_S, 4),
+                    new(OpCodes.Ldloc_S, 6),
                     new(OpCodes.Call, Method(typeof(SummonedCustomRole), nameof(SummonedCustomRole.TryParseRemoteAdmin))),
-                    new(OpCodes.Callvirt, Method(typeof(StringBuilder), nameof(StringBuilder.Append))),
+                    new(OpCodes.Callvirt, Method(typeof(StringBuilder), nameof(StringBuilder.Append), new Type[] { typeof(string) })),
                     new(OpCodes.Pop),
                 });
 
             return newInstructions;
+        }
+
+        internal static void TryPatchCedMod()
+        {
+            Assembly cedModAssembly = Loader.Plugins.Where(p => p.Name is "CedMod").FirstOrDefault()?.Assembly;
+            MethodInfo targetMethod = cedModAssembly?.GetType("CedMod.Patches.RaPlayerPatch")?.GetMethod("RaPlayerCoRoutine");
+
+            if (targetMethod is not null)
+                Plugin.Instance._harmony.Patch(targetMethod, transpiler: new(Method(typeof(PlayerInfoPatch), nameof(PlayerInfoPatch.Transpiler))));
         }
     }
 }

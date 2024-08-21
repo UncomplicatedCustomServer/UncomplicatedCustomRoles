@@ -19,7 +19,7 @@ namespace UncomplicatedCustomRoles.Commands
         {
             if (arguments.Count == 0)
             {
-                response = "Unexpected number of args!\nUsage: ucr generate (FileName) (port)";
+                response = "Unexpected number of args!\nUsage: ucr generate (FileName) (Server-port)";
                 return false;
             }
 

@@ -18,10 +18,6 @@ using PlayerStatsSystem;
 using Subtitles;
 using Utils.Networking;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
-using static NineTailedFoxAnnouncer;
-using System.Runtime.Remoting.Messaging;
-using System.Security.Cryptography;
-using UnityEngine.Windows;
 using System.Text.RegularExpressions;
 
 // Mormora, la gente mormora

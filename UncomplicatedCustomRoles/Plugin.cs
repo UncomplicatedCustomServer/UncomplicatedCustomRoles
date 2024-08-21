@@ -12,6 +12,7 @@ using Scp330Handler = Exiled.Events.Handlers.Scp330;
 using UncomplicatedCustomRoles.API.Features;
 using HarmonyLib;
 using UncomplicatedCustomRoles.Manager.NET;
+using UncomplicatedCustomRoles.Patches;
 
 namespace UncomplicatedCustomRoles
 {
@@ -23,7 +24,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(4, 0, 0, 7);
+        public override Version Version { get; } = new(4, 0, 0, 8);
 
         public override Version RequiredExiledVersion { get; } = new(8, 11, 0);
 
@@ -39,7 +40,7 @@ namespace UncomplicatedCustomRoles
 
         internal static FileConfigs FileConfigs;
 
-        private Harmony _harmony;
+        internal Harmony _harmony;
 
         public override void OnEnabled()
         {
@@ -102,10 +103,6 @@ namespace UncomplicatedCustomRoles
                     Log.DebugEnabled.Add(Assembly);
                 }
             }
-            else if (HttpManager.LatestVersion.CompareTo(Version) == 0)
-                LogManager.System($"User is using the latest version of UCR: {Version}");
-            else
-                LogManager.System("Error while evaluating version!");
 
             InfiniteEffect.Stop();
             InfiniteEffect.EffectAssociationAllowed = true;
@@ -123,6 +120,7 @@ namespace UncomplicatedCustomRoles
             Harmony.DEBUG = true;
             _harmony = new($"com.ucs.ucr_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
+            PlayerInfoPatch.TryPatchCedMod();
 
             // Register custom event handlers for custom roles
             CustomRoleEventHandler.RegisterEvents();

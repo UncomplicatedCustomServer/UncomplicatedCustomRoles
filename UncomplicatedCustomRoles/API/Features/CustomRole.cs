@@ -256,8 +256,6 @@ namespace UncomplicatedCustomRoles.API.Features
                 return;
             }
 
-            LogManager.Debug($"Proposed new role {Role.Id} to register with {Role.MaxScp330Candies} ccds");
-
             if (!CustomRoles.ContainsKey(Role.Id))
             {
                 CustomRoles.Add(Role.Id, Role);

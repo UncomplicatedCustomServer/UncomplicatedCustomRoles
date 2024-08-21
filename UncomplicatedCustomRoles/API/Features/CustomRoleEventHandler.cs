@@ -80,7 +80,7 @@ namespace UncomplicatedCustomRoles.API.Features
             {
                 MethodInfo method = Listeners[eventArgs.GetType()].Item2;
                 object[] args = new[] { eventArgs };
-                method.Invoke(Listeners[eventArgs.GetType()].Item1, args);
+                method?.Invoke(Listeners[eventArgs.GetType()].Item1, args);
                 eventArgs = args[0] as IPlayerEvent;
             }
         }
