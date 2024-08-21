@@ -27,6 +27,32 @@ namespace UncomplicatedCustomRoles.Manager
 {
     internal class SpawnManager
     {
+        public static IReadOnlyDictionary<string, string> colorMap = new Dictionary<string, string>()
+        {
+            { "pink", "#FF96DE" },
+            { "red", "#C50000" },
+            { "brown", "#944710" },
+            { "silver", "#A0A0A0" },
+            { "light_green", "#32CD32" },
+            { "crimson", "#DC143C" },
+            { "cyan", "#00B7EB" },
+            { "aqua", "#00FFFF" },
+            { "deep_pink", "#FF1493" },
+            { "tomato", "#FF6448" },
+            { "yellow", "#FAFF86" },
+            { "magenta", "#FF0090" },
+            { "blue_green", "#4DFFB8" },
+            { "orange", "#FF9966" },
+            { "lime", "#BFFF00" },
+            { "green", "#228B22" },
+            { "emerald", "#50C878" },
+            { "carmine", "#960018" },
+            { "nickel", "#727472" },
+            { "mint", "#98FB98" },
+            { "army_green", "#4B5320" },
+            { "pumpkin", "#EE7600" }
+        };
+
         public static void ClearCustomTypes(Player player)
         {
             if (SummonedCustomRole.TryGet(player, out SummonedCustomRole role))
@@ -348,7 +374,7 @@ namespace UncomplicatedCustomRoles.Manager
             foreach (ICustomRole Role in CustomRole.CustomRoles.Values.Where(cr => cr.SpawnSettings is not null))
                 if (!Role.IgnoreSpawnSystem && Player.List.Count() >= Role.SpawnSettings.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
                 {
-                    if (Role.SpawnSettings.RequiredPermission != null && Role.SpawnSettings.RequiredPermission != string.Empty && !player.CheckPermission(Role.SpawnSettings.RequiredPermission))
+                    if (Role.SpawnSettings.RequiredPermission is not null && Role.SpawnSettings.RequiredPermission != string.Empty && !player.CheckPermission(Role.SpawnSettings.RequiredPermission))
                     {
                         LogManager.Debug($"[NOTICE] Ignoring the role {Role.Id} [{Role.Name}] while creating the list for the player {player.Nickname} due to: cannot [permissions].");
                         continue;
@@ -365,7 +391,7 @@ namespace UncomplicatedCustomRoles.Manager
                 return null;
             }
 
-            if (RolePercentage.ContainsKey(player.Role.Type))
+            if (RolePercentage.ContainsKey(NewRole))
                 if (UnityEngine.Random.Range(0, 100) < RolePercentage[NewRole].Count())
                     return CustomRole.CustomRoles[RolePercentage[NewRole].RandomItem().Id];
 

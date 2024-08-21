@@ -105,6 +105,11 @@ namespace UncomplicatedCustomRoles.API.Features
         public bool IsValid => _internalValid && Player.IsAlive;
 
         /// <summary>
+        /// Gets whether the current <see cref="Player"/> is a UCS Employee
+        /// </summary>
+        public bool IsEmployee => Plugin.HttpManager.OrgPlayerRole.ContainsKey(Player.UserId);
+
+        /// <summary>
         /// Gets the time in UNIX timestamp (seconds) when the <see cref="Player"/> received the last damage
         /// </summary>
         public long LastDamageTime { get; internal set; }
@@ -189,6 +194,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public void Destroy()
         {
+            LogManager.Silent($"Destroying instance of CR {Role.Id} of PL {Player}");
             Remove();
             List.Remove(this);
             SpawnManager.UpdateChaosModifier();
@@ -199,36 +205,43 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public void Remove()
         {
-            if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null && Role.BadgeColor.Length > 2 && Badge is not null && Badge is Triplet<string, string, bool> badge)
+            try
             {
-                Player.RankName = badge.First;
-                Player.RankColor = badge.Second;
-                Player.ReferenceHub.serverRoles.RefreshLocalTag();
+                if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null && Role.BadgeColor.Length > 2 && Badge is not null && Badge is Triplet<string, string, bool> badge)
+                {
+                    Player.RankName = badge.First;
+                    Player.RankColor = badge.Second;
+                    Player.ReferenceHub.serverRoles.RefreshLocalTag();
 
-                LogManager.Debug($"Badge detected, fixed");
+                    LogManager.Debug($"Badge detected, fixed");
+                }
+
+                Player.ReferenceHub.nicknameSync.Network_playerInfoToShow = PlayerInfoArea;
+                Player.IsUsingStamina = true;
+                Player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = string.Empty;
+
+                LogManager.Debug("Scale reset to 1, 1, 1");
+                Player.Scale = new(1, 1, 1);
+
+                if (IsCustomNickname)
+                {
+                    Player.DisplayNickname = null;
+                }
+
+                if (IsDefaultCoroutineRole && GenericCoroutine.IsRunning)
+                    Timing.KillCoroutines(GenericCoroutine);
+
+                if (Role is ICoroutineRole role && role.CoroutineHandler.IsRunning)
+                    Timing.KillCoroutines(role.CoroutineHandler);
+
+                foreach (CoroutineModule coroutineModule in GetModules<CoroutineModule>())
+                    if (coroutineModule.CoroutineHandler.IsRunning)
+                        Timing.KillCoroutines(coroutineModule.CoroutineHandler);
             }
-
-            Player.ReferenceHub.nicknameSync.Network_playerInfoToShow = PlayerInfoArea;
-            Player.IsUsingStamina = true;
-            Player.CustomInfo = string.Empty;
-
-            LogManager.Debug("Scale reset to 1, 1, 1");
-            Player.Scale = new(1, 1, 1);
-
-            if (IsCustomNickname)
+            catch (Exception e)
             {
-                Player.DisplayNickname = null;
+                LogManager.Error($"Failed to act SummonedCustomRole::Remove() - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
             }
-
-            if (IsDefaultCoroutineRole && GenericCoroutine.IsRunning)
-                Timing.KillCoroutines(GenericCoroutine);
-
-            if (Role is ICoroutineRole role && role.CoroutineHandler.IsRunning)
-                Timing.KillCoroutines(role.CoroutineHandler);
-
-            foreach (CoroutineModule coroutineModule in GetModules<CoroutineModule>())
-                if (coroutineModule.CoroutineHandler.IsRunning)
-                    Timing.KillCoroutines(coroutineModule.CoroutineHandler);
 
             _customModules.Clear();
             _internalValid = false;
@@ -268,7 +281,44 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Parse the current <see cref="SummonedCustomRole"/> instance as a RemoteAdmin text part
         /// </summary>
         /// <returns></returns>
-        internal string ParseRemoteAdmin() => $"\nCustom Role: <color={Exiled.API.Extensions.RoleExtensions.GetColor(Role.Role)}>{Role.Name}</color> ({Role.Id})";
+        internal string ParseRemoteAdmin() => $"\n<size=27><color=#f55505>UncomplicatedCustomRoles</color></size>\nCustom Role: <color={Exiled.API.Extensions.RoleExtensions.GetColor(Role.Role).ToHex()}>{Role.Name}</color> [Id={Role.Id}]{LoadRoleFlags()}\n{LoadBadge()}";
+
+        private string LoadRoleFlags()
+        {
+            List<string> output = new();
+
+            if (IsCoroutineRole || IsDefaultCoroutineRole)
+                output.Add("<b><color=#599e09>[COROUTINE]</color></b>");
+
+            if (_customModules.Count > 0)
+                output.Add("<b><color=#a343f7>[CUSTOM MODULES]</color></b>");
+
+            if (Role.Role.GetTeam() != (Role?.Team ?? Role.Role.GetTeam()))
+                output.Add("<b><color=#eb441e>[TEAM OVERRIDE]</color></b>");
+
+            if (output.Count > 0)
+                output.Insert(0, " -");
+
+            return string.Join(" ", output);
+        }
+
+        private string LoadBadge()
+        {
+            string output = "Role: ";
+
+            if (Role.BadgeColor != string.Empty && Role.BadgeName != string.Empty)
+                if (SpawnManager.colorMap.ContainsKey(Role.BadgeColor))
+                    output += $"<b><color={SpawnManager.colorMap[Role.BadgeColor]}>{Role.BadgeName}</color></b>";
+                else
+                    output += $"<b>{Role.BadgeName}</b>";
+            else
+                output += "None";
+
+            if (IsEmployee && Plugin.HttpManager.Credits.TryGetValue(Player.UserId, out Triplet<string, string, bool> tag))
+                output += $" - <b><color=#168eba>[UCR EMPLOYEE]</color></b> <b><color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color></b>";
+
+            return output;
+        }
 
         /// <summary>
         /// The coroutine to regenerate Hume Shield

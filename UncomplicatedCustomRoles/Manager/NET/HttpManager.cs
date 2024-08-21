@@ -68,6 +68,11 @@ namespace UncomplicatedCustomRoles.Manager.NET
         public Dictionary<string, Triplet<string, string, bool>> Credits { get; internal set; } = new();
 
         /// <summary>
+        /// Gets the role of the given player (as steamid@64) inside UCR
+        /// </summary>
+        public Dictionary<string, string> OrgPlayerRole { get; } = new();
+
+        /// <summary>
         /// Gets the List of the ResponseTimes
         /// </summary>
         public List<float> ResponseTimes { get; } = new();
@@ -178,9 +183,16 @@ namespace UncomplicatedCustomRoles.Manager.NET
                 Dictionary<string, Dictionary<string, string>> Data = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(RetriveString(HttpGetRequest("https://ucs.fcosma.it/api/credits.json")));
 
                 foreach (KeyValuePair<string, Dictionary<string, string>> kvp in Data.Where(kvp => kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") && kvp.Value.ContainsKey("override")))
-                    Credits.Add(kvp.Key, new(kvp.Value["role"], kvp.Value["color"], bool.Parse(kvp.Value["ovveride"])));
+                {
+                    Credits.Add(kvp.Key, new(kvp.Value["role"], kvp.Value["color"], bool.Parse(kvp.Value["override"])));
+                    if (kvp.Value.TryGetValue("job", out string isJob) && isJob is "true")
+                        OrgPlayerRole.Add(kvp.Key, isJob);
+                }
             }
-            catch (Exception) { }
+            catch (Exception e)
+            {
+                LogManager.Error($"Failed to act HttpManager::LoadCreditTags() - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
+            }
         }
 
         public Triplet<string, string, bool> GetCreditTag(Player player)

@@ -86,6 +86,7 @@
     <Compile Include="Commands\Owner.cs" />
     <Compile Include="Commands\Role.cs" />
     <Compile Include="Commands\Reload.cs" />
+    <Compile Include="Commands\Show.cs" />
     <Compile Include="Commands\Spawn.cs" />
     <Compile Include="Commands\SpawnPoint.cs" />
     <Compile Include="Config.cs" />
@@ -108,10 +109,11 @@
     <Compile Include="Manager\SpawnManager.cs" />
     <Compile Include="Patches\Announcer.cs" />
     <Compile Include="Patches\InventoryLimitsPrefix.cs" />
-    <Compile Include="Patches\OnDisabledPatch.cs" />
+    <Compile Include="Patches\DisabledEventPatch.cs" />
     <Compile Include="Patches\PlayerInfoPatch.cs" />
     <Compile Include="Patches\PluginsLoaded.cs" />
     <Compile Include="Patches\Scp3114StranglePrefix.cs" />
+    <Compile Include="Patches\SetRolePatch.cs" />
     <Compile Include="Patches\TeamPatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="API\Interfaces\ICustomRole.cs" />
