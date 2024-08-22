@@ -281,7 +281,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Parse the current <see cref="SummonedCustomRole"/> instance as a RemoteAdmin text part
         /// </summary>
         /// <returns></returns>
-        internal string ParseRemoteAdmin() => $"\n<size=27><color=#f55505>UncomplicatedCustomRoles</color></size>\nCustom Role: <color={Exiled.API.Extensions.RoleExtensions.GetColor(Role.Role).ToHex()}>{Role.Name}</color> [Id={Role.Id}]{LoadRoleFlags()}\n{LoadBadge()}";
+        internal string ParseRemoteAdmin() => $"\n<size=26><color=#f55505>UncomplicatedCustomRoles</color></size>\nCustom Role: <color={Exiled.API.Extensions.RoleExtensions.GetColor(Role.Role).ToHex()}>{Role.Name}</color> [Id={Role.Id}]{LoadRoleFlags()}\n{LoadBadge()}";
 
         private string LoadRoleFlags()
         {
@@ -298,8 +298,7 @@ namespace UncomplicatedCustomRoles.API.Features
 
             if (output.Count > 0)
             {
-                output.Insert(0, "<align=right>");
-                output.Add("</align>");
+                output.Insert(0, " -");
             }
 
             return string.Join(" ", output);
@@ -318,7 +317,7 @@ namespace UncomplicatedCustomRoles.API.Features
                 output += "None";
 
             if (IsEmployee && Plugin.HttpManager.Credits.TryGetValue(Player.UserId, out Triplet<string, string, bool> tag))
-                output += $"<align=right><color=#168eba>[UCR EMPLOYEE]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color></align>";
+                output += $" - <color=#168eba>[UCR EMPLOYEE]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>";
 
             return output;
         }
