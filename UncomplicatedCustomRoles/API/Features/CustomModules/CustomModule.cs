@@ -1,13 +1,10 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
-using UnityEngine;
-using UnityEngine.Assertions.Must;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
@@ -56,12 +53,18 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         /// </summary>
         public virtual void Execute()
         { }
+
         private static IEnumerable<Type> LoadAll()
         {
             return Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsSubclassOf(typeof(CustomModule)) && !t.IsAbstract);
         }
 
-
+        /// <summary>
+        /// Load a <see cref="List{T}"/> of <see cref="ICustomModule"/> from the given <see cref="CustomFlags"/>
+        /// </summary>
+        /// <param name="flags"></param>
+        /// <param name="instance"></param>
+        /// <returns></returns>
         public static List<ICustomModule> Load(CustomFlags flags, SummonedCustomRole instance)
         {
             LogManager.Debug($"Loading custom modules for {instance.Player} - {instance.Role.Id} -- {flags} -- {_loaded.Count()}");
@@ -91,6 +94,13 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
 
             LogManager.Silent($"rff for {flags}: {result.Count}");
             return result;
+        }
+
+        public static ICustomModule Load(Type type, SummonedCustomRole instance)
+        {
+            if (type.GetConstructors()[0].GetParameters().Length > 0 && type.GetConstructors()[0].GetParameters()[0].ParameterType == typeof(SummonedCustomRole))
+                return (CustomModule)Activator.CreateInstance(type, new object[] { instance });
+            return (CustomModule)Activator.CreateInstance(type);
         }
     }
 }

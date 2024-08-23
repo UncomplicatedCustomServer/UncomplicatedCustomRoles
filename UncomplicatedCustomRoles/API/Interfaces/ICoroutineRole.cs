@@ -1,15 +1,16 @@
 ﻿using MEC;
+using UncomplicatedCustomRoles.API.Features;
 
 namespace UncomplicatedCustomRoles.API.Interfaces
 {
-    internal interface ICoroutineRole : ICustomRole
+    public interface ICoroutineRole : ICustomRole
     {
-        public abstract CoroutineHandle CoroutineHandler { get; internal set; }
+        public abstract CoroutineHandle CoroutineHandler { get; set; }
 
         public abstract float TickRate { get; set; }
 
-        public abstract long Frame { get; internal set; }
+        public abstract long Frame { get; set; }
 
-        public abstract void Tick();
+        public abstract void Tick(SummonedCustomRole roleInstance);
     }
 }

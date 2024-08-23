@@ -60,7 +60,7 @@ namespace UncomplicatedCustomRoles
             ServerHandler.RoundStarted += Handler.OnRoundStarted;
             ServerHandler.RoundEnded += Handler.OnRoundEnded;
 
-            PlayerHandler.Verified += Handler.OnVerified;
+            // PlayerHandler.Verified += Handler.OnVerified;
             PlayerHandler.Died += Handler.OnDied;
             PlayerHandler.Spawned += Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole += Handler.OnChangingRole;
@@ -142,7 +142,7 @@ namespace UncomplicatedCustomRoles
             ServerHandler.RoundEnded -= Handler.OnRoundEnded;
             ServerHandler.RoundStarted -= Handler.OnRoundStarted;
 
-            PlayerHandler.Verified -= Handler.OnVerified;
+            // PlayerHandler.Verified -= Handler.OnVerified;
             PlayerHandler.Died -= Handler.OnDied;
             PlayerHandler.Spawned -= Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole -= Handler.OnChangingRole;
@@ -159,6 +159,7 @@ namespace UncomplicatedCustomRoles
             Scp330Handler.InteractingScp330 -= Handler.OnInteractingScp330;
 
             HttpManager.Stop();
+            HttpManager.UnregisterEvents();
 
             Handler = null;
 

@@ -1,4 +1,5 @@
 ﻿using Exiled.API.Features;
+using Exiled.Events.EventArgs.Player;
 using Exiled.Loader;
 using MEC;
 using Newtonsoft.Json;
@@ -10,6 +11,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using UncomplicatedCustomRoles.API.Struct;
+
+using PlayerHandler = Exiled.Events.Handlers.Player;
 
 namespace UncomplicatedCustomRoles.Manager.NET
 {
@@ -90,6 +93,8 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         private Version _latestVersion { get; set; } = null;
 
+        private bool _alreadyManaged { get; set; } = false;
+
         /// <summary>
         /// Create a new istance of the HttpManager
         /// </summary>
@@ -104,7 +109,20 @@ namespace UncomplicatedCustomRoles.Manager.NET
             MaxErrors = maxErrors;
             HttpClient = new();
             LoadCreditTags();
+            RegisterEvents();
         }
+
+        internal void RegisterEvents()
+        {
+            PlayerHandler.Verified += OnVerified;
+        }
+
+        internal void UnregisterEvents()
+        {
+            PlayerHandler.Verified -= OnVerified;
+        }
+
+        public void OnVerified(VerifiedEventArgs ev) => ApplyCreditTag(ev.Player);
 
         private bool CheckForDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "Newtonsoft.Json");
 
@@ -205,9 +223,19 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         public void ApplyCreditTag(Player player)
         {
+            if (_alreadyManaged)
+                return;
+
             Triplet<string, string, bool> Tag = GetCreditTag(player);
-            if (player.RankName is not null && player.RankName != string.Empty && !Tag.Third)
-                return; // Do not override
+            
+            if (player.RankName is not null && player.RankName != string.Empty)
+            {
+                if (Credits.Any(k => k.Value.First == player.RankName && k.Value.Second == player.RankColor))
+                    _alreadyManaged = true;
+
+                if (!Tag.Third)
+                    return; // Do not override
+            }
 
             if (Tag.First is not null && Tag.Second is not null)
             {
@@ -241,9 +269,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
             httpContent = Status.Content;
             ResponseTimes.Add(DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start);
             if (Status.StatusCode == HttpStatusCode.OK)
-            {
                 return true;
-            }
             return false;
         }
 

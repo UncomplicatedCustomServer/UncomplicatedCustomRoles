@@ -22,7 +22,7 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
         /// <summary>
         /// Gets or sets the speed of the regeneration of the hume shield in units/second
         /// </summary>
-        public float HumeShieldRegenerationAmout { get; set; } = 2;
+        public float HumeShieldRegenerationAmount { get; set; } = 2;
 
         /// <summary>
         /// Gets or sets the time that the player has to be untouched (not damaged) in order to regen the hume shield (in seconds)

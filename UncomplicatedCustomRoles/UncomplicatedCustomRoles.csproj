@@ -98,7 +98,6 @@
     <Compile Include="Extensions\PlayerExtension.cs" />
     <Compile Include="Extensions\Vector3Extension.cs" />
     <Compile Include="Integrations\ScriptedEvents.cs" />
-    <Compile Include="API\Interfaces\IEventRole.cs" />
     <Compile Include="API\Interfaces\IUCRCommand.cs" />
     <Compile Include="Manager\FileConfigs.cs" />
     <Compile Include="API\Features\Effect.cs" />

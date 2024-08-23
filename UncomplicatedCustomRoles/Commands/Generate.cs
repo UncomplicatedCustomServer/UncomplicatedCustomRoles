@@ -11,7 +11,7 @@ namespace UncomplicatedCustomRoles.Commands
     {
         public string Name { get; } = "generate";
 
-        public string Description { get; } = "Generate another default CustomRole inside a given file, creating it";
+        public string Description { get; } = "Generate another default Custom Role inside a given file, creating it";
 
         public string RequiredPermission { get; } = "ucr.generate";
 

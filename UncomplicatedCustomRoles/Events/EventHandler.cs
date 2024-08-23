@@ -88,55 +88,6 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnRoundEnded(RoundEndedEventArgs _) => InfiniteEffect.Terminate();
 
-        //public void OnChangingRole(ChangingRoleEventArgs ev) => SpawnManager.ClearCustomTypes(ev.Player);
-
-        /*public void OnSpawning(SpawningEventArgs ev)
-        {
-            if (ev.Player is null)
-                return;
-
-            LogManager.Debug("Called SPAWNING event");
-
-            if (Spawn.Spawning.Contains(ev.Player.Id))
-                return;
-
-            if (ev.Player.HasCustomRole())
-                return;
-
-            if (!Plugin.Instance.DoSpawnBasicRoles)
-                return;
-
-            if (ev.Player.IsNPC)
-                return;
-
-            string LogReason = string.Empty;
-            if (Plugin.Instance.Config.AllowOnlyNaturalSpawns && !Spawn.SpawnQueue.Contains(ev.Player.Id))
-            {
-                LogManager.Debug("The player is not in the queue for respawning!");
-                return;
-            }
-            else if (Spawn.SpawnQueue.Contains(ev.Player.Id))
-            {
-                Spawn.SpawnQueue.Remove(ev.Player.Id);
-                LogReason = " [WITH a respawn wave - VANILLA]";
-            }
-
-            LogManager.Debug($"Player {ev.Player.Nickname} spawned{LogReason}, going to assign a role if needed!");
-
-            // Let's clear for custom types
-            SpawnManager.ClearCustomTypes(ev.Player);
-
-            ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(ev.Player);
-
-            if (Role is not null)
-            {
-                LogManager.Debug($"Summoning player {ev.Player.Nickname} ({ev.Player.Id}) as {Role.Name} ({Role.Id})");
-                Timing.CallDelayed(0.3f, () => SpawnManager.SummonCustomSubclass(ev.Player, Role.Id));
-            }
-
-            LogManager.Debug($"Evaluated custom role for player {ev.Player.Nickname} - found: {Role?.Id} ({Role?.Name})");
-        }*/
-
         public void OnChangingRole(ChangingRoleEventArgs ev)
         {
             if (ev.Player is null)
@@ -191,8 +142,6 @@ namespace UncomplicatedCustomRoles.Events
             LogManager.Debug($"No CustomRole found for player {ev.Player.Nickname}, allowing natural spawn with {ev.NewRole}");
         }
 
-        public void OnVerified(VerifiedEventArgs ev) => Plugin.HttpManager.ApplyCreditTag(ev.Player);
-
         public void OnHurting(HurtingEventArgs Hurting)
         {
             if (!Hurting.IsAllowed)
@@ -210,8 +159,8 @@ namespace UncomplicatedCustomRoles.Events
                         LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - FROM ATTACKER");
                         return;
                     }
-                    /*else if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
-                        pacifism.Execute();*/
+                    else if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
+                        pacifism.Execute();
 
                     Hurting.DamageHandler.Damage *= attackerCustomRole.Role.DamageMultiplier;
                 }
@@ -221,10 +170,11 @@ namespace UncomplicatedCustomRoles.Events
                     {
                         Hurting.IsAllowed = false;
                         LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - FROM HURTED");
+                        return;
                     }
 
-                    /*if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
-                        Hurting.IsAllowed = false;*/
+                    if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
+                        Hurting.IsAllowed = false;
                 }
             }
         }

@@ -10,7 +10,7 @@ namespace UncomplicatedCustomRoles.Commands
     {
         public string Name { get; } = "show";
 
-        public string Description { get; } = "Show a specific CustomRole if loaded";
+        public string Description { get; } = "Show a specific Custom Role if loaded";
 
         public string RequiredPermission { get; } = "ucr.show";
 

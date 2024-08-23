@@ -1,10 +1,9 @@
 ﻿using Exiled.API.Features;
 using Exiled.Events.EventArgs.Player;
-using UncomplicatedCustomRoles.API.Interfaces;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
-    public class EventCustomRole : CustomRole, IEventRole
+    public class EventCustomRole : CustomRole
     {
         /// <summary>
         /// Called before kicking a <see cref="API.Features.Player"/> from the server.

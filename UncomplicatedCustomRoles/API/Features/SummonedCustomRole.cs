@@ -6,6 +6,7 @@ using PlayerRoles.PlayableScps;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.API.Interfaces;
@@ -92,7 +93,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets whether the current <see cref="SummonedCustomRole"/> implements a coroutine for handling basic plugin features
         /// </summary>
-        public bool IsDefaultCoroutineRole => (Role.Health?.HumeShield ?? 0) > 0 && (Role.Health?.HumeShieldRegenerationAmout ?? 0) > 0;
+        public bool IsDefaultCoroutineRole => (Role.Health?.HumeShield ?? 0) > 0 && (Role.Health?.HumeShieldRegenerationAmount ?? 0) > 0;
 
         /// <summary>
         /// Gets whether the current <see cref="ICustomRole"/> implements a custom coroutine
@@ -271,7 +272,7 @@ namespace UncomplicatedCustomRoles.API.Features
             while (_internalValid && Player.IsAlive && Role is ICoroutineRole coroutineRole)
             {
                 coroutineRole.Frame++;
-                coroutineRole.Tick();
+                coroutineRole.Tick(this);
 
                 yield return Timing.WaitForSeconds(coroutineRole.TickRate);
             }
@@ -298,7 +299,7 @@ namespace UncomplicatedCustomRoles.API.Features
 
             if (output.Count > 0)
             {
-                output.Insert(0, " -");
+                output.Insert(0, "      -     ");
             }
 
             return string.Join(" ", output);
@@ -306,7 +307,7 @@ namespace UncomplicatedCustomRoles.API.Features
 
         private string LoadBadge()
         {
-            string output = "Role: ";
+            string output = "Badge: ";
 
             if (Role.BadgeColor != string.Empty && Role.BadgeName != string.Empty)
                 if (SpawnManager.colorMap.ContainsKey(Role.BadgeColor))
@@ -316,8 +317,11 @@ namespace UncomplicatedCustomRoles.API.Features
             else
                 output += "None";
 
-            if (IsEmployee && Plugin.HttpManager.Credits.TryGetValue(Player.UserId, out Triplet<string, string, bool> tag))
-                output += $" - <color=#168eba>[UCR EMPLOYEE]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>";
+            if (Plugin.HttpManager.Credits.TryGetValue(Player.UserId, out Triplet<string, string, bool> tag))
+                if (IsEmployee)
+                    output += $"      -      <color=#168eba>[UCR EMPLOYEE]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>";
+                else
+                    output += $"      -      <color=#168eba>[UCR CONTRIBUTOR]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>";
 
             return output;
         }
@@ -331,7 +335,7 @@ namespace UncomplicatedCustomRoles.API.Features
             _isRegeneratingHume = true;
             while (_internalValid && Player.IsAlive && Player.HumeShield < Role.Health.HumeShield && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.Health.HumeShieldRegenerationDelay)
             {
-                Player.HumeShield += Role.Health.HumeShieldRegenerationAmout;
+                Player.HumeShield += Role.Health.HumeShieldRegenerationAmount;
                 yield return Timing.WaitForSeconds(1f);
             }
             _isRegeneratingHume = false;
@@ -375,6 +379,36 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public bool HasModule<T>() where T : CustomModule => _customModules.Any(cm => cm.GetType() == typeof(T));
+
+        /// <summary>
+        /// Add a new <see cref="CustomModule"/> to the current <see cref="SummonedCustomRole"/> instance
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        public void AddModule<T>() where T : CustomModule => _customModules.Add(CustomModule.Load(typeof(T), this));
+
+        /// <summary>
+        /// Try to remove the first <see cref="CustomModule"/>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        public void RemoveModule<T>() where T : CustomModule
+        {
+            if (GetModule(out T module))
+            {
+                if (module is CoroutineModule coroutineModule && coroutineModule.CoroutineHandler.IsRunning)
+                    Timing.KillCoroutines(coroutineModule.CoroutineHandler);
+                _customModules.Remove(module);
+            }
+        }
+
+        /// <summary>
+        /// Remove every <see cref="CustomModule"/> with the same given type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        public void RemoveModules<T>() where T : CustomModule
+        {
+            foreach (ICustomModule _ in GetModules<T>())
+                RemoveModule<T>();
+        }
 
         /// <summary>
         /// Gets every <see cref="SummonedCustomRole"/> with the same <see cref="ICustomRole"/> as a <see cref="List{T}"/>

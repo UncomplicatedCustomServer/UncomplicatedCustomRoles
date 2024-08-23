@@ -14,7 +14,7 @@ namespace UncomplicatedCustomRoles.Commands
     {
         public string Name { get; } = "spawnpoint";
 
-        public string Description { get; } = "Add, remove or list spawnpoints for customroles";
+        public string Description { get; } = "Manage the UCR spawnpoints";
 
         public string RequiredPermission { get; } = "ucr.spawnpoint";
 
