@@ -15,5 +15,6 @@ namespace UncomplicatedCustomRoles.API.Enums
         CustomScpAnnouncer = 1 << 5,
         ShowOnlyCustomInfo = 1 << 6,
         SilentWalker = 1 << 7,
+        SilentAnnouncer = 1 << 8,
     }
 }

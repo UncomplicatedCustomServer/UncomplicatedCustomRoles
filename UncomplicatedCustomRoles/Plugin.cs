@@ -24,7 +24,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(4, 0, 0, 8);
+        public override Version Version { get; } = new(4, 0, 0);
 
         public override Version RequiredExiledVersion { get; } = new(8, 11, 0);
 
@@ -88,6 +88,7 @@ namespace UncomplicatedCustomRoles
                 LogManager.Info("             Special thanks to:");
                 LogManager.Info("  >>  @timmeyxd - They gave me money in order to continue to develop this plugin while keeping it free");
                 LogManager.Info("  >>  @naxefir - They tested hundred of test versions in order to help me relasing the most bug-free versions");
+                LogManager.Info("  >>  @.piwnica2137 - They tested lots of versions in order to help me releasing almost bug-free versions");
                 LogManager.Info("                   ");
                 LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
             }
@@ -118,6 +119,7 @@ namespace UncomplicatedCustomRoles
 
             // Patch with Harmony
             Harmony.DEBUG = true;
+            LogManager.Info("Haromy logs: " + FileLog.LogPath);
             _harmony = new($"com.ucs.ucr_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
             PlayerInfoPatch.TryPatchCedMod();

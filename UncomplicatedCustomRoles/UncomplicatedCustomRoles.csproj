@@ -63,6 +63,7 @@
     <Compile Include="API\Features\CustomModules\LifeStealer.cs" />
     <Compile Include="API\Features\CustomModules\NotAffectedByAppearance.cs" />
     <Compile Include="API\Features\CustomModules\PacifismUntilDamage.cs" />
+    <Compile Include="API\Features\CustomModules\SilentAnnouncer.cs" />
     <Compile Include="API\Features\CustomModules\SilentWalker.cs" />
     <Compile Include="API\Features\CustomRole.cs" />
     <Compile Include="API\Features\CustomRoleEventHandler.cs" />
@@ -112,6 +113,7 @@
     <Compile Include="Patches\PlayerInfoPatch.cs" />
     <Compile Include="Patches\PluginsLoaded.cs" />
     <Compile Include="Patches\Scp3114StranglePrefix.cs" />
+    <Compile Include="Patches\ServerNamePatch.cs" />
     <Compile Include="Patches\SetRolePatch.cs" />
     <Compile Include="Patches\TeamPatch.cs" />
     <Compile Include="Plugin.cs" />

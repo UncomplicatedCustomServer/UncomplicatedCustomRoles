@@ -10,15 +10,21 @@ namespace UncomplicatedCustomRoles.Patches
     [HarmonyPatch(typeof(NineTailedFoxAnnouncer), nameof(NineTailedFoxAnnouncer.AnnounceScpTermination))]
     internal class Announcer
     {
-        static bool Prefix(ReferenceHub scp, DamageHandlerBase hit, NineTailedFoxAnnouncer __instance)
+        static bool Prefix(ReferenceHub scp, DamageHandlerBase hit)
         {
-            if (scp.GetTeam() is Team.SCPs && SummonedCustomRole.TryGet(scp, out SummonedCustomRole role) && role.GetModule(out CustomScpAnnouncer announcer))
+            if (scp.GetTeam() is Team.SCPs && SummonedCustomRole.TryGet(scp, out SummonedCustomRole role))
             {
-                announcer.Awake(hit);
+                if (role.HasModule<SilentAnnouncer>())
+                    return false;
 
-                SpawnManager.HandleRecontainmentAnnoucement(announcer);
+                if (role.GetModule(out CustomScpAnnouncer announcer))
+                {
+                    announcer.Awake(hit);
 
-                return false;
+                    SpawnManager.HandleRecontainmentAnnoucement(announcer);
+
+                    return false;
+                }
             }
 
             return true;

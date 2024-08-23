@@ -1,10 +1,204 @@
-﻿using Exiled.API.Features;
+﻿using Exiled.API.Enums;
+using Exiled.API.Features;
 using Exiled.Events.EventArgs.Player;
+using PlayerRoles;
+using System.Collections.Generic;
+using UncomplicatedCustomRoles.API.Enums;
+using UncomplicatedCustomRoles.API.Features.Behaviour;
+using UncomplicatedCustomRoles.API.Interfaces;
+using UnityEngine;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
-    public class EventCustomRole : CustomRole
+#nullable enable
+    public class EventCustomRole : ICustomRole
     {
+        /// <summary>
+        /// Gets or sets the <see cref="ICustomRole"/> unique Id
+        /// </summary>
+        public virtual int Id { get; set; } = 1;
+
+        /// <summary>
+        /// Gets or sets the name of the custom role.<br></br>
+        /// Thisn won't be shown to players, just a thing to help you recognize better your custom roles.
+        /// </summary>
+        public virtual string Name { get; set; } = "Janitor";
+
+        /// <summary>
+        /// Gets or sets whether the <see cref="RoleTypeId"/> name should be hidden in favor of the <see cref="Name"/>
+        /// </summary>
+        public virtual bool OverrideRoleName { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the nickname that will be set to the player if not null.
+        /// </summary>
+        public virtual string? Nickname { get; set; } = "D-%dnumber%";
+
+        /// <summary>
+        /// Gets or sets the CustomInfo that will be give to the player.<br></br>
+        /// Will be visible only to other players
+        /// </summary>
+        public virtual string CustomInfo { get; set; } = "Janitor";
+
+        /// <summary>
+        /// Gets or sets the badge name
+        /// </summary>
+        public virtual string BadgeName { get; set; } = "Janitor";
+
+        /// <summary>
+        /// Gets or sets the badge color
+        /// </summary>
+        public virtual string BadgeColor { get; set; } = "pumpkin";
+
+        /// <summary>
+        /// Gets or sets the <see cref="RoleTypeId"/> of the player
+        /// </summary>
+        public virtual RoleTypeId Role { get; set; } = RoleTypeId.ClassD;
+
+        /// <summary>
+        /// Gets or sets the <see cref="PlayerRoles.Team"/> of the player
+        /// </summary>
+        public virtual Team? Team { get; set; } = null;
+
+        /// <summary>
+        /// Gets or sets the the Role Appeareance for the player.<br></br>
+        /// If it's equal to <see cref="Role"/> then won't be applied
+        /// </summary>
+        public virtual RoleTypeId RoleAppearance { get; set; } = RoleTypeId.ClassD;
+
+        /// <summary>
+        /// Gets or sets the <see cref="Team"/>(s) that will be "friends" with this custom role
+        /// </summary>
+        public virtual List<Team> IsFriendOf { get; set; } = new();
+
+        /// <summary>
+        /// Gets or sets the <see cref="HealthBehaviour"/>
+        /// </summary>
+        public virtual HealthBehaviour Health { get; set; } = new();
+
+        /// <summary>
+        /// Gets or sets the <see cref="AhpBehaviour"/>
+        /// </summary>
+        public virtual AhpBehaviour Ahp { get; set; } = new();
+
+        /// <summary>
+        /// Gets or sets the <see cref="IUCREffect"/>s
+        /// </summary>
+        public virtual List<Effect> Effects { get; set; } = new();
+
+        /// <summary>
+        /// Gets or sets the <see cref="StaminaBehaviour"/>
+        /// </summary>
+        public virtual StaminaBehaviour Stamina { get; set; } = new();
+
+        /// <summary>
+        /// Gets or sets the maximum number of candies that can be took by the player without losing hands
+        /// </summary>
+        public virtual int MaxScp330Candies { get; set; } = 2;
+
+        /// <summary>
+        /// Gets or sets whether the player can escape or not
+        /// </summary>
+        public virtual bool CanEscape { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets the role after escape
+        /// </summary>
+        public virtual Dictionary<string, string> RoleAfterEscape { get; set; } = new()
+        {
+            {
+                "default",
+                "InternalRole Spectator"
+            },
+            {
+                "cuffed by InternalTeam ChaosInsurgency",
+                "InternalRole ClassD"
+            }
+        };
+
+        /// <summary>
+        /// Gets or sets the scale of the player
+        /// </summary>
+        public virtual Vector3 Scale { get; set; } = Vector3.one;
+
+        /// <summary>
+        /// Gets or sets the broadcast that will be shown to the player when spawned
+        /// </summary>
+        public virtual string SpawnBroadcast { get; set; } = "You are a <color=orange><b>Janitor</b></color>!\nClean the Light Containment Zone!";
+
+        /// <summary>
+        /// Gets or sets the broadcast duration
+        /// </summary>
+        public virtual ushort SpawnBroadcastDuration { get; set; } = 5;
+
+        /// <summary>
+        /// Gets or sets the hint that will be shown to the player when spawned
+        /// </summary>
+        public virtual string SpawnHint { get; set; } = "This hint will be shown when you will spawn as a Janitor!";
+
+        /// <summary>
+        /// Gets or sets hint duration
+        /// </summary>
+        public virtual float SpawnHintDuration { get; set; } = 5;
+
+        /// <summary>
+        /// Gets or sets the custom inventory limits to override the default ones
+        /// </summary>
+        public virtual Dictionary<ItemCategory, sbyte> CustomInventoryLimits { get; set; } = new()
+        {
+            {
+                ItemCategory.Medical,
+                2
+            }
+        };
+
+        /// <summary>
+        /// Gets or sets the inventory of the player
+        /// </summary>
+        public virtual List<ItemType> Inventory { get; set; } = new()
+        {
+            ItemType.Flashlight,
+            ItemType.KeycardJanitor
+        };
+
+        /// <summary>
+        /// Gets or sets the custom items inventory of the player
+        /// </summary>
+        public virtual List<uint> CustomItemsInventory { get; set; } = new();
+
+        /// <summary>
+        /// Gets or sets the ammo inventory of the player
+        /// </summary>
+        public virtual Dictionary<AmmoType, ushort> Ammo { get; set; } = new()
+        {
+            {
+                AmmoType.Nato9,
+                10
+            }
+        };
+
+        /// <summary>
+        /// Gets or sets the damage multiplier.<br></br>
+        /// This will increase - keep normal - or decrease the damage that this role will do
+        /// </summary>
+        public virtual float DamageMultiplier { get; set; } = 1;
+
+        /// <summary>
+        /// Gets or sets the <see cref="SpawnBehaviour"/>
+        /// </summary>
+        public virtual SpawnBehaviour? SpawnSettings { get; set; } = new();
+
+        /// <summary>
+        /// Gets or sets the <see cref="Enums.CustomFlags"/> of the custom role
+        /// </summary>
+        public virtual CustomFlags? CustomFlags { get; set; } = null;
+
+        /// <summary>
+        /// Gets or sets whether the custom role should be evaluated during normal spawn events or not
+        /// </summary>
+        public virtual bool IgnoreSpawnSystem { get; set; } = false;
+        List<Manager.Effect>? ICustomRole.Effects { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+
         /// <summary>
         /// Called before kicking a <see cref="API.Features.Player"/> from the server.
         /// </summary>

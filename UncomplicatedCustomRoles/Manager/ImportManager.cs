@@ -38,11 +38,10 @@ namespace UncomplicatedCustomRoles.Manager
 
             foreach (IPlugin<IConfig> plugin in Loader.Plugins.Where(plugin => plugin.Name != Plugin.Instance.Name))
             {
-                LogManager.Silent($"Passing plugin {plugin.Name}");
+                LogManager.Silent($"[Import Manager] Passing plugin {plugin.Name}");
                 foreach (Type type in plugin.Assembly.GetTypes())
                     try
                     {
-                        LogManager.Silent($"Passing obj {type.FullName}");
                         object[] attribs = type.GetCustomAttributes(typeof(PluginCustomRole), false);
                         if (attribs != null && attribs.Length > 0 && (type.IsSubclassOf(typeof(ICustomRole)) || type.IsSubclassOf(typeof(CustomRole)) || type.IsSubclassOf(typeof(EventCustomRole))))
                         {

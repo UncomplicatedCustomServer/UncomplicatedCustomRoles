@@ -133,6 +133,8 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public const float TickDuration = 0.25f;
 
+        private const int _remoteAdminFullWidth = 61;
+
         internal SummonedCustomRole(Player player, ICustomRole role, Triplet<string, string, bool>? badge, List<IEffect> infiniteEffects, PlayerInfoArea playerInfo, bool isCustomNickname = false)
         {
             Id = Guid.NewGuid().ToString();
@@ -299,7 +301,7 @@ namespace UncomplicatedCustomRoles.API.Features
 
             if (output.Count > 0)
             {
-                output.Insert(0, "      -     ");
+                output.Insert(0, "                                ");
             }
 
             return string.Join(" ", output);
@@ -319,9 +321,9 @@ namespace UncomplicatedCustomRoles.API.Features
 
             if (Plugin.HttpManager.Credits.TryGetValue(Player.UserId, out Triplet<string, string, bool> tag))
                 if (IsEmployee)
-                    output += $"      -      <color=#168eba>[UCR EMPLOYEE]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>";
+                    output += $"                                 <color=#168eba>[UCR EMPLOYEE]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>";
                 else
-                    output += $"      -      <color=#168eba>[UCR CONTRIBUTOR]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>";
+                    output += $"                                 <color=#168eba>[UCR CONTRIBUTOR]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>";
 
             return output;
         }

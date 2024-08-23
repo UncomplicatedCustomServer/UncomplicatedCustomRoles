@@ -450,6 +450,12 @@ namespace UncomplicatedCustomRoles.Manager
                     cassie += $"{c} ";
                     subtitle += c;
                 }
+
+            if (ClutterSpawner.IsHolidayActive(Holidays.AprilFools))
+            {
+                cassie = "1 0 4";
+                subtitle = "104";
+            }
         }
 
         private static string ToPublicFormat(string input) => input.Replace("SCP", "").Replace(" ", "").ToUpper();

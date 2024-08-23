@@ -8,12 +8,12 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using UncomplicatedCustomRoles.API.Features;
-
+using UncomplicatedCustomRoles.Manager;
 using static HarmonyLib.AccessTools;
 
 namespace UncomplicatedCustomRoles.Patches
 {
-    [HarmonyPatch(typeof(RaPlayer), nameof(RaPlayer.ReceiveData), typeof(CommandSender), typeof(string))]
+    //[HarmonyPatch(typeof(RaPlayer), nameof(RaPlayer.ReceiveData), typeof(CommandSender), typeof(string))]
     internal class PlayerInfoPatch
     {
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
@@ -48,11 +48,20 @@ namespace UncomplicatedCustomRoles.Patches
 
         internal static void TryPatchCedMod()
         {
+            LogManager.Silent("Trying to patch CedMod");
             Assembly cedModAssembly = Loader.Plugins.Where(p => p.Name is "CedMod").FirstOrDefault()?.Assembly;
             MethodInfo targetMethod = cedModAssembly?.GetType("CedMod.Patches.RaPlayerPatch")?.GetMethod("RaPlayerCoRoutine");
 
             if (targetMethod is not null)
+            {
+                LogManager.Silent("Patched CedMod");
                 Plugin.Instance._harmony.Patch(targetMethod, transpiler: new(Method(typeof(PlayerInfoPatch), nameof(PlayerInfoPatch.Transpiler))));
+            }
+            else
+            {
+                LogManager.Silent("Patched RaPlayer");
+                Plugin.Instance._harmony.Patch(Method(typeof(RaPlayer), nameof(RaPlayer.ReceiveData), new Type[] { typeof(CommandSender), typeof(string) }), transpiler: new(Method(typeof(PlayerInfoPatch), nameof(PlayerInfoPatch.Transpiler))));
+            }
         }
     }
 }
