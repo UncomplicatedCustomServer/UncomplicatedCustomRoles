@@ -39,6 +39,8 @@
     <PlatformTarget>x64</PlatformTarget>
     <LangVersion>11</LangVersion>
     <ErrorReport>prompt</ErrorReport>
+    <Optimize>false</Optimize>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -51,9 +53,21 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="API\Attributes\PluginCustomRole.cs" />
+    <Compile Include="API\Features\CustomModules\CoroutineModule.cs" />
+    <Compile Include="API\Features\CustomModules\CustomModule.cs" />
     <Compile Include="API\Features\Behaviour\AhpBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\HealthBehaviour.cs" />
+    <Compile Include="API\Features\CustomModules\CustomScpAnnouncer.cs" />
+    <Compile Include="API\Features\CustomModules\DoNotTriggerTeslaGates.cs" />
+    <Compile Include="API\Features\CustomModules\HalfLifeStealer.cs" />
+    <Compile Include="API\Features\CustomModules\LifeStealer.cs" />
+    <Compile Include="API\Features\CustomModules\NotAffectedByAppearance.cs" />
+    <Compile Include="API\Features\CustomModules\PacifismUntilDamage.cs" />
+    <Compile Include="API\Features\CustomModules\SilentAnnouncer.cs" />
+    <Compile Include="API\Features\CustomModules\SilentWalker.cs" />
     <Compile Include="API\Features\CustomRole.cs" />
+    <Compile Include="API\Features\CustomRoleEventHandler.cs" />
+    <Compile Include="API\Features\EventCustomRole.cs" />
     <Compile Include="API\Features\Escape.cs" />
     <Compile Include="API\Features\InfiniteEffect.cs" />
     <Compile Include="API\Features\Behaviour\SpawnBehaviour.cs" />
@@ -62,25 +76,30 @@
     <Compile Include="API\Features\Spawn.cs" />
     <Compile Include="API\Features\SpawnPoint.cs" />
     <Compile Include="API\Features\SummonedCustomRole.cs" />
+    <Compile Include="API\Interfaces\ICoroutineRole.cs" />
+    <Compile Include="API\Interfaces\ICustomModule.cs" />
     <Compile Include="API\Struct\Quadruple.cs" />
     <Compile Include="API\Struct\Triplet.cs" />
     <Compile Include="Commands\CommandParent.cs" />
+    <Compile Include="Commands\Generate.cs" />
     <Compile Include="Commands\List.cs" />
     <Compile Include="Commands\LogShare.cs" />
     <Compile Include="Commands\Owner.cs" />
     <Compile Include="Commands\Role.cs" />
     <Compile Include="Commands\Reload.cs" />
+    <Compile Include="Commands\Show.cs" />
     <Compile Include="Commands\Spawn.cs" />
     <Compile Include="Commands\SpawnPoint.cs" />
     <Compile Include="Config.cs" />
-    <Compile Include="Enums\SpawnLocationType.cs" />
+    <Compile Include="API\Enums\CustomFlags.cs" />
+    <Compile Include="API\Enums\SpawnType.cs" />
     <Compile Include="Events\EventHandler.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
     <Compile Include="Extensions\ListExtension.cs" />
     <Compile Include="Extensions\PlayerExtension.cs" />
     <Compile Include="Extensions\Vector3Extension.cs" />
     <Compile Include="Integrations\ScriptedEvents.cs" />
-    <Compile Include="Interfaces\IUCRCommand.cs" />
+    <Compile Include="API\Interfaces\IUCRCommand.cs" />
     <Compile Include="Manager\FileConfigs.cs" />
     <Compile Include="API\Features\Effect.cs" />
     <Compile Include="Manager\NET\HttpManager.cs" />
@@ -88,10 +107,18 @@
     <Compile Include="Manager\LogManager.cs" />
     <Compile Include="Manager\NET\SpawnPointApiCommunicator.cs" />
     <Compile Include="Manager\SpawnManager.cs" />
+    <Compile Include="Patches\Announcer.cs" />
     <Compile Include="Patches\InventoryLimitsPrefix.cs" />
+    <Compile Include="Patches\DisabledEventPatch.cs" />
+    <Compile Include="Patches\PlayerInfoPatch.cs" />
+    <Compile Include="Patches\PluginsLoaded.cs" />
+    <Compile Include="Patches\Scp3114StranglePrefix.cs" />
+    <Compile Include="Patches\ServerNamePatch.cs" />
+    <Compile Include="Patches\SetRolePatch.cs" />
+    <Compile Include="Patches\TeamPatch.cs" />
     <Compile Include="Plugin.cs" />
-    <Compile Include="Interfaces\ICustomRole.cs" />
-    <Compile Include="Interfaces\IEffect.cs" />
+    <Compile Include="API\Interfaces\ICustomRole.cs" />
+    <Compile Include="API\Interfaces\IEffect.cs" />
     <Compile Include="Integrations\RespawnTimer.cs" />
   </ItemGroup>
   <ItemGroup>

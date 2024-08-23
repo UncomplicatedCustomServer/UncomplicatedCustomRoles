@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.Manager;
-using UncomplicatedCustomRoles.Interfaces;
 using MEC;
 using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
@@ -13,6 +12,8 @@ using System;
 using UncomplicatedCustomRoles.API.Features;
 using Exiled.Events.EventArgs.Scp330;
 using CustomPlayerEffects;
+using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.API.Features.CustomModules;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -59,23 +60,27 @@ namespace UncomplicatedCustomRoles.Events
             if (!ev.IsAllowed)
                 return;
 
-            if (ev.Effect is SeveredHands && SummonedCustomRole.TryGet(ev.Player, out SummonedCustomRole Role) && Role.Role.MaxScp330Candies >= Role.Scp330Count)
-            {
-                LogManager.Debug($"Tried to add the {ev.Effect.name} but was not allowed due to {Role.Scp330Count} <= {Role.Role.MaxScp330Candies}");
-                ev.IsAllowed = false;
-            }
+            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole role))
+                if (ev.Effect is SeveredHands && role.Role.MaxScp330Candies >= role.Scp330Count)
+                {
+                    LogManager.Debug($"Tried to add the {ev.Effect.name} but was not allowed due to {role.Scp330Count} <= {role.Role.MaxScp330Candies}");
+                    ev.IsAllowed = false;
+                }
+                else if (ev.Effect is CardiacArrest && role.Role.IsFriendOf is not null && role.Role.IsFriendOf.Contains(Team.SCPs))
+                    ev.IsAllowed = false;
         }
 
         public void OnPlayerSpawned(SpawnedEventArgs _) { }
 
         public void OnFinishingRecall(FinishingRecallEventArgs ev)
         {
-            ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(ev.Player, RoleTypeId.Scp0492);
+            ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(ev.Target, RoleTypeId.Scp0492);
+            LogManager.Silent($"{ev.Target} recalled by {ev.Player}, found {Role?.Id} {Role?.Name}");
 
             if (Role is not null)
             {
                 ev.IsAllowed = false;
-                ev.Player.SetCustomRole(Role);
+                ev.Target.SetCustomRole(Role);
             }
         }
 
@@ -83,14 +88,21 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnRoundEnded(RoundEndedEventArgs _) => InfiniteEffect.Terminate();
 
-        public void OnChangingRole(ChangingRoleEventArgs ev) => SpawnManager.ClearCustomTypes(ev.Player);
-
-        public void OnSpawning(SpawningEventArgs ev)
+        public void OnChangingRole(ChangingRoleEventArgs ev)
         {
             if (ev.Player is null)
                 return;
 
-            LogManager.Debug("Called SPAWNING event");
+            // Let's clear for custom types
+            SpawnManager.ClearCustomTypes(ev.Player);
+
+            if (!ev.IsAllowed)
+                return;
+
+            if (ev.NewRole is RoleTypeId.Spectator || ev.NewRole is RoleTypeId.None || ev.NewRole is RoleTypeId.Filmmaker)
+                return;
+
+            LogManager.Debug("Called CHANGINGROLE event");
 
             if (Spawn.Spawning.Contains(ev.Player.Id))
                 return;
@@ -118,45 +130,71 @@ namespace UncomplicatedCustomRoles.Events
 
             LogManager.Debug($"Player {ev.Player.Nickname} spawned{LogReason}, going to assign a role if needed!");
 
-            // Let's clear for custom types
-            SpawnManager.ClearCustomTypes(ev.Player);
-
-            ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(ev.Player);
+            ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(ev.Player, ev.NewRole);
 
             if (Role is not null)
             {
                 LogManager.Debug($"Summoning player {ev.Player.Nickname} ({ev.Player.Id}) as {Role.Name} ({Role.Id})");
                 SpawnManager.SummonCustomSubclass(ev.Player, Role.Id);
+                ev.IsAllowed = false;
             }
 
-            LogManager.Debug($"Evaluated custom role for player {ev.Player.Nickname} - found: {Role?.Id} ({Role?.Name})");
+            LogManager.Debug($"No CustomRole found for player {ev.Player.Nickname}, allowing natural spawn with {ev.NewRole}");
         }
-
-        public void OnVerified(VerifiedEventArgs ev) => Plugin.HttpManager.ApplyCreditTag(ev.Player);
 
         public void OnHurting(HurtingEventArgs Hurting)
         {
+            if (!Hurting.IsAllowed)
+                return;
+
             LogManager.Silent($"DamageHandler of Hurting: {Hurting.Player} {Hurting.Attacker}");
 
-            if (Hurting.Attacker is not null && Hurting.Attacker.TryGetSummonedInstance(out SummonedCustomRole AttackerRole))
+            if (Hurting.Player is not null && Hurting.Attacker is not null && Hurting.Player.IsAlive && Hurting.Attacker.IsAlive)
             {
-                // Let's first check if the thing is allowed!
-                if (Hurting.Player is not null && AttackerRole.Role is CustomRole Role && Role.IsFriendOf.Contains(Hurting.Player.Role.Team))
+                if (Hurting.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole))
                 {
-                    LogManager.Silent($"Player {Hurting.Attacker} can't hurt {Hurting.Player} due to is_friend_of");
-                    Hurting.IsAllowed = false;
-                    return;
+                    if (attackerCustomRole.Role.IsFriendOf is not null && attackerCustomRole.Role.IsFriendOf.Contains(Hurting.Player.ReferenceHub.GetTeam()))
+                    {
+                        Hurting.IsAllowed = false;
+                        LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - FROM ATTACKER");
+                        return;
+                    }
+                    else if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
+                        pacifism.Execute();
+
+                    Hurting.DamageHandler.Damage *= attackerCustomRole.Role.DamageMultiplier;
+                }
+                else if (Hurting.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole))
+                {
+                    if (playerCustomRole.Role.IsFriendOf is not null && playerCustomRole.Role.IsFriendOf.Contains(Hurting.Attacker.ReferenceHub.GetTeam()))
+                    {
+                        Hurting.IsAllowed = false;
+                        LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - FROM HURTED");
+                        return;
+                    }
+
+                    if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
+                        Hurting.IsAllowed = false;
+                }
+            }
+        }
+
+        public void OnHurt(HurtEventArgs ev)
+        {
+            if (ev.Player is not null && ev.Player.IsAlive && ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedCustomRole))
+            {
+                summonedCustomRole.LastDamageTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+                if (summonedCustomRole.GetModule(out LifeStealer lifeStealer))
+                {
+                    lifeStealer.Amount = ev.Amount;
+                    lifeStealer.Execute();
                 }
 
-                Hurting.DamageHandler.Damage *= AttackerRole.Role.DamageMultiplier;
-            }
-            else if (Hurting.Player is not null && Hurting.Attacker is not null && Hurting.Player.TryGetSummonedInstance(out SummonedCustomRole PlayerRole))
-            {
-                if (PlayerRole.Role is CustomRole Role && Role.IsFriendOf.Contains(Hurting.Attacker.Role.Team))
+                if (summonedCustomRole.GetModule(out HalfLifeStealer halfLifeStealer))
                 {
-                    LogManager.Silent($"Player {Hurting.Attacker} can't hurt {Hurting.Player} due to is_friend_of");
-                    Hurting.IsAllowed = false;
-                    return;
+                    halfLifeStealer.Amount = ev.Amount;
+                    halfLifeStealer.Execute();
                 }
             }
         }
@@ -221,6 +259,24 @@ namespace UncomplicatedCustomRoles.Events
 
                 }
             }
+        }
+
+        public void OnMakingNoise(MakingNoiseEventArgs ev)
+        {
+            if (!ev.IsAllowed)
+                return;
+
+            if (ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole) && customRole.HasModule<SilentWalker>())
+                ev.IsAllowed = false;
+        }
+
+        public void OnTriggeringTeslaGate(TriggeringTeslaEventArgs ev)
+        {
+            if (!ev.IsAllowed)
+                return;
+
+            if (ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole) && customRole.HasModule<DoNotTriggerTeslaGates>())
+                ev.IsAllowed = false;
         }
 
         public void OnRespawningWave(RespawningTeamEventArgs Respawn)

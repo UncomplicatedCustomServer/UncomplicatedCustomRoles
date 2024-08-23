@@ -1,7 +1,7 @@
 ﻿using CommandSystem;
 using System.Collections.Generic;
 
-namespace UncomplicatedCustomRoles.Interfaces
+namespace UncomplicatedCustomRoles.API.Interfaces
 {
     internal interface IUCRCommand
     {

@@ -2,8 +2,8 @@
 using Exiled.API.Features;
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.API.Features;
+using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Extensions;
-using UncomplicatedCustomRoles.Interfaces;
 
 namespace UncomplicatedCustomRoles.Commands
 {

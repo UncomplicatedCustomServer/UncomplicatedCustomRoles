@@ -2,10 +2,11 @@
 using Exiled.API.Features;
 using System.Collections.Generic;
 using SpawnPointInstance = UncomplicatedCustomRoles.API.Features.SpawnPoint;
-using UncomplicatedCustomRoles.Interfaces;
 using UncomplicatedCustomRoles.Manager.NET;
 using System.Net;
 using System.Threading.Tasks;
+using UncomplicatedCustomRoles.Manager;
+using UncomplicatedCustomRoles.API.Interfaces;
 
 namespace UncomplicatedCustomRoles.Commands
 {
@@ -13,7 +14,7 @@ namespace UncomplicatedCustomRoles.Commands
     {
         public string Name { get; } = "spawnpoint";
 
-        public string Description { get; } = "Add, remove or list spawnpoints for customroles";
+        public string Description { get; } = "Manage the UCR spawnpoints";
 
         public string RequiredPermission { get; } = "ucr.spawnpoint";
 
@@ -48,8 +49,12 @@ namespace UncomplicatedCustomRoles.Commands
             {
                 "download",
                 new("", "Get a link to download the current SpawnPoint list from the UCS cloud")
+            },
+            {
+                "ip",
+                new("", "Get your current IPv4/IPv6")
             }
-        };
+        }; 
 
         public bool Executor(List<string> arguments, ICommandSender sender, out string response)
         {
@@ -67,7 +72,7 @@ namespace UncomplicatedCustomRoles.Commands
             {
                 response = CommandHeader;
                 foreach (KeyValuePair<string, KeyValuePair<string, string>> command in SubCommands)
-                    response += $"{command.Key} {command.Value.Key}-> {command.Value.Value}";
+                    response += $"{command.Key} {command.Value.Key}-> {command.Value.Value}\n";
             }
             else
                 switch (arguments[0])
@@ -83,12 +88,6 @@ namespace UncomplicatedCustomRoles.Commands
                         if (arguments.Count != 2)
                         {
                             response = "Wrong usage!\nucr spawnpoint create (Name)";
-                            return false;
-                        }
-
-                        if (Player.CurrentRoom is null)
-                        {
-                            response = "You are not inside a room!\nPlease go to the SpawnPoint position!";
                             return false;
                         }
 
@@ -150,6 +149,8 @@ namespace UncomplicatedCustomRoles.Commands
                         }
                         break;
                     case "download":
+                        string url = SpawnPointApiCommunicator.AskDownloadUrl();
+                        LogManager.Info($"Download your SpawnPoint settings with this URL:\n{SpawnPointApiCommunicator.AskDownloadUrl()}");
                         response = $"Download URL:\n{SpawnPointApiCommunicator.AskDownloadUrl()}";
                         break;
                     case "goto":
@@ -172,6 +173,9 @@ namespace UncomplicatedCustomRoles.Commands
                         }
                         else
                             response = "SpawnPoint not found!";
+                        break;
+                    case "ip":
+                        response = $"Your IPv4/IPv6 is: {SpawnPointApiCommunicator.AskIp()}";
                         break;
                     case "sync":
                         response = "Sync done!";

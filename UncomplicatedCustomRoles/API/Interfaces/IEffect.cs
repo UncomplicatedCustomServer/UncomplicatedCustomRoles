@@ -1,6 +1,6 @@
 ﻿using Exiled.API.Enums;
     
-namespace UncomplicatedCustomRoles.Interfaces
+namespace UncomplicatedCustomRoles.API.Interfaces
 {
     public interface IEffect
     {

@@ -33,7 +33,7 @@ You'll be able to configure the <ins>role</ins>, the <ins>health</ins>, the <ins
 - In-game commands to handle the plugin and the roles
 
 ## Installation
-Download the `UncomplicatedCustomRoles.dll` from the [latest relase](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/releases/latest) and put it inside the `EXILED/Plugins` folder.
+Download the `UncomplicatedCustomRoles.dll` from the [latest release](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/releases/latest) and put it inside the `EXILED/Plugins` folder.
 
 ## Developers
 UncomplicatedCustomRoles has an easy and fast API system for developers to use our plugin.

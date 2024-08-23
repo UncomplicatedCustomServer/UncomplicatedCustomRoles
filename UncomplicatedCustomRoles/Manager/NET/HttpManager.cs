@@ -1,4 +1,5 @@
 ﻿using Exiled.API.Features;
+using Exiled.Events.EventArgs.Player;
 using Exiled.Loader;
 using MEC;
 using Newtonsoft.Json;
@@ -11,59 +12,88 @@ using System.Text;
 using System.Threading.Tasks;
 using UncomplicatedCustomRoles.API.Struct;
 
+using PlayerHandler = Exiled.Events.Handlers.Player;
+
 namespace UncomplicatedCustomRoles.Manager.NET
 {
+#pragma warning disable IDE1006
+
     internal class HttpManager
     {
         /// <summary>
-        /// The <see cref="CoroutineHandle"/> of the presence coroutine.
+        /// Gets the <see cref="CoroutineHandle"/> of the presence coroutine.
         /// </summary>
         public CoroutineHandle PresenceCoroutine { get; internal set; }
 
         /// <summary>
-        /// If <see cref="true"/> the message that confirm that the server is communicating correctly with our APIs has been sent in the console.
+        /// Gets the <see cref="true"/> the message that confirm that the server is communicating correctly with our APIs has been sent in the console.
         /// </summary>
         public bool SentConfirmationMessage { get; internal set; } = false;
 
         /// <summary>
-        /// The number of errors that has occurred. If this number exceed the <see cref="MaxErrors"/> quote then this feature will be deactivated.
+        /// Gets the number of errors that has occurred. If this number exceed the <see cref="MaxErrors"/> quote then this feature will be deactivated.
         /// </summary>
         public uint Errors { get; internal set; } = 0;
 
         /// <summary>
-        /// The maximum number of errors that can occur before deactivating the function.
+        /// Gets the maximum number of errors that can occur before deactivating the function.
         /// </summary>
         public uint MaxErrors { get; }
 
         /// <summary>
-        /// If <see cref="true"/> this feature is active.
+        /// Gets whether <see cref="true"/> this feature is active.
         /// </summary>
         public bool Active { get; internal set; } = false;
 
         /// <summary>
-        /// The prefix of the plugin for our APIs
+        /// Gets if the feature can be activated - missing library
+        /// </summary>
+        public bool IsAllowed { get; internal set; } = true;
+
+        /// <summary>
+        /// Gets the prefix of the plugin for our APIs
         /// </summary>
         public string Prefix { get; }
 
         /// <summary>
-        /// The <see cref="HttpClient"/> public istance
+        /// Gets the <see cref="HttpClient"/> public istance
         /// </summary>
         public HttpClient HttpClient { get; }
 
         /// <summary>
-        /// The UCS APIs endpoint
+        /// Gets the UCS APIs endpoint
         /// </summary>
         public string Endpoint { get; } = "https://ucs.fcosma.it/api/v2";
 
         /// <summary>
-        /// Store every credit tag for UCS
+        /// Gets the CreditTag storage for the plugin, downloaded from our central server
         /// </summary>
         public Dictionary<string, Triplet<string, string, bool>> Credits { get; internal set; } = new();
 
         /// <summary>
-        /// An array of response times
+        /// Gets the role of the given player (as steamid@64) inside UCR
+        /// </summary>
+        public Dictionary<string, string> OrgPlayerRole { get; } = new();
+
+        /// <summary>
+        /// Gets the List of the ResponseTimes
         /// </summary>
         public List<float> ResponseTimes { get; } = new();
+
+        /// <summary>
+        /// Gets the latest <see cref="Version"/> of the plugin, loaded by the UCS cloud
+        /// </summary>
+        public Version LatestVersion { get
+            {
+                if (_latestVersion is null)
+                    LoadLatestVersion();
+                return _latestVersion;
+            }
+        }
+
+        private Version _latestVersion { get; set; } = null;
+
+        private bool _alreadyManaged { get; set; } = false;
 
         /// <summary>
         /// Create a new istance of the HttpManager
@@ -72,11 +102,29 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// <param name="maxErrors"></param>
         public HttpManager(string prefix, uint maxErrors = 5)
         {
+            if (!CheckForDependency())
+                Timing.CallContinuously(15f, () => LogManager.Error("You don't have the dependency Newtonsoft.Json installed!\nPlease install it AS SOON AS POSSIBLE!\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV"));
+
             Prefix = prefix;
             MaxErrors = maxErrors;
             HttpClient = new();
             LoadCreditTags();
+            RegisterEvents();
         }
+
+        internal void RegisterEvents()
+        {
+            PlayerHandler.Verified += OnVerified;
+        }
+
+        internal void UnregisterEvents()
+        {
+            PlayerHandler.Verified -= OnVerified;
+        }
+
+        public void OnVerified(VerifiedEventArgs ev) => ApplyCreditTag(ev.Player);
+
+        private bool CheckForDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "Newtonsoft.Json");
 
         public HttpResponseMessage HttpGetRequest(string url)
         {
@@ -135,14 +183,14 @@ namespace UncomplicatedCustomRoles.Manager.NET
             return HttpGetRequest($"{Endpoint}/owners/add?discordid={discordId}")?.StatusCode ?? HttpStatusCode.InternalServerError;
         }
 
-        public Version LatestVersion()
+        public void LoadLatestVersion()
         {
             string Version = RetriveString(HttpGetRequest($"{Endpoint}/{Prefix}/version?vts=5"));
-            
-            if (Version is not null && Version != string.Empty)
-                return new(Version);
 
-            return Plugin.Instance.Version;
+            if (Version is not null && Version != string.Empty && Version.Contains("."))
+                _latestVersion = new(Version);
+            else
+                _latestVersion = new();
         }
 
         public void LoadCreditTags()
@@ -153,9 +201,16 @@ namespace UncomplicatedCustomRoles.Manager.NET
                 Dictionary<string, Dictionary<string, string>> Data = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(RetriveString(HttpGetRequest("https://ucs.fcosma.it/api/credits.json")));
 
                 foreach (KeyValuePair<string, Dictionary<string, string>> kvp in Data.Where(kvp => kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") && kvp.Value.ContainsKey("override")))
-                    Credits.Add(kvp.Key, new(kvp.Value["role"], kvp.Value["color"], bool.Parse(kvp.Value["ovveride"])));
+                {
+                    Credits.Add(kvp.Key, new(kvp.Value["role"], kvp.Value["color"], bool.Parse(kvp.Value["override"])));
+                    if (kvp.Value.TryGetValue("job", out string isJob) && isJob is "true")
+                        OrgPlayerRole.Add(kvp.Key, isJob);
+                }
             }
-            catch (Exception) { }
+            catch (Exception e)
+            {
+                LogManager.Error($"Failed to act HttpManager::LoadCreditTags() - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
+            }
         }
 
         public Triplet<string, string, bool> GetCreditTag(Player player)
@@ -168,9 +223,19 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         public void ApplyCreditTag(Player player)
         {
+            if (_alreadyManaged)
+                return;
+
             Triplet<string, string, bool> Tag = GetCreditTag(player);
-            if (player.RankName is not null && player.RankName != string.Empty && !Tag.Third)
-                return; // Do not override
+            
+            if (player.RankName is not null && player.RankName != string.Empty)
+            {
+                if (Credits.Any(k => k.Value.First == player.RankName && k.Value.Second == player.RankColor))
+                    _alreadyManaged = true;
+
+                if (!Tag.Third)
+                    return; // Do not override
+            }
 
             if (Tag.First is not null && Tag.Second is not null)
             {
@@ -181,7 +246,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         public bool IsLatestVersion(out Version latest)
         {
-            latest = LatestVersion();
+            latest = LatestVersion;
             if (latest.CompareTo(Plugin.Instance.Version) > 0)
                 return false;
 
@@ -191,7 +256,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         public bool IsLatestVersion()
         {
-            if (LatestVersion().CompareTo(Plugin.Instance.Version) > 0)
+            if (LatestVersion.CompareTo(Plugin.Instance.Version) > 0)
                 return false;
 
             return true;
@@ -204,9 +269,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
             httpContent = Status.Content;
             ResponseTimes.Add(DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start);
             if (Status.StatusCode == HttpStatusCode.OK)
-            {
                 return true;
-            }
             return false;
         }
 
@@ -258,6 +321,9 @@ namespace UncomplicatedCustomRoles.Manager.NET
         public void Start()
         {
             if (Active)
+                return;
+
+            if (!IsAllowed)
                 return;
 
             Active = true;

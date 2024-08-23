@@ -4,8 +4,8 @@ using Exiled.API.Features.Roles;
 using Exiled.API.Interfaces;
 using PlayerRoles;
 using UncomplicatedCustomRoles.API.Features;
+using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Extensions;
-using UncomplicatedCustomRoles.Interfaces;
 
 namespace UncomplicatedCustomRoles.Manager
 {

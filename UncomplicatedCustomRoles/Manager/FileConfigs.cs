@@ -1,9 +1,11 @@
 ﻿using Exiled.API.Features;
 using Exiled.Loader;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using UncomplicatedCustomRoles.API.Features;
 
 namespace UncomplicatedCustomRoles.Manager
@@ -42,12 +44,13 @@ namespace UncomplicatedCustomRoles.Manager
                     if (FileName.Split().First() == ".")
                         return;
 
-                    string Content = File.ReadAllText(FileName);
-
-                    if (Content.Contains("custom_roles:") && Content.Contains("- id:"))
-                        LoadLegacyRoles(FileName, Content, action);
+                    if (CustomTypeChecker(File.ReadAllText(FileName), out CustomRole role, out string error))
+                    {
+                        LogManager.Debug($"Proposed to the registerer the external role {role.Id} [{role.Name}] from file:\n{FileName}");
+                        action(role);
+                    }
                     else
-                        LoadRoles(FileName, Content, action);
+                        LogManager.Error($"Error during the deserialization of the CustomRole at {FileName}: {error}");
                 }
                 catch (Exception ex)
                 {
@@ -63,35 +66,28 @@ namespace UncomplicatedCustomRoles.Manager
             }
         }
 
-        private void LoadLegacyRoles(string fileName, string content, Action<CustomRole> action)
+        private bool CustomTypeChecker(string content, out CustomRole role, out string error)
         {
-            Dictionary<string, List<CustomRole>> Roles = Loader.Deserializer.Deserialize<Dictionary<string, List<CustomRole>>>(content);
+            Dictionary<string, object> data = Loader.Deserializer.Deserialize<Dictionary<string, object>>(content);
+            role = default;
+            error = null;
 
-            if (!Roles.ContainsKey("custom_roles"))
+            SnakeCaseNamingStrategy namingStrategy = new();
+
+            foreach (PropertyInfo property in typeof(CustomRole).GetProperties().Where(p => p.CanWrite && p is not null && p.GetType() is not null))
+                if (!data.ContainsKey(namingStrategy.GetPropertyName(property.Name, false)) && error is null)
+                    error = $"Given CustomRole doesn't contain the required property '{namingStrategy.GetPropertyName(property.Name, false)}' ({namingStrategy.GetPropertyName(property.PropertyType.Name, false)})";
+
+            if (error is null)
             {
-                LogManager.Error($"Error during the deserialization of file {fileName}: Node name 'custom_roles' not found!");
-                return;
-            }
-            foreach (CustomRole Role in Roles["custom_roles"])
-            {
-                LogManager.Debug($"Proposed to the registerer the external LEGACY role {Role.Id} [{Role.Name}] from file:\n{fileName}");
-                action(Role);
+                role = Loader.Deserializer.Deserialize<CustomRole>(content);
+                return true;
             }
 
-            // Convert the role to a decent thing
-            if (Roles["custom_roles"].Count == 1)
-                File.WriteAllText(fileName, Loader.Serializer.Serialize(Roles["custom_roles"][0]));
-            else
-                for (int i = 0; i < Roles["custom_roles"].Count; i++)
-                    File.WriteAllText(fileName.Replace(".yml", $"-{i}.yml"), Loader.Serializer.Serialize(Roles["custom_roles"][i]));
+            return false;
         }
 
-        private void LoadRoles(string fileName, string content, Action<CustomRole> action)
-        {
-            CustomRole Role = Loader.Deserializer.Deserialize<CustomRole>(content);
-            LogManager.Debug($"Proposed to the registerer the external role {Role.Id} [{Role.Name}] from file:\n{fileName}");
-            action(Role);
-        }
+        public void Echo() { }
 
         public void Welcome(string localDir = "")
         {

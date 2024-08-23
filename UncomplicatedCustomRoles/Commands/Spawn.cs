@@ -3,7 +3,7 @@ using Exiled.API.Features;
 using MEC;
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.API.Features;
-using UncomplicatedCustomRoles.Interfaces;
+using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
 using Handler = UncomplicatedCustomRoles.Events.EventHandler;
 

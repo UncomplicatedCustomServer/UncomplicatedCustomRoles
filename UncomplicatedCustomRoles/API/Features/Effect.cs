@@ -1,5 +1,5 @@
 ﻿using Exiled.API.Enums;
-using UncomplicatedCustomRoles.Interfaces;
+using UncomplicatedCustomRoles.API.Interfaces;
 
 namespace UncomplicatedCustomRoles.Manager
 {

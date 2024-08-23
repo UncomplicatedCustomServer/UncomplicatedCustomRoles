@@ -3,7 +3,7 @@ using MEC;
 using PlayerRoles;
 using System;
 using UncomplicatedCustomRoles.API.Features;
-using UncomplicatedCustomRoles.Interfaces;
+using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 
@@ -132,10 +132,42 @@ namespace UncomplicatedCustomRoles.Extensions
             return false;
         }
 
-        public static void ApplyCustomInfo(this Player player, string value)
+        /// <summary>
+        /// Changes the CustomInfo of a <see cref="Player"/>
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="value"></param>
+        public static void ApplyClearCustomInfo(this Player player, string value)
         {
-            player.InfoArea = string.IsNullOrEmpty(value) ? player.InfoArea & ~PlayerInfoArea.CustomInfo : player.InfoArea |= PlayerInfoArea.CustomInfo;
-            player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = value;
+            player.ReferenceHub.nicknameSync.Network_playerInfoToShow = string.IsNullOrEmpty(value) ? player.ReferenceHub.nicknameSync.Network_playerInfoToShow & ~PlayerInfoArea.CustomInfo : player.ReferenceHub.nicknameSync.Network_playerInfoToShow |= PlayerInfoArea.CustomInfo;
+            player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = ProcessCustomInfo(value);
         }
+
+        /// <summary>
+        /// Changes the CustomInfo of a <see cref="Player"/> overriding also the player Role
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="customInfo"></param>
+        /// <param name="role"></param>
+        public static void ApplyCustomInfoAndRoleName(this Player player, string customInfo, string role)
+        {
+            player.ReferenceHub.nicknameSync.Network_playerInfoToShow |= PlayerInfoArea.CustomInfo;
+            player.ReferenceHub.nicknameSync.Network_playerInfoToShow &= ~PlayerInfoArea.Role; // Hide role
+
+            if (role.Contains("</"))
+                LogManager.Error($"Failed to apply CustomInfo with Role name at PlayerExtension::ApplyCustomInfoAndRoleName(%Player, string, string): role name can't contains any end tag like </color>, </b>, </size> etc...!\nCustomInfo won't be applied to player {player.Nickname} ({player.Id}) -- Found: {role}");
+
+            if (customInfo.StartsWith("<"))
+                LogManager.Error($"Failed to apply CustomInfo with Role name at PlayerExtension::ApplyCustomInfoAndRoleName(%Player, string, string): role custom_info can't contains any tag like </olor>, <b>, <size> etc...!\nCustomInfo won't be applied to player {player.Nickname} ({player.Id}) -- Found: {customInfo}");
+
+            player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = $"{role}\n{ProcessCustomInfo(customInfo)}";
+        }
+
+        /// <summary>
+        /// Changes in the given string [br] with the UNICODE escape char "\n"
+        /// </summary>
+        /// <param name="customInfo"></param>
+        /// <returns></returns>
+        private static string ProcessCustomInfo(string customInfo) => customInfo.Replace("[br]", "\n");
     }
 }

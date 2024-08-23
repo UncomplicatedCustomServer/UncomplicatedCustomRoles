@@ -1,8 +1,7 @@
 ﻿using CommandSystem;
-using Exiled.Permissions.Extensions;
 using System.Collections.Generic;
 using System.Net;
-using UncomplicatedCustomRoles.Interfaces;
+using UncomplicatedCustomRoles.API.Interfaces;
 
 namespace UncomplicatedCustomRoles.Commands
 {
