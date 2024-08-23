@@ -103,10 +103,10 @@ namespace UncomplicatedCustomRoles.Integrations
             }
 
             // Set custom role
-            RegisterCustomAction("SET_CUSTOM_ROLE", (Tuple<string[], object> args) =>
+            RegisterCustomAction("SET_UCR_ROLE", (Tuple<string[], object> args) =>
             {
                 if (args.Item1.Length < 2)
-                    return new(false, "Error: the function SET_CUSTOM_ROLE requires 2 args: SET_CUSTOM_ROLE <PlayerId> <RoleId>", null);
+                    return new(false, "Error: the function SET_UCR_ROLE requires 2 args: SET_UCR_ROLE <PlayerId> <RoleId>", null);
 
                 Player Player = GetPlayerFromArgs(args);
 
@@ -124,10 +124,10 @@ namespace UncomplicatedCustomRoles.Integrations
             });
 
             // Remove custom role
-            RegisterCustomAction("REMOVE_CUSTOM_ROLE", (Tuple<string[], object> args) =>
+            RegisterCustomAction("REMOVE_UCR_ROLE", (Tuple<string[], object> args) =>
             {
                 if (args.Item1.Length < 1)
-                    return new(false, "Error: the function REMOVE_CUSTOM_ROLE requires 1 args: REMOVE_CUSTOM_ROLE <PlayerId>", null);
+                    return new(false, "Error: the function REMOVE_UCR_ROLE requires 1 args: REMOVE_UCR_ROLE <PlayerId>", null);
 
                 Player Player = GetPlayerFromArgs(args);
 
@@ -140,10 +140,10 @@ namespace UncomplicatedCustomRoles.Integrations
                 return new(true, string.Empty, null);
             });
 
-            RegisterCustomAction("GET_CUSTOM_ROLE", (Tuple<string[], object> args) =>
+            RegisterCustomAction("GET_UCR_ROLE", (Tuple<string[], object> args) =>
             {
                 if (args.Item1.Length < 1)
-                    return new(false, "Error: the function HAS_CUSTOM_ROLE requires 1 args: HAS_CUSTOM_ROLE <PlayerId>", null);
+                    return new(false, "Error: the function GET_UCR_ROLE requires 1 args: GET_UCR_ROLE <PlayerId>", null);
 
                 Player Player = GetPlayerFromArgs(args);
 
