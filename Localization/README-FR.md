@@ -26,7 +26,7 @@ Vous serez capable de configurer le <ins>rôle</ins>, le <ins>nombre de point de
 **UCR** a plusieurs fonctionnalités tel que:
 - Un nombre illimité de rôles personnalisable
 - Une config qui est séparé dans un autre fichier, pas le fichier config de Exiled (Celui par défaut)
-- Un [wiki] complet et compréhensible (https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki)
+- Un [wiki](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki) complet et compréhensible 
 - Pas de dépandance requise
 - Une communauté active sur **Discord**
 - __Des privileges et des aperçus spéciaux__ pour les owners des serveurs utulisant UCR
