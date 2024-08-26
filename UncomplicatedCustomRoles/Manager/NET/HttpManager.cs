@@ -1,6 +1,10 @@
 ﻿using MEC;
 using Newtonsoft.Json;
+using PluginAPI;
 using PluginAPI.Core;
+using PluginAPI.Core.Attributes;
+using PluginAPI.Events;
+using PluginAPI.Loader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +16,8 @@ using UncomplicatedCustomRoles.API.Struct;
 
 namespace UncomplicatedCustomRoles.Manager.NET
 {
+#pragma warning disable IDE1006
+
     internal class HttpManager
     {
         /// <summary>
@@ -65,9 +71,31 @@ namespace UncomplicatedCustomRoles.Manager.NET
         public Dictionary<string, Triplet<string, string, bool>> Credits { get; internal set; } = new();
 
         /// <summary>
+        /// Gets the role of the given player (as steamid@64) inside UCR
+        /// </summary>
+        public Dictionary<string, string> OrgPlayerRole { get; } = new();
+
+        /// <summary>
         /// Gets the List of the ResponseTimes
         /// </summary>
         public List<float> ResponseTimes { get; } = new();
+
+        /// <summary>
+        /// Gets the latest <see cref="Version"/> of the plugin, loaded by the UCS cloud
+        /// </summary>
+        public Version LatestVersion
+        {
+            get
+            {
+                if (_latestVersion is null)
+                    LoadLatestVersion();
+                return _latestVersion;
+            }
+        }
+
+        private Version _latestVersion { get; set; } = null;
+
+        private bool _alreadyManaged { get; set; } = false;
 
         /// <summary>
         /// Create a new istance of the HttpManager
@@ -76,18 +104,19 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// <param name="maxErrors"></param>
         public HttpManager(string prefix, uint maxErrors = 5)
         {
-            /*if (Type.GetType("Newtonsoft.Json.JsonConvert") is null)
-            {
-                LogManager.Error($"Failed to load the HttpManager of {prefix.ToUpper()}: Missing library Newtonsoft.Json v13.0.3\nPlease install it AS SOON AS POSSIBLE!");
-                IsAllowed = false;
-                return;
-            }*/
+            if (!CheckForDependency())
+                Timing.CallContinuously(15f, () => LogManager.Error("You don't have the dependency Newtonsoft.Json installed!\nPlease install it AS SOON AS POSSIBLE!\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV"));
 
             Prefix = prefix;
             MaxErrors = maxErrors;
             HttpClient = new();
             LoadCreditTags();
         }
+
+        [PluginEvent(PluginAPI.Enums.ServerEventType.PlayerJoined)]
+        public void OnVerified(PlayerJoinedEvent ev) => ApplyCreditTag(ev.Player);
+
+        private bool CheckForDependency() => AssemblyLoader.Dependencies.Any(assembly => assembly.GetName().Name == "Newtonsoft.Json");
 
         public HttpResponseMessage HttpGetRequest(string url)
         {
@@ -98,8 +127,8 @@ namespace UncomplicatedCustomRoles.Manager.NET
                 Response.Wait();
 
                 return Response.Result;
-            } 
-            catch(Exception)
+            }
+            catch (Exception)
             {
                 return null;
             }
@@ -146,14 +175,14 @@ namespace UncomplicatedCustomRoles.Manager.NET
             return HttpGetRequest($"{Endpoint}/owners/add?discordid={discordId}")?.StatusCode ?? HttpStatusCode.InternalServerError;
         }
 
-        public Version LatestVersion()
+        public void LoadLatestVersion()
         {
             string Version = RetriveString(HttpGetRequest($"{Endpoint}/{Prefix}/version?vts=5"));
-            
-            if (Version is not null && Version != string.Empty)
-                return new(Version);
 
-            return Plugin.Version;
+            if (Version is not null && Version != string.Empty && Version.Contains("."))
+                _latestVersion = new(Version);
+            else
+                _latestVersion = new();
         }
 
         public void LoadCreditTags()
@@ -164,9 +193,16 @@ namespace UncomplicatedCustomRoles.Manager.NET
                 Dictionary<string, Dictionary<string, string>> Data = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(RetriveString(HttpGetRequest("https://ucs.fcosma.it/api/credits.json")));
 
                 foreach (KeyValuePair<string, Dictionary<string, string>> kvp in Data.Where(kvp => kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") && kvp.Value.ContainsKey("override")))
-                    Credits.Add(kvp.Key, new(kvp.Value["role"], kvp.Value["color"], bool.Parse(kvp.Value["ovveride"])));
+                {
+                    Credits.Add(kvp.Key, new(kvp.Value["role"], kvp.Value["color"], bool.Parse(kvp.Value["override"])));
+                    if (kvp.Value.TryGetValue("job", out string isJob) && isJob is "true")
+                        OrgPlayerRole.Add(kvp.Key, isJob);
+                }
             }
-            catch (Exception) { }
+            catch (Exception e)
+            {
+                LogManager.Error($"Failed to act HttpManager::LoadCreditTags() - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
+            }
         }
 
         public Triplet<string, string, bool> GetCreditTag(Player player)
@@ -179,20 +215,31 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         public void ApplyCreditTag(Player player)
         {
+            if (_alreadyManaged)
+                return;
+
             Triplet<string, string, bool> Tag = GetCreditTag(player);
-            if (player.ReferenceHub.serverRoles.Network_myText is not null && player.ReferenceHub.serverRoles.Network_myText != string.Empty && !Tag.Third)
-                return; // Do not override
+
+            if (player.ReferenceHub.serverRoles.Network_myText is not null && player.ReferenceHub.serverRoles.Network_myText != string.Empty)
+            {
+                if (Credits.Any(k => k.Value.First == player.ReferenceHub.serverRoles.Network_myText && k.Value.Second == player.ReferenceHub.serverRoles.Network_myColor))
+                    _alreadyManaged = true;
+
+                if (!Tag.Third)
+                    return; // Do not override
+            }
 
             if (Tag.First is not null && Tag.Second is not null)
             {
                 player.ReferenceHub.serverRoles.SetText(Tag.First);
                 player.ReferenceHub.serverRoles.SetColor(Tag.Second);
+                player.ReferenceHub.serverRoles.RefreshLocalTag();
             }
         }
 
         public bool IsLatestVersion(out Version latest)
         {
-            latest = LatestVersion();
+            latest = LatestVersion;
             if (latest.CompareTo(Plugin.Version) > 0)
                 return false;
 
@@ -202,7 +249,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         public bool IsLatestVersion()
         {
-            if (LatestVersion().CompareTo(Plugin.Version) > 0)
+            if (LatestVersion.CompareTo(Plugin.Version) > 0)
                 return false;
 
             return true;
@@ -211,21 +258,19 @@ namespace UncomplicatedCustomRoles.Manager.NET
         internal bool Presence(out HttpContent httpContent)
         {
             float Start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            HttpResponseMessage Status = HttpGetRequest($"{Endpoint}/{Prefix}/presence?port={Server.Port}&cores={Environment.ProcessorCount}&ram=0&version={Plugin.Version}");
+            HttpResponseMessage Status = HttpGetRequest($"{Endpoint}/{Prefix}/presence?port={Server.Port}&cores=0&ram=0&version={Plugin.Version}");
             httpContent = Status.Content;
             ResponseTimes.Add(DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start);
             if (Status.StatusCode == HttpStatusCode.OK)
-            {
                 return true;
-            }
             return false;
         }
 
-        internal void PresenceNotListed() => HttpGetRequest($"{Endpoint}/{Prefix}/presence_notlisted?port={Server.Port}&cores={Environment.ProcessorCount}&ram=0&version={Plugin.Version}");
+        internal void PresenceNotListed() => HttpGetRequest($"{Endpoint}/{Prefix}/presence_notlisted?port={Server.Port}&cores=0&ram=0&version={Plugin.Version}");
 
         internal HttpStatusCode ShareLogs(string data, out HttpContent httpContent)
         {
-            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={PluginAPI.PluginApiVersion.VersionStatic}&plugin_version={Plugin.Version}", data);
+            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={PluginApiVersion.VersionString}&plugin_version={Plugin.Version}", data);
             httpContent = Status.Content;
             return Status.StatusCode;
         }
@@ -240,18 +285,15 @@ namespace UncomplicatedCustomRoles.Manager.NET
         {
             while (Active && Errors <= MaxErrors)
             {
-                if (CustomNetworkManager.IsVerified)
-                    if (!Presence(out HttpContent content))
-                        try
-                        {
-                            Dictionary<string, string> Response = JsonConvert.DeserializeObject<Dictionary<string, string>>(RetriveString(content));
-                            Errors++;
-                            if (Plugin.Instance.Config.EnableBasicLogs)
-                                LogManager.Warn($"[UCS HTTP Manager] >> Error while trying to put data inside our APIs.\nThe endpoint say: {Response["message"]} ({Response["status"]})");
-                        }
-                        catch (Exception) { }
-                    else
-                        PresenceNotListed();
+                if (!Presence(out HttpContent content))
+                    try
+                    {
+                        Dictionary<string, string> Response = JsonConvert.DeserializeObject<Dictionary<string, string>>(RetriveString(content));
+                        Errors++;
+                        if (Plugin.Instance.Config.EnableBasicLogs)
+                            LogManager.Warn($"[UCS HTTP Manager] >> Error while trying to put data inside our APIs.\nThe endpoint say: {Response["message"]} ({Response["status"]})");
+                    }
+                    catch (Exception) { }
 
                 // Do anche the Mailbox action
                 if (Plugin.Instance.Config.DoEnableAdminMessages)
@@ -265,7 +307,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
                 yield return Timing.WaitForSeconds(500.0f);
             }
         }
-        
+
         public void Start()
         {
             if (Active)

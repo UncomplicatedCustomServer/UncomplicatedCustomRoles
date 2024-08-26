@@ -1,29 +1,20 @@
 ﻿using PlayerRoles;
-using System;
+using PluginAPI.Core.Attributes;
+using PluginAPI.Enums;
+using PluginAPI.Events;
 using System.Collections.Generic;
-using System.Linq;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.Events.Args;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
-#pragma warning disable CS0618 // Il tipo o il membro è obsoleto
 #nullable enable
-    public class CustomRole : ICustomRole
+    public class EventCustomRole : ICustomRole
     {
-        /// <summary>
-        /// Get a list of every <see cref="ICustomRole"/> registered.
-        /// </summary>
-        public static IReadOnlyCollection<ICustomRole> List => CustomRoles.Values;
-
-        /// <summary>
-        /// A more easy-to-use dictionary to store every registered <see cref="ICustomRole"/>
-        /// </summary>
-        internal static Dictionary<int, ICustomRole> CustomRoles = new();
-
         /// <summary>
         /// Gets or sets the <see cref="ICustomRole"/> unique Id
         /// </summary>
@@ -209,138 +200,136 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public virtual bool IgnoreSpawnSystem { get; set; } = false;
 
-#nullable disable
-        /// <summary>
-        /// Try to get a registered <see cref="ICustomRole"/> by it's Id.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="customRole"></param>
-        /// <returns><see cref="true"/> if the operation was successfull.</returns>
-        public static bool TryGet(int id, out ICustomRole customRole)
-        {
-            if (CustomRoles.ContainsKey(id))
-            {
-                customRole = CustomRoles[id];
-                return true;
-            }
+        [PluginEvent(ServerEventType.PlayerKicked)]
+        public virtual void OnKicked(PlayerKickedEvent ev) { }
 
-            customRole = null;
-            return false;
-        }
+        [PluginEvent(ServerEventType.PlayerBanned)]
+        public virtual void OnBanned(PlayerBannedEvent ev) { }
 
-        /// <summary>
-        /// Get a registered <see cref="ICustomRole"/> by it's Id
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns>The <see cref="ICustomRole"/> with the given Id or <see cref="null"/> if not found.</returns>
-        public static ICustomRole Get(int id)
-        {
-            if (TryGet(id, out ICustomRole customRole)) 
-                return customRole; 
+        [PluginEvent(ServerEventType.PlayerUseItem)]
+        public virtual void OnUsingItem(PlayerUseItemEvent ev) { }
 
-            return null;
-        }
+        [PluginEvent(ServerEventType.PlayerUsedItem)]
+        public virtual void OnUsedItem(PlayerUsedItemEvent ev) { }
 
-        /// <summary>
-        /// Register a new <see cref="ICustomRole"/>.
-        /// Required only if you want the custom role to be evaluated from UCR.
-        /// </summary>
-        /// <param name="customRole"></param>
-        public static void Register(ICustomRole Role, bool notLoadIfLoaded = false)
-        {
-            if (!Validate(Role))
-            {
-                LogManager.Warn($"Failed to register the UCR role with the ID {Role.Id} due to the validator check!");
+        [PluginEvent(ServerEventType.PlayerCancelUsingItem)]
+        public virtual void OnCancelledItemUse(PlayerCancelUsingItemEvent ev) { }
 
-                return;
-            }
+        [PluginEvent(ServerEventType.RagdollSpawn)]
+        public virtual void OnSpawnedRagdoll(RagdollSpawnEvent ev) { }
 
-            LogManager.Debug($"Proposed new role {Role.Id} to register with {Role.MaxScp330Candies} ccds");
+        [PluginEvent(ServerEventType.PlayerLeft)]
+        public virtual void OnLeft(PlayerLeftEvent ev) { }
 
-            if (!CustomRoles.ContainsKey(Role.Id))
-            {
-                CustomRoles.Add(Role.Id, Role);
+        [PluginEvent(ServerEventType.PlayerDeath)]
+        public virtual void OnDied(PlayerDeathEvent ev) { }
 
-                if (Plugin.Instance.Config.EnableBasicLogs)
-                    LogManager.Info($"Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
+        [PluginEvent(ServerEventType.PlayerChangeRole)]
+        public virtual void OnChangingRole(PlayerChangeRoleEvent ev) { }
 
-                return;
-            }
+        [PluginEvent(ServerEventType.PlayerThrowProjectile)]
+        public virtual void OnThrowedProjectile(PlayerThrowProjectileEvent ev) { }
 
-            if (notLoadIfLoaded)
-            {
-                LogManager.Debug($"Can't load role {Role.Id} {Role.Name} due to plugin settings!\nPlease reach UCS support for UCR!");
-                return;
-            }
+        [PluginEvent(ServerEventType.PlayerThrowItem)]
+        public virtual void OnThrowedItem(PlayerThrowItemEvent ev) { }
 
-            LogManager.Warn($"Failed to register the UCR role with the ID {Role.Id}: The problem can be the following: ERR_ID_ALREADY_HERE!\nTrying to assign a new one...");
+        [PluginEvent(ServerEventType.PlayerDropItem)]
+        public virtual void OnDroppedItem(PlayerDropItemEvent ev) { }
 
-            int NewId = GetFirstFreeID(Role.Id);
+        [PluginEvent(ServerEventType.PlayerSearchPickup)]
+        public virtual void OnPickingUpItem(PlayerSearchPickupEvent ev) { }
 
-            LogManager.Info($"Custom Role {Role.Name} with the old Id {Role.Id} will be registered with the following Id: {NewId}");
+        [PluginEvent(ServerEventType.PlayerSearchedPickup)]
+        public virtual void OnPickedUpItem(PlayerSearchedPickupEvent ev) { }
 
-            Role.Id = NewId;
+        [PluginEvent(ServerEventType.PlayerHandcuff)]
+        public virtual void OnHandcuffed(PlayerHandcuffEvent ev) { }
 
-            Register(Role, true);
-        }
+        [PluginEvent(ServerEventType.PlayerRemoveHandcuffs)]
+        public virtual void OnRemovedHandcuffs(PlayerRemoveHandcuffsEvent ev) { }
 
-        /// <summary>
-        /// Validate a <see cref="ICustomRole"/>
-        /// </summary>
-        /// <param name="Role"></param>
-        /// <returns></returns>
-        [Obsolete("This method should not be used as was intended for the first versions of UCR and now the plugin can handle also things that are reported as errors here!", false)]
-        public static bool Validate(ICustomRole Role)
-        {
-            if (Role is null)
-                return false;
+        [PluginEvent(ServerEventType.PlayerEscape)]
+        public virtual void OnEscaped(EscapingEventArgs ev) { }
 
-            if (Role.SpawnSettings is null)
-            {
-                LogManager.Warn($"Is kinda useless registering a role with no spawn_settings.\nFound (or not found) in role: {Role.Name} ({Role.Id})");
-                return false;
-            }
+        [PluginEvent(ServerEventType.PlayerUsingIntercom)]
+        public virtual void OnIntercomSpeaking(PlayerUsingIntercomEvent ev) { }
 
-            if (Role.SpawnSettings.Spawn == SpawnType.ZoneSpawn && Role.SpawnSettings.SpawnZones.Count() < 1)
-            {
-                LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the ZoneSpawn as SpawnType the List SpawnZones can't be empty!");
-                return false;
-            }
-            else if (Role.SpawnSettings.Spawn == SpawnType.RoomsSpawn && Role.SpawnSettings.SpawnRooms.Count() < 1)
-            {
-                LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the RoomSpawn as SpawnType the List SpawnRooms can't be empty!");
-                return false;
-            }
-            else if (Role.SpawnSettings.Spawn == SpawnType.SpawnPointSpawn && (Role.SpawnSettings.SpawnPoints is null || Role.SpawnSettings.SpawnPoints.Count < 1))
-            {
-                LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the SpawnPointSpawn as SpawnType the SpawnPoint can't be empty or null!");
-                return false;
-            }
+        [PluginEvent(ServerEventType.PlayerShotWeapon)]
+        public virtual void OnShot(PlayerShotWeaponEvent ev) { }
 
-            return true;
-        }
+        [PluginEvent(ServerEventType.PlayerEnterPocketDimension)]
+        public virtual void OnEnteredPocketDimension(PlayerEnterPocketDimensionEvent ev) { }
 
-        /// <summary>
-        /// Get the first free id to register a new custom role
-        /// </summary>
-        /// <param name="Id"></param>
-        /// <returns></returns>
-        public static int GetFirstFreeID(int Id)
-        {
-            while (CustomRoles.ContainsKey(Id))
-                Id++;
+        [PluginEvent(ServerEventType.PlayerExitPocketDimension)]
+        public virtual void OnExitedPocketDimension(PlayerExitPocketDimensionEvent ev) { }
 
-            return Id;
-        }
+        [PluginEvent(ServerEventType.PlayerReloadWeapon)]
+        public virtual void OnReloadedWeapon(PlayerReloadWeaponEvent ev) { }
 
-        /// <summary>
-        /// Unregister a registered <see cref="ICustomRole"/>.
-        /// </summary>
-        /// <param name="customRole"></param>
-        public static void Unregister(ICustomRole customRole)
-        {
-            if (CustomRoles.ContainsKey(customRole.Id))
-                CustomRoles.Remove(customRole.Id);
-        }
+        [PluginEvent(ServerEventType.PlayerSpawn)]
+        public virtual void OnSpawned(PlayerSpawnEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerChangeItem)]
+        public virtual void OnChangedItem(PlayerChangeItemEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerInteractElevator)]
+        public virtual void OnInteractedElevator(PlayerInteractElevatorEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerInteractLocker)]
+        public virtual void OnInteractedLocker(PlayerInteractLockerEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerReceiveEffect)]
+        public virtual void OnReceivedEffect(PlayerReceiveEffectEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerPreCoinFlip)]
+        public virtual void OnFlippingCoin(PlayerPreCoinFlipEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerCoinFlip)]
+        public virtual void OnFlippedCoin(PlayerCoinFlipEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerToggleFlashlight)]
+        public virtual void OnToggledFlashlight(PlayerToggleFlashlightEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerUnloadWeapon)]
+        public virtual void OnUnloadedWeapon(PlayerUnloadWeaponEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerAimWeapon)]
+        public virtual void OnAimedWapon(PlayerAimWeaponEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerMakeNoise)]
+        public virtual void OnMadeNoise(PlayerMakeNoiseEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerUsingRadio)]
+        public virtual void OnUsingRadio(PlayerUsingRadioEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerUseHotkey)]
+        public virtual void OnUsingHotKey(PlayerUseHotkeyEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerRadioToggle)]
+        public virtual void OnToggledRadio(PlayerRadioToggleEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerDamagedWindow)]
+        public virtual void OnPlayerDamageWindow(PlayerDamagedWindowEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerUnlockGenerator)]
+        public virtual void OnUnlockedGenerator(PlayerUnlockGeneratorEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerOpenGenerator)]
+        public virtual void OnOpenedGenerator(PlayerOpenGeneratorEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerCloseGenerator)]
+        public virtual void OnClosedGenerator(PlayerCloseGeneratorEvent ev) { }
+
+        [PluginEvent(ServerEventType.GeneratorActivated)]
+        public virtual void OnActivatedGenerator(GeneratorActivatedEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerInteractDoor)]
+        public virtual void OnInteractedDoor(PlayerInteractDoorEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerDroppedAmmo)]
+        public virtual void OnDroppedAmmo(PlayerDroppedAmmoEvent ev) { }
+
+        [PluginEvent(ServerEventType.PlayerMuted)]
+        public virtual void OnMuted(PlayerMutedEvent ev) { }
     }
 }

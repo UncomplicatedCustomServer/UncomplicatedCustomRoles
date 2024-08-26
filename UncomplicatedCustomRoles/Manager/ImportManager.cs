@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using UncomplicatedCustomRoles.API.Attributes;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Extensions;
-using UncomplicatedCustomRoles.Interfaces;
+using UncomplicatedCustomRoles.API.Interfaces;
 
 namespace UncomplicatedCustomRoles.Manager
 {

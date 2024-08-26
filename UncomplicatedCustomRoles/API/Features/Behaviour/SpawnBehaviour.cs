@@ -1,35 +1,63 @@
 ﻿using MapGeneration;
 using PlayerRoles;
 using System.Collections.Generic;
+using UncomplicatedCustomRoles.API.Enums;
 
 namespace UncomplicatedCustomRoles.API.Features.Behaviour
 {
 #nullable enable
     public class SpawnBehaviour
     {
-        // Spawn Behaviour for the roles (role-based)
+        /// <summary>
+        /// Gets or sets a <see cref="List{T}"/> of <see cref="RoleTypeId"/> that this role can override
+        /// </summary>
         public List<RoleTypeId> CanReplaceRoles { get; set; } = new()
         {
             RoleTypeId.ClassD
         };
 
+        /// <summary>
+        /// Gets or sets the maximum number of the given <see cref="ICustomRole"/> can be alive at the same time
+        /// </summary>
         public int MaxPlayers { get; set; } = 10;
 
+        /// <summary>
+        /// Gets or sets the minimum number of players that are required by the given <see cref="ICustomRole"/> to spawn
+        /// </summary>
         public int MinPlayers { get; set; } = 1;
 
-        public int SpawnChance { get; set; } = 60;
+        /// <summary>
+        /// Gets or sets the spawn chance of the role.<br></br>
+        /// 0 is 0% and 100 is 100%
+        /// </summary>
+        public float SpawnChance { get; set; } = 60;
 
-        public SpawnLocationType Spawn { get; set; } = SpawnLocationType.RoomsSpawn;
+        /// <summary>
+        /// Gets or sets the <see cref="SpawnType"/> of the role
+        /// </summary>
+        public SpawnType Spawn { get; set; } = SpawnType.RoomsSpawn;
 
+        /// <summary>
+        /// Gets or sets a <see cref="List{T}"/> of zones that will be evaluated as spawnpoints
+        /// </summary>
         public List<FacilityZone> SpawnZones { get; set; } = new();
 
+        /// <summary>
+        /// Gets or sets a <see cref="List{T}"/> of rooms that will be evaluated as spawnpoints
+        /// </summary>
         public List<RoomName> SpawnRooms { get; set; } = new()
         {
             RoomName.LczClassDSpawn
         };
 
-        public string? SpawnPoint { get; set; } = null;
+        /// <summary>
+        /// Gets or sets a <see cref="List{T}"/> of SpawnPoints that will be evaluated as spawnpoints
+        /// </summary>
+        public List<string> SpawnPoints { get; set; } = new();
 
+        /// <summary>
+        /// Gets or sets the required Exiled.Permission to spawn as the given <see cref="ICustomRole"/>
+        /// </summary>
         public string? RequiredPermission { get; set; } = string.Empty;
     }
 }

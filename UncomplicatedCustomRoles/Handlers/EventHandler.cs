@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.Manager;
-using UncomplicatedCustomRoles.Interfaces;
+using UncomplicatedCustomRoles.API.Interfaces;
 using MEC;
 using PlayerRoles;
 using UncomplicatedCustomRoles.Extensions;
@@ -86,52 +86,50 @@ namespace UncomplicatedCustomRoles.Handlers
         [PluginEvent(ServerEventType.RoundEnd)]
         public void OnRoundEnded(RoundEndEvent _) => InfiniteEffect.Terminate();
 
-        [PluginEvent(ServerEventType.PlayerChangeRole)]
-        public void OnChangingRole(PlayerChangeRoleEvent ev) => SpawnManager.ClearCustomTypes(ev.Player);
-
-        [PluginEvent(ServerEventType.PlayerSpawn)]
-        public void OnSpawning(PlayerSpawnEvent ev)
+        [InternalPluginEvent(EventName.ChangingRole)]
+        public void OnSpawning(ChangingRoleEventArgs ev)
         {
-            if (ev.Player is null)
+            if (ev.Hub is null)
                 return;
+
+            if (!ev.IsAllowed)
+
+            SpawnManager.ClearCustomTypes(ev.Hub);
 
             LogManager.Debug("Called SPAWNING event");
 
-            if (Spawn.Spawning.Contains(ev.Player.PlayerId))
+            if (Spawn.Spawning.Contains(ev.Hub.PlayerId))
                 return;
 
-            if (ev.Player.HasCustomRole())
+            if (SummonedCustomRole.TryGet(ev.Hub, out _))
                 return;
 
             if (!Plugin.Instance.DoSpawnBasicRoles)
                 return;
 
             string LogReason = string.Empty;
-            if (Plugin.Instance.Config.AllowOnlyNaturalSpawns && !Spawn.SpawnQueue.Contains(ev.Player.PlayerId))
+            if (Plugin.Instance.Config.AllowOnlyNaturalSpawns && !Spawn.SpawnQueue.Contains(ev.Hub.PlayerId))
             {
                 LogManager.Debug("The player is not in the queue for respawning!");
                 return;
             }
-            else if (Spawn.SpawnQueue.Contains(ev.Player.PlayerId))
+            else if (Spawn.SpawnQueue.Contains(ev.Hub.PlayerId))
             {
-                Spawn.SpawnQueue.Remove(ev.Player.PlayerId);
+                Spawn.SpawnQueue.Remove(ev.Hub.PlayerId);
                 LogReason = " [WITH a respawn wave - VANILLA]";
             }
 
-            LogManager.Debug($"Player {ev.Player.Nickname} spawned{LogReason}, going to assign a role if needed!");
+            LogManager.Debug($"Player {ev.Hub.nicknameSync.Network_myNickSync} spawned{LogReason}, going to assign a role if needed!");
 
-            // Let's clear for custom types
-            SpawnManager.ClearCustomTypes(ev.Player);
-
-            ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(ev.Player);
+            ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(ev.Hub, ev.NewRole);
 
             if (Role is not null)
             {
-                LogManager.Debug($"Summoning player {ev.Player.Nickname} ({ev.Player.PlayerId}) as {Role.Name} ({Role.Id})");
-                Timing.CallDelayed(0.3f, () => SpawnManager.SummonCustomSubclass(ev.Player, Role.Id));
+                LogManager.Debug($"Summoning player {ev.Hub.nicknameSync.Network_myNickSync} ({ev.Hub.PlayerId}) as {Role.Name} ({Role.Id})");
+                SpawnManager.SummonCustomSubclass(Player.Get(ev.Hub), Role.Id);
             }
 
-            LogManager.Debug($"Evaluated custom role for player {ev.Player.Nickname} - found: {Role?.Id} ({Role?.Name})");
+            LogManager.Debug($"Evaluated custom role for player {ev.Hub.nicknameSync.Network_myNickSync} - found: {Role?.Id} ({Role?.Name})");
         }
 
         [PluginEvent(ServerEventType.PlayerJoined)]

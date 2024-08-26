@@ -1,10 +1,11 @@
 ﻿using PlayerRoles;
 using System.Collections.Generic;
+using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 
-namespace UncomplicatedCustomRoles.Interfaces
+namespace UncomplicatedCustomRoles.API.Interfaces
 {
 #nullable enable
     public interface ICustomRole
@@ -24,6 +25,8 @@ namespace UncomplicatedCustomRoles.Interfaces
         public abstract string BadgeColor { get; set; }
 
         public abstract RoleTypeId Role { get; set; }
+
+        public abstract Team? Team { get; set; }
 
         public abstract RoleTypeId RoleAppearance { get; set; }
 
@@ -57,11 +60,15 @@ namespace UncomplicatedCustomRoles.Interfaces
 
         public abstract List<ItemType> Inventory { get; set; }
 
+        public abstract List<uint> CustomItemsInventory { get; set; }
+
         public abstract Dictionary<ItemType, ushort> Ammo { get; set; }
 
         public abstract float DamageMultiplier { get; set; }
 
         public abstract SpawnBehaviour? SpawnSettings { get; set; }
+
+        public abstract CustomFlags? CustomFlags { get; set; }
 
         public abstract bool IgnoreSpawnSystem { get; set; }
     }

@@ -1,12 +1,14 @@
-﻿using MEC;
+﻿using CustomPlayerEffects;
+using MEC;
 using Mirror;
 using PlayerRoles;
 using PluginAPI.Core;
 using System;
 using UncomplicatedCustomRoles.API.Features;
-using UncomplicatedCustomRoles.Interfaces;
+using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
+using static Respawning.RespawnEffectsController;
 
 /*
  * > 05/06/2024 - A really really good day :)

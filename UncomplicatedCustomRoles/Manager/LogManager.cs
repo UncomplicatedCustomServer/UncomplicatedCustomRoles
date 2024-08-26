@@ -6,7 +6,7 @@ using System.Net;
 using System.Net.Http;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Struct;
-using UncomplicatedCustomRoles.Interfaces;
+using UncomplicatedCustomRoles.API.Interfaces;
 
 namespace UncomplicatedCustomRoles.Manager
 {

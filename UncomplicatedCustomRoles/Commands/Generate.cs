@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
 using UncomplicatedCustomRoles.API.Features;
-using UncomplicatedCustomRoles.Interfaces;
+using UncomplicatedCustomRoles.API.Interfaces;
 
 namespace UncomplicatedCustomRoles.Commands
 {

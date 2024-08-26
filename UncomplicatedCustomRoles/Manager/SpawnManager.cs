@@ -1,7 +1,7 @@
 ﻿using PlayerRoles;
 using System.Collections.Generic;
 using System.Linq;
-using UncomplicatedCustomRoles.Interfaces;
+using UncomplicatedCustomRoles.API.Interfaces;
 using UnityEngine;
 using System;
 using UncomplicatedCustomRoles.Extensions;
@@ -12,6 +12,12 @@ using UncomplicatedCustomRoles.API.Struct;
 using MapGeneration;
 using UncomplicatedCustomRoles.API.Helpers.Imports.EXILED.Extensions;
 using InventorySystem.Disarming;
+using UncomplicatedCustomRoles.API.Enums;
+using PlayerStatsSystem;
+using Subtitles;
+using System.Text.RegularExpressions;
+using UncomplicatedCustomRoles.API.Features.CustomModules;
+using Utils.Networking;
 
 // Mormora, la gente mormora
 // falla tacere praticando l'allegria
@@ -20,7 +26,39 @@ namespace UncomplicatedCustomRoles.Manager
 {
     internal class SpawnManager
     {
+        public static IReadOnlyDictionary<string, string> colorMap = new Dictionary<string, string>()
+        {
+            { "pink", "#FF96DE" },
+            { "red", "#C50000" },
+            { "brown", "#944710" },
+            { "silver", "#A0A0A0" },
+            { "light_green", "#32CD32" },
+            { "crimson", "#DC143C" },
+            { "cyan", "#00B7EB" },
+            { "aqua", "#00FFFF" },
+            { "deep_pink", "#FF1493" },
+            { "tomato", "#FF6448" },
+            { "yellow", "#FAFF86" },
+            { "magenta", "#FF0090" },
+            { "blue_green", "#4DFFB8" },
+            { "orange", "#FF9966" },
+            { "lime", "#BFFF00" },
+            { "green", "#228B22" },
+            { "emerald", "#50C878" },
+            { "carmine", "#960018" },
+            { "nickel", "#727472" },
+            { "mint", "#98FB98" },
+            { "army_green", "#4B5320" },
+            { "pumpkin", "#EE7600" }
+        };
+
         public static void ClearCustomTypes(Player player)
+        {
+            if (SummonedCustomRole.TryGet(player, out SummonedCustomRole role))
+                role.Destroy();
+        }
+
+        public static void ClearCustomTypes(ReferenceHub player)
         {
             if (SummonedCustomRole.TryGet(player, out SummonedCustomRole role))
                 role.Destroy();
@@ -62,37 +100,41 @@ namespace UncomplicatedCustomRoles.Manager
 
             RoleSpawnFlags SpawnFlag = RoleSpawnFlags.None;
 
-            if (Role.SpawnSettings.Spawn == SpawnLocationType.KeepRoleSpawn)
+            if (Role.SpawnSettings.Spawn == SpawnType.KeepRoleSpawn)
                 SpawnFlag = RoleSpawnFlags.UseSpawnpoint;
 
             player.ReferenceHub.roleManager.ServerSetRole(Role.Role, RoleChangeReason.Respawn, SpawnFlag);
 
-            if (Role.SpawnSettings.Spawn == SpawnLocationType.KeepCurrentPositionSpawn)
+            if (Role.SpawnSettings.Spawn == SpawnType.KeepCurrentPositionSpawn)
                 player.Position = BasicPosition;
 
             if (SpawnFlag == RoleSpawnFlags.None)
             {
                 switch (Role.SpawnSettings.Spawn)
                 {
-                    case SpawnLocationType.ZoneSpawn:
+                    case SpawnType.ZoneSpawn:
                         player.Position = Map.Rooms.Where(room => room.Zone == Role.SpawnSettings.SpawnZones.RandomItem() && Map.TeslaGates.Where(tesla => tesla.Room != room).Count() < 1).RandomValue().ApiRoom.Position.AddY(0.75f);
                         break;
-                    case SpawnLocationType.CompleteRandomSpawn:
+                    case SpawnType.CompleteRandomSpawn:
                         player.Position = Map.Rooms.Where(room => Map.TeslaGates.Where(tesla => tesla.Room != room).Count() < 1).RandomValue().ApiRoom.Position.AddY(0.75f);
                         break;
-                    case SpawnLocationType.RoomsSpawn:
+                    case SpawnType.RoomsSpawn:
                         LogManager.Silent($"Going to spawn CR {Role.Name} ({Role.Id}) ({player.Nickname}) at a Room - Count: {Role.SpawnSettings.SpawnRooms.Count}");
                         RoomName Room = Role.SpawnSettings.SpawnRooms.RandomItem();
                         player.Position = Map.Rooms.Where(room => room.Name == Room).FirstOrDefault()?.ApiRoom.Position.AddY(1.5f) ?? BasicPosition;
                         break;
-                    case SpawnLocationType.SpawnPointSpawn:
-                        if (Role.SpawnSettings.SpawnPoint is not null && SpawnPoint.TryGet(Role.SpawnSettings.SpawnPoint, out SpawnPoint spawn))
-                            spawn.Spawn(player);
-                        else
+                    case SpawnType.SpawnPointSpawn:
+                        if (Role.SpawnSettings.SpawnPoints is not null && Role.SpawnSettings.SpawnPoints.Count > 0)
                         {
-                            LogManager.Warn($"Failed to spawn player {player.Nickname} ({player.PlayerId}) as CustomRole {Role.Name} ({Role.Id}): selected SpawnPoint '{Role.SpawnSettings.SpawnPoint}' does not exists, set the spawn position to the previous one...");
-                            player.Position = BasicPosition;
+                            string spawnPointName = Role.SpawnSettings.SpawnPoints.RandomItem();
+                            if (Role.SpawnSettings.SpawnPoints is not null && SpawnPoint.TryGet(spawnPointName, out SpawnPoint spawn))
+                                spawn.Spawn(player);
+                            else
+                                LogManager.Warn($"Failed to spawn player {player.Nickname} ({player.PlayerId}) as CustomRole {Role.Name} ({Role.Id}): selected SpawnPoint '{spawnPointName}' does not exists, set the spawn position to the previous one...");
                         }
+                        break;
+                    case SpawnType.ClassDCell:
+                        player.Position = RoleTypeId.ClassD.GetRandomSpawnLocation();
                         break;
                 };
             }
@@ -102,44 +144,38 @@ namespace UncomplicatedCustomRoles.Manager
 
         public static void SummonSubclassApplier(Player Player, ICustomRole Role)
         {
-            Timing.CallDelayed(0.75f, () =>
-            {
-                Player.ClearInventory();
-                foreach (ItemType Item in Role.Inventory)
-                    Player.AddItem(Item);
+            Player.ClearInventory();
+            foreach (ItemType Item in Role.Inventory)
+                Player.AddItem(Item);
 
-                // ClearAmmo
-                Player.ReferenceHub.inventory.UserInventory.ReserveAmmo.Clear();
-                Player.ReferenceHub.inventory.SendAmmoNextFrame = true;
+            // ClearAmmo
+            Player.ReferenceHub.inventory.UserInventory.ReserveAmmo.Clear();
+            Player.ReferenceHub.inventory.SendAmmoNextFrame = true;
 
-                if (Role.Ammo.GetType() == typeof(Dictionary<ItemType, ushort>) && Role.Ammo.Count() > 0)
-                    foreach (KeyValuePair<ItemType, ushort> Ammo in Role.Ammo)
-                        Player.AddAmmo(Ammo.Key, Ammo.Value);
+            if (Role.Ammo.GetType() == typeof(Dictionary<ItemType, ushort>) && Role.Ammo.Count() > 0)
+                foreach (KeyValuePair<ItemType, ushort> Ammo in Role.Ammo)
+                    Player.AddAmmo(Ammo.Key, Ammo.Value);
 
-                if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
-                    if (Role.OverrideRoleName)
-                        Player.ApplyCustomInfoAndRoleName(Role.CustomInfo, Role.Name);
-                    else
-                        Player.ApplyClearCustomInfo(Role.CustomInfo);
+            Player.ReferenceHub.nicknameSync.Network_playerInfoToShow |= PlayerInfoArea.Nickname;
 
-                // Apply every required stats
-                Role.Health?.Apply(Player);
-                Role.Ahp?.Apply(Player);
-                Role.Stamina?.Apply(Player);
+            PlayerInfoArea InfoArea = Player.ReferenceHub.nicknameSync.Network_playerInfoToShow;
 
-                if (Role.Scale != Vector3.zero && Role.Scale != Vector3.one)
-                    Player.ApplyScale(Role.Scale);
+            if (!Role.OverrideRoleName && (Role.CustomFlags & CustomFlags.ShowOnlyCustomInfo) == CustomFlags.ShowOnlyCustomInfo)
+                Player.ReferenceHub.nicknameSync.Network_playerInfoToShow &= ~PlayerInfoArea.Role;
 
+            if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
+                if (Role.OverrideRoleName)
+                    Player.ApplyCustomInfoAndRoleName(Role.CustomInfo, Role.Name);
+                else
+                    Player.ApplyClearCustomInfo(Role.CustomInfo);
 
-                if (Role.RoleAppearance != Role.Role)
-                {
-                    LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
-                    Timing.CallDelayed(1f, () =>
-                    {
-                        Player.ChangeAppearance(Role.RoleAppearance, true);
-                    });
-                }
-            });
+            // Apply every required stats
+            Role.Health?.Apply(Player);
+            Role.Ahp?.Apply(Player);
+            Role.Stamina?.Apply(Player);
+
+            if (Role.Scale != Vector3.zero && Role.Scale != Vector3.one)
+                Player.ApplyScale(Role.Scale);
 
             LogManager.Silent("Adding permanent effects");
             List<IEffect> PermanentEffects = new();
@@ -203,7 +239,7 @@ namespace UncomplicatedCustomRoles.Manager
             LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})!");
 
             //new SummonedCustomRole(Player, Role, Badge, PermanentEffects, ChangedNick);
-            new SummonedCustomRole(Player, Role, Badge, PermanentEffects, ChangedNick);
+            new SummonedCustomRole(Player, Role, Badge, PermanentEffects, InfoArea, ChangedNick);
 
             if (Spawn.Spawning.Contains(Player.PlayerId))
                 Spawn.Spawning.Remove(Player.PlayerId);
@@ -288,9 +324,11 @@ namespace UncomplicatedCustomRoles.Manager
 
 #nullable enable
 #pragma warning disable CS8602 // <Element> can be null at this point! (added a check!)
-        public static ICustomRole? DoEvaluateSpawnForPlayer(Player player, RoleTypeId? role = null)
+        public static ICustomRole? DoEvaluateSpawnForPlayer(Player player, RoleTypeId? role = null) => DoEvaluateSpawnForPlayer(player.ReferenceHub, role);
+
+        public static ICustomRole? DoEvaluateSpawnForPlayer(ReferenceHub player, RoleTypeId? role = null)
         {
-            role ??= player.Role;
+            role ??= player.GetRoleId();
 
             RoleTypeId NewRole = (RoleTypeId)role;
 
@@ -326,17 +364,91 @@ namespace UncomplicatedCustomRoles.Manager
 
             LogManager.Silent($"RLC {RolePercentage.Count} ppts {RolePercentage[NewRole]?.Count} for {NewRole}");
 
-            if (player.HasCustomRole())
+            if (SummonedCustomRole.TryGet(player, out _))
             {
                 LogManager.Debug("Was evalutating role select for an already custom role player, stopping");
                 return null;
             }
 
-            if (RolePercentage.ContainsKey(player.Role))
+            if (RolePercentage.ContainsKey(NewRole))
                 if (UnityEngine.Random.Range(0, 100) < RolePercentage[NewRole].Count())
                     return CustomRole.CustomRoles[RolePercentage[NewRole].RandomItem().Id];
 
             return null;
+        }
+
+        public static void UpdateChaosModifier()
+        {
+            int diff = 0;
+            foreach (SummonedCustomRole role in SummonedCustomRole.List.Where(role => role.IsOverwrittenRole))
+            {
+                if (role.Role.Team is not Team.SCPs && PlayerRolesUtils.GetTeam(role.Role.Role) is Team.SCPs)
+                    diff--;
+                else if (role.Role.Team is Team.SCPs && PlayerRolesUtils.GetTeam(role.Role.Role) is not Team.SCPs)
+                    diff++;
+            }
+
+            RoundSummary.singleton.Network_chaosTargetCount += diff;
+        }
+
+        public static void HandleRecontainmentAnnoucement(CustomScpAnnouncer element)
+        {
+            HandleRecontainmentAnnoucement(element.DamageHandler, element.Instance);
+            element.Execute();
+        }
+
+        public static void HandleRecontainmentAnnoucement(DamageHandlerBase baseHandler, SummonedCustomRole role)
+        {
+            float num = AlphaWarheadController.Detonated ? 3.5f : 1f;
+            TryGetPublicFormat(role.Role.Name, role.Role.Role, out string cassie, out string subtitle);
+            NineTailedFoxAnnouncer.singleton.ServerOnlyAddGlitchyPhrase($"{cassie} {baseHandler.CassieDeathAnnouncement.Announcement}", UnityEngine.Random.Range(0.1f, 0.14f) * num, UnityEngine.Random.Range(0.07f, 0.08f) * num);
+            List<SubtitlePart> list = new()
+            {
+                new(SubtitleType.SCP, new string[] { subtitle }),
+            };
+            list.AddRange(baseHandler.CassieDeathAnnouncement.SubtitleParts);
+            new SubtitleMessage(list.ToArray()).SendToAuthenticated(0);
+        }
+
+        private static void TryGetPublicFormat(string input, RoleTypeId def, out string cassie, out string subtitle)
+        {
+            if (!input.Contains("SCP-"))
+                NineTailedFoxAnnouncer.ConvertSCP(def, out subtitle, out cassie);
+            else
+                TryExtractScpNumber(input, out cassie, out subtitle);
+        }
+
+        private static void TryExtractScpNumber(string input, out string cassie, out string subtitle)
+        {
+            char[] allowed = new[] { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' };
+            cassie = string.Empty;
+            subtitle = string.Empty;
+            foreach (char c in ToPublicFormat(Regex.Replace(input, "<.*?>", string.Empty)).ToCharArray())
+                if (allowed.Contains(c))
+                {
+                    cassie += $"{c} ";
+                    subtitle += c;
+                }
+
+            if (ClutterSpawner.IsHolidayActive(Holidays.AprilFools))
+            {
+                cassie = "1 0 4";
+                subtitle = "104";
+            }
+        }
+
+        private static string ToPublicFormat(string input) => input.Replace("SCP", "").Replace(" ", "").ToUpper();
+
+        private static IEnumerable<Player> LoadAppearanceAffectedPlayers(Player target)
+        {
+            List<Player> result = new();
+            foreach (Player player in Player.GetPlayers().Where(p => p.PlayerId != target.PlayerId))
+                if (player.TryGetSummonedInstance(out SummonedCustomRole role) && !role.HasModule<NotAffectedByAppearance>())
+                    result.Add(player);
+                else if (!player.TryGetSummonedInstance(out _))
+                    result.Add(player);
+
+            return result;
         }
     }  
 }

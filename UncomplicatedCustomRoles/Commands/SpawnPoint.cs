@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using PluginAPI.Core;
 using SpawnPointInstance = UncomplicatedCustomRoles.API.Features.SpawnPoint;
-using UncomplicatedCustomRoles.Interfaces;
+using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager.NET;
 using System.Net;
 using System.Threading.Tasks;

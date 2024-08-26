@@ -5,5 +5,6 @@
         PlayerHurting,
         PlayerEscaping,
         RespawningTeam,
+        ChangingRole
     }
 }

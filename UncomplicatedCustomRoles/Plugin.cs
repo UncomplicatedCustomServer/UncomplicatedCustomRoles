@@ -39,6 +39,8 @@ namespace UncomplicatedCustomRoles
 
         private Harmony _harmony;
 
+        private CustomRoleEventHandler _puppetEventHandler;
+
         [PluginEntryPoint(Name, StringVersion, Description, Author)]
         public void OnEnabled()
         {
@@ -51,10 +53,11 @@ namespace UncomplicatedCustomRoles
             API.Features.Escape.Bucket.Clear();
 
             Handler = new();
+            _puppetEventHandler = new();
             FileConfigs = new();
             HttpManager = new("ucr", int.MaxValue);
 
-            CustomRole.List.Clear();
+            CustomRole.CustomRoles.Clear();
             
             if (!File.Exists(Path.Combine(Paths.Configs, "UncomplicatedCustomRoles", ".nohttp")))
                 HttpManager.Start();
@@ -81,6 +84,7 @@ namespace UncomplicatedCustomRoles
 
             // Load events
             EventManager.RegisterEvents(this, Handler);
+            EventManager.RegisterEvents(this, _puppetEventHandler);
             Events.EventManager.RegisterEvents(Handler);
 
             FileConfigs.Welcome();
@@ -108,6 +112,10 @@ namespace UncomplicatedCustomRoles
             _harmony.UnpatchAll();
             _harmony = null;
 
+            EventManager.UnregisterEvents(this, Handler);
+            EventManager.UnregisterEvents(this, _puppetEventHandler);
+
+            _puppetEventHandler = null;
             Handler = null;
 
             Instance = null;
