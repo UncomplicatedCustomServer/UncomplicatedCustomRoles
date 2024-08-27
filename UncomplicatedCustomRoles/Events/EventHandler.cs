@@ -181,7 +181,7 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnHurt(HurtEventArgs ev)
         {
-            if (ev.Player is not null && ev.Player.IsAlive && ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedCustomRole))
+            if (ev.Player is not null && ev.Attacker is not null && ev.Attacker.IsAlive && ev.Player.IsAlive && ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedCustomRole))
             {
                 summonedCustomRole.LastDamageTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
