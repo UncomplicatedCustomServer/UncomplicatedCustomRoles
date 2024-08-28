@@ -9,6 +9,7 @@ using PlayerHandler = Exiled.Events.Handlers.Player;
 using Scp049Handler = Exiled.Events.Handlers.Scp049;
 using ServerHandler = Exiled.Events.Handlers.Server;
 using Scp330Handler = Exiled.Events.Handlers.Scp330;
+using WarheadHandler = Exiled.Events.Handlers.Warhead;
 using UncomplicatedCustomRoles.API.Features;
 using HarmonyLib;
 using UncomplicatedCustomRoles.Manager.NET;
@@ -61,10 +62,12 @@ namespace UncomplicatedCustomRoles
             ServerHandler.RoundEnded += Handler.OnRoundEnded;
 
             // PlayerHandler.Verified += Handler.OnVerified;
+            PlayerHandler.ActivatingGenerator += Handler.OnGenerator;
             PlayerHandler.Died += Handler.OnDied;
             PlayerHandler.Spawned += Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole += Handler.OnChangingRole;
             PlayerHandler.ReceivingEffect += Handler.OnReceivingEffect;
+            PlayerHandler.PlayerDamageWindow += Handler.OnScp079Recontainment;
             PlayerHandler.Escaping += Handler.OnEscaping;
             PlayerHandler.UsedItem += Handler.OnItemUsed;
             PlayerHandler.Hurting += Handler.OnHurting;
@@ -75,6 +78,8 @@ namespace UncomplicatedCustomRoles
             Scp049Handler.FinishingRecall += Handler.OnFinishingRecall;
 
             Scp330Handler.InteractingScp330 += Handler.OnInteractingScp330;
+
+            WarheadHandler.Starting += Handler.OnWarheadLever;
 
             if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomRoles", ".nohttp")))
                 HttpManager.Start();
@@ -143,9 +148,11 @@ namespace UncomplicatedCustomRoles
             ServerHandler.RoundStarted -= Handler.OnRoundStarted;
 
             // PlayerHandler.Verified -= Handler.OnVerified;
+            PlayerHandler.ActivatingGenerator -= Handler.OnGenerator;
             PlayerHandler.Died -= Handler.OnDied;
             PlayerHandler.Spawned -= Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole -= Handler.OnChangingRole;
+            PlayerHandler.PlayerDamageWindow -= Handler.OnScp079Recontainment;
             PlayerHandler.ReceivingEffect -= Handler.OnReceivingEffect;
             PlayerHandler.Escaping -= Handler.OnEscaping;
             PlayerHandler.UsedItem -= Handler.OnItemUsed;
@@ -157,6 +164,8 @@ namespace UncomplicatedCustomRoles
             Scp049Handler.FinishingRecall -= Handler.OnFinishingRecall;
 
             Scp330Handler.InteractingScp330 -= Handler.OnInteractingScp330;
+
+            WarheadHandler.Starting -= Handler.OnWarheadLever;
 
             HttpManager.Stop();
             HttpManager.UnregisterEvents();

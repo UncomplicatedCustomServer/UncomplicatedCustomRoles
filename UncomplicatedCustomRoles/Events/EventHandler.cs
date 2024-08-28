@@ -14,6 +14,7 @@ using Exiled.Events.EventArgs.Scp330;
 using CustomPlayerEffects;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
+using Exiled.Events.EventArgs.Warhead;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -82,6 +83,24 @@ namespace UncomplicatedCustomRoles.Events
                 ev.IsAllowed = false;
                 ev.Target.SetCustomRole(Role);
             }
+        }
+
+        public void OnGenerator(ActivatingGeneratorEventArgs ev)
+        {
+            if (ev.Player.ReferenceHub.GetTeam() == Team.SCPs)
+                ev.IsAllowed = false;
+        }
+
+        public void OnWarheadLever(StartingEventArgs ev)
+        {
+            if (ev.Player.ReferenceHub.GetTeam() == Team.SCPs)
+                ev.IsAllowed = false;
+        }
+
+        public void OnScp079Recontainment(DamagingWindowEventArgs ev)
+        {
+            if (ev.Player.ReferenceHub.GetTeam() == Team.SCPs && (ev.Window.Type == Exiled.API.Enums.GlassType.Scp079Trigger || ev.Window.Type == Exiled.API.Enums.GlassType.Scp079))
+                ev.IsAllowed = false;
         }
 
         public void OnDied(DiedEventArgs ev) => SpawnManager.ClearCustomTypes(ev.Player);
