@@ -80,6 +80,30 @@ namespace UncomplicatedCustomRoles.Handlers
                 ev.Target.SetCustomRole(Role);
         }
 
+        [PluginEvent(ServerEventType.PlayerActivateGenerator)]
+        public bool OnActivatedGenerator(PlayerActivateGeneratorEvent ev)
+        {
+            if (ev.Player is not null && ev.Player.Team is Team.SCPs)
+                return false;
+            return true;
+        }
+
+        [PluginEvent(ServerEventType.PlayerDeactivatedGenerator)]
+        public bool OnActivatedGenerator(PlayerDeactivatedGeneratorEvent ev)
+        {
+            if (ev.Player is not null && ev.Player.Team is Team.SCPs)
+                return false;
+            return true;
+        }
+
+        [PluginEvent(ServerEventType.WarheadStart)]
+        public bool OnWarheadStart(WarheadStartEvent ev)
+        {
+            if (ev.Player.ReferenceHub.GetTeam() == Team.SCPs)
+                return false;
+            return true;
+        }
+
         [PluginEvent(ServerEventType.PlayerDeath)]
         public void OnDied(PlayerDeathEvent ev) => SpawnManager.ClearCustomTypes(ev.Player);
 
@@ -240,7 +264,7 @@ namespace UncomplicatedCustomRoles.Handlers
         [PluginEvent(ServerEventType.PlayerUsedItem)]
         public void OnItemUsed(PlayerUsedItemEvent UsedItem)
         {
-            if (UsedItem.Player is not null && UsedItem.Player.TryGetSummonedInstance(out SummonedCustomRole summoned) && UsedItem.Item.ItemTypeId == ItemType.SCP500)
+            if (UsedItem.Player is not null && UsedItem.Player.TryGetSummonedInstance(out SummonedCustomRole summoned) && UsedItem.Item.ItemTypeId is ItemType.SCP500)
                 foreach (IEffect Effect in summoned.InfiniteEffects)
                     if (Effect.Removable)
                         summoned.InfiniteEffects.Remove(Effect);

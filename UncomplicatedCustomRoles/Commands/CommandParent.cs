@@ -62,7 +62,7 @@ namespace UncomplicatedCustomRoles.Commands
                 }
                 else
                 {
-                    response = "Command not found";
+                    response = $"Subcommand '{arguments.At(0)}' not found!";
                     return false;
                 }
             }

@@ -9,6 +9,7 @@ using PluginAPI.Core.Attributes;
 using PluginAPI.Events;
 using PluginAPI.Core;
 using PluginAPI.Helpers;
+using System.Diagnostics.Contracts;
 
 namespace UncomplicatedCustomRoles
 {
@@ -99,9 +100,6 @@ namespace UncomplicatedCustomRoles
             Harmony.DEBUG = true;
             _harmony = new($"com.ucs.ucr_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
-
-            // Run the import managet
-            ImportManager.Init();
         }
 
         [PluginUnload]
@@ -120,5 +118,7 @@ namespace UncomplicatedCustomRoles
 
             Instance = null;
         }
+
+        public void OnFinishedLoadingPlugins() => ImportManager.Init();
     }
 }

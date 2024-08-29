@@ -126,6 +126,8 @@
     <Compile Include="Extensions\EnumberableExtension.cs" />
     <Compile Include="Extensions\PlayerExtension.cs" />
     <Compile Include="Extensions\Vector3Extension.cs" />
+    <Compile Include="HarmonyElements\Patch\RaPlayerInfoPatch.cs" />
+    <Compile Include="HarmonyElements\Prefix\Announcer.cs" />
     <Compile Include="HarmonyElements\Prefix\DamageHandler.cs" />
     <Compile Include="HarmonyElements\Patch\EscapeHandler.cs" />
     <Compile Include="HarmonyElements\Patch\RespawningTeamHandler.cs" />
@@ -133,6 +135,7 @@
     <Compile Include="HarmonyElements\Postfix\StaminaUsageHandler.cs" />
     <Compile Include="API\Interfaces\IUCRCommand.cs" />
     <Compile Include="HarmonyElements\Prefix\InitializeNewRolePrefix.cs" />
+    <Compile Include="HarmonyElements\Prefix\ServerLoaded.cs" />
     <Compile Include="HarmonyElements\TeamPatch.cs" />
     <Compile Include="Manager\FileConfigs.cs" />
     <Compile Include="API\Features\Effect.cs" />

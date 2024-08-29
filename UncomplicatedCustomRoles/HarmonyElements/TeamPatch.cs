@@ -62,25 +62,6 @@ namespace UncomplicatedCustomRoles.Patches
                     break;
                 }
 
-            /*if (index != -1)
-                newInstructions.InsertRange(index, new CodeInstruction[]
-                {
-                    // ReferenceHub
-                    new(OpCodes.Ldarg_1),
-                    new(OpCodes.Call, PropertyGetter(typeof(AttackerDamageHandler), nameof(AttackerDamageHandler.Attacker))),
-                    new(OpCodes.Ldfld, Field(typeof(Footprint), nameof(Footprint.Hub))),
-
-                    // Actual role
-                    new(OpCodes.Ldloc_2),
-
-                    // Get the new role
-                    new(OpCodes.Call, Method(typeof(SummonedCustomRole), nameof(SummonedCustomRole.TryGetCusomTeam))),
-
-                    // Save the new role
-                    new(OpCodes.Stloc_2),
-                });
-            */
-
             if (index != 1)
             {
                 newInstructions[index] = new(OpCodes.Ldfld, Field(typeof(Footprint), nameof(Footprint.Hub)));
