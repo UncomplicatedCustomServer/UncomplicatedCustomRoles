@@ -146,7 +146,7 @@ namespace UncomplicatedCustomRoles.API.Features
         public void OnRemovedHandcuffs(PlayerRemoveHandcuffsEvent ev) => InvokeAllSafely(ev);
 
         [PluginEvent(ServerEventType.PlayerEscape)]
-        public void OnEscaped(EscapingEventArgs ev) => InvokeAllSafely(ev);
+        public void OnEscaped(PlayerEscapeEvent ev) => InvokeAllSafely(ev);
 
         [PluginEvent(ServerEventType.PlayerUsingIntercom)]
         public void OnIntercomSpeaking(PlayerUsingIntercomEvent ev) => InvokeAllSafely(ev);

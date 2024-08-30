@@ -249,7 +249,7 @@ namespace UncomplicatedCustomRoles.API.Features
         public virtual void OnRemovedHandcuffs(PlayerRemoveHandcuffsEvent ev) { }
 
         [PluginEvent(ServerEventType.PlayerEscape)]
-        public virtual void OnEscaped(EscapingEventArgs ev) { }
+        public virtual void OnEscaped(PlayerEscapeEvent ev) { }
 
         [PluginEvent(ServerEventType.PlayerUsingIntercom)]
         public virtual void OnIntercomSpeaking(PlayerUsingIntercomEvent ev) { }
