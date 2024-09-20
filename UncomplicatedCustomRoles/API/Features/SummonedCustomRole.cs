@@ -66,7 +66,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets the list of infinite <see cref="IEffect"/>
         /// </summary>
-        public List<IEffect> InfiniteEffects { get; }
+        public List<IEffect> InfiniteEffects { get; internal set; }
 
         /// <summary>
         /// Gets the current nickname of the player - if null the role didn't changed it!

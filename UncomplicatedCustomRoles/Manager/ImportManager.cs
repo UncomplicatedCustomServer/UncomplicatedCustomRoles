@@ -7,6 +7,7 @@ using UncomplicatedCustomRoles.API.Attributes;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.API.Interfaces;
+using PluginAPI.Loader;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -16,36 +17,49 @@ namespace UncomplicatedCustomRoles.Manager
 
         public const float WaitingTime = 5f;
 
+        private static bool _alreadyLoaded = false;
+
         public static void Init()
         {
+            if (_alreadyLoaded)
+                return;
+
             ActivePlugins.Clear();
             // Call a delayed task
             Task.Run(Actor);
         }
 
-        private static async void Actor()
+        private static void Actor()
         {
-            await Task.Delay((int)(WaitingTime * 10000));
+            if (Plugin.Instance.Config.EnableBasicLogs)
+                LogManager.Info($"Checking for CustomRole registered in other plugins to import...");
+            _alreadyLoaded = true;
 
-            foreach (Assembly assembly in PluginAPI.Loader.AssemblyLoader.Plugins.Keys.Where(assembly => assembly != Assembly.GetExecutingAssembly()))
-                foreach (Type type in assembly.GetTypes())
+            foreach (Assembly plugin in AssemblyLoader.Plugins.Keys.Where(ass => ass.FullName != "UncomplicatedCustomRoles"))
+            {
+                LogManager.Silent($"[Import Manager] Passing plugin {plugin.FullName}");
+                foreach (Type type in plugin.GetTypes())
                     try
                     {
                         object[] attribs = type.GetCustomAttributes(typeof(PluginCustomRole), false);
-                        if (attribs != null && attribs.Length > 0 && type == typeof(ICustomRole) || type == typeof(CustomRole))
+                        if (attribs != null && attribs.Length > 0 && (type.IsSubclassOf(typeof(ICustomRole)) || type.IsSubclassOf(typeof(CustomRole)) || type.IsSubclassOf(typeof(EventCustomRole))))
                         {
-                            ActivePlugins.TryAdd(assembly);
+                            LogManager.Silent("Importing it!");
+                            ActivePlugins.TryAdd(plugin);
 
                             ICustomRole Role = Activator.CreateInstance(type) as ICustomRole;
-                            CustomRole.Register(Role);
+
                             if (Plugin.Instance.Config.EnableBasicLogs)
-                                LogManager.Info($"Imported CustomRole {Role.Name} ({Role.Id}) through Attribute from plugin {assembly.FullName} (v{assembly.ImageRuntimeVersion})");
+                                LogManager.Info($"Imported CustomRole {Role.Name} ({Role.Id}) through Attribute from plugin {plugin.FullName} (v0.0.0)");
+
+                            CustomRole.Register(Role);
                         }
                     }
                     catch (Exception e)
                     {
-                        LogManager.Error($"Error while registering CustomRole from class by Attribute: {e.GetType().FullName} - {e.Message}\nType: {type.FullName} [{assembly.FullName}] - Source: {e.Source}");
+                        LogManager.Error($"Error while registering CustomRole from class by Attribute: {e.GetType().FullName} - {e.Message}\nType: {type.FullName} [{plugin.FullName}] - Source: {e.Source}");
                     }
+            }
         }
     }
 }
