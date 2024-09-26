@@ -50,7 +50,7 @@ namespace UncomplicatedCustomRoles
             Instance = this;
 
             // QoL things
-            /*LogManager.History.Clear();
+            LogManager.History.Clear();
             API.Features.Escape.Bucket.Clear();
 
             Handler = new();
