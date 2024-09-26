@@ -60,7 +60,7 @@ namespace UncomplicatedCustomRoles
 
             CustomRole.CustomRoles.Clear();
             
-            /*if (!File.Exists(Path.Combine(Paths.Configs, "UncomplicatedCustomRoles", ".nohttp")))
+            if (!File.Exists(Path.Combine(Paths.Configs, "UncomplicatedCustomRoles", ".nohttp")))
                 HttpManager.Start();
 
             if (Config.EnableBasicLogs)
@@ -81,11 +81,11 @@ namespace UncomplicatedCustomRoles
 
             InfiniteEffect.Stop();
             InfiniteEffect.EffectAssociationAllowed = true;
-            //InfiniteEffect.Start();
+            InfiniteEffect.Start();
 
             // Load events
             EventManager.RegisterEvents(this, Handler);
-            //EventManager.RegisterEvents(this, _puppetEventHandler);
+            EventManager.RegisterEvents(this, _puppetEventHandler);
             Events.EventManager.RegisterEvents(Handler);
 
             FileConfigs.Welcome();
@@ -97,15 +97,15 @@ namespace UncomplicatedCustomRoles
             SpawnPointApiCommunicator.Init();
 
             // Patch with Harmony
-            Harmony.DEBUG = true;
+            // no debug | Harmony.DEBUG = true;
             _harmony = new($"com.ucs.ucr_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
-            _harmony.PatchAll();*/
+            _harmony.PatchAll();
         }
 
         [PluginUnload]
         public void OnDisabled()
         {
-            /*HttpManager.Stop();
+            HttpManager.Stop();
 
             _harmony.UnpatchAll();
             _harmony = null;
@@ -114,7 +114,7 @@ namespace UncomplicatedCustomRoles
             EventManager.UnregisterEvents(this, _puppetEventHandler);
 
             _puppetEventHandler = null;
-            Handler = null;*/
+            Handler = null;
 
             Instance = null;
         }
