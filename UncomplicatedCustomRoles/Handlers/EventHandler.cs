@@ -21,7 +21,7 @@ namespace UncomplicatedCustomRoles.Handlers
     internal class EventHandler
     {
         [PluginEvent(ServerEventType.RoundStart)]
-        public void OnRoundStarted()
+        public void OnRoundStarted(RoundStartEvent _)
         {
             Plugin.Instance.DoSpawnBasicRoles = false;
 
@@ -113,62 +113,56 @@ namespace UncomplicatedCustomRoles.Handlers
         [PluginEvent(ServerEventType.RoundEnd)]
         public void OnRoundEnded(RoundEndEvent _) => InfiniteEffect.Terminate();
 
-        [InternalPluginEvent(EventName.ChangingRole)]
-        public void OnSpawning(ChangingRoleEventArgs ev)
+        [PluginEvent(ServerEventType.PlayerChangeRole)]
+        public bool ChangingRole(PlayerChangeRoleEvent ev)
         {
             try
             {
-                LogManager.Info("A");
-                return;
-                if (ev.Hub is null)
-                    return;
+                if (ev.Player.ReferenceHub is null)
+                    return true;
 
-                SpawnManager.ClearCustomTypes(ev.Hub);
-
-                if (!ev.IsAllowed)
-                    return;
-
-                return;
+                SpawnManager.ClearCustomTypes(ev.Player);
 
                 LogManager.Debug("Called SPAWNING event");
 
-                if (Spawn.Spawning.Contains(ev.Hub.PlayerId))
-                    return;
+                if (Spawn.Spawning.Contains(ev.Player.PlayerId))
+                    return true;
 
-                if (SummonedCustomRole.TryGet(ev.Hub, out _))
-                    return;
+                if (SummonedCustomRole.TryGet(ev.Player, out _))
+                    return true;
 
                 if (!Plugin.Instance.DoSpawnBasicRoles)
-                    return;
+                    return true;
 
                 string LogReason = string.Empty;
-                if (Plugin.Instance.Config.AllowOnlyNaturalSpawns && !Spawn.SpawnQueue.Contains(ev.Hub.PlayerId))
+                if (Plugin.Instance.Config.AllowOnlyNaturalSpawns && !Spawn.SpawnQueue.Contains(ev.Player.PlayerId))
                 {
                     LogManager.Debug("The player is not in the queue for respawning!");
-                    return;
+                    return true;
                 }
-                else if (Spawn.SpawnQueue.Contains(ev.Hub.PlayerId))
+                else if (Spawn.SpawnQueue.Contains(ev.Player.PlayerId))
                 {
-                    Spawn.SpawnQueue.Remove(ev.Hub.PlayerId);
+                    Spawn.SpawnQueue.Remove(ev.Player.PlayerId);
                     LogReason = " [WITH a respawn wave - VANILLA]";
                 }
 
-                LogManager.Debug($"Player {ev.Hub.nicknameSync.Network_myNickSync} spawned{LogReason}, going to assign a role if needed!");
+                LogManager.Debug($"Player {ev.Player.Nickname} spawned{LogReason}, going to assign a role if needed!");
 
-                ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(ev.Hub, ev.NewRole);
+                ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(ev.Player, ev.NewRole);
 
                 if (Role is not null)
                 {
-                    LogManager.Debug($"Summoning player {ev.Hub.nicknameSync.Network_myNickSync} ({ev.Hub.PlayerId}) as {Role.Name} ({Role.Id})");
-                    SpawnManager.SummonCustomSubclass(Player.Get(ev.Hub), Role.Id);
+                    LogManager.Debug($"Summoning player {ev.Player.Nickname} ({ev.Player.PlayerId}) as {Role.Name} ({Role.Id})");
+                    SpawnManager.SummonCustomSubclass(ev.Player, Role.Id);
+                    LogManager.Debug($"Evaluated custom role for player {ev.Player.Nickname} - found: {Role?.Id} ({Role?.Name})");
+                    return false;
                 }
-
-                LogManager.Debug($"Evaluated custom role for player {ev.Hub.nicknameSync.Network_myNickSync} - found: {Role?.Id} ({Role?.Name})");
             }
             catch (Exception e)
             {
                 Log.Error($"Internal UCR Error - {e.GetType().FullName}: {e.Message}\n{e.StackTrace} -- {e.Source}");
             }
+            return true;
         }
 
         [PluginEvent(ServerEventType.PlayerJoined)]

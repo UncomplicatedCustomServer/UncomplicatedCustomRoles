@@ -6,7 +6,7 @@ using UncomplicatedCustomRoles.Events.Enums;
 
 namespace UncomplicatedCustomRoles.HarmonyElements.Prefix
 {
-    [HarmonyPatch(typeof(PlayerRoleManager), nameof(PlayerRoleManager.InitializeNewRole))]
+    /*[HarmonyPatch(typeof(PlayerRoleManager), nameof(PlayerRoleManager.InitializeNewRole))]
     internal class InitializeNewRolePrefix
     {
         static bool Prefix(ref RoleTypeId targetId, ref RoleChangeReason reason, ref RoleSpawnFlags spawnFlags, PlayerRoleManager __instance)
@@ -21,5 +21,5 @@ namespace UncomplicatedCustomRoles.HarmonyElements.Prefix
 
             return eventArgs.IsAllowed;
         }
-    }
+    }*/
 }

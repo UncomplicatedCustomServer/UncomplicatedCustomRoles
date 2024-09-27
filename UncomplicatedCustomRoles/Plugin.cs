@@ -9,7 +9,6 @@ using PluginAPI.Core.Attributes;
 using PluginAPI.Events;
 using PluginAPI.Core;
 using PluginAPI.Helpers;
-using System.Diagnostics.Contracts;
 
 namespace UncomplicatedCustomRoles
 {
