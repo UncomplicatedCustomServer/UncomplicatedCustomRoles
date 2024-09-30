@@ -358,7 +358,7 @@ namespace UncomplicatedCustomRoles.Manager
 
             foreach (ICustomRole Role in CustomRole.CustomRoles.Values.Where(cr => cr.SpawnSettings is not null))
                 if (!Role.IgnoreSpawnSystem && Player.GetPlayers().Count >= Role.SpawnSettings.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
-                    foreach (RoleTypeId RoleType in Role.SpawnSettings.CanReplaceRoles)
+                    foreach (RoleTypeId RoleType in Role.SpawnSettings.CanReplaceRoles.Where(RolePercentage.ContainsKey))
                         for (int a = 0; a < Role.SpawnSettings.SpawnChance; a++)
                             RolePercentage[RoleType].Add(Role);
 

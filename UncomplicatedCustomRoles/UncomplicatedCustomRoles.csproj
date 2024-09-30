@@ -120,6 +120,7 @@
     <Compile Include="Events\Interfaces\IDeniableEvent.cs" />
     <Compile Include="Events\Interfaces\IEventArgs.cs" />
     <Compile Include="Events\Interfaces\IPlayerEvent.cs" />
+    <Compile Include="Extensions\ListExtension.cs" />
     <Compile Include="Extensions\RoleTypeExtension.cs" />
     <Compile Include="Handlers\EventHandler.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />

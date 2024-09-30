@@ -20,7 +20,7 @@ namespace UncomplicatedCustomRoles
 
         public const string Description = "UncomplicatedCustomRoles allows you to create custom roles for your SCP:SL server";
 
-        public const string StringVersion = "4.0.0";
+        public const string StringVersion = "5.0.0.1";
 
         public static Version Version => new(StringVersion);
 

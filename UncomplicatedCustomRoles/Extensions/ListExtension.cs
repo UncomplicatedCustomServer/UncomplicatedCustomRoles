@@ -7,26 +7,22 @@ namespace UncomplicatedCustomRoles.Extensions
     {
         public static void TryAdd<T>(this List<T> list, T item)
         {
-            if (list == null) 
+            if (list is null) 
                 throw new ArgumentNullException("list");
 
             if (!list.Contains(item))
                 list.Add(item);
         }
 
-        public static string ToRealString<T>(this List<T> list)
+        public static void TryPush<T>(this List<T> list, int index, T item)
         {
             if (list is null)
-                return "null value";
+                throw new ArgumentNullException("list");
 
-            string Data = $"[{list.GetType().FullName}] List<{list.GetType().GetGenericArguments()[0].FullName}> ({list.Count}) [\n";
-
-            foreach (T element in list)
-                Data += $"{element},\n";
-
-            Data += "];";
-
-            return Data;
+            if (index >= list.Count)
+                list.Add(item);
+            else
+                list[index] = item;
         }
     }
 }

@@ -16,7 +16,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using UncomplicatedCustomRoles.API.Features;
-
+using UncomplicatedCustomRoles.Extensions;
 using static HarmonyLib.AccessTools;
 
 namespace UncomplicatedCustomRoles.Patches
@@ -62,10 +62,10 @@ namespace UncomplicatedCustomRoles.Patches
                     break;
                 }
 
-            if (index != 1)
+            if (index is not -1)
             {
-                newInstructions[index] = new(OpCodes.Ldfld, Field(typeof(Footprint), nameof(Footprint.Hub)));
-                newInstructions[index + 1] = new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) }));
+                newInstructions.TryPush(index, new(OpCodes.Ldfld, Field(typeof(Footprint), nameof(Footprint.Hub))));
+                newInstructions.TryPush(index + 1, new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) })));
             }
 
             return newInstructions;
@@ -107,9 +107,9 @@ namespace UncomplicatedCustomRoles.Patches
                     break;
                 }
 
-            if (index != -1)
+            if (index is not -1)
             {
-                newInstructions[index] = new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) }));
+                newInstructions.TryPush(index, new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) })));
                 newInstructions.Remove(newInstructions.ElementAt(index + 1));
             }
 
@@ -132,10 +132,10 @@ namespace UncomplicatedCustomRoles.Patches
                     break;
                 }
 
-            if (index != -1)
+            if (index is not -1)
             {
-                newInstructions[index] = new(OpCodes.Ldfld, Field(typeof(Footprint), nameof(Footprint.Hub)));
-                newInstructions[index + 1] = new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) }));
+                newInstructions.TryPush(index, new(OpCodes.Ldfld, Field(typeof(Footprint), nameof(Footprint.Hub))));
+                newInstructions.TryPush(index + 1, new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) })));
             }
 
             return newInstructions;
@@ -157,10 +157,10 @@ namespace UncomplicatedCustomRoles.Patches
                     break;
                 }
 
-            if (index != -1)
+            if (index is not -1)
             {
-                newInstructions[index] = new(OpCodes.Ldfld, Field(typeof(Footprint), nameof(Footprint.Hub)));
-                newInstructions[index + 1] = new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) }));
+                newInstructions.TryPush(index, new(OpCodes.Ldfld, Field(typeof(Footprint), nameof(Footprint.Hub))));
+                newInstructions.TryPush(index + 1, new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) })));
             }
 
             return newInstructions;
@@ -182,10 +182,10 @@ namespace UncomplicatedCustomRoles.Patches
                     break;
                 }
 
-            if (index != -1)
+            if (index is not -1)
             {
-                newInstructions[index] = new(OpCodes.Ldfld, Field(typeof(Footprint), nameof(Footprint.Hub)));
-                newInstructions[index + 1] = new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) }));
+                newInstructions.TryPush(index, new(OpCodes.Ldfld, Field(typeof(Footprint), nameof(Footprint.Hub))));
+                newInstructions.TryPush(index + 1, new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) })));
             }
 
             return newInstructions;
@@ -207,12 +207,12 @@ namespace UncomplicatedCustomRoles.Patches
                     break;
                 }
 
-            if (index != -1)
+            if (index is not -1)
             {
-                newInstructions[index] = new(OpCodes.Ldfld, Field(typeof(Footprint), nameof(Footprint.Hub)));
+                newInstructions.TryPush(index, new(OpCodes.Ldfld, Field(typeof(Footprint), nameof(Footprint.Hub))));
                 newInstructions.Insert(index + 1, new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) })));
-                newInstructions[index + 3] = new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) }));
-                newInstructions[index + 4] = new(OpCodes.Call, Method(typeof(HitboxIdentity), nameof(HitboxIdentity.IsEnemy), new Type[] { typeof(Team), typeof(Team) }));
+                newInstructions.TryPush(index + 3, new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) })));
+                newInstructions.TryPush(index + 4, new(OpCodes.Call, Method(typeof(HitboxIdentity), nameof(HitboxIdentity.IsEnemy), new Type[] { typeof(Team), typeof(Team) })));
             }
 
             return newInstructions;
@@ -234,12 +234,12 @@ namespace UncomplicatedCustomRoles.Patches
                     break;
                 }
 
-            if (index != -1)
+            if (index is not -1)
             {
-                newInstructions[index] = new(OpCodes.Ldfld, Field(typeof(Footprint), nameof(Footprint.Hub)));
+                newInstructions.TryPush(index, new(OpCodes.Ldfld, Field(typeof(Footprint), nameof(Footprint.Hub))));
                 newInstructions.Insert(index + 1, new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) })));
-                newInstructions[index + 3] = new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) }));
-                newInstructions[index + 4] = new(OpCodes.Call, Method(typeof(HitboxIdentity), nameof(HitboxIdentity.IsEnemy), new Type[] { typeof(Team), typeof(Team) }));
+                newInstructions.TryPush(index + 3, new(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) })));
+                newInstructions.TryPush(index + 4, new(OpCodes.Call, Method(typeof(HitboxIdentity), nameof(HitboxIdentity.IsEnemy), new Type[] { typeof(Team), typeof(Team) })));
             }
 
             return newInstructions;
