@@ -353,7 +353,8 @@ namespace UncomplicatedCustomRoles.Manager
                 { RoleTypeId.Scp096, new() },
                 { RoleTypeId.Scp106, new() },
                 { RoleTypeId.Scp3114, new() },
-                { RoleTypeId.FacilityGuard, new() }
+                { RoleTypeId.FacilityGuard, new() },
+                { RoleTypeId.None, new() }
             };
 
             foreach (ICustomRole Role in CustomRole.CustomRoles.Values.Where(cr => cr.SpawnSettings is not null))
