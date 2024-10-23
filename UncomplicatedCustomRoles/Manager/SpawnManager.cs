@@ -372,7 +372,7 @@ namespace UncomplicatedCustomRoles.Manager
             };
 
             foreach (ICustomRole Role in CustomRole.CustomRoles.Values.Where(cr => cr.SpawnSettings is not null))
-                if (!Role.IgnoreSpawnSystem && Player.List.Count() >= Role.SpawnSettings.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
+                if (!Role.IgnoreSpawnSystem && Player.List.Count(pl => !pl.IsHost) >= Role.SpawnSettings.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
                 {
                     if (Role.SpawnSettings.RequiredPermission is not null && Role.SpawnSettings.RequiredPermission != string.Empty && !player.CheckPermission(Role.SpawnSettings.RequiredPermission))
                     {

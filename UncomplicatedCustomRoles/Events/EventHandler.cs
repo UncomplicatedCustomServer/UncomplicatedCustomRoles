@@ -29,7 +29,7 @@ namespace UncomplicatedCustomRoles.Events
                 Plugin.Instance.DoSpawnBasicRoles = true;
             });
 
-            foreach (Player Player in Player.List.Where(player => !player.IsNPC && player is not null))
+            foreach (Player Player in Player.List.Where(player => !player.IsNPC && player is not null && !player.IsHost))
             {
                 ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(Player);
 
@@ -178,8 +178,8 @@ namespace UncomplicatedCustomRoles.Events
                         LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - FROM ATTACKER");
                         return;
                     }
-                    else if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
-                        pacifism.Execute();
+                    /*else if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
+                        pacifism.Execute();*/
 
                     Hurting.DamageHandler.Damage *= attackerCustomRole.Role.DamageMultiplier;
                 }
@@ -192,8 +192,8 @@ namespace UncomplicatedCustomRoles.Events
                         return;
                     }
 
-                    if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
-                        Hurting.IsAllowed = false;
+                    /*if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
+                        Hurting.IsAllowed = false;*/
                 }
             }
         }
@@ -310,10 +310,8 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnItemUsed(UsedItemEventArgs UsedItem)
         {
-            if (UsedItem.Player is not null && UsedItem.Player.TryGetSummonedInstance(out SummonedCustomRole summoned) && UsedItem.Item.Type == ItemType.SCP500)
-                foreach (IEffect Effect in summoned.InfiniteEffects)
-                    if (Effect.Removable)
-                        summoned.InfiniteEffects.Remove(Effect);
+            if (UsedItem.Player is not null && UsedItem.Player.TryGetSummonedInstance(out SummonedCustomRole summoned) && UsedItem.Item.Type is ItemType.SCP500)
+                summoned.InfiniteEffects.RemoveAll(effect => effect.Removable);
         }
 
         public static IEnumerator<float> DoSpawnPlayer(Player Player, int Id, bool DoBypassRoleOverwrite = true)

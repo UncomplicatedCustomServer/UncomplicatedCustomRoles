@@ -14,6 +14,7 @@ using UncomplicatedCustomRoles.API.Features;
 using HarmonyLib;
 using UncomplicatedCustomRoles.Manager.NET;
 using UncomplicatedCustomRoles.Patches;
+using System.Threading.Tasks;
 
 namespace UncomplicatedCustomRoles
 {
@@ -25,7 +26,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(4, 0, 0);
+        public override Version Version { get; } = new(4, 1, 0);
 
         public override Version RequiredExiledVersion { get; } = new(8, 11, 0);
 
@@ -53,7 +54,7 @@ namespace UncomplicatedCustomRoles
 
             Handler = new();
             FileConfigs = new();
-            HttpManager = new("ucr", int.MaxValue);
+            HttpManager = new("ucr");
 
             CustomRole.List.Clear();
 
@@ -81,9 +82,6 @@ namespace UncomplicatedCustomRoles
 
             WarheadHandler.Starting += Handler.OnWarheadLever;
 
-            if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomRoles", ".nohttp")))
-                HttpManager.Start();
-
             if (Config.EnableBasicLogs)
             {
                 LogManager.Info("===========================================");
@@ -98,17 +96,20 @@ namespace UncomplicatedCustomRoles
                 LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
             }
 
-            if (HttpManager.LatestVersion.CompareTo(Version) > 0)
-                LogManager.Warn($"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Version} | Latest available: v{HttpManager.LatestVersion}\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
-            else if (HttpManager.LatestVersion.CompareTo(Version) < 0)
+            Task.Run(delegate
             {
-                LogManager.Info($"You are using an EXPERIMENTAL or PRE-RELEASE version of UncomplicatedCustomRoles!\nLatest stable release: {HttpManager.LatestVersion}\nWe do not assure that this version won't make your SCP:SL server crash! - Debug log has been enabled!");
-                if (!Log.DebugEnabled.Contains(Assembly))
+                if (HttpManager.LatestVersion.CompareTo(Version) > 0)
+                    LogManager.Warn($"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Version} | Latest available: v{HttpManager.LatestVersion}\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
+                else if (HttpManager.LatestVersion.CompareTo(Version) < 0)
                 {
-                    Config.Debug = true;
-                    Log.DebugEnabled.Add(Assembly);
+                    LogManager.Info($"You are using an EXPERIMENTAL or PRE-RELEASE version of UncomplicatedCustomRoles!\nLatest stable release: {HttpManager.LatestVersion}\nWe do not assure that this version won't make your SCP:SL server crash! - Debug log has been enabled!");
+                    if (!Log.DebugEnabled.Contains(Assembly))
+                    {
+                        Config.Debug = true;
+                        Log.DebugEnabled.Add(Assembly);
+                    }
                 }
-            }
+            });
 
             InfiniteEffect.Stop();
             InfiniteEffect.EffectAssociationAllowed = true;
@@ -167,7 +168,6 @@ namespace UncomplicatedCustomRoles
 
             WarheadHandler.Starting -= Handler.OnWarheadLever;
 
-            HttpManager.Stop();
             HttpManager.UnregisterEvents();
 
             Handler = null;

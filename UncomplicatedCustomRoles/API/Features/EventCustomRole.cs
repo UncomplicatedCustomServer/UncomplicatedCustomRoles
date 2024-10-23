@@ -1,11 +1,11 @@
 ﻿using Exiled.API.Enums;
-using Exiled.API.Features;
 using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 
 namespace UncomplicatedCustomRoles.API.Features
