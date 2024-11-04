@@ -68,7 +68,7 @@ namespace UncomplicatedCustomRoles.Manager
                 Content += $"{Loader.Serializer.Serialize(Role)}\n\n---\n\n";
             }
 
-            HttpStatusCode Response = Plugin.HttpManager.ShareLogs(Content, out content);
+            HttpStatusCode Response = Plugin.HttpManager.ShareLogs(Content, out _);
 
             if (Response is HttpStatusCode.OK)
             {

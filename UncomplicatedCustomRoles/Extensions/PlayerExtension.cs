@@ -160,7 +160,13 @@ namespace UncomplicatedCustomRoles.Extensions
             if (customInfo.StartsWith("<"))
                 LogManager.Error($"Failed to apply CustomInfo with Role name at PlayerExtension::ApplyCustomInfoAndRoleName(%Player, string, string): role custom_info can't contains any tag like </olor>, <b>, <size> etc...!\nCustomInfo won't be applied to player {player.Nickname} ({player.Id}) -- Found: {customInfo}");
 
-            player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = $"{role}\n{ProcessCustomInfo(customInfo)}";
+            if (customInfo is null || customInfo.Length < 1)
+            {
+                player.ReferenceHub.nicknameSync.Network_playerInfoToShow &= ~PlayerInfoArea.CustomInfo;
+                player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = $"{role}";
+            }
+            else
+                player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = $"{role}\n{ProcessCustomInfo(customInfo)}";
         }
 
         /// <summary>

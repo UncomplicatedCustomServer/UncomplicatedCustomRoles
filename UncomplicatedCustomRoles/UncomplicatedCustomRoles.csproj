@@ -58,13 +58,16 @@
     <Compile Include="API\Features\Behaviour\AhpBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\HealthBehaviour.cs" />
     <Compile Include="API\Features\CustomModules\CustomScpAnnouncer.cs" />
+    <Compile Include="API\Features\CustomModules\DoNotTrigger096.cs" />
     <Compile Include="API\Features\CustomModules\DoNotTriggerTeslaGates.cs" />
     <Compile Include="API\Features\CustomModules\HalfLifeStealer.cs" />
+    <Compile Include="API\Features\CustomModules\ItemBan.cs" />
     <Compile Include="API\Features\CustomModules\LifeStealer.cs" />
     <Compile Include="API\Features\CustomModules\NotAffectedByAppearance.cs" />
     <Compile Include="API\Features\CustomModules\PacifismUntilDamage.cs" />
     <Compile Include="API\Features\CustomModules\SilentAnnouncer.cs" />
     <Compile Include="API\Features\CustomModules\SilentWalker.cs" />
+    <Compile Include="API\Features\CustomModules\TutorialRagdoll.cs" />
     <Compile Include="API\Features\CustomRole.cs" />
     <Compile Include="API\Features\CustomRoleEventHandler.cs" />
     <Compile Include="API\Features\EventCustomRole.cs" />
@@ -100,6 +103,7 @@
     <Compile Include="Extensions\Vector3Extension.cs" />
     <Compile Include="Integrations\ScriptedEvents.cs" />
     <Compile Include="API\Interfaces\IUCRCommand.cs" />
+    <Compile Include="Integrations\UCI.cs" />
     <Compile Include="Manager\FileConfigs.cs" />
     <Compile Include="API\Features\Effect.cs" />
     <Compile Include="Manager\NET\HttpManager.cs" />

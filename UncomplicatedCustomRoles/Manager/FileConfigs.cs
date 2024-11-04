@@ -55,13 +55,9 @@ namespace UncomplicatedCustomRoles.Manager
                 catch (Exception ex)
                 {
                     if (!Plugin.Instance.Config.Debug)
-                    {
                         LogManager.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.");
-                    }
                     else
-                    {
                         LogManager.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.\nStack trace: {ex.StackTrace}");
-                    }
                 }
             }
         }

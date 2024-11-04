@@ -43,7 +43,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// <summary>
         /// Gets the UCS APIs endpoint
         /// </summary>
-        public string Endpoint { get; } = "https://ucs.fcosma.it/api/v2";
+        public string Endpoint { get; } = "https://api.ucserver.it";
 
         /// <summary>
         /// Gets the CreditTag storage for the plugin, downloaded from our central server
@@ -74,7 +74,6 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// Create a new istance of the HttpManager
         /// </summary>
         /// <param name="prefix"></param>
-        /// <param name="maxErrors"></param>
         public HttpManager(string prefix)
         {
             if (!CheckForDependency())
@@ -203,6 +202,9 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         public void ApplyCreditTag(Player player)
         {
+            if (!Plugin.Instance.Config.EnableCreditTags)
+                return;
+
             if (_alreadyManaged)
                 return;
 

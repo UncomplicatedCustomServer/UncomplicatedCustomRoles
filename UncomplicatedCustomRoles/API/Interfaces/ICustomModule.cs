@@ -7,6 +7,8 @@ namespace UncomplicatedCustomRoles.API.Interfaces
     {
         public abstract SummonedCustomRole Instance { get; }
 
+        public abstract string Name { get; }
+
         public abstract void Execute();
     }
 }

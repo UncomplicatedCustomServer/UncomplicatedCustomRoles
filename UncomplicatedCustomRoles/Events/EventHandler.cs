@@ -1,6 +1,5 @@
 ﻿using Exiled.API.Features;
 using System.Collections.Generic;
-using System.Linq;
 using UncomplicatedCustomRoles.Manager;
 using MEC;
 using Exiled.Events.EventArgs.Player;
@@ -15,29 +14,22 @@ using CustomPlayerEffects;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using Exiled.Events.EventArgs.Warhead;
+using PlayerRoles.Ragdolls;
+using Exiled.Events.EventArgs.Scp096;
+using UncomplicatedCustomRoles.API.Features.CustomModules.ItemBan;
 
 namespace UncomplicatedCustomRoles.Events
 {
     internal class EventHandler
     {
+        private static List<int> RagdollAppearanceQueue { get; } = new();
+
         public void OnRoundStarted()
         {
-            Plugin.Instance.DoSpawnBasicRoles = false;
-
-            Timing.CallDelayed(1.5f, () =>
-            {
-                Plugin.Instance.DoSpawnBasicRoles = true;
-            });
-
-            foreach (Player Player in Player.List.Where(player => !player.IsNPC && player is not null && !player.IsHost))
-            {
-                ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(Player);
-
-                LogManager.Debug($"Evaluating role spawn for player {Player.Nickname}, found {Role?.Id} {Role?.Name}!");
-
-                if (Role is not null)
-                    SpawnManager.SummonCustomSubclass(Player, Role.Id);
-            }
+            // Starts the infinite effect thing
+            InfiniteEffect.Stop();
+            InfiniteEffect.EffectAssociationAllowed = true;
+            InfiniteEffect.Start();
         }
 
         public void OnInteractingScp330(InteractingScp330EventArgs ev)
@@ -103,7 +95,28 @@ namespace UncomplicatedCustomRoles.Events
                 ev.IsAllowed = false;
         }
 
+        public void OnDying(DyingEventArgs ev)
+        {
+            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole) && customRole.HasModule<TutorialRagdoll>())
+                RagdollAppearanceQueue.Add(ev.Player.Id);
+        }
+
         public void OnDied(DiedEventArgs ev) => SpawnManager.ClearCustomTypes(ev.Player);
+
+        public void OnRagdollSpawn(SpawningRagdollEventArgs ev)
+        {
+            if (ev.Player is null) 
+                return;
+
+            if (!RagdollAppearanceQueue.Contains(ev.Player.Id))
+                return;
+
+            ev.IsAllowed = false;
+            RagdollAppearanceQueue.Remove(ev.Player.Id);
+
+            RagdollData data = new(ev.Player.ReferenceHub, ev.DamageHandlerBase, RoleTypeId.Tutorial, ev.Position, ev.Rotation, ev.Nickname, ev.CreationTime);
+            Ragdoll.CreateAndSpawn(data);
+        }
 
         public void OnRoundEnded(RoundEndedEventArgs _) => InfiniteEffect.Terminate();
 
@@ -127,9 +140,6 @@ namespace UncomplicatedCustomRoles.Events
                 return;
 
             if (ev.Player.HasCustomRole())
-                return;
-
-            if (!Plugin.Instance.DoSpawnBasicRoles)
                 return;
 
             if (ev.Player.IsNPC)
@@ -178,8 +188,8 @@ namespace UncomplicatedCustomRoles.Events
                         LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - FROM ATTACKER");
                         return;
                     }
-                    /*else if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
-                        pacifism.Execute();*/
+                    else if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
+                        pacifism.Execute();
 
                     Hurting.DamageHandler.Damage *= attackerCustomRole.Role.DamageMultiplier;
                 }
@@ -192,8 +202,8 @@ namespace UncomplicatedCustomRoles.Events
                         return;
                     }
 
-                    /*if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
-                        Hurting.IsAllowed = false;*/
+                    if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
+                        Hurting.IsAllowed = false;
                 }
             }
         }
@@ -312,6 +322,27 @@ namespace UncomplicatedCustomRoles.Events
         {
             if (UsedItem.Player is not null && UsedItem.Player.TryGetSummonedInstance(out SummonedCustomRole summoned) && UsedItem.Item.Type is ItemType.SCP500)
                 summoned.InfiniteEffects.RemoveAll(effect => effect.Removable);
+        }
+
+        public void OnAddingTarget(AddingTargetEventArgs ev)
+        {
+            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
+            { 
+                if (ev.Player.ReferenceHub.GetTeam() is Team.SCPs)
+                    ev.IsAllowed = false;
+
+                if (summonedInstance.HasModule<DoNotTrigger096>())
+                    ev.IsAllowed = false;
+
+                if (summonedInstance.HasModule<PacifismUntilDamage>())
+                    ev.IsAllowed = false;
+            }
+        }
+
+        public void OnPickingUp(PickingUpItemEventArgs ev)
+        {
+            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
+                ev.IsAllowed = ItemBanBase.CheckPickup(summonedInstance, ev.Pickup);
         }
 
         public static IEnumerator<float> DoSpawnPlayer(Player Player, int Id, bool DoBypassRoleOverwrite = true)

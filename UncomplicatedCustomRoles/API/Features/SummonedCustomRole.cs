@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
+using UncomplicatedCustomRoles.API.Features.CustomModules.ItemBan;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Commands;
@@ -163,6 +164,8 @@ namespace UncomplicatedCustomRoles.API.Features
                 coroutineModule.Execute();
 
             EvaluateRoleBase();
+
+            ItemBanBase.CheckInventoryAll(this);
 
             EventHandler = new(this);
             List.Add(this);

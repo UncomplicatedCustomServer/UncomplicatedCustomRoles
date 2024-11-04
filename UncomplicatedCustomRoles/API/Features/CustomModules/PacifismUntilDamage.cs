@@ -6,7 +6,7 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
     {
         public new static CustomFlags Flag => CustomFlags.PacifismUntilDamage;
 
-        public bool IsPacifist { get; internal set; }
+        public bool IsPacifist { get; internal set; } = true;
 
         public override void Execute() => IsPacifist = false;
     }

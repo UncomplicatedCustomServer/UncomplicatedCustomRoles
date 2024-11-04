@@ -7,6 +7,7 @@ using UncomplicatedCustomRoles.Manager;
 using Handler = UncomplicatedCustomRoles.Events.EventHandler;
 using PlayerHandler = Exiled.Events.Handlers.Player;
 using Scp049Handler = Exiled.Events.Handlers.Scp049;
+using Scp096Handler = Exiled.Events.Handlers.Scp096;
 using ServerHandler = Exiled.Events.Handlers.Server;
 using Scp330Handler = Exiled.Events.Handlers.Scp330;
 using WarheadHandler = Exiled.Events.Handlers.Warhead;
@@ -36,8 +37,6 @@ namespace UncomplicatedCustomRoles
 
         internal Handler Handler;
 
-        internal bool DoSpawnBasicRoles = false;
-
         internal static HttpManager HttpManager;
 
         internal static FileConfigs FileConfigs;
@@ -64,7 +63,9 @@ namespace UncomplicatedCustomRoles
 
             // PlayerHandler.Verified += Handler.OnVerified;
             PlayerHandler.ActivatingGenerator += Handler.OnGenerator;
+            PlayerHandler.Dying += Handler.OnDying;
             PlayerHandler.Died += Handler.OnDied;
+            PlayerHandler.SpawningRagdoll += Handler.OnRagdollSpawn;
             PlayerHandler.Spawned += Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole += Handler.OnChangingRole;
             PlayerHandler.ReceivingEffect += Handler.OnReceivingEffect;
@@ -75,8 +76,11 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Hurt += Handler.OnHurt;
             PlayerHandler.TriggeringTesla += Handler.OnTriggeringTeslaGate;
             PlayerHandler.MakingNoise += Handler.OnMakingNoise;
+            PlayerHandler.PickingUpItem += Handler.OnPickingUp;
 
             Scp049Handler.FinishingRecall += Handler.OnFinishingRecall;
+
+            Scp096Handler.AddingTarget += Handler.OnAddingTarget;
 
             Scp330Handler.InteractingScp330 += Handler.OnInteractingScp330;
 
@@ -110,10 +114,6 @@ namespace UncomplicatedCustomRoles
                     }
                 }
             });
-
-            InfiniteEffect.Stop();
-            InfiniteEffect.EffectAssociationAllowed = true;
-            InfiniteEffect.Start();
 
             FileConfigs.Welcome();
             FileConfigs.Welcome(Server.Port.ToString());
@@ -150,7 +150,9 @@ namespace UncomplicatedCustomRoles
 
             // PlayerHandler.Verified -= Handler.OnVerified;
             PlayerHandler.ActivatingGenerator -= Handler.OnGenerator;
+            PlayerHandler.Dying -= Handler.OnDying;
             PlayerHandler.Died -= Handler.OnDied;
+            PlayerHandler.SpawningRagdoll -= Handler.OnRagdollSpawn;
             PlayerHandler.Spawned -= Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole -= Handler.OnChangingRole;
             PlayerHandler.PlayerDamageWindow -= Handler.OnScp079Recontainment;
@@ -161,8 +163,11 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Hurt -= Handler.OnHurt;
             PlayerHandler.TriggeringTesla -= Handler.OnTriggeringTeslaGate;
             PlayerHandler.MakingNoise -= Handler.OnMakingNoise;
+            PlayerHandler.PickingUpItem -= Handler.OnPickingUp;
 
             Scp049Handler.FinishingRecall -= Handler.OnFinishingRecall;
+
+            Scp096Handler.AddingTarget -= Handler.OnAddingTarget;
 
             Scp330Handler.InteractingScp330 -= Handler.OnInteractingScp330;
 

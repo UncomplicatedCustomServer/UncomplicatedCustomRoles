@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -17,7 +18,17 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// <summary>
         /// Gets the API endpoint
         /// </summary>
-        public static string Endpoint => "https://ucs.fcosma.it/api/spawnpoints";
+        public static string Endpoint => "https://api.ucserver.it/spawnpoints";
+
+        /// <summary>
+        /// Gets the file path for the local spawnpoints of this server
+        /// </summary>
+        public static string FilePath => Path.Combine(Paths.Configs, $".{Server.Port}-spawnpoints.json");
+
+        /// <summary>
+        /// Gets whether the spawnpoints should be local or "global"
+        /// </summary>
+        public static bool Local => Plugin.Instance.Config.LocalSpawnPoints;
 
         /// <summary>
         /// Gets the  maximum number of SpawnPoints per server
@@ -32,6 +43,9 @@ namespace UncomplicatedCustomRoles.Manager.NET
             if (!Plugin.HttpManager.IsAllowed)
                 return;
 
+            if (!File.Exists(FilePath))
+                File.WriteAllText(FilePath, JsonConvert.SerializeObject(new SpawnPoint[] { }));
+
             Task.Run(LoadFromCloud);
         }
 
@@ -43,20 +57,19 @@ namespace UncomplicatedCustomRoles.Manager.NET
             // We need first to reset the list
             SpawnPoint.List.Clear();
 
+            if (Local)
+            {
+                TryLoadSpawnPoints(File.ReadAllText(FilePath));
+                return;
+            }
+
             HttpResponseMessage Response = Plugin.HttpManager.HttpGetRequest($"{Endpoint}/list?port={Server.Port}");
             if (Response.StatusCode is HttpStatusCode.NotFound)
                 LogManager.System("Failed to load SpawnPoints from UCS cloud: not found! - Generated (ig)");
             else
                 try
                 {
-                    List<SpawnPoint> List = JsonConvert.DeserializeObject<List<SpawnPoint>>(Plugin.HttpManager.RetriveString(Response));
-
-                    foreach (SpawnPoint SpawnPoint in List)
-                        SpawnPoint.List.Add(SpawnPoint);
-
-                    LogManager.Info($"Loaded {List.Count} SpawnPoints from our central servers!");
-
-                    CustomRoleSpawnCompatibilityChecker();
+                    TryLoadSpawnPoints(Plugin.HttpManager.RetriveString(Response));
                 }
                 catch (Exception e)
                 {
@@ -65,12 +78,18 @@ namespace UncomplicatedCustomRoles.Manager.NET
         }
 
         /// <summary>
-        /// Push the <see cref="SpawnPointOld"/>s inside UCS cloud - useful if the list has been updated!<br></br>
+        /// Push the <see cref="SpawnPoint"/>s inside UCS cloud - useful if the list has been updated!<br></br>
         /// Every server has a limit of 10 ports with 10 spawnpoints for each one
         /// </summary>
         /// <returns></returns>
         public static void PushSpawnPoints()
         {
+            if (Local)
+            {
+                File.WriteAllText(FilePath, JsonConvert.SerializeObject(SpawnPoint.List));
+                return;
+            }
+
             try
             {
                 HttpResponseMessage Response = Plugin.HttpManager.HttpPutRequest($"{Endpoint}/update?port={Server.Port}", JsonConvert.SerializeObject(SpawnPoint.List));
@@ -121,6 +140,18 @@ namespace UncomplicatedCustomRoles.Manager.NET
                 foreach (string spawnPoint in role.SpawnSettings.SpawnPoints)
                     if (!SpawnPoint.Exists(spawnPoint))
                         LogManager.Warn($"CustomRole {role.Name} {role.Id} has an invalid SpawnPoint '{role.SpawnSettings.SpawnPoints}' inside it's configuration: the selected SpawnPoint does not exists!");
+        }
+
+        private static void TryLoadSpawnPoints(string json)
+        {
+            List<SpawnPoint> List = JsonConvert.DeserializeObject<List<SpawnPoint>>(json);
+
+            foreach (SpawnPoint SpawnPoint in List)
+                SpawnPoint.List.Add(SpawnPoint);
+
+            LogManager.Info($"Loaded {List.Count} SpawnPoints from our central servers!");
+
+            CustomRoleSpawnCompatibilityChecker();
         }
     }
 }
