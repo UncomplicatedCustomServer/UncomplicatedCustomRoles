@@ -6,7 +6,6 @@ using PlayerRoles.PlayableScps;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.API.Features.CustomModules.ItemBan;
@@ -133,8 +132,6 @@ namespace UncomplicatedCustomRoles.API.Features
         /// The duration of a tick
         /// </summary>
         public const float TickDuration = 0.25f;
-
-        private const int _remoteAdminFullWidth = 61;
 
         internal SummonedCustomRole(Player player, ICustomRole role, Triplet<string, string, bool>? badge, List<IEffect> infiniteEffects, PlayerInfoArea playerInfo, bool isCustomNickname = false)
         {

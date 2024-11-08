@@ -192,8 +192,7 @@ namespace UncomplicatedCustomRoles.Events
                         return;
                     }
                     else if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
-                        //pacifism.Execute();
-                        return;
+                        pacifism.Execute();
 
                     Hurting.DamageHandler.Damage *= attackerCustomRole.Role.DamageMultiplier;
                 }

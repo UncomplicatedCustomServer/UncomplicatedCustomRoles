@@ -8,6 +8,9 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
 
         public bool IsPacifist { get; internal set; } = true;
 
-        public override void Execute() => IsPacifist = false;
+        public override void Execute()
+        {
+            IsPacifist = false;
+        }
     }
 }
