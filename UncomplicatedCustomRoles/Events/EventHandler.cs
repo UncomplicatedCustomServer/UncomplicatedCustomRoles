@@ -131,6 +131,9 @@ namespace UncomplicatedCustomRoles.Events
             if (!ev.IsAllowed)
                 return;
 
+            if (Round.IsLobby)
+                return;
+
             if (ev.NewRole is RoleTypeId.Spectator || ev.NewRole is RoleTypeId.None || ev.NewRole is RoleTypeId.Filmmaker)
                 return;
 
@@ -189,7 +192,8 @@ namespace UncomplicatedCustomRoles.Events
                         return;
                     }
                     else if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
-                        pacifism.Execute();
+                        //pacifism.Execute();
+                        return;
 
                     Hurting.DamageHandler.Damage *= attackerCustomRole.Role.DamageMultiplier;
                 }
