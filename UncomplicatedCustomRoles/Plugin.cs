@@ -7,12 +7,15 @@ using UncomplicatedCustomRoles.Manager;
 using Handler = UncomplicatedCustomRoles.Events.EventHandler;
 using PlayerHandler = Exiled.Events.Handlers.Player;
 using Scp049Handler = Exiled.Events.Handlers.Scp049;
+using Scp096Handler = Exiled.Events.Handlers.Scp096;
 using ServerHandler = Exiled.Events.Handlers.Server;
 using Scp330Handler = Exiled.Events.Handlers.Scp330;
+using WarheadHandler = Exiled.Events.Handlers.Warhead;
 using UncomplicatedCustomRoles.API.Features;
 using HarmonyLib;
 using UncomplicatedCustomRoles.Manager.NET;
 using UncomplicatedCustomRoles.Patches;
+using System.Threading.Tasks;
 
 namespace UncomplicatedCustomRoles
 {
@@ -24,7 +27,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(4, 0, 0);
+        public override Version Version { get; } = new(4, 1, 0);
 
         public override Version RequiredExiledVersion { get; } = new(8, 11, 0);
 
@@ -33,8 +36,6 @@ namespace UncomplicatedCustomRoles
         internal static Plugin Instance;
 
         internal Handler Handler;
-
-        internal bool DoSpawnBasicRoles = false;
 
         internal static HttpManager HttpManager;
 
@@ -52,7 +53,7 @@ namespace UncomplicatedCustomRoles
 
             Handler = new();
             FileConfigs = new();
-            HttpManager = new("ucr", int.MaxValue);
+            HttpManager = new("ucr");
 
             CustomRole.List.Clear();
 
@@ -61,23 +62,29 @@ namespace UncomplicatedCustomRoles
             ServerHandler.RoundEnded += Handler.OnRoundEnded;
 
             // PlayerHandler.Verified += Handler.OnVerified;
+            PlayerHandler.ActivatingGenerator += Handler.OnGenerator;
+            PlayerHandler.Dying += Handler.OnDying;
             PlayerHandler.Died += Handler.OnDied;
+            PlayerHandler.SpawningRagdoll += Handler.OnRagdollSpawn;
             PlayerHandler.Spawned += Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole += Handler.OnChangingRole;
             PlayerHandler.ReceivingEffect += Handler.OnReceivingEffect;
+            PlayerHandler.PlayerDamageWindow += Handler.OnScp079Recontainment;
             PlayerHandler.Escaping += Handler.OnEscaping;
             PlayerHandler.UsedItem += Handler.OnItemUsed;
             PlayerHandler.Hurting += Handler.OnHurting;
             PlayerHandler.Hurt += Handler.OnHurt;
             PlayerHandler.TriggeringTesla += Handler.OnTriggeringTeslaGate;
             PlayerHandler.MakingNoise += Handler.OnMakingNoise;
+            PlayerHandler.PickingUpItem += Handler.OnPickingUp;
 
             Scp049Handler.FinishingRecall += Handler.OnFinishingRecall;
 
+            Scp096Handler.AddingTarget += Handler.OnAddingTarget;
+
             Scp330Handler.InteractingScp330 += Handler.OnInteractingScp330;
 
-            if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomRoles", ".nohttp")))
-                HttpManager.Start();
+            WarheadHandler.Starting += Handler.OnWarheadLever;
 
             if (Config.EnableBasicLogs)
             {
@@ -93,21 +100,20 @@ namespace UncomplicatedCustomRoles
                 LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
             }
 
-            if (HttpManager.LatestVersion.CompareTo(Version) > 0)
-                LogManager.Warn($"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Version} | Latest available: v{HttpManager.LatestVersion}\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
-            else if (HttpManager.LatestVersion.CompareTo(Version) < 0)
+            Task.Run(delegate
             {
-                LogManager.Info($"You are using an EXPERIMENTAL or PRE-RELEASE version of UncomplicatedCustomRoles!\nLatest stable release: {HttpManager.LatestVersion}\nWe do not assure that this version won't make your SCP:SL server crash! - Debug log has been enabled!");
-                if (!Log.DebugEnabled.Contains(Assembly))
+                if (HttpManager.LatestVersion.CompareTo(Version) > 0)
+                    LogManager.Warn($"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Version} | Latest available: v{HttpManager.LatestVersion}\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
+                else if (HttpManager.LatestVersion.CompareTo(Version) < 0)
                 {
-                    Config.Debug = true;
-                    Log.DebugEnabled.Add(Assembly);
+                    LogManager.Info($"You are using an EXPERIMENTAL or PRE-RELEASE version of UncomplicatedCustomRoles!\nLatest stable release: {HttpManager.LatestVersion}\nWe do not assure that this version won't make your SCP:SL server crash! - Debug log has been enabled!");
+                    if (!Log.DebugEnabled.Contains(Assembly))
+                    {
+                        Config.Debug = true;
+                        Log.DebugEnabled.Add(Assembly);
+                    }
                 }
-            }
-
-            InfiniteEffect.Stop();
-            InfiniteEffect.EffectAssociationAllowed = true;
-            InfiniteEffect.Start();
+            });
 
             FileConfigs.Welcome();
             FileConfigs.Welcome(Server.Port.ToString());
@@ -118,8 +124,6 @@ namespace UncomplicatedCustomRoles
             SpawnPointApiCommunicator.Init();
 
             // Patch with Harmony
-            Harmony.DEBUG = true;
-            LogManager.Info("Haromy logs: " + FileLog.LogPath);
             _harmony = new($"com.ucs.ucr_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
             PlayerInfoPatch.TryPatchCedMod();
@@ -145,9 +149,13 @@ namespace UncomplicatedCustomRoles
             ServerHandler.RoundStarted -= Handler.OnRoundStarted;
 
             // PlayerHandler.Verified -= Handler.OnVerified;
+            PlayerHandler.ActivatingGenerator -= Handler.OnGenerator;
+            PlayerHandler.Dying -= Handler.OnDying;
             PlayerHandler.Died -= Handler.OnDied;
+            PlayerHandler.SpawningRagdoll -= Handler.OnRagdollSpawn;
             PlayerHandler.Spawned -= Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole -= Handler.OnChangingRole;
+            PlayerHandler.PlayerDamageWindow -= Handler.OnScp079Recontainment;
             PlayerHandler.ReceivingEffect -= Handler.OnReceivingEffect;
             PlayerHandler.Escaping -= Handler.OnEscaping;
             PlayerHandler.UsedItem -= Handler.OnItemUsed;
@@ -155,12 +163,16 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Hurt -= Handler.OnHurt;
             PlayerHandler.TriggeringTesla -= Handler.OnTriggeringTeslaGate;
             PlayerHandler.MakingNoise -= Handler.OnMakingNoise;
+            PlayerHandler.PickingUpItem -= Handler.OnPickingUp;
 
             Scp049Handler.FinishingRecall -= Handler.OnFinishingRecall;
 
+            Scp096Handler.AddingTarget -= Handler.OnAddingTarget;
+
             Scp330Handler.InteractingScp330 -= Handler.OnInteractingScp330;
 
-            HttpManager.Stop();
+            WarheadHandler.Starting -= Handler.OnWarheadLever;
+
             HttpManager.UnregisterEvents();
 
             Handler = null;

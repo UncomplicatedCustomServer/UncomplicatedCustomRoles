@@ -6,8 +6,9 @@ using PlayerRoles;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Extensions;
+using UncomplicatedCustomRoles.Manager;
 
-namespace UncomplicatedCustomRoles.Manager
+namespace UncomplicatedCustomRoles.Integrations
 {
 #pragma warning disable CS8974 // Conversione del gruppo di metodi in un tipo non delegato
 

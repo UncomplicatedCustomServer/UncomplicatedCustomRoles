@@ -16,5 +16,15 @@ namespace UncomplicatedCustomRoles.API.Enums
         ShowOnlyCustomInfo = 1 << 6,
         SilentWalker = 1 << 7,
         SilentAnnouncer = 1 << 8,
+        TutorialRagdoll = 1 << 9,
+        DoNotTrigger096 = 1 << 10,
+        BanKeycards = 1 << 11,
+        BanMedicals = 1 << 12,
+        BanRadios = 1 << 13,
+        BanFirearms = 1 << 14,
+        BanGrenades = 1 << 15,
+        BanSCPItems = 1 << 16,
+        BanMicroHID = 1 << 17,
+        BanArmors = 1 << 18,
     }
 }

@@ -20,6 +20,8 @@ namespace UncomplicatedCustomRoles.Commands
 
         public const string CommandHeader = "UncomplicatedCustomRoles - SpawnPoint Feature\n";
 
+        public const string LocalError = "Sorry but you can't perform that action while having your spawnpoints hosted in your local folder!";
+
         public Dictionary<string, KeyValuePair<string, string>> SubCommands = new()
         {
             {
@@ -125,6 +127,10 @@ namespace UncomplicatedCustomRoles.Commands
                             response = $"SpawnPoint '{arguments[1]}' not found!";
                         break;
                     case "migrate":
+                        if (SpawnPointApiCommunicator.Local)
+                            response = LocalError;
+
+
                         if (arguments.Count < 2)
                         {
                             response = "Wrong usage!\nucr spawnpoint migrate (NewPort)";
@@ -149,6 +155,9 @@ namespace UncomplicatedCustomRoles.Commands
                         }
                         break;
                     case "download":
+                        if (SpawnPointApiCommunicator.Local)
+                            response = LocalError;
+
                         string url = SpawnPointApiCommunicator.AskDownloadUrl();
                         LogManager.Info($"Download your SpawnPoint settings with this URL:\n{SpawnPointApiCommunicator.AskDownloadUrl()}");
                         response = $"Download URL:\n{SpawnPointApiCommunicator.AskDownloadUrl()}";
@@ -175,9 +184,15 @@ namespace UncomplicatedCustomRoles.Commands
                             response = "SpawnPoint not found!";
                         break;
                     case "ip":
+                        if (SpawnPointApiCommunicator.Local)
+                            response = LocalError;
+
                         response = $"Your IPv4/IPv6 is: {SpawnPointApiCommunicator.AskIp()}";
                         break;
                     case "sync":
+                        if (SpawnPointApiCommunicator.Local)
+                            response = LocalError;
+
                         response = "Sync done!";
                         Task.Run(SpawnPointApiCommunicator.LoadFromCloud);
                         break;

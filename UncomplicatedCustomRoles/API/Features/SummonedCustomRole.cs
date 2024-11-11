@@ -6,9 +6,9 @@ using PlayerRoles.PlayableScps;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
+using UncomplicatedCustomRoles.API.Features.CustomModules.ItemBan;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Commands;
@@ -133,8 +133,6 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public const float TickDuration = 0.25f;
 
-        private const int _remoteAdminFullWidth = 61;
-
         internal SummonedCustomRole(Player player, ICustomRole role, Triplet<string, string, bool>? badge, List<IEffect> infiniteEffects, PlayerInfoArea playerInfo, bool isCustomNickname = false)
         {
             Id = Guid.NewGuid().ToString();
@@ -163,6 +161,8 @@ namespace UncomplicatedCustomRoles.API.Features
                 coroutineModule.Execute();
 
             EvaluateRoleBase();
+
+            ItemBanBase.CheckInventoryAll(this);
 
             EventHandler = new(this);
             List.Add(this);

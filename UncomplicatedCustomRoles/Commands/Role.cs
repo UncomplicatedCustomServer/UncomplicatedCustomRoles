@@ -1,6 +1,7 @@
 ﻿using CommandSystem;
 using Exiled.API.Features;
 using System.Collections.Generic;
+using System.Linq;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Extensions;
@@ -38,22 +39,18 @@ namespace UncomplicatedCustomRoles.Commands
                     response = $"Player {Player.Nickname} {Player.UserId} [{Player.Id}] is the custom role {summoned.Role.Name} [{summoned.Role.Id}]";
                     return true;
                 }
+
                 response = $"Player {Player.Nickname} {Player.UserId} [{Player.Id}] is not a custom role!";
                 return true;
             }
             else
             {
                 response = "Custom roles of every player:";
-                foreach (Player Player in Player.List)
-                {
+                foreach (Player Player in Player.List.Where(p => !p.IsHost))
                     if (Player.TryGetSummonedInstance(out SummonedCustomRole summoned))
-                    {
                         response += $"\n - Player {Player.Nickname} {Player.UserId} [{Player.Id}] is the custom role {summoned.Role.Name} [{summoned.Role.Id}]";
-                    } else
-                    {
+                    else
                         response += $"\n - Player {Player.Nickname} {Player.UserId} [{Player.Id}] is not a custom role!";
-                    }
-                }
                 return true;
             }
         }

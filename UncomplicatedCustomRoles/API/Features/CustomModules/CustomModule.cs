@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -23,6 +24,8 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         /// </summary>
         public SummonedCustomRole Instance { get; } = null;
 
+        public string Name { get; } = string.Empty;
+
         /// <summary>
         /// Gets whether the given <see cref="CustomModule"/> has it's <see cref="Instance"/> or not
         /// </summary>
@@ -40,13 +43,17 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         /// <summary>
         /// Create a new instance of <see cref="CustomModule"/> without a <see cref="SummonedCustomRole"/>
         /// </summary>
-        public CustomModule() { }
+        public CustomModule() => Name = GetType().Name;
 
         /// <summary>
         /// Create a new instance of <see cref="CustomModule"/>
         /// </summary>
         /// <param name="instance"></param>
-        public CustomModule(SummonedCustomRole instance) => Instance = instance;
+        public CustomModule(SummonedCustomRole instance)
+        {
+            Instance = instance;
+            Name = GetType().Name;
+        }
 
         /// <summary>
         /// Executen the Custom Module action

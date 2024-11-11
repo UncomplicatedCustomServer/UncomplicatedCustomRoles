@@ -1,6 +1,5 @@
 ﻿using Exiled.API.Features;
 using System.Collections.Generic;
-using System.Linq;
 using UncomplicatedCustomRoles.Manager;
 using MEC;
 using Exiled.Events.EventArgs.Player;
@@ -14,29 +13,23 @@ using Exiled.Events.EventArgs.Scp330;
 using CustomPlayerEffects;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
+using Exiled.Events.EventArgs.Warhead;
+using PlayerRoles.Ragdolls;
+using Exiled.Events.EventArgs.Scp096;
+using UncomplicatedCustomRoles.API.Features.CustomModules.ItemBan;
 
 namespace UncomplicatedCustomRoles.Events
 {
     internal class EventHandler
     {
+        private static List<int> RagdollAppearanceQueue { get; } = new();
+
         public void OnRoundStarted()
         {
-            Plugin.Instance.DoSpawnBasicRoles = false;
-
-            Timing.CallDelayed(1.5f, () =>
-            {
-                Plugin.Instance.DoSpawnBasicRoles = true;
-            });
-
-            foreach (Player Player in Player.List.Where(player => !player.IsNPC && player is not null))
-            {
-                ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(Player);
-
-                LogManager.Debug($"Evaluating role spawn for player {Player.Nickname}, found {Role?.Id} {Role?.Name}!");
-
-                if (Role is not null)
-                    SpawnManager.SummonCustomSubclass(Player, Role.Id);
-            }
+            // Starts the infinite effect thing
+            InfiniteEffect.Stop();
+            InfiniteEffect.EffectAssociationAllowed = true;
+            InfiniteEffect.Start();
         }
 
         public void OnInteractingScp330(InteractingScp330EventArgs ev)
@@ -84,7 +77,46 @@ namespace UncomplicatedCustomRoles.Events
             }
         }
 
+        public void OnGenerator(ActivatingGeneratorEventArgs ev)
+        {
+            if (ev.Player.ReferenceHub.GetTeam() == Team.SCPs)
+                ev.IsAllowed = false;
+        }
+
+        public void OnWarheadLever(StartingEventArgs ev)
+        {
+            if (ev.Player.ReferenceHub.GetTeam() == Team.SCPs)
+                ev.IsAllowed = false;
+        }
+
+        public void OnScp079Recontainment(DamagingWindowEventArgs ev)
+        {
+            if (ev.Player.ReferenceHub.GetTeam() == Team.SCPs && (ev.Window.Type == Exiled.API.Enums.GlassType.Scp079Trigger || ev.Window.Type == Exiled.API.Enums.GlassType.Scp079))
+                ev.IsAllowed = false;
+        }
+
+        public void OnDying(DyingEventArgs ev)
+        {
+            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole) && customRole.HasModule<TutorialRagdoll>())
+                RagdollAppearanceQueue.Add(ev.Player.Id);
+        }
+
         public void OnDied(DiedEventArgs ev) => SpawnManager.ClearCustomTypes(ev.Player);
+
+        public void OnRagdollSpawn(SpawningRagdollEventArgs ev)
+        {
+            if (ev.Player is null) 
+                return;
+
+            if (!RagdollAppearanceQueue.Contains(ev.Player.Id))
+                return;
+
+            ev.IsAllowed = false;
+            RagdollAppearanceQueue.Remove(ev.Player.Id);
+
+            RagdollData data = new(ev.Player.ReferenceHub, ev.DamageHandlerBase, RoleTypeId.Tutorial, ev.Position, ev.Rotation, ev.Nickname, ev.CreationTime);
+            Ragdoll.CreateAndSpawn(data);
+        }
 
         public void OnRoundEnded(RoundEndedEventArgs _) => InfiniteEffect.Terminate();
 
@@ -99,6 +131,9 @@ namespace UncomplicatedCustomRoles.Events
             if (!ev.IsAllowed)
                 return;
 
+            if (Round.IsLobby)
+                return;
+
             if (ev.NewRole is RoleTypeId.Spectator || ev.NewRole is RoleTypeId.None || ev.NewRole is RoleTypeId.Filmmaker)
                 return;
 
@@ -108,9 +143,6 @@ namespace UncomplicatedCustomRoles.Events
                 return;
 
             if (ev.Player.HasCustomRole())
-                return;
-
-            if (!Plugin.Instance.DoSpawnBasicRoles)
                 return;
 
             if (ev.Player.IsNPC)
@@ -159,8 +191,8 @@ namespace UncomplicatedCustomRoles.Events
                         LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - FROM ATTACKER");
                         return;
                     }
-                    else if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
-                        pacifism.Execute();
+                    else if (attackerCustomRole?.HasModule<PacifismUntilDamage>() ?? false)
+                        attackerCustomRole.RemoveModules<PacifismUntilDamage>();
 
                     Hurting.DamageHandler.Damage *= attackerCustomRole.Role.DamageMultiplier;
                 }
@@ -173,7 +205,7 @@ namespace UncomplicatedCustomRoles.Events
                         return;
                     }
 
-                    if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
+                    if (attackerCustomRole?.HasModule<PacifismUntilDamage>() ?? false)
                         Hurting.IsAllowed = false;
                 }
             }
@@ -181,7 +213,7 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnHurt(HurtEventArgs ev)
         {
-            if (ev.Player is not null && ev.Player.IsAlive && ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedCustomRole))
+            if (ev.Player is not null && ev.Attacker is not null && ev.Attacker.IsAlive && ev.Player.IsAlive && ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedCustomRole))
             {
                 summonedCustomRole.LastDamageTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
@@ -291,10 +323,29 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnItemUsed(UsedItemEventArgs UsedItem)
         {
-            if (UsedItem.Player is not null && UsedItem.Player.TryGetSummonedInstance(out SummonedCustomRole summoned) && UsedItem.Item.Type == ItemType.SCP500)
-                foreach (IEffect Effect in summoned.InfiniteEffects)
-                    if (Effect.Removable)
-                        summoned.InfiniteEffects.Remove(Effect);
+            if (UsedItem.Player is not null && UsedItem.Player.TryGetSummonedInstance(out SummonedCustomRole summoned) && UsedItem.Item.Type is ItemType.SCP500)
+                summoned.InfiniteEffects.RemoveAll(effect => effect.Removable);
+        }
+
+        public void OnAddingTarget(AddingTargetEventArgs ev)
+        {
+            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
+            { 
+                if (ev.Player.ReferenceHub.GetTeam() is Team.SCPs)
+                    ev.IsAllowed = false;
+
+                if (summonedInstance.HasModule<DoNotTrigger096>())
+                    ev.IsAllowed = false;
+
+                if (summonedInstance.HasModule<PacifismUntilDamage>())
+                    ev.IsAllowed = false;
+            }
+        }
+
+        public void OnPickingUp(PickingUpItemEventArgs ev)
+        {
+            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
+                ev.IsAllowed = ItemBanBase.CheckPickup(summonedInstance, ev.Pickup);
         }
 
         public static IEnumerator<float> DoSpawnPlayer(Player Player, int Id, bool DoBypassRoleOverwrite = true)

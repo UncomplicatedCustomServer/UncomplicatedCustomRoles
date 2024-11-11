@@ -19,6 +19,7 @@ using Subtitles;
 using Utils.Networking;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using System.Text.RegularExpressions;
+using UncomplicatedCustomRoles.Integrations;
 
 // Mormora, la gente mormora
 // falla tacere praticando l'allegria
@@ -141,26 +142,14 @@ namespace UncomplicatedCustomRoles.Manager
 
             LogManager.Silent($"Can we assign custom roles? Let's see: {Role.CustomItemsInventory.Count()}");
             if (Role.CustomItemsInventory.Count() > 0)
-                foreach (uint ItemId in Role.CustomItemsInventory)
+                foreach (uint itemId in Role.CustomItemsInventory)
                     if (!Player.IsInventoryFull)
                         try
                         {
-                            if (Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems") is not null)
-                            {
-                                Type AssemblyType = Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems").Assembly.GetType("UncomplicatedCustomItems.API.Utilities");
-                                if ((bool)AssemblyType?.GetMethod("IsCustomItem")?.Invoke(null, new object[] { ItemId }))
-                                {
-                                    object CustomItem = AssemblyType?.GetMethod("GetCustomItem")?.Invoke(null, new object[] { ItemId });
-
-                                    Exiled.Loader.Loader.GetPlugin("UncomplicatedCustomItems").Assembly.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem")?.GetMethods().Where(method => method.Name == "Summon" && method.GetParameters().Length == 2).FirstOrDefault()?.Invoke(null, new object[]
-                                    {
-                                    CustomItem,
-                                    Player
-                                    });
-                                }
-                            }
+                            if (UCI.HasCustomItem(itemId, out _))
+                                UCI.GiveCustomItem(itemId, Player);
                             else
-                                CustomItem.Get(ItemId)?.Give(Player);
+                                CustomItem.Get(itemId)?.Give(Player);
                         }
                         catch (Exception ex)
                         {
@@ -372,7 +361,7 @@ namespace UncomplicatedCustomRoles.Manager
             };
 
             foreach (ICustomRole Role in CustomRole.CustomRoles.Values.Where(cr => cr.SpawnSettings is not null))
-                if (!Role.IgnoreSpawnSystem && Player.List.Count() >= Role.SpawnSettings.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
+                if (!Role.IgnoreSpawnSystem && Player.List.Count(pl => !pl.IsHost) >= Role.SpawnSettings.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
                 {
                     if (Role.SpawnSettings.RequiredPermission is not null && Role.SpawnSettings.RequiredPermission != string.Empty && !player.CheckPermission(Role.SpawnSettings.RequiredPermission))
                     {

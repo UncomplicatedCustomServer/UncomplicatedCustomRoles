@@ -37,7 +37,7 @@ namespace UncomplicatedCustomRoles.Commands
             if (arguments.Count() == 0)
             {
                 // Help page
-                response = $"\n>> UncomplicatedCustomRoles v{Plugin.Instance.Version} <<\nby FoxWorn3365 & Dr.Agenda\n\nAvailable commands:";
+                response = $"\n>> UncomplicatedCustomRoles v{Plugin.Instance.Version} <<\nby {Plugin.Instance.Author}\n\nAvailable commands:";
 
                 foreach (IUCRCommand Command in RegisteredCommands)
                 {
@@ -57,14 +57,17 @@ namespace UncomplicatedCustomRoles.Commands
 
                 IUCRCommand Command = RegisteredCommands.Where(command => command.Name == arguments.At(0)).FirstOrDefault();
 
-                if (Command is not null && sender.CheckPermission(Command.RequiredPermission))
-                {
-                    // Let's call the command
-                    return Command.Executor(Arguments, sender, out response);
-                }
+                if (Command is not null)
+                    if (sender.CheckPermission(Command.RequiredPermission))
+                        return Command.Executor(Arguments, sender, out response);
+                    else
+                    {
+                        response = $"You don't have enough permission(s) to execute that command!\nNeeded: {Command.RequiredPermission}";
+                        return false;
+                    }
                 else
                 {
-                    response = "Command not found";
+                    response = "Command not found!";
                     return false;
                 }
             }

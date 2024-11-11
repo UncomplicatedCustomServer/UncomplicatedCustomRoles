@@ -1,22 +1,21 @@
 <div align="center"><a href="https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/releases/latest"><img src="https://img.shields.io/github/v/release/UncomplicatedCustomServer/UncomplicatedCustomRoles"></a> <a href="https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/releases/latest"><img src="https://img.shields.io/github/downloads/UncomplicatedCustomServer/UncomplicatedCustomRoles/total"></a> <a href="https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/pulls"><img src="https://img.shields.io/github/issues-pr/UncomplicatedCustomServer/UncomplicatedCustomRoles"></a> <a href="https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/pulls"><img src="https://img.shields.io/github/issues-pr-closed/UncomplicatedCustomServer/UncomplicatedCustomRoles"></a> <a href="https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/commits/main/"><img src="https://badgen.net/github/commits/UncomplicatedCustomServer/UncomplicatedCustomRoles/main"></a> <img src="https://img.shields.io/badge/Verified_Exiled_Plugin-ss">
 
-  <h1>UncomplicatedCustomRoles</h1>
+  <img src="https://raw.githubusercontent.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/refs/heads/resources/ucr_promo_banner.png">
   <i>Easy, fully configurable and customizable custom roles for your SCP:SL Server!</i>
 
   <br><br>
-    <img src="https://ucs.fcosma.it/api/v2/ucr/graph/black">
   <br><br>
     <a href='https://discord.gg/5StRGu8EJV'><img src='https://www.allkpop.com/upload/2021/01/content/262046/1611711962-discord-button.png' height="100"></a>
   <br><br>
 </div>
 
-**EXILED** >= `v8.9.6`
+**EXILED** >= `v8.12`
 <br><br>
 
 ## Localized READMEs
-- [Français](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-FR.md)
-- [Italiano](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-IT.md)
-- [Russian](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-RU.md)
+- [&#127467;&#127479; Français](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-FR.md)
+- [&#x1F1EE;&#x1F1F9; Italiano](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-IT.md)
+- [&#127479;&#127482; Russian](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-RU.md)
 
 ## What's UncomplicatedCustomRoles
 **UncomplicatedCustomRoles** or **UCR** is a plugin for [EXILED](https://github.com/Exiled-Team/EXILED) that allow you to create fully configurable and customizable custom role with YAML.\
@@ -41,6 +40,11 @@ We have created lots of examples in the [developers wiki](https://github.com/Unc
 
 ## Having skill issues?
 Read the [WIKI](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki) and if you still can't fix the problem you can ask to the community on our [Discord server](https://discord.gg/5StRGu8EJV)!
+
+## Consider donating to UncomplicatedCustomServer Collective
+Every plugin we create is **free** and **open-source**.\
+Please consider donating something to support our work through **OpenCollective**: 
+<a href="https://opencollective.com/ucs"><img height="15" src="https://raw.githubusercontent.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/refs/heads/resources/oc_icon.png">&nbsp;&nbsp;Donate</a>
 
 ## Contacts
 ### UncomplicatedCustomRoles
