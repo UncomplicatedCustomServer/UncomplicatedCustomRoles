@@ -191,8 +191,8 @@ namespace UncomplicatedCustomRoles.Events
                         LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - FROM ATTACKER");
                         return;
                     }
-                    else if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
-                        pacifism.Execute();
+                    else if (attackerCustomRole?.HasModule<PacifismUntilDamage>() ?? false)
+                        attackerCustomRole.RemoveModules<PacifismUntilDamage>();
 
                     Hurting.DamageHandler.Damage *= attackerCustomRole.Role.DamageMultiplier;
                 }
@@ -205,7 +205,7 @@ namespace UncomplicatedCustomRoles.Events
                         return;
                     }
 
-                    if (attackerCustomRole.GetModule(out PacifismUntilDamage pacifism) && pacifism.IsPacifist)
+                    if (attackerCustomRole?.HasModule<PacifismUntilDamage>() ?? false)
                         Hurting.IsAllowed = false;
                 }
             }
