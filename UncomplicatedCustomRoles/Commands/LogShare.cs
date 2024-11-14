@@ -32,17 +32,25 @@ namespace UncomplicatedCustomRoles.Commands
             }
 
             long Start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            response = "Loading the JSON content to share with the developers...";
+            response = $"Loading the JSON content to share with the developers...";
 
             Task.Run(() =>
             {
                 HttpStatusCode Response = LogManager.SendReport(out HttpContent Content);
-                Dictionary<string, string> Data = JsonConvert.DeserializeObject<Dictionary<string, string>>(Plugin.HttpManager.RetriveString(Content));
-
-                if (Response is HttpStatusCode.OK && Data.ContainsKey("id"))
-                    Log.Info($"[ShareTheLog] Successfully shared the UCR logs with the developers!\nSend this Id to the developers: {Data["id"]}\n\nTook {DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start}ms");
-                else
-                    Log.Info($"Failed to share the UCR logs with the developers: Server says: {Response}");
+                try
+                {
+                    if (Response is HttpStatusCode.OK)
+                    {
+                        Dictionary<string, string> Data = JsonConvert.DeserializeObject<Dictionary<string, string>>(Plugin.HttpManager.RetriveString(Content));
+                        Log.Info($"[ShareTheLog] Successfully shared the UCR logs with the developers!\nSend this Id to the developers: {Data["id"]}\n\nTook {DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start}ms");
+                    } 
+                    else
+                        Log.Info($"Failed to share the UCR logs with the developers: Server says: {Response}");
+                }
+                catch (Exception e) 
+                { 
+                    Log.Error(e.ToString()); 
+                }
             });
             
 

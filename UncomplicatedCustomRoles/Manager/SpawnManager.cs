@@ -248,6 +248,9 @@ namespace UncomplicatedCustomRoles.Manager
             if (Spawn.Spawning.Contains(Player.Id))
                 Spawn.Spawning.Remove(Player.Id);
 
+            if (API.Features.Escape.Bucket.Contains(Player.Id))
+                API.Features.Escape.Bucket.Remove(Player.Id);
+
             LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})! [2VDS]");
         }
 

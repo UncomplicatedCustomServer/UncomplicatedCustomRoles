@@ -55,20 +55,20 @@ namespace UncomplicatedCustomRoles.Manager
             if (History.Count < 1)
                 return HttpStatusCode.Forbidden;
 
-            string Content = string.Empty;
+            string stringContent = string.Empty;
 
             foreach (LogEntry Element in History)
-                Content += $"{Element}\n";
+                stringContent += $"{Element}\n";
 
             // Now let's add the separator
-            Content += "\n======== BEGIN CUSTOM ROLES ========\n";
+            stringContent += "\n======== BEGIN CUSTOM ROLES ========\n";
 
             foreach (ICustomRole Role in CustomRole.CustomRoles.Values)
             {
-                Content += $"{Loader.Serializer.Serialize(Role)}\n\n---\n\n";
+                stringContent += $"{Loader.Serializer.Serialize(Role)}\n\n---\n\n";
             }
 
-            HttpStatusCode Response = Plugin.HttpManager.ShareLogs(Content, out _);
+            HttpStatusCode Response = Plugin.HttpManager.ShareLogs(stringContent, out content);
 
             if (Response is HttpStatusCode.OK)
             {

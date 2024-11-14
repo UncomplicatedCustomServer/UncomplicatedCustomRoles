@@ -60,8 +60,8 @@ namespace UncomplicatedCustomRoles
             ServerHandler.RespawningTeam += Handler.OnRespawningWave;
             ServerHandler.RoundStarted += Handler.OnRoundStarted;
             ServerHandler.RoundEnded += Handler.OnRoundEnded;
+            ServerHandler.WaitingForPlayers += Handler.OnWaitingForPlayers;
 
-            // PlayerHandler.Verified += Handler.OnVerified;
             PlayerHandler.ActivatingGenerator += Handler.OnGenerator;
             PlayerHandler.Dying += Handler.OnDying;
             PlayerHandler.Died += Handler.OnDied;
@@ -77,6 +77,7 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.TriggeringTesla += Handler.OnTriggeringTeslaGate;
             PlayerHandler.MakingNoise += Handler.OnMakingNoise;
             PlayerHandler.PickingUpItem += Handler.OnPickingUp;
+            PlayerHandler.Verified += Handler.OnVerified;
 
             Scp049Handler.FinishingRecall += Handler.OnFinishingRecall;
 
@@ -147,6 +148,7 @@ namespace UncomplicatedCustomRoles
             ServerHandler.RespawningTeam -= Handler.OnRespawningWave;
             ServerHandler.RoundEnded -= Handler.OnRoundEnded;
             ServerHandler.RoundStarted -= Handler.OnRoundStarted;
+            ServerHandler.WaitingForPlayers -= Handler.OnWaitingForPlayers;
 
             // PlayerHandler.Verified -= Handler.OnVerified;
             PlayerHandler.ActivatingGenerator -= Handler.OnGenerator;
@@ -164,6 +166,7 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.TriggeringTesla -= Handler.OnTriggeringTeslaGate;
             PlayerHandler.MakingNoise -= Handler.OnMakingNoise;
             PlayerHandler.PickingUpItem -= Handler.OnPickingUp;
+            PlayerHandler.Verified -= Handler.OnVerified;
 
             Scp049Handler.FinishingRecall -= Handler.OnFinishingRecall;
 
