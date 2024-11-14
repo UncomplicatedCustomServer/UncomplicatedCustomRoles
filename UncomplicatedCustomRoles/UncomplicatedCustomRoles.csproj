@@ -116,7 +116,6 @@
     <Compile Include="Patches\InventoryLimitsPrefix.cs" />
     <Compile Include="Patches\DisabledEventPatch.cs" />
     <Compile Include="Patches\PlayerInfoPatch.cs" />
-    <Compile Include="Patches\PluginsLoaded.cs" />
     <Compile Include="Patches\Scp3114StranglePrefix.cs" />
     <Compile Include="Patches\ServerNamePatch.cs" />
     <Compile Include="Patches\SetRolePatch.cs" />

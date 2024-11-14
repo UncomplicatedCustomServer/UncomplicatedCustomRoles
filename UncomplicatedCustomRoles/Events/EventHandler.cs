@@ -24,12 +24,33 @@ namespace UncomplicatedCustomRoles.Events
     {
         private static List<int> RagdollAppearanceQueue { get; } = new();
 
+        private static List<int> FirstRoundPlayers { get; } = new();
+
+        private static bool Initialized { get; set; } = false;
+
+        public void OnWaitingForPlayers()
+        {
+            Plugin.Instance.OnFinishedLoadingPlugins();
+
+        }
+
         public void OnRoundStarted()
         {
+            Initialized = true;
+            FirstRoundPlayers.Clear();
+
             // Starts the infinite effect thing
             InfiniteEffect.Stop();
             InfiniteEffect.EffectAssociationAllowed = true;
             InfiniteEffect.Start();
+        }
+
+        public void OnVerified(VerifiedEventArgs ev)
+        {
+            if (Initialized)
+                return;
+
+            FirstRoundPlayers.Add(ev.Player.Id);
         }
 
         public void OnInteractingScp330(InteractingScp330EventArgs ev)
@@ -137,30 +158,28 @@ namespace UncomplicatedCustomRoles.Events
             if (ev.NewRole is RoleTypeId.Spectator || ev.NewRole is RoleTypeId.None || ev.NewRole is RoleTypeId.Filmmaker)
                 return;
 
-            LogManager.Debug("Called CHANGINGROLE event");
-
             if (Spawn.Spawning.Contains(ev.Player.Id))
                 return;
 
             if (ev.Player.HasCustomRole())
                 return;
 
+
             if (ev.Player.IsNPC)
                 return;
 
-            string LogReason = string.Empty;
-            if (Plugin.Instance.Config.AllowOnlyNaturalSpawns && !Spawn.SpawnQueue.Contains(ev.Player.Id))
+            if (!FirstRoundPlayers.Contains(ev.Player.Id))
             {
-                LogManager.Debug("The player is not in the queue for respawning!");
-                return;
+                if (Plugin.Instance.Config.AllowOnlyNaturalSpawns && !Spawn.SpawnQueue.Contains(ev.Player.Id))
+                {
+                    LogManager.Debug("The player is not in the queue for respawning!");
+                    return;
+                }
+                else if (Spawn.SpawnQueue.Contains(ev.Player.Id))
+                {
+                    Spawn.SpawnQueue.Remove(ev.Player.Id);
+                }
             }
-            else if (Spawn.SpawnQueue.Contains(ev.Player.Id))
-            {
-                Spawn.SpawnQueue.Remove(ev.Player.Id);
-                LogReason = " [WITH a respawn wave - VANILLA]";
-            }
-
-            LogManager.Debug($"Player {ev.Player.Nickname} spawned{LogReason}, going to assign a role if needed!");
 
             ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(ev.Player, ev.NewRole);
 

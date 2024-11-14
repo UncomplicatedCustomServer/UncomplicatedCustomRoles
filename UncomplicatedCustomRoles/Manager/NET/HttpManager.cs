@@ -43,7 +43,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// <summary>
         /// Gets the UCS APIs endpoint
         /// </summary>
-        public string Endpoint { get; } = "https://api.ucserver.it";
+        public string Endpoint { get; } = "https://api.ucserver.it/v2";
 
         /// <summary>
         /// Gets the CreditTag storage for the plugin, downloaded from our central server
@@ -171,7 +171,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
             Credits = new();
             try
             {
-                Dictionary<string, Dictionary<string, string>> Data = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(RetriveString(HttpGetRequest("https://ucs.fcosma.it/api/credits.json")));
+                Dictionary<string, Dictionary<string, string>> Data = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(RetriveString(HttpGetRequest("https://api.ucserver.it/credits.json")));
 
                 if (Data is null)
                 {
