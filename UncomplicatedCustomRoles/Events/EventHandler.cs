@@ -31,7 +31,6 @@ namespace UncomplicatedCustomRoles.Events
         public void OnWaitingForPlayers()
         {
             Plugin.Instance.OnFinishedLoadingPlugins();
-
         }
 
         public void OnRoundStarted()
@@ -139,7 +138,11 @@ namespace UncomplicatedCustomRoles.Events
             Ragdoll.CreateAndSpawn(data);
         }
 
-        public void OnRoundEnded(RoundEndedEventArgs _) => InfiniteEffect.Terminate();
+        public void OnRoundEnded(RoundEndedEventArgs _)
+        {
+            Initialized = false;
+            InfiniteEffect.Terminate();
+        }
 
         public void OnChangingRole(ChangingRoleEventArgs ev)
         {
@@ -330,20 +333,20 @@ namespace UncomplicatedCustomRoles.Events
                 ev.IsAllowed = false;
         }
 
-        public void OnRespawningWave(RespawningTeamEventArgs Respawn)
+        public void OnRespawningWave(RespawningTeamEventArgs ev)
         {
             LogManager.Silent("Respawning wave");
             if (Spawn.DoHandleWave)
-                foreach (Player Player in Respawn.Players)
+                foreach (Player Player in ev.Players)
                     Spawn.SpawnQueue.Add(Player.Id);
             else
                 Spawn.DoHandleWave = true;
         }
 
-        public void OnItemUsed(UsedItemEventArgs UsedItem)
+        public void OnItemUsed(UsedItemEventArgs ev)
         {
-            if (UsedItem.Player is not null && UsedItem.Player.TryGetSummonedInstance(out SummonedCustomRole summoned) && UsedItem.Item.Type is ItemType.SCP500)
-                summoned.InfiniteEffects.RemoveAll(effect => effect.Removable);
+            if (ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole summoned) && ev.Item.Type is ItemType.SCP500)
+                summoned?.InfiniteEffects.RemoveAll(effect => effect is not null && effect.Removable);
         }
 
         public void OnAddingTarget(AddingTargetEventArgs ev)
