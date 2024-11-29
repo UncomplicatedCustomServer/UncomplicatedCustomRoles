@@ -169,10 +169,17 @@ namespace UncomplicatedCustomRoles.Manager
                 Player.ReferenceHub.nicknameSync.Network_playerInfoToShow &= ~PlayerInfoArea.Role;
 
             if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
+            {
                 if (Role.OverrideRoleName)
                     Player.ApplyCustomInfoAndRoleName(Role.CustomInfo, Role.Name);
                 else
                     Player.ApplyClearCustomInfo(Role.CustomInfo);
+            }
+            else
+            {
+                if (Role.OverrideRoleName)
+                    Player.ApplyCustomInfoAndRoleName("", Role.Name);
+            }
 
             // Apply every required stats
             Role.Health?.Apply(Player);
