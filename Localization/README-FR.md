@@ -10,13 +10,13 @@
   <br><br>
 </div>
 
-**EXILED** >= `v8.9.6`
+**EXILED** >= `v8.12`
 <br><br>
 
 ## README Traduis
 - [**Original** (Anglais)](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/README.md)
 - [Italien](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-IT.md)
-- [Russie](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-RU.md)
+- [Russe](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-RU.md)
 
 ## Qu'est ce que c'est UncomplicatedCustomRoles ?
 **UncomplicatedCustomRoles** ou **UCR** est un plugin pour [EXILED](https://github.com/Exiled-Team/EXILED) qui vous permet de créer des rôles personnalisé complètement customisable et configurable avec du YAML.\
@@ -26,19 +26,19 @@ Vous serez capable de configurer le <ins>rôle</ins>, le <ins>nombre de point de
 **UCR** a plusieurs fonctionnalités tel que:
 - Un nombre illimité de rôles personnalisable
 - Une config qui est séparé dans un autre fichier, pas le fichier config de Exiled (Celui par défaut)
-- Un [wiki](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki) complet et compréhensible 
+- Un [wiki](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki) complet et compréhensible (Il est en Anglais)
 - Pas de dépandance requise
 - Une communauté active sur **Discord**
-- __Des privileges et des aperçus spéciaux__ pour les owners des serveurs utulisant UCR
+- __Des privileges et des aperçus spéciaux__ pour les owners des serveurs utilisant UCR
 - Des commandes en jeu qui vous permettent de manipuler le plugin + vos rôles personnalisé
 ## Installation
 Telecharger le `UncomplicatedCustomRoles.dll` içi [latest release](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/releases/latest) et mettez le dans `EXILED/Plugins` folder.
 
 ## Développeurs
-UncomplicatedCustomRoles dispose d'un système d'API simple et rapide pour les développeurs qui utulisent notre plugin.
-Nous avons créer plein d'exemples dans le [developers wiki](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki/Developers-World)
+UncomplicatedCustomRoles dispose d'une API simple et rapide pour les développeurs qui utilisent le plugin.
+Nous avons créer plein d'exemples dans le [developers wiki](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki/Developers-World) (Qui est aussi en Anglais)
 
-## Vous avez un manque de skill? (Skill issue)
+## Vous avez du mal ? (Skill issue)
 Lisez le [WIKI](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki) et si vous n'arrivez toujours pas à regler le problème, demander sur notre serveur Discord. La communauté vous aidera [Discord server](https://discord.gg/5StRGu8EJV)!
 
 ## Contactes
