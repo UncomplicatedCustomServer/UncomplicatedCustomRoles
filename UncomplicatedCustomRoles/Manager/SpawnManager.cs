@@ -54,6 +54,8 @@ namespace UncomplicatedCustomRoles.Manager
             { "pumpkin", "#EE7600" }
         };
 
+        private static int DiffTargetCount { get; set; } = 0;
+
         public static void ClearCustomTypes(Player player)
         {
             if (SummonedCustomRole.TryGet(player, out SummonedCustomRole role))
@@ -401,6 +403,9 @@ namespace UncomplicatedCustomRoles.Manager
                     diff++;
             }
 
+            Round.ChaosTargetCount -= DiffTargetCount;
+
+            DiffTargetCount = diff;
             Round.ChaosTargetCount += diff;
         }
 

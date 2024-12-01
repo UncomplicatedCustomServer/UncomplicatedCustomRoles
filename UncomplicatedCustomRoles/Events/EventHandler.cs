@@ -44,13 +44,7 @@ namespace UncomplicatedCustomRoles.Events
             InfiniteEffect.Start();
         }
 
-        public void OnVerified(VerifiedEventArgs ev)
-        {
-            if (Initialized)
-                return;
-
-            FirstRoundPlayers.Add(ev.Player.Id);
-        }
+        public void OnVerified(VerifiedEventArgs ev) => FirstRoundPlayers.Add(ev.Player.Id);
 
         public void OnInteractingScp330(InteractingScp330EventArgs ev)
         {
@@ -298,8 +292,10 @@ namespace UncomplicatedCustomRoles.Events
                 } 
                 else
                 {
+                    LogManager.Silent($"Trying to find CustomRole with Id {NewRole.Value}");
                     if (int.TryParse(NewRole.Value.ToString(), out int id) && CustomRole.TryGet(id, out ICustomRole role))
                     {
+                        LogManager.Silent($"Role found!");
                         Escaping.IsAllowed = false;
                         if (!API.Features.Escape.Bucket.Contains(Escaping.Player.Id))
                         {
