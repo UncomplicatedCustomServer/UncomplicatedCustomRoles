@@ -27,7 +27,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(4, 1, 2);
+        public override Version Version { get; } = new(5, 0, 0);
 
         public override Version RequiredExiledVersion { get; } = new(8, 11, 0);
 
@@ -69,7 +69,6 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Spawned += Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole += Handler.OnChangingRole;
             PlayerHandler.ReceivingEffect += Handler.OnReceivingEffect;
-            PlayerHandler.PlayerDamageWindow += Handler.OnScp079Recontainment;
             PlayerHandler.Escaping += Handler.OnEscaping;
             PlayerHandler.UsedItem += Handler.OnItemUsed;
             PlayerHandler.Hurting += Handler.OnHurting;
@@ -157,7 +156,6 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.SpawningRagdoll -= Handler.OnRagdollSpawn;
             PlayerHandler.Spawned -= Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole -= Handler.OnChangingRole;
-            PlayerHandler.PlayerDamageWindow -= Handler.OnScp079Recontainment;
             PlayerHandler.ReceivingEffect -= Handler.OnReceivingEffect;
             PlayerHandler.Escaping -= Handler.OnEscaping;
             PlayerHandler.UsedItem -= Handler.OnItemUsed;

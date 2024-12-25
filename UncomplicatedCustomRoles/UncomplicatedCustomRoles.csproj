@@ -518,8 +518,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="EXILEDOFFICIAL">
-      <Version>8.11.0</Version>
+    <PackageReference Include="ExMod.Exiled">
+      <Version>9.0.1</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.3</Version>

@@ -186,7 +186,7 @@ namespace UncomplicatedCustomRoles.Patches
         }
     }
 
-    [HarmonyPatch(typeof(HumanTerminationTokens), nameof(HumanTerminationTokens.HandleHomocide))]
+    /*[HarmonyPatch(typeof(HumanTerminationTokens), nameof(HumanTerminationTokens.HandleHomocide))]
     internal class HumanTerminationTokensPatch
     {
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
@@ -209,7 +209,7 @@ namespace UncomplicatedCustomRoles.Patches
 
             return newInstructions;
         }
-    }
+    }*/
 
     [HarmonyPatch(typeof(BePoliteBeEfficientHandler), nameof(BePoliteBeEfficientHandler.HandleDeath))]
     internal class BePoliteBeEfficientPatch

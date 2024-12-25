@@ -394,6 +394,10 @@ namespace UncomplicatedCustomRoles.Manager
 
         public static void UpdateChaosModifier()
         {
+            return;
+
+            /*
+             *  We need to check if there's another function instead of Round.ChaosTarget
             int diff = 0;
             foreach (SummonedCustomRole role in SummonedCustomRole.List.Where(role => role.IsOverwrittenRole))
             {
@@ -401,12 +405,7 @@ namespace UncomplicatedCustomRoles.Manager
                     diff--;
                 else if (role.Role.Team is Team.SCPs && PlayerRolesUtils.GetTeam(role.Role.Role) is not Team.SCPs)
                     diff++;
-            }
-
-            Round.ChaosTargetCount -= DiffTargetCount;
-
-            DiffTargetCount = diff;
-            Round.ChaosTargetCount += diff;
+            }*/
         }
 
         public static void HandleRecontainmentAnnoucement(CustomScpAnnouncer element)
