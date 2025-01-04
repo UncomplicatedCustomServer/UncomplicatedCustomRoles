@@ -252,7 +252,7 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnEscaping(EscapingEventArgs Escaping)
         {
-            if (!summoned.Role.CanEscape) 
+            if summoned.Role.CanEscape 
                 {    
                 LogManager.Debug($"Player {Escaping.Player.Nickname} triggered the escaping event as {Escaping.Player.Role.Name}");
                 }
