@@ -198,8 +198,6 @@ namespace UncomplicatedCustomRoles.Events
             if (!Hurting.IsAllowed)
                 return;
 
-            LogManager.Silent($"DamageHandler of Hurting: {Hurting.Player} {Hurting.Attacker}");
-
             if (Hurting.Player is not null && Hurting.Attacker is not null && Hurting.Player.IsAlive && Hurting.Attacker.IsAlive)
             {
                 if (Hurting.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole))
