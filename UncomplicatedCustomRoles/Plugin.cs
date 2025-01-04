@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using Exiled.API.Enums;
 using Exiled.API.Features;
 using UncomplicatedCustomRoles.Integrations;
@@ -27,7 +26,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(5, 0, 0, 1);
+        public override Version Version { get; } = new(5, 0, 0, 2);
 
         public override Version RequiredExiledVersion { get; } = new(8, 11, 0);
 
@@ -38,7 +37,7 @@ namespace UncomplicatedCustomRoles
         internal Handler Handler;
 
         internal static HttpManager HttpManager;
-
+        
         internal static FileConfigs FileConfigs;
 
         internal Harmony _harmony;
@@ -104,15 +103,8 @@ namespace UncomplicatedCustomRoles
             {
                 if (HttpManager.LatestVersion.CompareTo(Version) > 0)
                     LogManager.Warn($"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Version} | Latest available: v{HttpManager.LatestVersion}\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
-                else if (HttpManager.LatestVersion.CompareTo(Version) < 0)
-                {
-                    LogManager.Info($"You are using an EXPERIMENTAL or PRE-RELEASE version of UncomplicatedCustomRoles!\nLatest stable release: {HttpManager.LatestVersion}\nWe do not assure that this version won't make your SCP:SL server crash! - Debug log has been enabled!");
-                    if (!Log.DebugEnabled.Contains(Assembly))
-                    {
-                        Config.Debug = true;
-                        Log.DebugEnabled.Add(Assembly);
-                    }
-                }
+
+                VersionManager.Init();
             });
 
             FileConfigs.Welcome();

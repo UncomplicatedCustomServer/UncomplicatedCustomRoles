@@ -170,11 +170,10 @@ namespace UncomplicatedCustomRoles.Manager
             if (!Role.OverrideRoleName && (Role.CustomFlags & CustomFlags.ShowOnlyCustomInfo) == CustomFlags.ShowOnlyCustomInfo)
                 Player.ReferenceHub.nicknameSync.Network_playerInfoToShow &= ~PlayerInfoArea.Role;
 
-            if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
-                if (Role.OverrideRoleName)
-                    Player.ApplyCustomInfoAndRoleName(Role.CustomInfo, Role.Name);
-                else
-                    Player.ApplyClearCustomInfo(Role.CustomInfo);
+            if (Role.OverrideRoleName)
+                Player.ApplyCustomInfoAndRoleName(Role.CustomInfo, Role.Name);
+            else
+                Player.ApplyClearCustomInfo(Role.CustomInfo);
 
             // Apply every required stats
             Role.Health?.Apply(Player);
@@ -195,10 +194,12 @@ namespace UncomplicatedCustomRoles.Manager
                         PermanentEffects.Add(effect);
                         continue;
                     }
+                    LogManager.Debug($"Enabling effect {effect.EffectType} to {Player.Nickname} for {effect.Duration} (i:{effect.Intensity})");
                     Player.EnableEffect(effect.EffectType, effect.Duration);
                     Player.ChangeEffectIntensity(effect.EffectType, effect.Intensity, effect.Duration);
                 }
             }
+            LogManager.Silent($"Found {PermanentEffects.Count} permament effects");
 
             if (Role.SpawnBroadcast != string.Empty)
             {
@@ -370,7 +371,7 @@ namespace UncomplicatedCustomRoles.Manager
                 {
                     if (Role.SpawnSettings.RequiredPermission is not null && Role.SpawnSettings.RequiredPermission != string.Empty && !player.CheckPermission(Role.SpawnSettings.RequiredPermission))
                     {
-                        LogManager.Debug($"[NOTICE] Ignoring the role {Role.Id} [{Role.Name}] while creating the list for the player {player.Nickname} due to: cannot [permissions].");
+                        LogManager.Silent($"[NOTICE] Ignoring the role {Role.Id} [{Role.Name}] while creating the list for the player {player.Nickname} due to: cannot [permissions].");
                         continue;
                     }
 

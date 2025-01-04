@@ -17,6 +17,7 @@ using Exiled.Events.EventArgs.Warhead;
 using PlayerRoles.Ragdolls;
 using Exiled.Events.EventArgs.Scp096;
 using UncomplicatedCustomRoles.API.Features.CustomModules.ItemBan;
+using System.Threading.Tasks;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -26,16 +27,17 @@ namespace UncomplicatedCustomRoles.Events
 
         private static List<int> FirstRoundPlayers { get; } = new();
 
-        private static bool Initialized { get; set; } = false;
+        private static bool Started { get; set; } = false;
 
         public void OnWaitingForPlayers()
         {
+            Started = false;
             Plugin.Instance.OnFinishedLoadingPlugins();
         }
 
         public void OnRoundStarted()
         {
-            Initialized = true;
+            Started = true;
             FirstRoundPlayers.Clear();
 
             // Starts the infinite effect thing
@@ -134,8 +136,9 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnRoundEnded(RoundEndedEventArgs _)
         {
-            Initialized = false;
+            Started = false;
             InfiniteEffect.Terminate();
+            LogManager.MessageSent = false;
         }
 
         public void OnChangingRole(ChangingRoleEventArgs ev)
@@ -165,7 +168,7 @@ namespace UncomplicatedCustomRoles.Events
             if (ev.Player.IsNPC)
                 return;
 
-            if (!FirstRoundPlayers.Contains(ev.Player.Id))
+            if (Started || !FirstRoundPlayers.Contains(ev.Player.Id))
             {
                 if (Plugin.Instance.Config.AllowOnlyNaturalSpawns && !Spawn.SpawnQueue.Contains(ev.Player.Id))
                 {
@@ -347,7 +350,7 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnAddingTarget(AddingTargetEventArgs ev)
         {
-            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
+            if (ev.Target.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
             { 
                 if (ev.Player.ReferenceHub.GetTeam() is Team.SCPs)
                     ev.IsAllowed = false;

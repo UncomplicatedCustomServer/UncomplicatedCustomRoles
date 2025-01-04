@@ -111,7 +111,9 @@
     <Compile Include="Manager\ImportManager.cs" />
     <Compile Include="Manager\LogManager.cs" />
     <Compile Include="Manager\NET\SpawnPointApiCommunicator.cs" />
+    <Compile Include="Manager\NET\VersionInfo.cs" />
     <Compile Include="Manager\SpawnManager.cs" />
+    <Compile Include="Manager\VersionManager.cs" />
     <Compile Include="Patches\Announcer.cs" />
     <Compile Include="Patches\InventoryLimitsPrefix.cs" />
     <Compile Include="Patches\DisabledEventPatch.cs" />
