@@ -251,12 +251,12 @@ namespace UncomplicatedCustomRoles.Events
         }
 
         public void OnEscaping(EscapingEventArgs Escaping)
-        {
-            if (summoned.Role.CanEscape)  
-                  LogManager.Debug($"Player {Escaping.Player.Nickname} triggered the escaping event as {Escaping.Player.Role.Name}");
-                
+        {                
             if (Escaping.Player.TryGetSummonedInstance(out SummonedCustomRole summoned))
             {
+                if (summoned.Role.CanEscape)
+                    LogManager.Debug($"Player {Escaping.Player.Nickname} triggered the escaping event as {Escaping.Player.Role.Name}");
+
                 LogManager.Debug($"Player IS a custom role: {summoned.Role.Name}");
 
                 if (!summoned.Role.CanEscape)
