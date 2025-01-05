@@ -23,7 +23,7 @@
 - [&#127479;&#127482; Русский](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-RU.md)
 
 ## Что такое UncomplicatedCustomRoles
-**UncomplicatedCustomRoles** или **UCR** — это плагин для [EXILED](https://github.com/Exiled-Team/EXILED), который позволяет создавать полностью настраиваемые роли с помощью YAML.\
+**UncomplicatedCustomRoles** или **UCR** — это плагин для [EXILED](https://github.com/ExMod-Team/EXILED), который позволяет создавать полностью настраиваемые роли с помощью YAML.\
 Вы сможете настроить <ins>роль</ins>, <ins>здоровье</ins>, <ins>роль после побега</ins> и многое другое.
 
 ## Основные возможности
