@@ -165,7 +165,7 @@ namespace UncomplicatedCustomRoles.Events
                 return;
 
 
-            if (ev.Player.IsNPC)
+            if (Plugin.Instance.Config.IgnoreNpcs && ev.Player.IsNPC)
                 return;
 
             if (Started || !FirstRoundPlayers.Contains(ev.Player.Id))
@@ -349,9 +349,12 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnAddingTarget(AddingTargetEventArgs ev)
         {
+            if (!ev.IsAllowed)
+                return;
+
             if (ev.Target.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
             { 
-                if (ev.Player.ReferenceHub.GetTeam() is Team.SCPs)
+                if (ev.Target.ReferenceHub.GetTeam() is Team.SCPs)
                     ev.IsAllowed = false;
 
                 if (summonedInstance.HasModule<DoNotTrigger096>())

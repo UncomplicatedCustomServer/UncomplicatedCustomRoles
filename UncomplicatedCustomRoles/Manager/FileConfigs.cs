@@ -54,6 +54,9 @@ namespace UncomplicatedCustomRoles.Manager
                 }
                 catch (Exception ex)
                 {
+                    // Add the role to the not-loaded list
+                    CustomRole.NotLoadedRoles.Add(new(TryGetRoleId(File.ReadAllText(FileName)), FileName, ex.GetType().Name, ex.Message));
+
                     if (!Plugin.Instance.Config.Debug)
                         LogManager.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.");
                     else
@@ -97,6 +100,15 @@ namespace UncomplicatedCustomRoles.Manager
 
                 LogManager.Info($"Plugin does not have a role folder, generated one in {Path.Combine(Dir, localDir)}");
             }
+        }
+
+        public static string TryGetRoleId(string content)
+        {
+            string[] pieces = content.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+
+            if (pieces.Contains("id:"))
+                return pieces.FirstOrDefault(l => l.Contains("id:")).Replace(" ", "").Replace("id:", "");
+            return "ND";
         }
     }
 }

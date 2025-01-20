@@ -149,9 +149,14 @@ namespace UncomplicatedCustomRoles.Manager
                         try
                         {
                             if (UCI.HasCustomItem(itemId, out _))
+                            {
                                 UCI.GiveCustomItem(itemId, Player);
+                            }
                             else
-                                CustomItem.Get(itemId)?.Give(Player);
+                            {
+                                CustomItem item = CustomItem.Get(itemId) ?? throw new KeyNotFoundException("Custom item not found!");
+                                item.Give(Player);
+                            }
                         }
                         catch (Exception ex)
                         {

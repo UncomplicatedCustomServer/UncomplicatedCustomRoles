@@ -27,6 +27,8 @@ namespace UncomplicatedCustomRoles.Commands
             // Create a copy of the custom roles Dictionary
             Dictionary<int, ICustomRole> Roles = new();
 
+            CustomRole.NotLoadedRoles.Clear();
+
             Plugin.FileConfigs.LoadAction((CustomRole Role) =>
             {
                 if (!CustomRole.Validate(Role))
@@ -52,7 +54,7 @@ namespace UncomplicatedCustomRoles.Commands
 
             Plugin.FileConfigs.LoadAction((CustomRole Role) =>
             {
-                if (!API.Features.CustomRole.Validate(Role))
+                if (!CustomRole.Validate(Role))
                 {
                     LogManager.Warn($"[RL] Failed to register the UCR role with the ID {Role.Id} due to the validator check!");
                     return;
