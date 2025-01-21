@@ -24,6 +24,9 @@ namespace UncomplicatedCustomRoles
         [Description("If true the UCS credit tag system won't be activated. PLEASE DON'T DEACTIVATE IT as LOTS OF PEOPLE WORKED ON THIS PLUGIN completly for FREE!")]
         public bool EnableCreditTags { get; set; } = false;
 
+        [Description("Whether the NPCs can naturally spawn custom roles")]
+        public bool IgnoreNpcs { get; set; } = true;
+
         [Description("Whether you want your spawnpoints to be hosted inside our central server or locally in the configs folder")]
         public bool LocalSpawnPoints { get; set; } = false;
 

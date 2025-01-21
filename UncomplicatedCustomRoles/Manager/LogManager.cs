@@ -64,16 +64,12 @@ namespace UncomplicatedCustomRoles.Manager
             stringContent += "\n======== BEGIN CUSTOM ROLES ========\n";
 
             foreach (ICustomRole Role in CustomRole.CustomRoles.Values)
-            {
                 stringContent += $"{Loader.Serializer.Serialize(Role)}\n\n---\n\n";
-            }
 
             HttpStatusCode Response = Plugin.HttpManager.ShareLogs(stringContent, out content);
 
             if (Response is HttpStatusCode.OK)
-            {
                 MessageSent = true;
-            }
 
             return Response;
         }

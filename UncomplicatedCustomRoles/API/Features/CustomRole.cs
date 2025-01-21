@@ -26,6 +26,12 @@ namespace UncomplicatedCustomRoles.API.Features
         public static List<ICustomRole> List => CustomRoles.Values.ToList();
 
         /// <summary>
+        /// Gets a list of every not loaded custom role.
+        /// The data is the Id, the role path, the error type and the error name
+        /// </summary>
+        internal static List<Tuple<string, string, string, string>> NotLoadedRoles { get; } = new();
+
+        /// <summary>
         /// Gets or sets the <see cref="ICustomRole"/> unique Id
         /// </summary>
         public virtual int Id { get; set; } = 1;

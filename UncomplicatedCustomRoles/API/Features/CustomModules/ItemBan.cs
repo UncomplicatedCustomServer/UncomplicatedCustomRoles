@@ -100,7 +100,7 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules.ItemBan
     {
         public new static CustomFlags Flag => CustomFlags.BanMicroHID;
 
-        public override ItemCategory Category => ItemCategory.MicroHID;
+        public override ItemCategory Category => ItemCategory.SpecialWeapon;
 
         public BanMicroHID(SummonedCustomRole role) : base(role)
         { }

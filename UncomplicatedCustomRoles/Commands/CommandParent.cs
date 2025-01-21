@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using Exiled.Permissions.Extensions;
 using System.Linq;
 using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.Manager.NET;
+using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Commands
 {
@@ -28,6 +30,7 @@ namespace UncomplicatedCustomRoles.Commands
             RegisteredCommands.Add(new SpawnPoint());
             RegisteredCommands.Add(new Generate());
             RegisteredCommands.Add(new Show());
+            RegisteredCommands.Add(new Version());
         }
 
         public List<IUCRCommand> RegisteredCommands { get; } = new();
@@ -37,7 +40,7 @@ namespace UncomplicatedCustomRoles.Commands
             if (arguments.Count() == 0)
             {
                 // Help page
-                response = $"\n>> UncomplicatedCustomRoles v{Plugin.Instance.Version} <<\nby {Plugin.Instance.Author}\n\nAvailable commands:";
+                response = $"\n>> UncomplicatedCustomRoles v{Plugin.Instance.Version}{(VersionManager.VersionInfo.CustomName is not null ? $" '{VersionManager.VersionInfo.CustomName}'" : string.Empty)} <<\nby {Plugin.Instance.Author}\n\nAvailable commands:";
 
                 foreach (IUCRCommand Command in RegisteredCommands)
                 {

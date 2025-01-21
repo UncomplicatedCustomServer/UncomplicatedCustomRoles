@@ -54,6 +54,8 @@ namespace UncomplicatedCustomRoles.Manager
             { "pumpkin", "#EE7600" }
         };
 
+        private static int DiffTargetCount { get; set; } = 0;
+
         public static void ClearCustomTypes(Player player)
         {
             if (SummonedCustomRole.TryGet(player, out SummonedCustomRole role))
@@ -147,9 +149,14 @@ namespace UncomplicatedCustomRoles.Manager
                         try
                         {
                             if (UCI.HasCustomItem(itemId, out _))
+                            {
                                 UCI.GiveCustomItem(itemId, Player);
+                            }
                             else
-                                CustomItem.Get(itemId)?.Give(Player);
+                            {
+                                CustomItem item = CustomItem.Get(itemId) ?? throw new KeyNotFoundException("Custom item not found!");
+                                item.Give(Player);
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -168,11 +175,10 @@ namespace UncomplicatedCustomRoles.Manager
             if (!Role.OverrideRoleName && (Role.CustomFlags & CustomFlags.ShowOnlyCustomInfo) == CustomFlags.ShowOnlyCustomInfo)
                 Player.ReferenceHub.nicknameSync.Network_playerInfoToShow &= ~PlayerInfoArea.Role;
 
-            if (Role.CustomInfo != null && Role.CustomInfo != string.Empty)
-                if (Role.OverrideRoleName)
-                    Player.ApplyCustomInfoAndRoleName(Role.CustomInfo, Role.Name);
-                else
-                    Player.ApplyClearCustomInfo(Role.CustomInfo);
+            if (Role.OverrideRoleName)
+                Player.ApplyCustomInfoAndRoleName(Role.CustomInfo, Role.Name);
+            else
+                Player.ApplyClearCustomInfo(Role.CustomInfo);
 
             // Apply every required stats
             Role.Health?.Apply(Player);
@@ -193,10 +199,12 @@ namespace UncomplicatedCustomRoles.Manager
                         PermanentEffects.Add(effect);
                         continue;
                     }
+                    LogManager.Debug($"Enabling effect {effect.EffectType} to {Player.Nickname} for {effect.Duration} (i:{effect.Intensity})");
                     Player.EnableEffect(effect.EffectType, effect.Duration);
                     Player.ChangeEffectIntensity(effect.EffectType, effect.Intensity, effect.Duration);
                 }
             }
+            LogManager.Silent($"Found {PermanentEffects.Count} permament effects");
 
             if (Role.SpawnBroadcast != string.Empty)
             {
@@ -368,7 +376,7 @@ namespace UncomplicatedCustomRoles.Manager
                 {
                     if (Role.SpawnSettings.RequiredPermission is not null && Role.SpawnSettings.RequiredPermission != string.Empty && !player.CheckPermission(Role.SpawnSettings.RequiredPermission))
                     {
-                        LogManager.Debug($"[NOTICE] Ignoring the role {Role.Id} [{Role.Name}] while creating the list for the player {player.Nickname} due to: cannot [permissions].");
+                        LogManager.Silent($"[NOTICE] Ignoring the role {Role.Id} [{Role.Name}] while creating the list for the player {player.Nickname} due to: cannot [permissions].");
                         continue;
                     }
 
@@ -392,6 +400,10 @@ namespace UncomplicatedCustomRoles.Manager
 
         public static void UpdateChaosModifier()
         {
+            return;
+
+            /*
+             *  We need to check if there's another function instead of Round.ChaosTarget
             int diff = 0;
             foreach (SummonedCustomRole role in SummonedCustomRole.List.Where(role => role.IsOverwrittenRole))
             {
@@ -399,9 +411,7 @@ namespace UncomplicatedCustomRoles.Manager
                     diff--;
                 else if (role.Role.Team is Team.SCPs && PlayerRolesUtils.GetTeam(role.Role.Role) is not Team.SCPs)
                     diff++;
-            }
-
-            Round.ChaosTargetCount += diff;
+            }*/
         }
 
         public static void HandleRecontainmentAnnoucement(CustomScpAnnouncer element)

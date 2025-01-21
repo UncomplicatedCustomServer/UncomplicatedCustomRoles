@@ -8,8 +8,7 @@ using PlayerRoles.PlayableScps.Scp079;
 using PlayerRoles.PlayableScps.Scp079.Rewards;
 using PlayerRoles.PlayableScps.Scp939.Mimicry;
 using PlayerStatsSystem;
-using PluginAPI.Core;
-using Respawning;
+using PluginAPI.Core; 
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -186,7 +185,7 @@ namespace UncomplicatedCustomRoles.Patches
         }
     }
 
-    [HarmonyPatch(typeof(HumanTerminationTokens), nameof(HumanTerminationTokens.HandleHomocide))]
+    /*[HarmonyPatch(typeof(HumanTerminationTokens), nameof(HumanTerminationTokens.HandleHomocide))]
     internal class HumanTerminationTokensPatch
     {
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
@@ -209,7 +208,7 @@ namespace UncomplicatedCustomRoles.Patches
 
             return newInstructions;
         }
-    }
+    }*/
 
     [HarmonyPatch(typeof(BePoliteBeEfficientHandler), nameof(BePoliteBeEfficientHandler.HandleDeath))]
     internal class BePoliteBeEfficientPatch

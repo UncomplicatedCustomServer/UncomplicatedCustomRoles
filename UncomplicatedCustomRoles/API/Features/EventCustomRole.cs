@@ -615,12 +615,6 @@ namespace UncomplicatedCustomRoles.API.Features
         public virtual void OnSendingAdminChatMessage(SendingAdminChatMessageEventsArgs ev) { }
 
         /// <summary>
-        ///  Called before KillPlayer is called.
-        /// </summary>
-        /// <param name="ev">The <see cref="KillingPlayerEventArgs"/> event handler. </param>
-        public virtual void OnKillPlayer(KillingPlayerEventArgs ev) { }
-
-        /// <summary>
         /// Called after a <see cref="T:Exiled.API.Features.Player" /> has an item added to their inventory.
         /// </summary>
         /// <param name="ev">The <see cref="ItemAddedEventArgs"/> event handler. </param>

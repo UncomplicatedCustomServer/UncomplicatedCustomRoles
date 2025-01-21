@@ -8,11 +8,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
-using UncomplicatedCustomRoles.API.Features.CustomModules.ItemBan;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Commands;
 using UncomplicatedCustomRoles.Manager;
+
+// Sashimi <3
 
 namespace UncomplicatedCustomRoles.API.Features
 {
@@ -162,8 +163,6 @@ namespace UncomplicatedCustomRoles.API.Features
 
             EvaluateRoleBase();
 
-            ItemBanBase.CheckInventoryAll(this);
-
             EventHandler = new(this);
             List.Add(this);
         }
@@ -284,7 +283,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Parse the current <see cref="SummonedCustomRole"/> instance as a RemoteAdmin text part
         /// </summary>
         /// <returns></returns>
-        internal string ParseRemoteAdmin() => $"\n<size=26><color=#f55505>UncomplicatedCustomRoles</color></size>\nCustom Role: <color={Exiled.API.Extensions.RoleExtensions.GetColor(Role.Role).ToHex()}>{Role.Name}</color> [Id={Role.Id}]{LoadRoleFlags()}\n{LoadBadge()}";
+        internal string ParseRemoteAdmin() => $"\n\n<size=26><color=#f55505>UncomplicatedCustomRoles</color></size>\nCustom Role: ({Role.Id}) <color={Exiled.API.Extensions.RoleExtensions.GetColor(Role.Role).ToHex()}>{Role.Name}</color>{LoadRoleFlags()}\n{LoadBadge()}";
 
         private string LoadRoleFlags()
         {
@@ -315,7 +314,7 @@ namespace UncomplicatedCustomRoles.API.Features
                 if (SpawnManager.colorMap.ContainsKey(Role.BadgeColor))
                     output += $"<color={SpawnManager.colorMap[Role.BadgeColor]}>{Role.BadgeName}</color>";
                 else
-                    output += $"{Role.BadgeName}";
+                    output += $"{Role.BadgeName.Replace("@hidden", "")}";
             else
                 output += "None";
 

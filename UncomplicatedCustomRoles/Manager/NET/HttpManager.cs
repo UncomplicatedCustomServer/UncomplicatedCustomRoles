@@ -158,6 +158,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         public void LoadLatestVersion()
         {
+            LogManager.Warn("Proceeding to check first verion [B] [MACCPR]");
             string Version = RetriveString(HttpGetRequest($"{Endpoint}/{Prefix}/version?vts=5"));
 
             if (Version is not null && Version != string.Empty && Version.Contains("."))
@@ -246,9 +247,20 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         internal HttpStatusCode ShareLogs(string data, out HttpContent httpContent)
         {
-            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&plugin_version={Plugin.Instance.Version}", data);
+            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&plugin_version={Plugin.Instance.Version.ToString(4)}&hash={VersionManager.HashFile(Plugin.Instance.Assembly.GetPath())}", data);
             httpContent = Status.Content;
             return Status.StatusCode;
+        }
+
+#nullable enable
+        internal async Task<Tuple<HttpStatusCode, string?>> VersionInfo()
+        {
+            HttpResponseMessage message = await HttpClient.GetAsync($"{Endpoint.Replace("/v2", "")}/vinfo/info?v={Plugin.Instance.Version.ToString(4)}");
+
+            if (message.StatusCode != HttpStatusCode.OK)
+                return new(message.StatusCode, null);
+
+            return new(message.StatusCode, await message.Content.ReadAsStringAsync());
         }
     }
 }
