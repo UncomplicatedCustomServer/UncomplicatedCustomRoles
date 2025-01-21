@@ -22,7 +22,7 @@ namespace UncomplicatedCustomRoles
         public bool EnableBasicLogs { get; set; } = true;
 
         [Description("If true the UCS credit tag system won't be activated. PLEASE DON'T DEACTIVATE IT as LOTS OF PEOPLE WORKED ON THIS PLUGIN completly for FREE!")]
-        public bool EnableCreditTags { get; set; } = false;
+        public bool EnableCreditTags { get; set; } = true;
 
         [Description("Whether the NPCs can naturally spawn custom roles")]
         public bool IgnoreNpcs { get; set; } = true;
