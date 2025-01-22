@@ -14,7 +14,7 @@
   <br><br>
 </div>
 
-**EXILED** >= `v8.12`
+**EXILED** >= `v9.x`
 <br><br>
 
 ## Локализованные README
