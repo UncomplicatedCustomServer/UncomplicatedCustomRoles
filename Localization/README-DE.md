@@ -32,7 +32,7 @@ Du kannst die <ins>Rolle</ins>, die <ins>HP</ins>, die <ins>Rolle nach dem Escap
 - Spielinterne Befehle zur Handhabung des Plugins und der Rollen
 
 ## Einrichtung
-Lade die `UncomplicatedCustomRoles.dll` aus der [neuesten Version] (https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/releases/latest) herunter und lege die .dll in den Ordner `EXILED/Plugins`.
+Lade die `UncomplicatedCustomRoles.dll` aus der [neuesten Version](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/releases/latest) herunter und lege die .dll in den Ordner `EXILED/Plugins`.
 
 ## Entwickler
 UncomplicatedCustomRoles hat ein einfaches und schnelles API-System für Entwickler, um unser Plugin zu verwenden.
