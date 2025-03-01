@@ -1,6 +1,5 @@
 ﻿using PlayerRoles;
 using PlayerStatsSystem;
-using System;
 using UncomplicatedCustomRoles.API.Enums;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
