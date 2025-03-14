@@ -26,12 +26,12 @@ namespace UncomplicatedCustomRoles.Commands
         {
             response = "List of all registered CustomRoles:";
             foreach (KeyValuePair<int, ICustomRole> Role in CustomRole.CustomRoles)
-            {
-                response += $"\n<size={TitleSize}>✔ [{Role.Key}] <color={Role.Value.Role.GetColor().ToHex()}>{Role.Value.Name}</color></size>\n    <size={TextSize}>Role: {Role.Value.Role} ({Role.Value.Team ?? Role.Value.Role.GetTeam()})\n{Spacing}HP: {Role.Value.Health.Amount}/{Role.Value.Health.Maximum}\n{Spacing}Custom info: {Role.Value.CustomInfo}\n{Spacing}Can escape: {Role.Value.CanEscape}\n{Spacing}Inventory: {string.Join(", ", Role.Value.Inventory)}\n{Spacing}Spawn: {Role.Value.SpawnSettings.Spawn} [{string.Join(", ", Role.Value.SpawnSettings.SpawnRooms)}] [{string.Join(", ", Role.Value.SpawnSettings.SpawnZones)}] [{string.Join(", ", Role.Value.SpawnSettings.SpawnPoints)}] ({Role.Value.SpawnSettings.SpawnChance}%)</size>\n";
-            }
+                if (Role.Value is not null)
+                    response += $"\n<size={TitleSize}>✔ [{Role.Key}] <color={Role.Value.Role.GetColor().ToHex()}>{Role.Value?.Name}</color></size>\n    <size={TextSize}>Role: {Role.Value.Role} ({Role.Value.Team ?? Role.Value.Role.GetTeam()})\n{Spacing}HP: {Role.Value?.Health?.Amount}/{Role.Value?.Health?.Maximum}\n{Spacing}Custom info: {Role.Value?.CustomInfo}\n{Spacing}Can escape: {Role.Value.CanEscape}\n{Spacing}Inventory: {string.Join(", ", Role.Value.Inventory ?? new())}\n{Spacing}Spawn: {Role.Value?.SpawnSettings?.Spawn} [{string.Join(", ", Role.Value?.SpawnSettings?.SpawnRooms ?? new())}] [{string.Join(", ", Role.Value?.SpawnSettings?.SpawnZones ?? new())}] [{string.Join(", ", Role.Value?.SpawnSettings?.SpawnPoints ?? new())}] ({Role.Value?.SpawnSettings?.SpawnChance}%)</size>\n";
 
             foreach (Tuple<string, string, string, string> tuple in CustomRole.NotLoadedRoles)
-                response += $"\n<size={TitleSize}>❌ [{tuple.Item1}] <color=red>{tuple.Item2.Split('/').Last()}</color></size>\n    <size={TextSize}>Path: {tuple.Item2}\n{Spacing}Error: <color=red>{tuple.Item4}</color></size>\n";
+                if (tuple is not null)
+                    response += $"\n<size={TitleSize}>❌ [{tuple?.Item1}] <color=red>{tuple?.Item2?.Split('/')?.Last()}</color></size>\n    <size={TextSize}>Path: {tuple?.Item2}\n{Spacing}Error: <color=red>{tuple?.Item4}</color></size>\n";
             
             return true;
         }

@@ -109,13 +109,12 @@ namespace UncomplicatedCustomRoles.Manager
                 switch (Role.SpawnSettings.Spawn)
                 {
                     case SpawnType.ZoneSpawn:
-                        player.Position = Room.List.Where(room => room.Zone == Role.SpawnSettings.SpawnZones.RandomItem() && room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
+                        player.Position = Room.List.Where(room => room.Zone == Role.SpawnSettings.SpawnZones.RandomItem() && room.TeslaGate is null && room.Type is not RoomType.EzShelter).GetRandomValue().Position.AddY(1.5f);
                         break;
                     case SpawnType.CompleteRandomSpawn:
                         player.Position = Room.List.Where(room => room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
                         break;
                     case SpawnType.RoomsSpawn:
-                        LogManager.Silent($"Going to spawn CR {Role.Name} ({Role.Id}) ({player.Nickname}) at a Room - Count: {Role.SpawnSettings.SpawnRooms.Count}");
                         player.Position = Room.Get(Role.SpawnSettings.SpawnRooms.RandomItem()).Position.AddY(1.5f);
                         break;
                     case SpawnType.SpawnPointSpawn:
@@ -162,7 +161,7 @@ namespace UncomplicatedCustomRoles.Manager
                         }
 
             Player.ClearAmmo();
-            if (Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
+            if (Role.Ammo is not null && Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
                 foreach (KeyValuePair<AmmoType, ushort> Ammo in Role.Ammo)
                     Player.AddAmmo(Ammo.Key, Ammo.Value);
 
@@ -236,6 +235,14 @@ namespace UncomplicatedCustomRoles.Manager
                     Player.DisplayNickname = Nick.Split(',').RandomItem();
                 else
                     Player.DisplayNickname = Nick;
+
+                Timing.CallDelayed(3f, () =>
+                {
+                    if (Role.Nickname.Contains(","))
+                        Player.DisplayNickname = Nick.Split(',').RandomItem();
+                    else
+                        Player.DisplayNickname = Nick;
+                });
 
                 ChangedNick = true;
             }
@@ -394,22 +401,6 @@ namespace UncomplicatedCustomRoles.Manager
                     return CustomRole.CustomRoles[RolePercentage[NewRole].RandomItem().Id];
 
             return null;
-        }
-
-        public static void UpdateChaosModifier()
-        {
-            return;
-
-            /*
-             *  We need to check if there's another function instead of Round.ChaosTarget
-            int diff = 0;
-            foreach (SummonedCustomRole role in SummonedCustomRole.List.Where(role => role.IsOverwrittenRole))
-            {
-                if (role.Role.Team is not Team.SCPs && PlayerRolesUtils.GetTeam(role.Role.Role) is Team.SCPs)
-                    diff--;
-                else if (role.Role.Team is Team.SCPs && PlayerRolesUtils.GetTeam(role.Role.Role) is not Team.SCPs)
-                    diff++;
-            }*/
         }
 
         public static void HandleRecontainmentAnnoucement(CustomScpAnnouncer element)

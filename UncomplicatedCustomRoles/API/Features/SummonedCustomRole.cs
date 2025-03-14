@@ -176,7 +176,6 @@ namespace UncomplicatedCustomRoles.API.Features
                 _roleBase = Player.Role.Base as FpcStandardScp;
             else if (Role.Role.GetTeam() != Role.Team && Role.Role.GetTeam() is Team.SCPs && Role.Team is not Team.SCPs)
                 _roleBase = Player.Role.Base as HumanRole;
-            SpawnManager.UpdateChaosModifier();
         }
 
         /// <summary>
@@ -199,7 +198,6 @@ namespace UncomplicatedCustomRoles.API.Features
             LogManager.Silent($"Destroying instance of CR {Role.Id} of PL {Player}");
             Remove();
             List.Remove(this);
-            SpawnManager.UpdateChaosModifier();
         }
 
         /// <summary>
