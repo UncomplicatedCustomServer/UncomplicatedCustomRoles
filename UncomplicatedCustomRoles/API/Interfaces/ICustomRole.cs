@@ -69,7 +69,7 @@ namespace UncomplicatedCustomRoles.API.Interfaces
 
         public abstract SpawnBehaviour? SpawnSettings { get; set; }
 
-        public abstract CustomFlags? CustomFlags { get; set; }
+        public abstract List<object>? CustomFlags { get; set; }
 
         public abstract bool IgnoreSpawnSystem { get; set; }
     }

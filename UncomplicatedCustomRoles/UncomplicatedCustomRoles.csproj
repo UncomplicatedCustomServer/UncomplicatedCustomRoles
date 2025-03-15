@@ -54,21 +54,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="API\Attributes\PluginCustomRole.cs" />
-    <Compile Include="API\Features\CustomModules\CoroutineModule.cs" />
-    <Compile Include="API\Features\CustomModules\CustomModule.cs" />
     <Compile Include="API\Features\Behaviour\AhpBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\HealthBehaviour.cs" />
+    <Compile Include="API\Features\CustomModules\CustomModule.cs" />
     <Compile Include="API\Features\CustomModules\CustomScpAnnouncer.cs" />
-    <Compile Include="API\Features\CustomModules\DoNotTrigger096.cs" />
-    <Compile Include="API\Features\CustomModules\DoNotTriggerTeslaGates.cs" />
-    <Compile Include="API\Features\CustomModules\HalfLifeStealer.cs" />
-    <Compile Include="API\Features\CustomModules\ItemBan.cs" />
-    <Compile Include="API\Features\CustomModules\LifeStealer.cs" />
-    <Compile Include="API\Features\CustomModules\NotAffectedByAppearance.cs" />
-    <Compile Include="API\Features\CustomModules\PacifismUntilDamage.cs" />
+    <Compile Include="API\Features\CustomModules\DoNotTriggetTeslaGates.cs" />
     <Compile Include="API\Features\CustomModules\SilentAnnouncer.cs" />
-    <Compile Include="API\Features\CustomModules\SilentWalker.cs" />
-    <Compile Include="API\Features\CustomModules\TutorialRagdoll.cs" />
     <Compile Include="API\Features\CustomRole.cs" />
     <Compile Include="API\Features\CustomRoleEventHandler.cs" />
     <Compile Include="API\Features\EventCustomRole.cs" />
@@ -81,7 +72,6 @@
     <Compile Include="API\Features\SpawnPoint.cs" />
     <Compile Include="API\Features\SummonedCustomRole.cs" />
     <Compile Include="API\Interfaces\ICoroutineRole.cs" />
-    <Compile Include="API\Interfaces\ICustomModule.cs" />
     <Compile Include="API\Struct\Quadruple.cs" />
     <Compile Include="API\Struct\Triplet.cs" />
     <Compile Include="Commands\CommandParent.cs" />
@@ -106,6 +96,7 @@
     <Compile Include="Integrations\ScriptedEvents.cs" />
     <Compile Include="API\Interfaces\IUCRCommand.cs" />
     <Compile Include="Integrations\UCI.cs" />
+    <Compile Include="Manager\Compatibility\OldCustomRole.cs" />
     <Compile Include="Manager\FileConfigs.cs" />
     <Compile Include="API\Features\Effect.cs" />
     <Compile Include="Manager\NET\HttpManager.cs" />
@@ -115,9 +106,11 @@
     <Compile Include="Manager\NET\VersionInfo.cs" />
     <Compile Include="Manager\SpawnManager.cs" />
     <Compile Include="Manager\VersionManager.cs" />
+    <Compile Include="Manager\YamlFlagsHandler.cs" />
     <Compile Include="Patches\Announcer.cs" />
     <Compile Include="Patches\InventoryLimitsPrefix.cs" />
     <Compile Include="Patches\DisabledEventPatch.cs" />
+    <Compile Include="Patches\PlayerEventPrefix.cs" />
     <Compile Include="Patches\PlayerInfoPatch.cs" />
     <Compile Include="Patches\Scp3114StranglePrefix.cs" />
     <Compile Include="Patches\ServerNamePatch.cs" />
@@ -522,7 +515,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ExMod.Exiled">
-      <Version>9.4.0</Version>
+      <Version>9.5.1</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.3</Version>

@@ -209,7 +209,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets or sets the <see cref="Enums.CustomFlags"/> of the custom role
         /// </summary>
-        public virtual CustomFlags? CustomFlags { get; set; } = null;
+        public virtual List<object>? CustomFlags { get; set; } = null;
 
         /// <summary>
         /// Gets or sets whether the custom role should be evaluated during normal spawn events or not

@@ -3,6 +3,7 @@ using Exiled.Loader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using UncomplicatedCustomRoles.API.Attributes;
 using UncomplicatedCustomRoles.API.Features;
@@ -13,7 +14,12 @@ namespace UncomplicatedCustomRoles.Manager
 {
     internal class ImportManager
     {
-        public static List<IPlugin<IConfig>> ActivePlugins => new();
+        public static readonly List<IPlugin<IConfig>> ActivePlugins = new();
+
+        public static readonly List<Assembly> AvailableAssemblies = new()
+        {
+            Plugin.Instance.Assembly
+        };
 
         public const float WaitingTime = 5f;
 
@@ -38,6 +44,7 @@ namespace UncomplicatedCustomRoles.Manager
 
             foreach (IPlugin<IConfig> plugin in Loader.Plugins.Where(plugin => plugin.Name != Plugin.Instance.Name))
             {
+                AvailableAssemblies.Add(plugin.Assembly);
                 LogManager.Silent($"[Import Manager] Passing plugin {plugin.Name}");
                 foreach (Type type in plugin.Assembly.GetTypes())
                     try

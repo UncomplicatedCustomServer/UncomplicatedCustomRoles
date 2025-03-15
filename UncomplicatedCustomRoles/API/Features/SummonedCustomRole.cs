@@ -119,7 +119,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets a <see cref="IReadOnlyCollection{T}"/> of every installed <see cref="CustomModule"/>
         /// </summary>
-        public IReadOnlyCollection<ICustomModule> CustomModules => _customModules;
+        public IReadOnlyCollection<CustomModule> CustomModules => _customModules;
 
         private PlayerRoleBase _roleBase { get; set; } = null;
 
@@ -127,7 +127,7 @@ namespace UncomplicatedCustomRoles.API.Features
 
         private bool _isRegeneratingHume { get; set; }
 
-        private List<ICustomModule> _customModules { get; }
+        private List<CustomModule> _customModules { get; }
 
         /// <summary>
         /// The duration of a tick
@@ -149,7 +149,7 @@ namespace UncomplicatedCustomRoles.API.Features
             if (IsDefaultCoroutineRole)
                 GenericCoroutine = Timing.RunCoroutine(RoleTickCoroutine());
 
-            _customModules = CustomModule.Load(Role.CustomFlags ?? CustomFlags.None, this);
+            _customModules = CustomModule.Load(Role.CustomFlags ?? new(), this);
 
             if (Role is ICoroutineRole coroutineRole)
                 if (coroutineRole.TickRate > 0)
@@ -157,9 +157,6 @@ namespace UncomplicatedCustomRoles.API.Features
                     coroutineRole.CoroutineHandler = Timing.RunCoroutine(CoroutineRoleCoroutine());
                     coroutineRole.Frame = -1;
                 }
-
-            foreach (CoroutineModule coroutineModule in GetModules<CoroutineModule>())
-                coroutineModule.Execute();
 
             EvaluateRoleBase();
 
@@ -224,8 +221,12 @@ namespace UncomplicatedCustomRoles.API.Features
                 Player.Scale = new(1, 1, 1);
 
                 if (IsCustomNickname)
-                {
                     Player.DisplayNickname = null;
+
+                foreach (CustomModule module in _customModules.ToArray())
+                {
+                    module.OnRemoved();
+                    _customModules.Remove(module);
                 }
 
                 if (IsDefaultCoroutineRole && GenericCoroutine.IsRunning)
@@ -233,10 +234,6 @@ namespace UncomplicatedCustomRoles.API.Features
 
                 if (Role is ICoroutineRole role && role.CoroutineHandler.IsRunning)
                     Timing.KillCoroutines(role.CoroutineHandler);
-
-                foreach (CoroutineModule coroutineModule in GetModules<CoroutineModule>())
-                    if (coroutineModule.CoroutineHandler.IsRunning)
-                        Timing.KillCoroutines(coroutineModule.CoroutineHandler);
             }
             catch (Exception e)
             {
@@ -355,7 +352,7 @@ namespace UncomplicatedCustomRoles.API.Features
         public T[] GetModules<T>() where T : CustomModule
         {
             T[] result = new T[] { };
-            foreach (ICustomModule module in _customModules.Where(cm => cm.GetType() == typeof(T)))
+            foreach (CustomModule module in _customModules.Where(cm => cm.GetType() == typeof(T)))
                 result.AddItem(module);
             return result;
         }
@@ -379,11 +376,17 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <returns></returns>
         public bool HasModule<T>() where T : CustomModule => _customModules.Any(cm => cm.GetType() == typeof(T));
 
+#nullable enable
         /// <summary>
         /// Add a new <see cref="CustomModule"/> to the current <see cref="SummonedCustomRole"/> instance
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        public void AddModule<T>() where T : CustomModule => _customModules.Add(CustomModule.Load(typeof(T), this));
+        public void AddModule(Type type, Dictionary<string, string>? args = null)
+        {
+            if (CustomModule.FastAdd(type, this, args) is CustomModule module)
+                _customModules.Add(module);
+        }
+#nullable disable
 
         /// <summary>
         /// Try to remove the first <see cref="CustomModule"/>
@@ -393,8 +396,7 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             if (GetModule(out T module))
             {
-                if (module is CoroutineModule coroutineModule && coroutineModule.CoroutineHandler.IsRunning)
-                    Timing.KillCoroutines(coroutineModule.CoroutineHandler);
+                module.OnRemoved();
                 _customModules.Remove(module);
             }
         }
@@ -405,7 +407,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <typeparam name="T"></typeparam>
         public void RemoveModules<T>() where T : CustomModule
         {
-            foreach (ICustomModule _ in GetModules<T>())
+            foreach (CustomModule _ in GetModules<T>())
                 RemoveModule<T>();
         }
 

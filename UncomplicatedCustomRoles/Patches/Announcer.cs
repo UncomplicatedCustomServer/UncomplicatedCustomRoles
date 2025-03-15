@@ -19,7 +19,7 @@ namespace UncomplicatedCustomRoles.Patches
 
                 if (role.GetModule(out CustomScpAnnouncer announcer))
                 {
-                    announcer.Awake(hit);
+                    //announcer.Awake(hit);
 
                     SpawnManager.HandleRecontainmentAnnoucement(announcer);
 
