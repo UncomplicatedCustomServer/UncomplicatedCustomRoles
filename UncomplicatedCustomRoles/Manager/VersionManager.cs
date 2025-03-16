@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Net;
 using System.Security.Cryptography;
-using System.Security.Policy;
 using System.Threading.Tasks;
 using UncomplicatedCustomRoles.Manager.NET;
 
@@ -55,13 +54,13 @@ namespace UncomplicatedCustomRoles.Manager
             string hash = HashFile(Plugin.Instance.Assembly.GetPath());
             if (hash != VersionInfo.Hash)
             {
-                RecallMessageSender();
+                HashNotMatchMessageSender(hash);
                 await Task.Run(async delegate
                 {
                     while (true)
                     {
-                        await Task.Delay(75000);
-                        RecallMessageSender();
+                        await Task.Delay(900000);
+                        HashNotMatchMessageSender(hash);
                     }
                 });
             }

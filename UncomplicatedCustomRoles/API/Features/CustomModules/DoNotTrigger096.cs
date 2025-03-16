@@ -1,5 +1,5 @@
 ﻿namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
-    public class SilentAnnouncer : CustomModule
+    public class DoNotTrigger096 : CustomModule
     { }
 }

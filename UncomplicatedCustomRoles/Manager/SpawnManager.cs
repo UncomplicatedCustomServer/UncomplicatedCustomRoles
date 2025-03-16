@@ -169,9 +169,6 @@ namespace UncomplicatedCustomRoles.Manager
 
             PlayerInfoArea InfoArea = Player.ReferenceHub.nicknameSync.Network_playerInfoToShow;
 
-            if (!Role.OverrideRoleName && (Role.CustomFlags & CustomFlags.ShowOnlyCustomInfo) == CustomFlags.ShowOnlyCustomInfo)
-                Player.ReferenceHub.nicknameSync.Network_playerInfoToShow &= ~PlayerInfoArea.Role;
-
             if (Role.OverrideRoleName)
                 Player.ApplyCustomInfoAndRoleName(Role.CustomInfo, Role.Name);
             else
@@ -403,53 +400,27 @@ namespace UncomplicatedCustomRoles.Manager
             return null;
         }
 
-        public static void HandleRecontainmentAnnoucement(CustomScpAnnouncer element)
-        {
-            HandleRecontainmentAnnoucement(element.DamageHandler, element.Instance);
-            element.Execute();
-        }
-
-        public static void HandleRecontainmentAnnoucement(DamageHandlerBase baseHandler, SummonedCustomRole role)
+        internal static void HandleRecontainmentAnnoucement(DamageHandlerBase baseHandler, CustomScpAnnouncer customScpAnnouncer)
         {
             float num = AlphaWarheadController.Detonated ? 3.5f : 1f;
-            TryGetPublicFormat(role.Role.Name, role.Role.Role, out string cassie, out string subtitle);
-            NineTailedFoxAnnouncer.singleton.ServerOnlyAddGlitchyPhrase($"{cassie} {baseHandler.CassieDeathAnnouncement.Announcement}", UnityEngine.Random.Range(0.1f, 0.14f) * num, UnityEngine.Random.Range(0.07f, 0.08f) * num);
+            NineTailedFoxAnnouncer.singleton.ServerOnlyAddGlitchyPhrase($"{ScpToCassie(customScpAnnouncer.RoleName)} {baseHandler.CassieDeathAnnouncement.Announcement}", UnityEngine.Random.Range(0.1f, 0.14f) * num, UnityEngine.Random.Range(0.07f, 0.08f) * num);
             List<SubtitlePart> list = new()
             {
-                new(SubtitleType.SCP, new string[] { subtitle }),
+                new(SubtitleType.SCP, new string[] { customScpAnnouncer.RoleName.Replace("SCP", string.Empty).Replace("scp", string.Empty).Replace("Scp", string.Empty) }),
             };
             list.AddRange(baseHandler.CassieDeathAnnouncement.SubtitleParts);
             new SubtitleMessage(list.ToArray()).SendToAuthenticated(0);
         }
 
-        private static void TryGetPublicFormat(string input, RoleTypeId def, out string cassie, out string subtitle)
+        private static string ScpToCassie(string scp)
         {
-            if (!input.Contains("SCP-"))
-                NineTailedFoxAnnouncer.ConvertSCP(def, out subtitle, out cassie);
-            else
-                TryExtractScpNumber(input, out cassie, out subtitle);
+            string result = string.Empty;
+
+            if (scp.ToUpper().Contains("SCP"))
+                result += "SCP ";
+
+            return $"{result}{scp.ToInt(" ")}";
         }
-
-        private static void TryExtractScpNumber(string input, out string cassie, out string subtitle)
-        {
-            char[] allowed = new[] { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' }; 
-            cassie = string.Empty;
-            subtitle = string.Empty;
-            foreach (char c in ToPublicFormat(Regex.Replace(input, "<.*?>", string.Empty)).ToCharArray())
-                if (allowed.Contains(c))
-                {
-                    cassie += $"{c} ";
-                    subtitle += c;
-                }
-
-            if (ClutterSpawner.IsHolidayActive(Holidays.AprilFools))
-            {
-                cassie = "1 0 4";
-                subtitle = "104";
-            }
-        }
-
-        private static string ToPublicFormat(string input) => input.Replace("SCP", "").Replace(" ", "").ToUpper();
 
         private static IEnumerable<Player> LoadAppearanceAffectedPlayers(Player target)
         {

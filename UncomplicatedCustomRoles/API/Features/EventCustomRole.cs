@@ -82,9 +82,9 @@ namespace UncomplicatedCustomRoles.API.Features
         public virtual AhpBehaviour Ahp { get; set; } = new();
 
         /// <summary>
-        /// Gets or sets the <see cref="IUCREffect"/>s
+        /// Gets or sets the <see cref="Effect"/>
         /// </summary>
-        public virtual List<Effect> Effects { get; set; } = new();
+        public virtual List<Effect>? Effects { get; set; } = new();
 
         /// <summary>
         /// Gets or sets the <see cref="StaminaBehaviour"/>
@@ -191,13 +191,12 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets or sets the <see cref="Enums.CustomFlags"/> of the custom role
         /// </summary>
-        public virtual CustomFlags? CustomFlags { get; set; } = null;
+        public virtual List<object>? CustomFlags { get; set; } = null;
 
         /// <summary>
         /// Gets or sets whether the custom role should be evaluated during normal spawn events or not
         /// </summary>
         public virtual bool IgnoreSpawnSystem { get; set; } = false;
-        List<Manager.Effect>? ICustomRole.Effects { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 
         /// <summary>
         /// Called before kicking a <see cref="API.Features.Player"/> from the server.

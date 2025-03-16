@@ -3,16 +3,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.Manager;
-using static Mono.Security.X509.X520;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
     public abstract class CustomModule
     {
         /// <summary>
-        /// The display name of the given <see cref="CustomModule"/>
+        /// Gets the display name of the given <see cref="CustomModule"/>
         /// </summary>
-        /// <def
+        /// <value>Default one is the class' name</value>
         public virtual string Name
         {
             get
@@ -21,13 +20,27 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
             }
         }
 
+        /// <summary>
+        /// Gets the list of events that this <see cref="CustomModule"/> will listen for.
+        /// </summary>
+        /// <remarks>The <see cref="OnEvent(string, IPlayerEvent)"/> will be invoked only for the given events!</remarks>
         public virtual List<string> TriggerOnEvents { get; } = new();
 
+        /// <summary>
+        /// Gets the list of required argument names for the current <see cref="CustomModule"/>
+        /// </summary>
         public virtual List<string> RequiredArgs { get; } = new();
 
-        private Dictionary<string, string> Args { get; set; }
+        /// <summary>
+        /// Gets the args of the current <see cref="CustomModule"/>
+        /// </summary>
+        /// <remarks>Every value is a <see cref="string"/></remarks>
+        internal Dictionary<string, string> Args { get; private set; }
 
-        private SummonedCustomRole CustomRole { get; set; }
+        /// <summary>
+        /// Gets the instance of the <see cref="SummonedCustomRole"/> in which the current <see cref="CustomModule"/> is embedded
+        /// </summary>
+        internal SummonedCustomRole CustomRole { get; private set; }
 
         internal void Initialize(SummonedCustomRole summonedCustomRole, Dictionary<string, string> args)
         {
@@ -35,14 +48,32 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
             Args = args;
         }
 
+        /// <summary>
+        /// The added event function
+        /// </summary>
+        /// <remarks>Invoked when the <see cref="CustomModule"/> has been added to the <see cref="SummonedCustomRole"/></remarks>
         public virtual void OnAdded()
         { }
 
+        /// <summary>
+        /// The removed event function
+        /// </summary>
+        /// <remarks>Invoked when the <see cref="CustomModule"/> has been removed from the <see cref="SummonedCustomRole"/></remarks>
         public virtual void OnRemoved()
         { }
 
+        /// <summary>
+        /// The generic event function
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="ev"></param>
+        /// <returns>Invoked only for the events listed in <see cref="TriggerOnEvents"/></returns>
         public virtual bool OnEvent(string name, IPlayerEvent ev) => true;
 
+        /// <summary>
+        /// A generic function
+        /// </summary>
+        /// <remark>This won't be invoked by UCR</remark>
         public virtual void Execute()
         { }
 
@@ -78,26 +109,35 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
 
         private static CustomModule? InitializeCustomModule(string name, Dictionary<string, string>? args, Type[] types, SummonedCustomRole summonedCustomRole)
         {
-            Type type = types.FirstOrDefault(t => t.Name == name);
-
-            if (type is null)
+            try
             {
-                LogManager.Error($"Failed to enable CustomModule '{name}'!\nError: ERR_CUSTOM_MODULE_NOT_FOUND", "CM0001");
+                Type type = types.FirstOrDefault(t => t.Name == name);
+
+                if (type is null)
+                {
+                    LogManager.Error($"Failed to enable CustomModule '{name}'!\nError: ERR_CUSTOM_MODULE_NOT_FOUND", "CM0001");
+                    return null;
+                }
+
+                if (Activator.CreateInstance(type) is not CustomModule module)
+                {
+                    LogManager.Error($"Failed to enable CustomModule '{name}'!\nError: ERR_CUSTOM_MODULE_NULLREFERENCE", "CM0002");
+                    return null;
+                }
+
+                module.Initialize(summonedCustomRole, args ?? new());
+                module.OnAdded(); // Invoke added event
+
+                LogManager.Silent($"CustomModule '{name}' successfully enabled for player {summonedCustomRole.Player.Nickname} ({summonedCustomRole.Player.Id}) and CustomRole {summonedCustomRole.Role.Id} ({summonedCustomRole.Role.Name})!");
+
+                return module;
+            }
+            catch (Exception e)
+            {
+                LogManager.Error(e.ToString());
+
                 return null;
             }
-
-            if (Activator.CreateInstance(type) is not CustomModule module)
-            {
-                LogManager.Error($"Failed to enable CustomModule '{name}'!\nError: ERR_CUSTOM_MODULE_NULLREFERENCE", "CM0002");
-                return null;
-            }
-
-            module.Initialize(summonedCustomRole, args ?? new());
-            module.OnAdded(); // Invoke added event
-
-            LogManager.Silent($"CustomModule '{name}' successfully enabled for player {summonedCustomRole.Player.Nickname} ({summonedCustomRole.Player.Id}) and CustomRole {summonedCustomRole.Role.Id} ({summonedCustomRole.Role.Name})!");
-
-            return module;
         }
     }
 }

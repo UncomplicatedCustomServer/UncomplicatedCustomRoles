@@ -100,7 +100,7 @@ namespace UncomplicatedCustomRoles.API.Features
         public virtual AhpBehaviour Ahp { get; set; } = new();
 
         /// <summary>
-        /// Gets or sets the <see cref="IUCREffect"/>s
+        /// Gets or sets the <see cref="Effect"/>
         /// </summary>
         public virtual List<Effect>? Effects { get; set; } = new();
 

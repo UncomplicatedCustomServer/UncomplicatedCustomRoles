@@ -149,6 +149,7 @@ namespace UncomplicatedCustomRoles.Manager.Compatibility
                 if ((CustomFlags & flag) == flag)
                     flags.Add(flag.ToString());
 
+            flags.Remove("None");
             return flags;
         }
     }

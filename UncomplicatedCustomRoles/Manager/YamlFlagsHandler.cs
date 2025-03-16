@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
+using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -30,9 +32,12 @@ namespace UncomplicatedCustomRoles.Manager
 
             foreach (object flag in flags)
             {
-                if (flag is Dictionary<string, Dictionary<string, string>> str)
-                    foreach (KeyValuePair<string, Dictionary<string, string>> res in str)
-                        result[res.Key] = res.Value;
+                if (flag is Dictionary<object, object> str)
+                {
+                    foreach (KeyValuePair<object, object> res in str)
+                        if (res.Value is Dictionary<object, object> dict)
+                            result[res.Key.ToString()] = dict.ConvertToString();
+                }
                 else
                     result[flag.ToString()] = null;
             }

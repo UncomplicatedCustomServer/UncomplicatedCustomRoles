@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UncomplicatedCustomRoles.API.Features;
+using UncomplicatedCustomRoles.Manager.Compatibility;
 
 namespace UncomplicatedCustomRoles.Manager
 {
@@ -14,22 +15,31 @@ namespace UncomplicatedCustomRoles.Manager
     {
         internal string Dir = Path.Combine(Paths.Configs, "UncomplicatedCustomRoles");
 
-        public bool Is(string localDir = "")
-        {
-            return Directory.Exists(Path.Combine(Dir, localDir));
-        }
+        public bool Is(string localDir = "") => Directory.Exists(Path.Combine(Dir, localDir));
 
-        public string[] List(string localDir = "")
-        {
-            return Directory.GetFiles(Path.Combine(Dir, localDir));
-        }
+        public string[] List(string localDir = "") => Directory.GetFiles(Path.Combine(Dir, localDir));
 
-        public void LoadAll(string localDir = "")
+        public void LoadAll(string localDir = "", Action<CustomRole> action = null)
         {
-            LoadAction((CustomRole Role) =>
+            LoadAction(action ?? ((CustomRole Role) =>
             {
                 CustomRole.Register(Role);
-            }, localDir);
+            }), localDir);
+            
+            foreach (string dir in Directory.GetDirectories(Path.Combine(Dir, localDir)))
+            {
+                string name = dir.Replace(Dir, string.Empty);
+                if (name[0] is '/')
+                    name = name.Remove(0, 1);
+
+                if (int.TryParse(dir, out int num) && num < 990000)
+                    continue;
+
+                LoadAction((CustomRole Role) =>
+                {
+                    CustomRole.Register(Role);
+                }, name);
+            }
         }
 
         public void LoadAction(Action<CustomRole> action, string localDir = "")
@@ -44,7 +54,7 @@ namespace UncomplicatedCustomRoles.Manager
                     if (FileName.Split().First() == ".")
                         return;
 
-                    if (CustomTypeChecker(File.ReadAllText(FileName), out CustomRole role, out string error))
+                    if (CustomTypeChecker(FileName, out CustomRole role, out string error))
                     {
                         LogManager.Debug($"Proposed to the registerer the external role {role.Id} [{role.Name}] from file:\n{FileName}");
                         action(role);
@@ -58,15 +68,16 @@ namespace UncomplicatedCustomRoles.Manager
                     CustomRole.NotLoadedRoles.Add(new(TryGetRoleId(File.ReadAllText(FileName)), FileName, ex.GetType().Name, ex.Message));
 
                     if (!Plugin.Instance.Config.Debug)
-                        LogManager.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.");
+                        LogManager.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.\n\nThis is a YAML error that YOU CAUSED and therefore >>YOU<< NEED TO FIX IT!\nDON'T COME TO US WITH THIS ERROR!");
                     else
-                        LogManager.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.\nStack trace: {ex.StackTrace}");
+                        LogManager.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.\nStack trace: {ex.StackTrace}\n\nThis is a YAML error that YOU CAUSED and therefore >>YOU<< NEED TO FIX IT!\nDON'T COME TO US WITH THIS ERROR!");
                 }
             }
         }
 
-        private bool CustomTypeChecker(string content, out CustomRole role, out string error)
+        private bool CustomTypeChecker(string path, out CustomRole role, out string error)
         {
+            string content = File.ReadAllText(path);
             Dictionary<string, object> data = Loader.Deserializer.Deserialize<Dictionary<string, object>>(content);
             role = default;
             error = null;
@@ -74,19 +85,30 @@ namespace UncomplicatedCustomRoles.Manager
             SnakeCaseNamingStrategy namingStrategy = new();
 
             foreach (PropertyInfo property in typeof(CustomRole).GetProperties().Where(p => p.CanWrite && p is not null && p.GetType() is not null))
-                if (!data.ContainsKey(namingStrategy.GetPropertyName(property.Name, false)) && error is null)
-                    error = $"Given CustomRole doesn't contain the required property '{namingStrategy.GetPropertyName(property.Name, false)}' ({namingStrategy.GetPropertyName(property.PropertyType.Name, false)})";
+            {
+                if (!data.ContainsKey(namingStrategy.GetPropertyName(property.Name, false)))
+                    error = $"Given CustomRole doesn't contain the required property '{namingStrategy.GetPropertyName(property.Name, false)}' ({namingStrategy.GetPropertyName(property.PropertyType.Name, false)})\nAt '{path}'";
+
+                if (error is not null)
+                    break;
+            }
 
             if (error is null)
             {
-                role = Loader.Deserializer.Deserialize<CustomRole>(content);
+                try
+                {
+                    role = Loader.Deserializer.Deserialize<CustomRole>(content);
+                } catch (Exception)
+                {
+                    role = Loader.Deserializer.Deserialize<OldCustomRole>(content).ToCustomRole();
+                    File.WriteAllText(path, Loader.Serializer.Serialize(role));
+                    Log.Warn($"Role {role.Name} ({role.Id}) was NOT updated! - Auto updated correctly, you shouldn't see this message again :D\nAt {path}");
+                }
                 return true;
             }
 
             return false;
         }
-
-        public void Echo() { }
 
         public void Welcome(string localDir = "")
         {
@@ -108,7 +130,7 @@ namespace UncomplicatedCustomRoles.Manager
 
             if (pieces.Contains("id:"))
                 return pieces.FirstOrDefault(l => l.Contains("id:")).Replace(" ", "").Replace("id:", "");
-            return "ND";
+            return "N/D";
         }
     }
 }

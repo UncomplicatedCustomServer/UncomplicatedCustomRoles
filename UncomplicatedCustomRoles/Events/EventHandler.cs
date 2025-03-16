@@ -12,12 +12,11 @@ using UncomplicatedCustomRoles.API.Features;
 using Exiled.Events.EventArgs.Scp330;
 using CustomPlayerEffects;
 using UncomplicatedCustomRoles.API.Interfaces;
-using UncomplicatedCustomRoles.API.Features.CustomModules;
 using Exiled.Events.EventArgs.Warhead;
 using PlayerRoles.Ragdolls;
 using Exiled.Events.EventArgs.Scp096;
-using UncomplicatedCustomRoles.API.Features.CustomModules.ItemBan;
-using System.Threading.Tasks;
+using UncomplicatedCustomRoles.API.Features.CustomModules;
+using UncomplicatedCustomRoles.Patches;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -26,6 +25,8 @@ namespace UncomplicatedCustomRoles.Events
         private static List<int> RagdollAppearanceQueue { get; } = new();
 
         private static List<int> FirstRoundPlayers { get; } = new();
+
+        private static Dictionary<int, Tuple<CustomScpAnnouncer, DateTimeOffset>> TerminationQueue { get; } = new();
 
         private static bool Started { get; set; } = false;
 
@@ -112,12 +113,26 @@ namespace UncomplicatedCustomRoles.Events
         }
 
         public void OnDying(DyingEventArgs ev)
-        {
-            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole) && customRole.HasModule<TutorialRagdoll>())
-                RagdollAppearanceQueue.Add(ev.Player.Id);
+        { 
+            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole))
+            {
+                if (customRole.HasModule<TutorialRagdoll>())
+                    RagdollAppearanceQueue.Add(ev.Player.Id);
+
+                if (customRole.GetModule(out CustomScpAnnouncer announcer))
+                    TerminationQueue.Add(ev.Player.Id, new(announcer, DateTimeOffset.Now));
+            }
         }
 
-        public void OnDied(DiedEventArgs ev) => SpawnManager.ClearCustomTypes(ev.Player);
+        public void OnDied(DiedEventArgs ev)
+        {
+            if (TerminationQueue.TryGetValue(ev.Player.Id, out Tuple<CustomScpAnnouncer, DateTimeOffset> data) && (DateTimeOffset.Now - data.Item2).Milliseconds < 1300)
+                SpawnManager.HandleRecontainmentAnnoucement(ev.DamageHandler, data.Item1);
+
+            TerminationQueue.TryRemove(ev.Player.Id);
+
+            SpawnManager.ClearCustomTypes(ev.Player);
+        }
 
         public void OnRagdollSpawn(SpawningRagdollEventArgs ev)
         {
@@ -230,22 +245,13 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnHurt(HurtEventArgs ev)
         {
-            if (ev.Player is not null && ev.Attacker is not null && ev.Attacker.IsAlive && ev.Player.IsAlive && ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedCustomRole))
-            {
-                summonedCustomRole.LastDamageTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            // Update the LastDamageTime for some HumeShield features
+            if (ev.Player is not null && ev.Player.IsAlive && ev.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole))
+                playerCustomRole.LastDamageTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-                if (summonedCustomRole.GetModule(out LifeStealer lifeStealer))
-                {
-                    lifeStealer.Amount = ev.Amount;
-                    lifeStealer.Execute();
-                }
-
-                if (summonedCustomRole.GetModule(out HalfLifeStealer halfLifeStealer))
-                {
-                    halfLifeStealer.Amount = ev.Amount;
-                    halfLifeStealer.Execute();
-                }
-            }
+            // Heal the attacker (for stealing the life) if it has the flag
+            if (ev.Attacker is not null && ev.Attacker.IsAlive && ev.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole) && attackerCustomRole.GetModule(out LifeStealer lifeStealer))
+                ev.Attacker.Heal(ev.Amount * (lifeStealer.Percentage / 100));
         }
 
         public void OnEscaping(EscapingEventArgs Escaping)
@@ -315,20 +321,20 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnMakingNoise(MakingNoiseEventArgs ev)
         {
-            if (!ev.IsAllowed)
+            /*if (!ev.IsAllowed)
                 return;
 
             if (ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole) && customRole.HasModule<SilentWalker>())
-                ev.IsAllowed = false;
+                ev.IsAllowed = false;*/
         }
 
         public void OnTriggeringTeslaGate(TriggeringTeslaEventArgs ev)
         {
-            if (!ev.IsAllowed)
+            /*if (!ev.IsAllowed)
                 return;
 
             if (ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole) && customRole.HasModule<DoNotTriggerTeslaGates>())
-                ev.IsAllowed = false;
+                ev.IsAllowed = false;*/
         }
 
         public void OnRespawningWave(RespawningTeamEventArgs ev)
@@ -368,7 +374,7 @@ namespace UncomplicatedCustomRoles.Events
         public void OnPickingUp(PickingUpItemEventArgs ev)
         {
             if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
-                ev.IsAllowed = ItemBanBase.CheckPickup(summonedInstance, ev.Pickup);
+                ev.IsAllowed = ItemBan.ValidatePickup(summonedInstance, ev.Pickup);
         }
 
         public static IEnumerator<float> DoSpawnPlayer(Player Player, int Id, bool DoBypassRoleOverwrite = true)

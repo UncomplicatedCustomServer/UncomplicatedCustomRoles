@@ -17,11 +17,8 @@ namespace UncomplicatedCustomRoles.Patches
                 if (role.HasModule<SilentAnnouncer>())
                     return false;
 
-                if (role.GetModule(out CustomScpAnnouncer announcer))
-                {
-                    //announcer.Awake(hit);
-
-                    SpawnManager.HandleRecontainmentAnnoucement(announcer);
+                if (role.GetModule(out CustomScpAnnouncer announcer)) {
+                    SpawnManager.HandleRecontainmentAnnoucement(hit, announcer);
 
                     return false;
                 }

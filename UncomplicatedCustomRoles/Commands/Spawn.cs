@@ -45,9 +45,9 @@ namespace UncomplicatedCustomRoles.Commands
 
             if (arguments[1] is not null && int.TryParse(arguments[1], out int id))
                 foreach (Tuple<string, Player> player in players)
-                    result += $"\n{SpawnPlayer(player, id, sync)}";
+                    result += SpawnPlayer(player, id, sync);
 
-            response = $"Spawning {players.Length} players as CustomRole {arguments[2]}\n{result}";
+            response = $"Spawning {players.Length} players as CustomRole {(sync ? "synchronously" : "asynchronously")}\n{result}";
             return true;
         }
 
