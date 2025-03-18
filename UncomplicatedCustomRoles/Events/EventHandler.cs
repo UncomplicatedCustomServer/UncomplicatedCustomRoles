@@ -278,7 +278,15 @@ namespace UncomplicatedCustomRoles.Events
                 }
 
                 // Try to set the role
-                KeyValuePair<bool, object> NewRole = SpawnManager.ParseEscapeRole(summoned.Role.RoleAfterEscape, Escaping.Player);
+                KeyValuePair<bool, object>? newRole = SpawnManager.ParseEscapeRole(summoned.Role.RoleAfterEscape, Escaping.Player);
+
+                if (newRole is null)
+                {
+                    Escaping.IsAllowed = false;
+                    return;
+                }
+
+                KeyValuePair<bool, object> NewRole = (KeyValuePair<bool, object>)newRole;
 
                 if (NewRole.Value is null)
                 {
@@ -317,24 +325,6 @@ namespace UncomplicatedCustomRoles.Events
 
                 }
             }
-        }
-
-        public void OnMakingNoise(MakingNoiseEventArgs ev)
-        {
-            /*if (!ev.IsAllowed)
-                return;
-
-            if (ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole) && customRole.HasModule<SilentWalker>())
-                ev.IsAllowed = false;*/
-        }
-
-        public void OnTriggeringTeslaGate(TriggeringTeslaEventArgs ev)
-        {
-            /*if (!ev.IsAllowed)
-                return;
-
-            if (ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole) && customRole.HasModule<DoNotTriggerTeslaGates>())
-                ev.IsAllowed = false;*/
         }
 
         public void OnRespawningWave(RespawningTeamEventArgs ev)

@@ -98,13 +98,21 @@ namespace UncomplicatedCustomRoles.Manager
                 try
                 {
                     role = Loader.Deserializer.Deserialize<CustomRole>(content);
+                    return true;
                 } catch (Exception)
                 {
-                    role = Loader.Deserializer.Deserialize<OldCustomRole>(content).ToCustomRole();
-                    File.WriteAllText(path, Loader.Serializer.Serialize(role));
-                    Log.Warn($"Role {role.Name} ({role.Id}) was NOT updated! - Auto updated correctly, you shouldn't see this message again :D\nAt {path}");
+                    try
+                    {
+                        role = Loader.Deserializer.Deserialize<OldCustomRole>(content).ToCustomRole();
+                        File.WriteAllText(path, Loader.Serializer.Serialize(role));
+                        Log.Warn($"Role {role.Name} ({role.Id}) was NOT updated! - Auto updated correctly, you shouldn't see this message again :D\nAt {path}");
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        return false;
+                    }
                 }
-                return true;
             }
 
             return false;

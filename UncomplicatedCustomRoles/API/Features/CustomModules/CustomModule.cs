@@ -80,6 +80,8 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
 #nullable enable
         internal static List<CustomModule> Load(List<object> modules, SummonedCustomRole summonedCustomRole)
         {
+            LogManager.Silent($"[CM Loader] Initialize loading for {summonedCustomRole}\nPreloaded {YamlFlagsHandler.Modules.Length} modules...");
+
             Dictionary<string, Dictionary<string, string>?> data = YamlFlagsHandler.Decode(modules) ?? new();
 
             List<CustomModule> mods = new();
@@ -97,7 +99,7 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         {
             if (Activator.CreateInstance(type) is not CustomModule module)
             {
-                LogManager.Error($"Failed to enable CustomModule '{type?.Name}'!\nError: ERR_CUSTOM_MODULE_NULLREFERENCE", "CM0003");
+                LogManager.Error($"Failed to enable CustomModule '{type?.Name}'!\nError: ERR_CUSTOM_MODULE_NULLREFERENCE_OR_NOTMODULE", "CM0003");
                 return null;
             }
 
@@ -111,24 +113,26 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         {
             try
             {
+                LogManager.Silent($"[CM Loader] Initialize loading module '{name}' for {summonedCustomRole}");
+
                 Type type = types.FirstOrDefault(t => t.Name == name);
 
                 if (type is null)
                 {
-                    LogManager.Error($"Failed to enable CustomModule '{name}'!\nError: ERR_CUSTOM_MODULE_NOT_FOUND", "CM0001");
+                    LogManager.Error($"[CM Loader] Failed to enable CustomModule '{name}'!\nError: ERR_CUSTOM_MODULE_NOT_FOUND", "CM0001");
                     return null;
                 }
 
                 if (Activator.CreateInstance(type) is not CustomModule module)
                 {
-                    LogManager.Error($"Failed to enable CustomModule '{name}'!\nError: ERR_CUSTOM_MODULE_NULLREFERENCE", "CM0002");
+                    LogManager.Error($"[CM Loader] Failed to enable CustomModule '{name}'!\nError: ERR_CUSTOM_MODULE_NULLREFERENCE_OR_NOTMODULE", "CM0002");
                     return null;
                 }
 
                 module.Initialize(summonedCustomRole, args ?? new());
                 module.OnAdded(); // Invoke added event
 
-                LogManager.Silent($"CustomModule '{name}' successfully enabled for player {summonedCustomRole.Player.Nickname} ({summonedCustomRole.Player.Id}) and CustomRole {summonedCustomRole.Role.Id} ({summonedCustomRole.Role.Name})!");
+                LogManager.Silent($"[CM Loader] CustomModule '{name}' successfully enabled for {summonedCustomRole}!");
 
                 return module;
             }

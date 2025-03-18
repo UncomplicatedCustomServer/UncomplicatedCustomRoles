@@ -59,7 +59,7 @@
     <Compile Include="API\Features\CustomModules\CustomModule.cs" />
     <Compile Include="API\Features\CustomModules\CustomScpAnnouncer.cs" />
     <Compile Include="API\Features\CustomModules\DoNotTrigger096.cs" />
-    <Compile Include="API\Features\CustomModules\DoNotTriggetTeslaGates.cs" />
+    <Compile Include="API\Features\CustomModules\DoNotTriggerTeslaGates.cs" />
     <Compile Include="API\Features\CustomModules\ItemBan.cs" />
     <Compile Include="API\Features\CustomModules\LifeStealer.cs" />
     <Compile Include="API\Features\CustomModules\NotAffectedByAppearance.cs" />

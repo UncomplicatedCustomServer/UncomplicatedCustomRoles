@@ -264,18 +264,18 @@ namespace UncomplicatedCustomRoles.Manager
             LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})! [2VDS]");
         }
 
-        public static KeyValuePair<bool, object> ParseEscapeRole(Dictionary<string, string> roleAfterEscape, Player player)
+        public static KeyValuePair<bool, object>? ParseEscapeRole(Dictionary<string, string> roleAfterEscape, Player player)
         {
-            Dictionary<Team, KeyValuePair<bool, object>> AsCuffedByInternalTeam = new();
+            Dictionary<Team, KeyValuePair<bool, object>?> AsCuffedByInternalTeam = new();
             // Dictionary<uint, KeyValuePair<bool, object>> AsCuffedByCustomTeam = new(); we will add the support to UCT and UIU-RS
             // cuffed by InternalTeam FoundationForces
             //   0     1       2             3           = 4
-            Dictionary<int, KeyValuePair<bool, object>> AsCuffedByCustomRole = new();
-            KeyValuePair<bool, object> Default = new(false, RoleTypeId.Spectator);
+            Dictionary<int, KeyValuePair<bool, object>?> AsCuffedByCustomRole = new();
+            KeyValuePair<bool, object>? Default = new(false, RoleTypeId.Spectator);
 
             foreach (KeyValuePair<string, string> kvp in roleAfterEscape)
             {
-                KeyValuePair<bool, object> Data = ParseEscapeString(kvp.Value);
+                KeyValuePair<bool, object>? Data = ParseEscapeString(kvp.Value);
                 if (kvp.Key is "default")
                     Default = Data;
                 else
@@ -322,8 +322,11 @@ namespace UncomplicatedCustomRoles.Manager
             return Default;
         }
 
-        public static KeyValuePair<bool, object> ParseEscapeString(string escape)
+        public static KeyValuePair<bool, object>? ParseEscapeString(string escape)
         {
+            if (escape is "Deny" or "deny" or "DENY")
+                return null;
+
             List<string> Elements = escape.Split(' ').ToList();
             if (Elements.Count != 2)
             {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
-    public class DoNotTriggetTeslaGates : CustomModule
+    public class DoNotTriggerTeslaGates : CustomModule
     {
         public override List<string> TriggerOnEvents => new()
         {

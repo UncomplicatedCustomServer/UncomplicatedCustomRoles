@@ -72,8 +72,6 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.UsedItem += Handler.OnItemUsed;
             PlayerHandler.Hurting += Handler.OnHurting;
             PlayerHandler.Hurt += Handler.OnHurt;
-            PlayerHandler.TriggeringTesla += Handler.OnTriggeringTeslaGate;
-            PlayerHandler.MakingNoise += Handler.OnMakingNoise;
             PlayerHandler.PickingUpItem += Handler.OnPickingUp;
             PlayerHandler.Verified += Handler.OnVerified;
 
@@ -153,8 +151,6 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.UsedItem -= Handler.OnItemUsed;
             PlayerHandler.Hurting -= Handler.OnHurting;
             PlayerHandler.Hurt -= Handler.OnHurt;
-            PlayerHandler.TriggeringTesla -= Handler.OnTriggeringTeslaGate;
-            PlayerHandler.MakingNoise -= Handler.OnMakingNoise;
             PlayerHandler.PickingUpItem -= Handler.OnPickingUp;
             PlayerHandler.Verified -= Handler.OnVerified;
 

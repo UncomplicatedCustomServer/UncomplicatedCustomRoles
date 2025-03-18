@@ -584,5 +584,7 @@ namespace UncomplicatedCustomRoles.API.Features
                         if (!Role.Player.ActiveEffects.Contains(Role.Player.GetEffect(Effect.EffectType)))
                             Role.Player.EnableEffect(Effect.EffectType, Effect.Intensity, float.MaxValue);
         }
+
+        public override string ToString() => $"Player {Player.Nickname} ({Player.Id}) - CustomRole {Role.Id} ({Role.Nickname})";
     }
 }
