@@ -1,5 +1,6 @@
 ﻿using Exiled.API.Features;
 using Exiled.Loader;
+using LiteNetLib4Mirror.Open.Nat;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
@@ -33,6 +34,9 @@ namespace UncomplicatedCustomRoles.Manager
                     name = name.Remove(0, 1);
 
                 if (int.TryParse(dir, out int num) && num < 990000)
+                    continue;
+
+                if (name is "")
                     continue;
 
                 LoadAction((CustomRole Role) =>
