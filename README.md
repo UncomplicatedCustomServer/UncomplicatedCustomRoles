@@ -60,5 +60,5 @@ Please consider donating something to support our work through **OpenCollective*
 ## Translation Credits
 **French:** `@robocnop`\
 **Italian:** `@foxworn`\
-**Russian:** `@naxefir`
+**Russian:** `@naxefir`\
 **Polish:** `@.piwnica2137`
