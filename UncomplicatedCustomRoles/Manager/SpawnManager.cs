@@ -139,20 +139,19 @@ namespace UncomplicatedCustomRoles.Manager
         {
             Player.ResetInventory(Role.Inventory);
 
-            LogManager.Silent($"Can we assign custom roles? Let's see: {Role.CustomItemsInventory.Count()}");
+            LogManager.Silent($"Can we give any CustomItem? {Role.CustomItemsInventory.Count()}");
             if (Role.CustomItemsInventory.Count() > 0)
                 foreach (uint itemId in Role.CustomItemsInventory)
                     if (!Player.IsInventoryFull)
                         try
                         {
-                            LogManager.Debug($"Trying to load CI with ID {itemId}");
                             if (UCI.HasCustomItem(itemId, out _))
                             {
+                                LogManager.Debug($"Going to give CustomItem (UCR) {itemId} to {Player.Id}");
                                 UCI.GiveCustomItem(itemId, Player);
                             }
                             else
                             {
-                                LogManager.Debug("__ooth");
                                 CustomItem item = CustomItem.Get(itemId) ?? null;
                                 LogManager.Debug($"Going to give CustomItem (EXILED) {item.Id} ({item.Name} - {item.Type}) to {Player.Id}");
                                 item?.Give(Player);
