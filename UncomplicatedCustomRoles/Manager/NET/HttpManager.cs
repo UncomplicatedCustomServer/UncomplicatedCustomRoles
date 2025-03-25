@@ -158,7 +158,6 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         public void LoadLatestVersion()
         {
-            LogManager.Warn("Proceeding to check first verion [B] [MACCPR]");
             string Version = RetriveString(HttpGetRequest($"{Endpoint}/{Prefix}/version?vts=5"));
 
             if (Version is not null && Version != string.Empty && Version.Contains("."))

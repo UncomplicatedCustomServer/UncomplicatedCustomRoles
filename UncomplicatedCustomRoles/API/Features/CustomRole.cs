@@ -216,6 +216,15 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public virtual bool IgnoreSpawnSystem { get; set; } = false;
 
+        /// <summary>
+        /// Invoked when the custom role is spawned
+        /// </summary>
+        /// <param name="role"></param>
+        public virtual void OnSpawned(SummonedCustomRole role)
+        { }
+
+        public override string ToString() => $"{Name} ({Id})";
+
 #nullable disable
         /// <summary>
         /// Try to get a registered <see cref="ICustomRole"/> by it's Id.
@@ -257,7 +266,7 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             if (!Validate(Role))
             {
-                LogManager.Warn($"Failed to register the UCR role with the ID {Role.Id} due to the validator check!");
+                LogManager.Warn($"[Role Loader] Failed to load CustomRole: {Role}!\nFailed to validate the role!");
 
                 return;
             }
@@ -267,22 +276,22 @@ namespace UncomplicatedCustomRoles.API.Features
                 CustomRoles.Add(Role.Id, Role);
 
                 if (Plugin.Instance.Config.EnableBasicLogs)
-                    LogManager.Info($"Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
+                    LogManager.SmInfo($"[Role Loader] CustomRole {Role} successfully loaded!");
 
                 return;
             }
 
             if (notLoadIfLoaded)
             {
-                LogManager.Debug($"Can't load role {Role.Id} {Role.Name} due to plugin settings!\nPlease reach UCS support for UCR!");
+                LogManager.Debug($"[Role Loader] Can't load CustomRole {Role} due to misterious plugin settings!\nI really have NO IDEA why that happened lol");
                 return;
             }
 
-            LogManager.Warn($"Failed to register the UCR role with the ID {Role.Id}: The problem can be the following: ERR_ID_ALREADY_HERE!\nTrying to assign a new one...");
+            LogManager.Warn($"[Role Loader] Failed to register CustomRole {Role}:\nThere's already another CustomRole with the same Id!\nAssiging a new Id...");
 
             int NewId = GetFirstFreeID(Role.Id);
 
-            LogManager.Info($"Custom Role {Role.Name} with the old Id {Role.Id} will be registered with the following Id: {NewId}");
+            LogManager.SmInfo($"[Role Loader] CustomRole {Role} successfully registered with a new Id: {NewId}");
 
             Role.Id = NewId;
 

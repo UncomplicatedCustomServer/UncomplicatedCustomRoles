@@ -145,19 +145,23 @@ namespace UncomplicatedCustomRoles.Manager
                     if (!Player.IsInventoryFull)
                         try
                         {
+                            LogManager.Debug($"Trying to load CI with ID {itemId}");
                             if (UCI.HasCustomItem(itemId, out _))
                             {
                                 UCI.GiveCustomItem(itemId, Player);
                             }
                             else
                             {
-                                CustomItem item = CustomItem.Get(itemId) ?? throw new KeyNotFoundException("Custom item not found!");
-                                item.Give(Player);
+                                LogManager.Debug("__ooth");
+                                CustomItem item = CustomItem.Get(itemId) ?? null;
+                                LogManager.Debug($"Going to give CustomItem (EXILED) {item.Id} ({item.Name} - {item.Type}) to {Player.Id}");
+                                item?.Give(Player);
                             }
                         }
                         catch (Exception ex)
                         {
                             LogManager.Debug($"Error while giving a custom item.\nError: {ex.Message}");
+                            Log.Error(ex);
                         }
 
             Player.ClearAmmo();
@@ -348,7 +352,10 @@ namespace UncomplicatedCustomRoles.Manager
 #pragma warning disable CS8602 // <Element> can be null at this point! (added a check!)
         public static ICustomRole? DoEvaluateSpawnForPlayer(Player player, RoleTypeId? role = null)
         {
-            role ??= player.Role.Type;
+            role ??= player.Role?.Type;
+
+            if (role is null)
+                return null;
 
             RoleTypeId NewRole = (RoleTypeId)role;
 

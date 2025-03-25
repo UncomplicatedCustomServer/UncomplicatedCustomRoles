@@ -29,15 +29,19 @@ namespace UncomplicatedCustomRoles.Manager
             
             foreach (string dir in Directory.GetDirectories(Path.Combine(Dir, localDir)))
             {
+                Log.Warn($"Evaluating dir {dir}");
                 string name = dir.Replace(Dir, string.Empty);
-                if (name[0] is '/')
+                Log.Warn($"Dir name: {name}");
+                if (name[0] is '/' or '\\')
                     name = name.Remove(0, 1);
 
-                if (int.TryParse(dir, out int num) && num < 990000)
+                if (int.TryParse(name, out int num) && num < 990000)
                     continue;
 
                 if (name is "")
                     continue;
+
+                Log.Warn($"Loading roles from {name}");
 
                 LoadAction((CustomRole Role) =>
                 {

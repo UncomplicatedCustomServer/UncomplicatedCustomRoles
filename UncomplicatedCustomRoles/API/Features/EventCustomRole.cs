@@ -2,7 +2,6 @@
 using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
 using System.Collections.Generic;
-using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
@@ -197,6 +196,13 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Gets or sets whether the custom role should be evaluated during normal spawn events or not
         /// </summary>
         public virtual bool IgnoreSpawnSystem { get; set; } = false;
+
+        /// <summary>
+        /// Invoked when the custom role is spawned
+        /// </summary>
+        /// <param name="role"></param>
+        public virtual void OnSpawned(SummonedCustomRole role)
+        { }
 
         /// <summary>
         /// Called before kicking a <see cref="API.Features.Player"/> from the server.
