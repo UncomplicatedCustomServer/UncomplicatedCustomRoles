@@ -61,4 +61,5 @@ Please consider donating something to support our work through **OpenCollective*
 **French:** `@robocnop`\
 **Italian:** `@foxworn`\
 **Russian:** `@naxefir`\
+**Deutsch:** `@seekedstroy`\
 **Polish:** `@.piwnica2137`
