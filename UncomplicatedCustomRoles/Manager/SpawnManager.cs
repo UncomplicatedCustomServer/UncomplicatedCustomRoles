@@ -54,8 +54,6 @@ namespace UncomplicatedCustomRoles.Manager
             { "pumpkin", "#EE7600" }
         };
 
-        private static int DiffTargetCount { get; set; } = 0;
-
         public static void ClearCustomTypes(Player player)
         {
             if (SummonedCustomRole.TryGet(player, out SummonedCustomRole role))
@@ -111,13 +109,12 @@ namespace UncomplicatedCustomRoles.Manager
                 switch (Role.SpawnSettings.Spawn)
                 {
                     case SpawnType.ZoneSpawn:
-                        player.Position = Room.List.Where(room => room.Zone == Role.SpawnSettings.SpawnZones.RandomItem() && room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
+                        player.Position = Room.List.Where(room => room.Zone == Role.SpawnSettings.SpawnZones.RandomItem() && room.TeslaGate is null && room.Type is not RoomType.EzShelter).GetRandomValue().Position.AddY(1.5f);
                         break;
                     case SpawnType.CompleteRandomSpawn:
                         player.Position = Room.List.Where(room => room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
                         break;
                     case SpawnType.RoomsSpawn:
-                        LogManager.Silent($"Going to spawn CR {Role.Name} ({Role.Id}) ({player.Nickname}) at a Room - Count: {Role.SpawnSettings.SpawnRooms.Count}");
                         player.Position = Room.Get(Role.SpawnSettings.SpawnRooms.RandomItem()).Position.AddY(1.5f);
                         break;
                     case SpawnType.SpawnPointSpawn:
@@ -142,7 +139,7 @@ namespace UncomplicatedCustomRoles.Manager
         {
             Player.ResetInventory(Role.Inventory);
 
-            LogManager.Silent($"Can we assign custom roles? Let's see: {Role.CustomItemsInventory.Count()}");
+            LogManager.Silent($"Can we give any CustomItem? {Role.CustomItemsInventory.Count()}");
             if (Role.CustomItemsInventory.Count() > 0)
                 foreach (uint itemId in Role.CustomItemsInventory)
                     if (!Player.IsInventoryFull)
@@ -150,30 +147,30 @@ namespace UncomplicatedCustomRoles.Manager
                         {
                             if (UCI.HasCustomItem(itemId, out _))
                             {
+                                LogManager.Debug($"Going to give CustomItem (UCR) {itemId} to {Player.Id}");
                                 UCI.GiveCustomItem(itemId, Player);
                             }
                             else
                             {
-                                CustomItem item = CustomItem.Get(itemId) ?? throw new KeyNotFoundException("Custom item not found!");
-                                item.Give(Player);
+                                CustomItem item = CustomItem.Get(itemId) ?? null;
+                                LogManager.Debug($"Going to give CustomItem (EXILED) {item.Id} ({item.Name} - {item.Type}) to {Player.Id}");
+                                item?.Give(Player);
                             }
                         }
                         catch (Exception ex)
                         {
                             LogManager.Debug($"Error while giving a custom item.\nError: {ex.Message}");
+                            Log.Error(ex);
                         }
 
             Player.ClearAmmo();
-            if (Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
+            if (Role.Ammo is not null && Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
                 foreach (KeyValuePair<AmmoType, ushort> Ammo in Role.Ammo)
                     Player.AddAmmo(Ammo.Key, Ammo.Value);
 
             Player.ReferenceHub.nicknameSync.Network_playerInfoToShow |= PlayerInfoArea.Nickname;
 
             PlayerInfoArea InfoArea = Player.ReferenceHub.nicknameSync.Network_playerInfoToShow;
-
-            if (!Role.OverrideRoleName && (Role.CustomFlags & CustomFlags.ShowOnlyCustomInfo) == CustomFlags.ShowOnlyCustomInfo)
-                Player.ReferenceHub.nicknameSync.Network_playerInfoToShow &= ~PlayerInfoArea.Role;
 
             if (Role.OverrideRoleName)
                 Player.ApplyCustomInfoAndRoleName(Role.CustomInfo, Role.Name);
@@ -239,6 +236,14 @@ namespace UncomplicatedCustomRoles.Manager
                 else
                     Player.DisplayNickname = Nick;
 
+                Timing.CallDelayed(3f, () =>
+                {
+                    if (Role.Nickname.Contains(","))
+                        Player.DisplayNickname = Nick.Split(',').RandomItem();
+                    else
+                        Player.DisplayNickname = Nick;
+                });
+
                 ChangedNick = true;
             }
 
@@ -262,18 +267,18 @@ namespace UncomplicatedCustomRoles.Manager
             LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})! [2VDS]");
         }
 
-        public static KeyValuePair<bool, object> ParseEscapeRole(Dictionary<string, string> roleAfterEscape, Player player)
+        public static KeyValuePair<bool, object>? ParseEscapeRole(Dictionary<string, string> roleAfterEscape, Player player)
         {
-            Dictionary<Team, KeyValuePair<bool, object>> AsCuffedByInternalTeam = new();
+            Dictionary<Team, KeyValuePair<bool, object>?> AsCuffedByInternalTeam = new();
             // Dictionary<uint, KeyValuePair<bool, object>> AsCuffedByCustomTeam = new(); we will add the support to UCT and UIU-RS
             // cuffed by InternalTeam FoundationForces
             //   0     1       2             3           = 4
-            Dictionary<int, KeyValuePair<bool, object>> AsCuffedByCustomRole = new();
-            KeyValuePair<bool, object> Default = new(false, RoleTypeId.Spectator);
+            Dictionary<int, KeyValuePair<bool, object>?> AsCuffedByCustomRole = new();
+            KeyValuePair<bool, object>? Default = new(false, RoleTypeId.Spectator);
 
             foreach (KeyValuePair<string, string> kvp in roleAfterEscape)
             {
-                KeyValuePair<bool, object> Data = ParseEscapeString(kvp.Value);
+                KeyValuePair<bool, object>? Data = ParseEscapeString(kvp.Value);
                 if (kvp.Key is "default")
                     Default = Data;
                 else
@@ -320,8 +325,11 @@ namespace UncomplicatedCustomRoles.Manager
             return Default;
         }
 
-        public static KeyValuePair<bool, object> ParseEscapeString(string escape)
+        public static KeyValuePair<bool, object>? ParseEscapeString(string escape)
         {
+            if (escape is "Deny" or "deny" or "DENY")
+                return null;
+
             List<string> Elements = escape.Split(' ').ToList();
             if (Elements.Count != 2)
             {
@@ -343,7 +351,10 @@ namespace UncomplicatedCustomRoles.Manager
 #pragma warning disable CS8602 // <Element> can be null at this point! (added a check!)
         public static ICustomRole? DoEvaluateSpawnForPlayer(Player player, RoleTypeId? role = null)
         {
-            role ??= player.Role.Type;
+            role ??= player.Role?.Type;
+
+            if (role is null)
+                return null;
 
             RoleTypeId NewRole = (RoleTypeId)role;
 
@@ -398,69 +409,27 @@ namespace UncomplicatedCustomRoles.Manager
             return null;
         }
 
-        public static void UpdateChaosModifier()
-        {
-            return;
-
-            /*
-             *  We need to check if there's another function instead of Round.ChaosTarget
-            int diff = 0;
-            foreach (SummonedCustomRole role in SummonedCustomRole.List.Where(role => role.IsOverwrittenRole))
-            {
-                if (role.Role.Team is not Team.SCPs && PlayerRolesUtils.GetTeam(role.Role.Role) is Team.SCPs)
-                    diff--;
-                else if (role.Role.Team is Team.SCPs && PlayerRolesUtils.GetTeam(role.Role.Role) is not Team.SCPs)
-                    diff++;
-            }*/
-        }
-
-        public static void HandleRecontainmentAnnoucement(CustomScpAnnouncer element)
-        {
-            HandleRecontainmentAnnoucement(element.DamageHandler, element.Instance);
-            element.Execute();
-        }
-
-        public static void HandleRecontainmentAnnoucement(DamageHandlerBase baseHandler, SummonedCustomRole role)
+        internal static void HandleRecontainmentAnnoucement(DamageHandlerBase baseHandler, CustomScpAnnouncer customScpAnnouncer)
         {
             float num = AlphaWarheadController.Detonated ? 3.5f : 1f;
-            TryGetPublicFormat(role.Role.Name, role.Role.Role, out string cassie, out string subtitle);
-            NineTailedFoxAnnouncer.singleton.ServerOnlyAddGlitchyPhrase($"{cassie} {baseHandler.CassieDeathAnnouncement.Announcement}", UnityEngine.Random.Range(0.1f, 0.14f) * num, UnityEngine.Random.Range(0.07f, 0.08f) * num);
+            NineTailedFoxAnnouncer.singleton.ServerOnlyAddGlitchyPhrase($"{ScpToCassie(customScpAnnouncer.RoleName)} {baseHandler.CassieDeathAnnouncement.Announcement}", UnityEngine.Random.Range(0.1f, 0.14f) * num, UnityEngine.Random.Range(0.07f, 0.08f) * num);
             List<SubtitlePart> list = new()
             {
-                new(SubtitleType.SCP, new string[] { subtitle }),
+                new(SubtitleType.SCP, new string[] { customScpAnnouncer.RoleName.Replace("SCP", string.Empty).Replace("scp", string.Empty).Replace("Scp", string.Empty) }),
             };
             list.AddRange(baseHandler.CassieDeathAnnouncement.SubtitleParts);
             new SubtitleMessage(list.ToArray()).SendToAuthenticated(0);
         }
 
-        private static void TryGetPublicFormat(string input, RoleTypeId def, out string cassie, out string subtitle)
+        private static string ScpToCassie(string scp)
         {
-            if (!input.Contains("SCP-"))
-                NineTailedFoxAnnouncer.ConvertSCP(def, out subtitle, out cassie);
-            else
-                TryExtractScpNumber(input, out cassie, out subtitle);
+            string result = string.Empty;
+
+            if (scp.ToUpper().Contains("SCP"))
+                result += "SCP ";
+
+            return $"{result}{scp.ToInt(" ")}";
         }
-
-        private static void TryExtractScpNumber(string input, out string cassie, out string subtitle)
-        {
-            char[] allowed = new[] { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' }; 
-            cassie = string.Empty;
-            subtitle = string.Empty;
-            foreach (char c in ToPublicFormat(Regex.Replace(input, "<.*?>", string.Empty)).ToCharArray())
-                if (allowed.Contains(c))
-                {
-                    cassie += $"{c} ";
-                    subtitle += c;
-                }
-
-            if (ClutterSpawner.IsHolidayActive(Holidays.AprilFools))
-            {
-                cassie = "1 0 4";
-                subtitle = "104";
-            }
-        }
-
-        private static string ToPublicFormat(string input) => input.Replace("SCP", "").Replace(" ", "").ToUpper();
 
         private static IEnumerable<Player> LoadAppearanceAffectedPlayers(Player target)
         {

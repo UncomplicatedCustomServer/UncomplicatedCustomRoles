@@ -33,7 +33,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// <summary>
         /// Gets the  maximum number of SpawnPoints per server
         /// </summary>
-        public const int MaxSpawnPoints = 35; // Don't worry, the check is also in the APIs backend :wink:
+        public const int MaxSpawnPoints = 100; // Don't worry, the check is also in the APIs backend :wink:
 
         /// <summary>
         /// Init the Communicator

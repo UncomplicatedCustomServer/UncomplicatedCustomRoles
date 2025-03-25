@@ -1,20 +1,14 @@
-﻿using UncomplicatedCustomRoles.API.Enums;
+﻿using System.Collections.Generic;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
-    internal class LifeStealer : CustomModule
+    public class LifeStealer : CustomModule
     {
-        public new static CustomFlags Flag => CustomFlags.LifeStealer;
-
-        public float Amount { get; set; }
-
-        public LifeStealer(SummonedCustomRole role) : base(role)
-        { }
-
-        public override void Execute()
+        public override List<string> RequiredArgs => new()
         {
-            if (Amount > 0 && HasInstance)
-                Instance.Player.Heal(Amount);
-        }
+            "percentage"
+        };
+
+        public int Percentage => Args.TryGetValue("percentage", out string perc) && int.TryParse(perc, out int numPerc) ? numPerc : 0; // NOTE: Percentage MUST be an int so like 75 is 75% (0.75)
     }
 }

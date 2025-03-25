@@ -1,7 +1,9 @@
 ﻿using CommandSystem;
 using Exiled.API.Features;
 using MEC;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
@@ -31,48 +33,51 @@ namespace UncomplicatedCustomRoles.Commands
                 return false;
             }
 
-            Player Player = Player.Get(arguments[0]);
-            if (Player is null)
-            {
-                response = $"Player not found: {arguments[0]}";
-                return false;
-            }
+            Tuple<string, Player>[] players;
 
-            if (arguments[1] is not null)
-            {
-                int Id = int.Parse(arguments[1]);
+            if (arguments[0].Contains(","))
+                players = arguments.Select(p => new Tuple<string, Player>(p, Player.Get(p))).ToArray();
+            else
+                players = new[] { new Tuple<string, Player>(arguments[0], Player.Get(arguments[0])) };
 
-                LogManager.Debug($"Selected role Id as Int32: {Id}");
-                if (!CustomRole.CustomRoles.ContainsKey(Id))
-                {
-                    response = $"Role with the Id {Id} was not found!";
-                    return false;
-                } 
-                else
-                {
-                    // Summon the player to the role
-                    response = $"Player {Player.Nickname} will be spawned as {Id}!";
+            string result = string.Empty;
+            bool sync = arguments.Count > 2 && arguments[2] == "sync";
 
-                    // Remove shit from the db
-                    SpawnManager.ClearCustomTypes(Player);
+            if (arguments[1] is not null && int.TryParse(arguments[1], out int id))
+                foreach (Tuple<string, Player> player in players)
+                    result += SpawnPlayer(player, id, sync);
 
-                    if (arguments.Count > 2 && arguments[2] is not null && arguments[2] == "sync")
-                    {
-                        LogManager.Debug("Spawning player sync");
-                        SpawnManager.SummonCustomSubclass(Player, Id, true);
-                    }
-                    else
-                    {
-                        LogManager.Debug("Spawning player async");
-                        Timing.RunCoroutine(Handler.DoSpawnPlayer(Player, Id));
-                    }
-                    return true;
-                }
-            } 
+            response = $"Spawning {players.Length} players as CustomRole {(sync ? "synchronously" : "asynchronously")}\n{result}";
+            return true;
+        }
+
+        private string SpawnPlayer(Tuple<string, Player> rawPlayer, int id, bool sync)
+        {
+            Player player = rawPlayer.Item2;
+
+            if (player is null)
+                return $"Player '{rawPlayer.Item1}' not found!";
+
+            LogManager.Debug($"Selected role Id as Int32: {id}");
+            if (!CustomRole.CustomRoles.ContainsKey(id))
+                return $"Role with the Id {id} was not found!";
             else
             {
-                response = $"You must define a role Id!";
-                return false;
+                // Remove shit from the db
+                SpawnManager.ClearCustomTypes(player);
+
+                if (sync)
+                {
+                    LogManager.Debug("Spawning player sync");
+                    SpawnManager.SummonCustomSubclass(player, id, true);
+                }
+                else
+                {
+                    LogManager.Debug("Spawning player async");
+                    Timing.RunCoroutine(Handler.DoSpawnPlayer(player, id));
+                }
+
+                return $"Successfully spawned player {player.Nickname} ({player.Id}) as CustomRole {id}";
             }
         }
     }

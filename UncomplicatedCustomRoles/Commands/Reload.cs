@@ -29,7 +29,7 @@ namespace UncomplicatedCustomRoles.Commands
 
             CustomRole.NotLoadedRoles.Clear();
 
-            Plugin.FileConfigs.LoadAction((CustomRole Role) =>
+            Plugin.FileConfigs.LoadAll(string.Empty, (CustomRole Role) =>
             {
                 if (!CustomRole.Validate(Role))
                 {
@@ -52,7 +52,7 @@ namespace UncomplicatedCustomRoles.Commands
                 LogManager.Warn($"[RL] Failed to register the UCR role with the ID {Role.Id}: apparently there's already another role with the same Id!\nId fixer deactivated [!]");
             });
 
-            Plugin.FileConfigs.LoadAction((CustomRole Role) =>
+            Plugin.FileConfigs.LoadAll(Server.Port.ToString(), (CustomRole Role) =>
             {
                 if (!CustomRole.Validate(Role))
                 {
@@ -73,7 +73,7 @@ namespace UncomplicatedCustomRoles.Commands
                 }
 
                 LogManager.Warn($"[RL] Failed to register the UCR role with the ID {Role.Id}: apparently there's already another role with the same Id!\nId fixer deactivated [!]");
-            }, Server.Port.ToString());
+            });
 
             if (Roles.Count < CustomRole.CustomRoles.Count)
             {

@@ -18,6 +18,9 @@ namespace UncomplicatedCustomRoles
         [Description("If true the plugin will apply the 'nickname' param in each role config to every player. Disable this if you encounter problems or bugs!")]
         public bool AllowNicknameEdit { get; set; } = true;
 
+        [Description("If true UCR will override the name given by RPNames")]
+        public bool OverrideRpNames { get; set; } = true;
+
         [Description("Do enable the basic UCR logs?")]
         public bool EnableBasicLogs { get; set; } = true;
 

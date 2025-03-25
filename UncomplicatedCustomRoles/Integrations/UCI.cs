@@ -11,9 +11,9 @@ namespace UncomplicatedCustomRoles.Integrations
     {
         public static Assembly Assembly => Loader.Plugins.FirstOrDefault(p => p.Name is "UncomplicatedCustomItems")?.Assembly;
 
-        public static Type Utilities => Assembly.GetType("UncomplicatedCustomItems.API.Utilities");
+        public static Type Utilities => Assembly?.GetType("UncomplicatedCustomItems.API.Utilities");
 
-        public static Type SummonedCustomItem => Assembly.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem");
+        public static Type SummonedCustomItem => Assembly?.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem");
 
         public static bool Available => Utilities is not null && SummonedCustomItem is not null;
 

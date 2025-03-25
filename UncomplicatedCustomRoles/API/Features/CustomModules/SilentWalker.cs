@@ -1,9 +1,15 @@
-﻿using UncomplicatedCustomRoles.API.Enums;
+﻿using Exiled.Events.EventArgs.Interfaces;
+using System.Collections.Generic;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
-    internal class SilentWalker : CustomModule
+    public class SilentWalker : CustomModule
     {
-        public new static CustomFlags Flag => CustomFlags.SilentWalker;
+        public override List<string> TriggerOnEvents => new()
+        {
+            "MakingNoise"
+        };
+
+        public override bool OnEvent(string name, IPlayerEvent ev) => false;
     }
 }

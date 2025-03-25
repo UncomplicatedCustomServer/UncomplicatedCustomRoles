@@ -1,33 +1,14 @@
-﻿using PlayerRoles;
-using PlayerStatsSystem;
-using System;
-using UncomplicatedCustomRoles.API.Enums;
+﻿using System.Collections.Generic;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
     public class CustomScpAnnouncer : CustomModule
     {
-        public new static CustomFlags Flag => CustomFlags.CustomScpAnnouncer;
-
-        public DamageHandlerBase DamageHandler { get; private set; } = null;
-
-        public bool IsAvailable { get; private set; }
-
-        public CustomScpAnnouncer(SummonedCustomRole role) : base(role) { }
-
-        public void Awake(DamageHandlerBase damageHandlerBase)
+        public override List<string> RequiredArgs => new()
         {
-            if ((Instance.Role?.Team ?? Instance.Role.Role.GetTeam()) is Team.SCPs)
-            {
-                IsAvailable = true;
-                DamageHandler = damageHandlerBase;
-            }
-        }
+            "name"
+        };
 
-        public override void Execute()
-        {
-            IsAvailable = false;
-            DamageHandler = null;
-        }
+        internal string RoleName => Args.TryGetValue("name", out string name) ? name : "SCP 404";
     }
 }

@@ -1,9 +1,5 @@
-﻿using UncomplicatedCustomRoles.API.Enums;
-
-namespace UncomplicatedCustomRoles.API.Features.CustomModules
+﻿namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
-    internal class NotAffectedByAppearance : CustomModule
-    {
-        public new static CustomFlags Flag => CustomFlags.NotAffectedByAppearance;
-    }
+    public class NotAffectedByAppearance : CustomModule
+    { }
 }

@@ -97,11 +97,6 @@ namespace UncomplicatedCustomRoles.API.Features
         public bool IsDefaultCoroutineRole => (Role.Health?.HumeShield ?? 0) > 0 && (Role.Health?.HumeShieldRegenerationAmount ?? 0) > 0;
 
         /// <summary>
-        /// Gets whether the current <see cref="ICustomRole"/> implements a custom coroutine
-        /// </summary>
-        public bool IsCoroutineRole => Role is ICoroutineRole;
-
-        /// <summary>
         /// Gets if the current SummonedCustomRole is valid or not
         /// </summary>
         public bool IsValid => _internalValid && Player.IsAlive;
@@ -119,7 +114,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets a <see cref="IReadOnlyCollection{T}"/> of every installed <see cref="CustomModule"/>
         /// </summary>
-        public IReadOnlyCollection<ICustomModule> CustomModules => _customModules;
+        public IReadOnlyCollection<CustomModule> CustomModules => _customModules;
 
         private PlayerRoleBase _roleBase { get; set; } = null;
 
@@ -127,7 +122,7 @@ namespace UncomplicatedCustomRoles.API.Features
 
         private bool _isRegeneratingHume { get; set; }
 
-        private List<ICustomModule> _customModules { get; }
+        private List<CustomModule> _customModules { get; }
 
         /// <summary>
         /// The duration of a tick
@@ -149,17 +144,7 @@ namespace UncomplicatedCustomRoles.API.Features
             if (IsDefaultCoroutineRole)
                 GenericCoroutine = Timing.RunCoroutine(RoleTickCoroutine());
 
-            _customModules = CustomModule.Load(Role.CustomFlags ?? CustomFlags.None, this);
-
-            if (Role is ICoroutineRole coroutineRole)
-                if (coroutineRole.TickRate > 0)
-                {
-                    coroutineRole.CoroutineHandler = Timing.RunCoroutine(CoroutineRoleCoroutine());
-                    coroutineRole.Frame = -1;
-                }
-
-            foreach (CoroutineModule coroutineModule in GetModules<CoroutineModule>())
-                coroutineModule.Execute();
+            _customModules = CustomModule.Load(Role.CustomFlags ?? new(), this);
 
             EvaluateRoleBase();
 
@@ -176,7 +161,6 @@ namespace UncomplicatedCustomRoles.API.Features
                 _roleBase = Player.Role.Base as FpcStandardScp;
             else if (Role.Role.GetTeam() != Role.Team && Role.Role.GetTeam() is Team.SCPs && Role.Team is not Team.SCPs)
                 _roleBase = Player.Role.Base as HumanRole;
-            SpawnManager.UpdateChaosModifier();
         }
 
         /// <summary>
@@ -199,7 +183,6 @@ namespace UncomplicatedCustomRoles.API.Features
             LogManager.Silent($"Destroying instance of CR {Role.Id} of PL {Player}");
             Remove();
             List.Remove(this);
-            SpawnManager.UpdateChaosModifier();
         }
 
         /// <summary>
@@ -226,19 +209,16 @@ namespace UncomplicatedCustomRoles.API.Features
                 Player.Scale = new(1, 1, 1);
 
                 if (IsCustomNickname)
-                {
                     Player.DisplayNickname = null;
+
+                foreach (CustomModule module in _customModules.ToArray())
+                {
+                    module.OnRemoved();
+                    _customModules.Remove(module);
                 }
 
                 if (IsDefaultCoroutineRole && GenericCoroutine.IsRunning)
                     Timing.KillCoroutines(GenericCoroutine);
-
-                if (Role is ICoroutineRole role && role.CoroutineHandler.IsRunning)
-                    Timing.KillCoroutines(role.CoroutineHandler);
-
-                foreach (CoroutineModule coroutineModule in GetModules<CoroutineModule>())
-                    if (coroutineModule.CoroutineHandler.IsRunning)
-                        Timing.KillCoroutines(coroutineModule.CoroutineHandler);
             }
             catch (Exception e)
             {
@@ -265,21 +245,6 @@ namespace UncomplicatedCustomRoles.API.Features
         }
 
         /// <summary>
-        /// The custom coroutine actor for the <see cref="ICoroutineRole"/>
-        /// </summary>
-        /// <returns></returns>
-        private IEnumerator<float> CoroutineRoleCoroutine()
-        {
-            while (_internalValid && Player.IsAlive && Role is ICoroutineRole coroutineRole)
-            {
-                coroutineRole.Frame++;
-                coroutineRole.Tick(this);
-
-                yield return Timing.WaitForSeconds(coroutineRole.TickRate);
-            }
-        }
-
-        /// <summary>
         /// Parse the current <see cref="SummonedCustomRole"/> instance as a RemoteAdmin text part
         /// </summary>
         /// <returns></returns>
@@ -288,9 +253,6 @@ namespace UncomplicatedCustomRoles.API.Features
         private string LoadRoleFlags()
         {
             List<string> output = new();
-
-            if (IsCoroutineRole || IsDefaultCoroutineRole)
-                output.Add("<color=#599e09>[COROUTINE]</color>");
 
             if (_customModules.Count > 0)
                 output.Add("<color=#a343f7>[CUSTOM MODULES]</color>");
@@ -357,7 +319,7 @@ namespace UncomplicatedCustomRoles.API.Features
         public T[] GetModules<T>() where T : CustomModule
         {
             T[] result = new T[] { };
-            foreach (ICustomModule module in _customModules.Where(cm => cm.GetType() == typeof(T)))
+            foreach (CustomModule module in _customModules.Where(cm => cm.GetType() == typeof(T)))
                 result.AddItem(module);
             return result;
         }
@@ -381,11 +343,17 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <returns></returns>
         public bool HasModule<T>() where T : CustomModule => _customModules.Any(cm => cm.GetType() == typeof(T));
 
+#nullable enable
         /// <summary>
         /// Add a new <see cref="CustomModule"/> to the current <see cref="SummonedCustomRole"/> instance
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        public void AddModule<T>() where T : CustomModule => _customModules.Add(CustomModule.Load(typeof(T), this));
+        public void AddModule(Type type, Dictionary<string, string>? args = null)
+        {
+            if (CustomModule.FastAdd(type, this, args) is CustomModule module)
+                _customModules.Add(module);
+        }
+#nullable disable
 
         /// <summary>
         /// Try to remove the first <see cref="CustomModule"/>
@@ -395,8 +363,7 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             if (GetModule(out T module))
             {
-                if (module is CoroutineModule coroutineModule && coroutineModule.CoroutineHandler.IsRunning)
-                    Timing.KillCoroutines(coroutineModule.CoroutineHandler);
+                module.OnRemoved();
                 _customModules.Remove(module);
             }
         }
@@ -407,7 +374,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <typeparam name="T"></typeparam>
         public void RemoveModules<T>() where T : CustomModule
         {
-            foreach (ICustomModule _ in GetModules<T>())
+            foreach (CustomModule _ in GetModules<T>())
                 RemoveModule<T>();
         }
 
@@ -584,5 +551,7 @@ namespace UncomplicatedCustomRoles.API.Features
                         if (!Role.Player.ActiveEffects.Contains(Role.Player.GetEffect(Effect.EffectType)))
                             Role.Player.EnableEffect(Effect.EffectType, Effect.Intensity, float.MaxValue);
         }
+
+        public override string ToString() => $"Player {Player.Nickname} ({Player.Id}) - CustomRole {Role.Id} ({Role.Nickname})";
     }
 }

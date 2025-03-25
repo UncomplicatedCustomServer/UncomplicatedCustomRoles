@@ -1,118 +1,27 @@
-﻿using Exiled.API.Extensions;
-using Exiled.API.Features.Pickups;
-using System.Linq;
-using UncomplicatedCustomRoles.API.Enums;
-using UncomplicatedCustomRoles.API.Interfaces;
+﻿using Exiled.API.Features.Pickups;
+using System;
+using System.Collections.Generic;
 
-namespace UncomplicatedCustomRoles.API.Features.CustomModules.ItemBan
+namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
-    internal abstract class ItemBanBase : CustomModule
+    public class ItemBan : CustomModule
     {
-        public abstract ItemCategory Category { get; }
-
-        public ItemBanBase(SummonedCustomRole role) : base(role) 
-        { }
-
-        public void CheckInventory() => Instance?.Player.RemoveItem(item => item.Category == Category);
-
-        public bool ValidatePickup(Pickup pickup) => pickup.Type.GetCategory() != Category;
-
-        public static void CheckInventoryAll(SummonedCustomRole role)
+        public override List<string> RequiredArgs => new()
         {
-            foreach (ICustomModule module in role.CustomModules.Where(module => module.Name.StartsWith("Ban")))
-            {
-                if (module is ItemBanBase itemBan)
-                    itemBan.CheckInventory();
-            }
-        }
+            "item_type"
+        };
 
-        public static bool CheckPickup(SummonedCustomRole role, Pickup pickup)
+        public ItemType? Type => Args.TryGetValue("item_type", out string itemType) && Enum.TryParse(itemType, out ItemType type) ? type : null;
+
+        public static bool ValidatePickup(SummonedCustomRole role, Pickup pickup)
         {
-            ICustomModule module = role.CustomModules.FirstOrDefault(m => m.Name.StartsWith("Ban") && m is ItemBanBase itemBan && itemBan.Category == pickup.Type.GetCategory());
-            if (module is not null && module is ItemBanBase itemBan)
-                return itemBan.ValidatePickup(pickup);
+            List<ItemType> notAllowedTypes = new();
 
-            return true; // Poco restrittivi
+            foreach (ItemBan itemBan in role.GetModules<ItemBan>())
+                if (itemBan.Type is ItemType type)
+                    notAllowedTypes.Add(type);
+
+            return !notAllowedTypes.Contains(pickup.Type);
         }
-    }
-
-    internal class BanKeycards : ItemBanBase
-    {
-        public new static CustomFlags Flag => CustomFlags.BanKeycards;
-
-        public override ItemCategory Category => ItemCategory.Keycard;
-
-        public BanKeycards(SummonedCustomRole role) : base(role) 
-        { }
-    }
-
-    internal class BanMedicals : ItemBanBase
-    {
-        public new static CustomFlags Flag => CustomFlags.BanMedicals;
-
-        public override ItemCategory Category => ItemCategory.Medical;
-
-        public BanMedicals(SummonedCustomRole role) : base(role)
-        { }
-    }
-
-    internal class BanRadios : ItemBanBase
-    {
-        public new static CustomFlags Flag => CustomFlags.BanRadios;
-
-        public override ItemCategory Category => ItemCategory.Radio;
-
-        public BanRadios(SummonedCustomRole role) : base(role)
-        { }
-    }
-
-    internal class BanFirearms : ItemBanBase
-    {
-        public new static CustomFlags Flag => CustomFlags.BanFirearms;
-
-        public override ItemCategory Category => ItemCategory.Firearm;
-
-        public BanFirearms(SummonedCustomRole role) : base(role)
-        { }
-    }
-
-    internal class BanGrenades : ItemBanBase
-    {
-        public new static CustomFlags Flag => CustomFlags.BanGrenades;
-
-        public override ItemCategory Category => ItemCategory.Grenade;
-
-        public BanGrenades(SummonedCustomRole role) : base(role)
-        { }
-    }
-
-    internal class BanSCPItems : ItemBanBase
-    {
-        public new static CustomFlags Flag => CustomFlags.BanSCPItems;
-
-        public override ItemCategory Category => ItemCategory.SCPItem;
-
-        public BanSCPItems(SummonedCustomRole role) : base(role)
-        { }
-    }
-
-    internal class BanMicroHID : ItemBanBase
-    {
-        public new static CustomFlags Flag => CustomFlags.BanMicroHID;
-
-        public override ItemCategory Category => ItemCategory.SpecialWeapon;
-
-        public BanMicroHID(SummonedCustomRole role) : base(role)
-        { }
-    }
-
-    internal class BanArmors : ItemBanBase
-    {
-        public new static CustomFlags Flag => CustomFlags.BanArmors;
-
-        public override ItemCategory Category => ItemCategory.Armor;
-
-        public BanArmors(SummonedCustomRole role) : base(role)
-        { }
     }
 }
