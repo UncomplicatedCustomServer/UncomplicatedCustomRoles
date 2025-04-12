@@ -97,11 +97,6 @@ namespace UncomplicatedCustomRoles.API.Features
         public bool IsDefaultCoroutineRole => (Role.Health?.HumeShield ?? 0) > 0 && (Role.Health?.HumeShieldRegenerationAmount ?? 0) > 0;
 
         /// <summary>
-        /// Gets whether the current <see cref="ICustomRole"/> implements a custom coroutine
-        /// </summary>
-        public bool IsCoroutineRole => Role is ICoroutineRole;
-
-        /// <summary>
         /// Gets if the current SummonedCustomRole is valid or not
         /// </summary>
         public bool IsValid => _internalValid && Player.IsAlive;
@@ -150,13 +145,6 @@ namespace UncomplicatedCustomRoles.API.Features
                 GenericCoroutine = Timing.RunCoroutine(RoleTickCoroutine());
 
             _customModules = CustomModule.Load(Role.CustomFlags ?? new(), this);
-
-            if (Role is ICoroutineRole coroutineRole)
-                if (coroutineRole.TickRate > 0)
-                {
-                    coroutineRole.CoroutineHandler = Timing.RunCoroutine(CoroutineRoleCoroutine());
-                    coroutineRole.Frame = -1;
-                }
 
             EvaluateRoleBase();
 
@@ -231,9 +219,6 @@ namespace UncomplicatedCustomRoles.API.Features
 
                 if (IsDefaultCoroutineRole && GenericCoroutine.IsRunning)
                     Timing.KillCoroutines(GenericCoroutine);
-
-                if (Role is ICoroutineRole role && role.CoroutineHandler.IsRunning)
-                    Timing.KillCoroutines(role.CoroutineHandler);
             }
             catch (Exception e)
             {
@@ -260,21 +245,6 @@ namespace UncomplicatedCustomRoles.API.Features
         }
 
         /// <summary>
-        /// The custom coroutine actor for the <see cref="ICoroutineRole"/>
-        /// </summary>
-        /// <returns></returns>
-        private IEnumerator<float> CoroutineRoleCoroutine()
-        {
-            while (_internalValid && Player.IsAlive && Role is ICoroutineRole coroutineRole)
-            {
-                coroutineRole.Frame++;
-                coroutineRole.Tick(this);
-
-                yield return Timing.WaitForSeconds(coroutineRole.TickRate);
-            }
-        }
-
-        /// <summary>
         /// Parse the current <see cref="SummonedCustomRole"/> instance as a RemoteAdmin text part
         /// </summary>
         /// <returns></returns>
@@ -283,9 +253,6 @@ namespace UncomplicatedCustomRoles.API.Features
         private string LoadRoleFlags()
         {
             List<string> output = new();
-
-            if (IsCoroutineRole || IsDefaultCoroutineRole)
-                output.Add("<color=#599e09>[COROUTINE]</color>");
 
             if (_customModules.Count > 0)
                 output.Add("<color=#a343f7>[CUSTOM MODULES]</color>");

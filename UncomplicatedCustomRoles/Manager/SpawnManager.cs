@@ -139,7 +139,7 @@ namespace UncomplicatedCustomRoles.Manager
         {
             Player.ResetInventory(Role.Inventory);
 
-            LogManager.Silent($"Can we assign custom roles? Let's see: {Role.CustomItemsInventory.Count()}");
+            LogManager.Silent($"Can we give any CustomItem? {Role.CustomItemsInventory.Count()}");
             if (Role.CustomItemsInventory.Count() > 0)
                 foreach (uint itemId in Role.CustomItemsInventory)
                     if (!Player.IsInventoryFull)
@@ -147,17 +147,20 @@ namespace UncomplicatedCustomRoles.Manager
                         {
                             if (UCI.HasCustomItem(itemId, out _))
                             {
+                                LogManager.Debug($"Going to give CustomItem (UCR) {itemId} to {Player.Id}");
                                 UCI.GiveCustomItem(itemId, Player);
                             }
                             else
                             {
-                                CustomItem item = CustomItem.Get(itemId) ?? throw new KeyNotFoundException("Custom item not found!");
-                                item.Give(Player);
+                                CustomItem item = CustomItem.Get(itemId) ?? null;
+                                LogManager.Debug($"Going to give CustomItem (EXILED) {item.Id} ({item.Name} - {item.Type}) to {Player.Id}");
+                                item?.Give(Player);
                             }
                         }
                         catch (Exception ex)
                         {
                             LogManager.Debug($"Error while giving a custom item.\nError: {ex.Message}");
+                            Log.Error(ex);
                         }
 
             Player.ClearAmmo();
@@ -348,7 +351,10 @@ namespace UncomplicatedCustomRoles.Manager
 #pragma warning disable CS8602 // <Element> can be null at this point! (added a check!)
         public static ICustomRole? DoEvaluateSpawnForPlayer(Player player, RoleTypeId? role = null)
         {
-            role ??= player.Role.Type;
+            role ??= player.Role?.Type;
+
+            if (role is null)
+                return null;
 
             RoleTypeId NewRole = (RoleTypeId)role;
 

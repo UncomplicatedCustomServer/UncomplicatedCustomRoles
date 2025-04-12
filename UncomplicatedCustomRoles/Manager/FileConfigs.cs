@@ -30,10 +30,10 @@ namespace UncomplicatedCustomRoles.Manager
             foreach (string dir in Directory.GetDirectories(Path.Combine(Dir, localDir)))
             {
                 string name = dir.Replace(Dir, string.Empty);
-                if (name[0] is '/')
+                if (name[0] is '/' or '\\')
                     name = name.Remove(0, 1);
 
-                if (int.TryParse(dir, out int num) && num < 990000)
+                if (int.TryParse(name, out int num) && num < 990000)
                     continue;
 
                 if (name is "")
@@ -109,7 +109,7 @@ namespace UncomplicatedCustomRoles.Manager
                     {
                         role = Loader.Deserializer.Deserialize<OldCustomRole>(content).ToCustomRole();
                         File.WriteAllText(path, Loader.Serializer.Serialize(role));
-                        Log.Warn($"Role {role.Name} ({role.Id}) was NOT updated! - Auto updated correctly, you shouldn't see this message again :D\nAt {path}");
+                        LogManager.Warn($"Role {role.Name} ({role.Id}) was NOT updated! - Auto updated correctly, you shouldn't see this message again :D\nAt {path}");
                         return true;
                     }
                     catch (Exception)

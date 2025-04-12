@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 
@@ -23,10 +24,16 @@ namespace UncomplicatedCustomRoles.Manager
             Log.Debug(message);
         }
 
-        public static void Info(string message)
+        public static void SmInfo(string message, string label = "Info")
+        {
+            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), label, message));
+            Log.Send($"[{Plugin.Instance.Assembly.GetName().Name}] {message}", LogLevel.Info, ConsoleColor.Gray);
+        }
+
+        public static void Info(string message, ConsoleColor color = ConsoleColor.Cyan)
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Info.ToString(), message));
-            Log.Info(message);
+            Log.Send($"[{Plugin.Instance.Assembly.GetName().Name}] {message}", LogLevel.Info, color);
         }
 
         public static void Warn(string message, string error = "CS0000")

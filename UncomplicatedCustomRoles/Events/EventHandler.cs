@@ -16,7 +16,6 @@ using Exiled.Events.EventArgs.Warhead;
 using PlayerRoles.Ragdolls;
 using Exiled.Events.EventArgs.Scp096;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
-using UncomplicatedCustomRoles.Patches;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -119,7 +118,7 @@ namespace UncomplicatedCustomRoles.Events
                 if (customRole.HasModule<TutorialRagdoll>())
                     RagdollAppearanceQueue.Add(ev.Player.Id);
 
-                if (customRole.GetModule(out CustomScpAnnouncer announcer))
+                if (customRole.GetModule(out CustomScpAnnouncer announcer) && ev.Player.ReferenceHub.GetTeam() is not Team.SCPs)
                     TerminationQueue.Add(ev.Player.Id, new(announcer, DateTimeOffset.Now));
             }
         }

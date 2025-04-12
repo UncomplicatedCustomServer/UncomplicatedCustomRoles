@@ -26,7 +26,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(6, 0, 0, 0);
+        public override Version Version { get; } = new(6, 0, 1, 0);
 
         public override Version RequiredExiledVersion { get; } = new(9, 1, 0);
 
@@ -85,16 +85,8 @@ namespace UncomplicatedCustomRoles
 
             if (Config.EnableBasicLogs)
             {
-                LogManager.Info("===========================================");
-                LogManager.Info(" Thanks for using UncomplicatedCustomRoles");
-                LogManager.Info("        by FoxWorn3365 & Dr.Agenda");
-                LogManager.Info("===========================================");
-                LogManager.Info("             Special thanks to:");
-                LogManager.Info("  >>  @timmeyxd - They gave me money in order to continue to develop this plugin while keeping it free");
-                LogManager.Info("  >>  @naxefir - They tested hundred of test versions in order to help me relasing the most bug-free versions");
-                LogManager.Info("  >>  @.piwnica2137 - They tested lots of versions in order to help me releasing almost bug-free versions");
-                LogManager.Info("                   ");
-                LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
+                LogManager.Info($"Thanks for using UncomplicatedCustomRoles v{Version.ToString(3)} by {Author}!");
+                LogManager.Info("For support and to remain updated please join our Discord: https://discord.gg/5StRGu8EJV", ConsoleColor.DarkYellow);
             }
 
             Task.Run(delegate
