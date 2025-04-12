@@ -51,7 +51,8 @@ namespace UncomplicatedCustomRoles
             Handler = new();
             HttpManager = new("ucr");
 
-            CustomRole.List.Clear();
+            CustomRole.CustomRoles.Clear();
+            CustomRole.NotLoadedRoles.Clear();
 
             ServerHandler.RespawningTeam += Handler.OnRespawningWave;
             ServerHandler.RoundStarted += Handler.OnRoundStarted;

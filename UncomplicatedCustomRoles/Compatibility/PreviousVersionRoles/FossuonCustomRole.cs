@@ -1,8 +1,19 @@
-﻿using Exiled.API.Enums;
+﻿/*
+ * This file is a part of the UncomplicatedCustomRoles project.
+ * 
+ * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
+ * 
+ * This file is licensed under the GNU Affero General Public License v3.0.
+ * You should have received a copy of the AGPL license along with this file.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using Exiled.API.Enums;
 using PlayerRoles;
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
+using UncomplicatedCustomRoles.Compatibility.PreviousVersionElements;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 
@@ -37,7 +48,7 @@ namespace UncomplicatedCustomRoles.Compatibility.PreviousVersionRoles
 
         public virtual List<Team> IsFriendOf { get; set; } = new();
 
-        public virtual HealthBehaviour Health { get; set; } = new();
+        public virtual FossuonHealthBehaviour Health { get; set; } = new();
 
         public virtual AhpBehaviour Ahp { get; set; } = new();
 
@@ -118,9 +129,19 @@ namespace UncomplicatedCustomRoles.Compatibility.PreviousVersionRoles
                 Team = Team,
                 RoleAppearance = RoleAppearance,
                 IsFriendOf = IsFriendOf,
-                Health = Health,
+                Health = new()
+                {
+                    Amount = Health.Amount,
+                    Maximum = Health.Maximum
+                },
                 Ahp = Ahp,
-                HumeShield = new(),
+                HumeShield = new()
+                {
+                    Amount = Health.HumeShield,
+                    Maximum = Health.HumeShield,
+                    RegenerationAmount = Health.HumeShieldRegenerationAmount,
+                    RegenerationDelay = Health.HumeShieldRegenerationDelay
+                },
                 Effects = Effects,
                 Stamina = Stamina,
                 MaxScp330Candies = MaxScp330Candies,

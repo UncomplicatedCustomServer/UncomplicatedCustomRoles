@@ -1,4 +1,14 @@
-﻿using CommandSystem;
+﻿/*
+ * This file is a part of the UncomplicatedCustomRoles project.
+ * 
+ * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
+ * 
+ * This file is licensed under the GNU Affero General Public License v3.0.
+ * You should have received a copy of the AGPL license along with this file.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using CommandSystem;
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
@@ -7,17 +17,11 @@ namespace UncomplicatedCustomRoles.Commands
 {
     public class Version : IUCRCommand
     {
-        public string Name { get; } = "list";
+        public string Name { get; } = "version";
 
-        public string Description { get; } = "List all registered custom roles";
+        public string Description { get; } = "Get the informations about the current version of UCR";
 
-        public string RequiredPermission { get; } = "ucr.list";
-
-        public const int TitleSize = 23;
-
-        public const int TextSize = 15;
-
-        public const string Spacing = "     ";
+        public string RequiredPermission { get; } = "ucr.version";
 
         public bool Executor(List<string> arguments, ICommandSender sender, out string response)
         {

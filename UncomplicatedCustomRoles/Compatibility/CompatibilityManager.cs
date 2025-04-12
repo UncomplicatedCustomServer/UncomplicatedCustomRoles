@@ -1,4 +1,14 @@
-﻿using Exiled.Loader;
+﻿/*
+ * This file is a part of the UncomplicatedCustomRoles project.
+ * 
+ * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
+ * 
+ * This file is licensed under the GNU Affero General Public License v3.0.
+ * You should have received a copy of the AGPL license along with this file.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using Exiled.Loader;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -66,14 +76,20 @@ namespace UncomplicatedCustomRoles.Compatibility
 
             if (status is LoadStatusType.Success)
                 LogManager.Info($"{prefix}Successfully loaded CustomRole {role}!", ConsoleColor.DarkGray);
-            else if (status is LoadStatusType.ValidatorError)
-                LogManager.Error($"{prefix}Failed to load CustomRole {role}: failed to validate the CustomRole", "RL0001");
+            else if (status is LoadStatusType.ValidatorError) 
+            {
+                CustomRole.Validate(role, out string error);
+                LogManager.Error($"{prefix}Failed to load CustomRole {role}: failed to validate the CustomRole\n{error}", "RL0001");
+            } 
             else if (status is LoadStatusType.SameId)
             {
-                LogManager.Error($"{prefix}Failed to load CustomRole {role}: there's already another CustomRole with the same Id!", "RL0002"); 
+                LogManager.Error($"{prefix}Failed to load CustomRole {role}: there's already another CustomRole with the same Id!", "RL0002");
+
                 if (!RolePaths.TryGetValue(role, out string path))
-                    path = string.Empty;
-                CustomRole.NotLoadedRoles.Add(new(role.Id.ToString(), path, "AlreadyHereException", $"There's already another CustomRole with the Id {role.Id}"));
+                    path = null;
+
+                if (path is not null)
+                    CustomRole.NotLoadedRoles.Add(new(path, File.ReadAllLines(path), null, $"There's already another CustomRole with the Id {role.Id}"));
             }
 
             if (status is not LoadStatusType.SameId && outdatedCustomRoles.TryGetValue(role, out Version version))
@@ -90,8 +106,29 @@ namespace UncomplicatedCustomRoles.Compatibility
             return start;
         }
 
-        public static string GetRoleFileId(string content) => GetRoleFileId(content.Split(new string[] { Environment.NewLine }, StringSplitOptions.None));
+        public static string GetRoleFileElement(string content, string rowPart, bool removeSpaces = true) => GetRoleFileElement(content.Split(new string[] { Environment.NewLine }, StringSplitOptions.None), rowPart, removeSpaces);
 
-        public static string GetRoleFileId(string[] pieces) => (pieces.FirstOrDefault(l => l.Contains("id:")) ?? "N/D").Replace(" ", "").Replace("id:", "");
+        public static string GetRoleFileElement(string[] pieces, string rowPart, bool removeSpaces = true)
+        {
+            string el = pieces.FirstOrDefault(l => l.Contains(rowPart)) ?? "N/D";
+
+            if (removeSpaces)
+                el.Replace(" ", string.Empty);
+
+            return el.Replace($"{rowPart} ", string.Empty).Replace(rowPart, string.Empty);
+        }
+
+        public static string HandleErrorString(Exception ex, bool showErrorName = false)
+        {
+            string message = (showErrorName ? $"{ex.GetType().Name} " : string.Empty) + ex.Message;
+
+            if (ex.InnerException is not null)
+                message += $" -> {ex.InnerException.Message}";
+
+            if (ex.InnerException.InnerException is not null)
+                message += $" -> {ex.InnerException.InnerException.Message}";
+
+            return message;
+        }
     }
 }

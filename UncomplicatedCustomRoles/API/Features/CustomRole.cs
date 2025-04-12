@@ -1,4 +1,14 @@
-﻿using Exiled.API.Enums;
+﻿/*
+ * This file is a part of the UncomplicatedCustomRoles project.
+ * 
+ * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
+ * 
+ * This file is licensed under the GNU Affero General Public License v3.0.
+ * You should have received a copy of the AGPL license along with this file.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using Exiled.API.Enums;
 using PlayerRoles;
 using System;
 using System.Collections.Generic;
@@ -30,7 +40,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Gets a list of every not loaded custom role.
         /// The data is the Id, the role path, the error type and the error name
         /// </summary>
-        internal static List<Tuple<string, string, string, string>> NotLoadedRoles { get; } = new();
+        internal static List<ErrorCustomRole> NotLoadedRoles { get; } = new();
 
         /// <summary>
         /// Gets a list of every outdated loaded roles.
@@ -279,7 +289,7 @@ namespace UncomplicatedCustomRoles.API.Features
             if (ImportManager.GetCallingAssembly().FullName != Plugin.Instance.Assembly.FullName)
                 return CompatibilityManager.RegisterCustomRole(customRole);
 
-            if (!Validate(customRole))
+            if (!Validate(customRole, out string _))
                 return LoadStatusType.ValidatorError;
 
             if (!CustomRoles.ContainsKey(customRole.Id))
@@ -293,42 +303,6 @@ namespace UncomplicatedCustomRoles.API.Features
         }
 
         /// <summary>
-        /// Validate a <see cref="ICustomRole"/>
-        /// </summary>
-        /// <param name="Role"></param>
-        /// <returns></returns>
-        [Obsolete("This method should not be used as was intended for the first versions of UCR and now the plugin can handle also things that are reported as errors here!", false)]
-        public static bool Validate(ICustomRole Role)
-        {
-            if (Role is null)
-                return false;
-
-            if (Role.SpawnSettings is null)
-            {
-                LogManager.Warn($"Is kinda useless registering a role with no spawn_settings.\nFound (or not found) in role: {Role.Name} ({Role.Id})");
-                return false;
-            }
-
-            if (Role.SpawnSettings.Spawn == SpawnType.ZoneSpawn && Role.SpawnSettings.SpawnZones.Count() < 1)
-            {
-                LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the ZoneSpawn as SpawnType the List SpawnZones can't be empty!");
-                return false;
-            }
-            else if (Role.SpawnSettings.Spawn == SpawnType.RoomsSpawn && Role.SpawnSettings.SpawnRooms.Count() < 1)
-            {
-                LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the RoomSpawn as SpawnType the List SpawnRooms can't be empty!");
-                return false;
-            }
-            else if (Role.SpawnSettings.Spawn == SpawnType.SpawnPointSpawn && (Role.SpawnSettings.SpawnPoints is null || Role.SpawnSettings.SpawnPoints.Count == 0))
-            {
-                LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the SpawnPointSpawn as SpawnType the SpawnPoint can't be empty or null!");
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
         /// Unregister a registered <see cref="ICustomRole"/>.
         /// </summary>
         /// <param name="customRole"></param>
@@ -336,6 +310,38 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             if (CustomRoles.ContainsKey(customRole.Id))
                 CustomRoles.Remove(customRole.Id);
+        }
+
+        internal static bool Validate(ICustomRole role, out string error)
+        {
+            error = "Role seems to be null";
+
+            if (role is null)
+                return false;
+
+            if (role.SpawnSettings is null)
+            {
+                error = $"Role has no spawn_settings";
+                return false;
+            }
+
+            if (role.SpawnSettings.Spawn is SpawnType.ZoneSpawn && role.SpawnSettings.SpawnZones.Count() < 1)
+            {
+                error = "If the SpawnType is ZoneSpawn the list SpawnZones shouldn't be empty";
+                return false;
+            }
+            else if (role.SpawnSettings.Spawn is SpawnType.RoomsSpawn && role.SpawnSettings.SpawnRooms.Count() < 1)
+            {
+                error = "If the SpawnType is RoomsSpawn the list SpawnRooms shouldn't be empty";
+                return false;
+            }
+            else if (role.SpawnSettings.Spawn is SpawnType.SpawnPointSpawn && (role.SpawnSettings.SpawnPoints is null || role.SpawnSettings.SpawnPoints.Count == 0))
+            {
+                error = "If the SpawnType is SpawnPointSpawn the list SpawnPoints shouldn't be empty";
+                return false;
+            }
+
+            return true;
         }
     }
 }

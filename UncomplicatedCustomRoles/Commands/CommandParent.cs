@@ -5,6 +5,17 @@ using Exiled.Permissions.Extensions;
 using System.Linq;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
+using UncomplicatedCustomRoles.Extensions;
+
+/*
+ * This file is a part of the UncomplicatedCustomRoles project.
+ * 
+ * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
+ * 
+ * This file is licensed under the GNU Affero General Public License v3.0.
+ * You should have received a copy of the AGPL license along with this file.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
 
 namespace UncomplicatedCustomRoles.Commands
 {
@@ -22,13 +33,13 @@ namespace UncomplicatedCustomRoles.Commands
         public override void LoadGeneratedCommands() 
         {
             RegisteredCommands.Add(new List());
-            RegisteredCommands.Add(new Owner());
+            RegisteredCommands.Add(new Info());
             RegisteredCommands.Add(new Role());
             RegisteredCommands.Add(new Spawn());
             RegisteredCommands.Add(new Reload());
             RegisteredCommands.Add(new SpawnPoint());
             RegisteredCommands.Add(new Generate());
-            RegisteredCommands.Add(new Show());
+            RegisteredCommands.Add(new Owner());
             RegisteredCommands.Add(new Version());
             RegisteredCommands.Add(new Debug());
         }
@@ -43,9 +54,9 @@ namespace UncomplicatedCustomRoles.Commands
                 response = $"\n>> UncomplicatedCustomRoles v{Plugin.Instance.Version}{(VersionManager.VersionInfo?.CustomName is not null ? $" '{VersionManager.VersionInfo.CustomName}'" : string.Empty)} <<\nby {Plugin.Instance.Author}\n\nAvailable commands:";
 
                 foreach (IUCRCommand Command in RegisteredCommands)
-                {
-                    response += $"\n- ucr {Command.Name}  ->  {Command.Description}  [{Command.RequiredPermission}]";
-                }
+                    response += $"\n• <b>ucr {Command.Name.GenerateWithBuffer(12)}</b> → {Command.Description}";
+
+                response += "\n<size=1>OwO</size>";
 
                 return true;
             } 

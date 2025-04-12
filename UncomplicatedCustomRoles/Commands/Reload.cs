@@ -1,4 +1,14 @@
-﻿using CommandSystem;
+﻿/*
+ * This file is a part of the UncomplicatedCustomRoles project.
+ * 
+ * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
+ * 
+ * This file is licensed under the GNU Affero General Public License v3.0.
+ * You should have received a copy of the AGPL license along with this file.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using CommandSystem;
 using Exiled.API.Features;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +39,8 @@ namespace UncomplicatedCustomRoles.Commands
             Dictionary<int, ICustomRole> oldRoles = CustomRole.CustomRoles.Clone();
 
             CustomRole.CustomRoles = new();
+            CustomRole.NotLoadedRoles.Clear();
+            CustomRole.OutdatedRoles.Clear();
 
             FileConfigs.LoadAll();
             FileConfigs.LoadAll(Server.Port.ToString());

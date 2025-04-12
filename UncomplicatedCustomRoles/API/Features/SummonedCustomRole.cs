@@ -1,4 +1,14 @@
-﻿using Exiled.API.Features;
+﻿/*
+ * This file is a part of the UncomplicatedCustomRoles project.
+ * 
+ * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
+ * 
+ * This file is licensed under the GNU Affero General Public License v3.0.
+ * You should have received a copy of the AGPL license along with this file.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using Exiled.API.Features;
 using HarmonyLib;
 using MEC;
 using PlayerRoles;
@@ -94,7 +104,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets whether the current <see cref="SummonedCustomRole"/> implements a coroutine for handling basic plugin features
         /// </summary>
-        public bool IsDefaultCoroutineRole => (Role.HumeShield?.Amount ?? 0) > 0 && (Role.HumeShield?.HumeShieldRegenerationAmount ?? 0) > 0;
+        public bool IsDefaultCoroutineRole => (Role.HumeShield?.Amount ?? 0) > 0 && (Role.HumeShield?.RegenerationAmount ?? 0) > 0;
 
         /// <summary>
         /// Gets if the current SummonedCustomRole is valid or not
@@ -237,7 +247,7 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             while (_internalValid && Player.IsAlive && IsDefaultCoroutineRole)
             {
-                if (EvaluateCustomActions() && Player.HumeShield < Role.HumeShield.Amount && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.HumeShieldRegenerationDelay && !_isRegeneratingHume)
+                if (EvaluateCustomActions() && Player.HumeShield < Role.HumeShield.Amount && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.RegenerationDelay && !_isRegeneratingHume)
                     Timing.RunCoroutine(HumeShieldCoroutine());
 
                 yield return Timing.WaitForSeconds(TickDuration);
@@ -282,9 +292,9 @@ namespace UncomplicatedCustomRoles.API.Features
 
             if (Plugin.HttpManager.Credits.TryGetValue(Player.UserId, out Triplet<string, string, bool> tag))
                 if (IsEmployee)
-                    output += $"                                 <color=#168eba>[UCR EMPLOYEE]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>";
+                    output += $"\n<color=#168eba>[UCR EMPLOYEE]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>";
                 else
-                    output += $"                                 <color=#168eba>[UCR CONTRIBUTOR]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>";
+                    output += $"\n<color=#168eba>[UCR CONTRIBUTOR]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>";
 
             return output;
         }
@@ -296,9 +306,9 @@ namespace UncomplicatedCustomRoles.API.Features
         public IEnumerator<float> HumeShieldCoroutine()
         {
             _isRegeneratingHume = true;
-            while (_internalValid && Player.IsAlive && Player.HumeShield < Role.HumeShield.Amount && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.HumeShieldRegenerationDelay)
+            while (_internalValid && Player.IsAlive && Player.HumeShield < Role.HumeShield.Amount && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.RegenerationDelay)
             {
-                Player.HumeShield += Role.HumeShield.HumeShieldRegenerationAmount;
+                Player.HumeShield += Role.HumeShield.RegenerationAmount;
                 yield return Timing.WaitForSeconds(1f);
             }
             _isRegeneratingHume = false;
