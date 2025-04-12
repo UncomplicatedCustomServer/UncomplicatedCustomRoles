@@ -103,7 +103,7 @@ namespace UncomplicatedCustomRoles.Manager
                 {
                     role = Loader.Deserializer.Deserialize<CustomRole>(content);
                     return true;
-                } catch (Exception)
+                } catch (Exception e)
                 {
                     try
                     {
@@ -114,7 +114,7 @@ namespace UncomplicatedCustomRoles.Manager
                     }
                     catch (Exception)
                     {
-                        return false;
+                        throw e;
                     }
                 }
             }
