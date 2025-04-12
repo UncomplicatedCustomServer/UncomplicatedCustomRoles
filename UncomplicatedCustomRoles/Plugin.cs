@@ -37,8 +37,6 @@ namespace UncomplicatedCustomRoles
         internal Handler Handler;
 
         internal static HttpManager HttpManager;
-        
-        internal static FileConfigs FileConfigs;
 
         internal Harmony _harmony;
 
@@ -51,7 +49,6 @@ namespace UncomplicatedCustomRoles
             API.Features.Escape.Bucket.Clear();
 
             Handler = new();
-            FileConfigs = new();
             HttpManager = new("ucr");
 
             CustomRole.List.Clear();
@@ -82,12 +79,6 @@ namespace UncomplicatedCustomRoles
             Scp330Handler.InteractingScp330 += Handler.OnInteractingScp330;
 
             WarheadHandler.Starting += Handler.OnWarheadLever;
-
-            if (Config.EnableBasicLogs)
-            {
-                LogManager.Info($"Thanks for using UncomplicatedCustomRoles v{Version.ToString(3)} by {Author}!");
-                LogManager.Info("For support and to remain updated please join our Discord: https://discord.gg/5StRGu8EJV", ConsoleColor.DarkYellow);
-            }
 
             Task.Run(delegate
             {
@@ -173,6 +164,12 @@ namespace UncomplicatedCustomRoles
 
             // Run the import managet
             ImportManager.Init();
+
+            if (Config.EnableBasicLogs)
+            {
+                LogManager.Info($"Thanks for using UncomplicatedCustomRoles v{Version.ToString(3)} by {Author}!");
+                LogManager.Info("For support and to remain updated please join our Discord: https://discord.gg/5StRGu8EJV", ConsoleColor.DarkYellow);
+            }
         }
 
         /// <summary>

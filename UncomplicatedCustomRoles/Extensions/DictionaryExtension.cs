@@ -1,5 +1,7 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
+using UnityEngine.UIElements;
 
 namespace UncomplicatedCustomRoles.Extensions
 {
@@ -59,6 +61,16 @@ namespace UncomplicatedCustomRoles.Extensions
                 result.Add(kvp.Key.ToString(), kvp.Value.ToString());
 
             return result;
+        }
+
+        public static Dictionary<TKey, TValue> Clone<TKey, TValue>(this Dictionary<TKey, TValue> dictionary)
+        {
+            Dictionary<TKey, TValue> newDictionary = new();
+
+            foreach (KeyValuePair<TKey, TValue> kvp in dictionary)
+                newDictionary.AddItem(kvp);
+
+            return newDictionary;
         }
     }
 }

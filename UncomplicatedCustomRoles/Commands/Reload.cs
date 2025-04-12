@@ -1,8 +1,10 @@
 ﻿using CommandSystem;
 using Exiled.API.Features;
 using System.Collections.Generic;
+using System.Linq;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Commands
@@ -24,76 +26,19 @@ namespace UncomplicatedCustomRoles.Commands
                 return false;
             }
 
-            // Create a copy of the custom roles Dictionary
-            Dictionary<int, ICustomRole> Roles = new();
+            Dictionary<int, ICustomRole> oldRoles = CustomRole.CustomRoles.Clone();
 
-            CustomRole.NotLoadedRoles.Clear();
+            CustomRole.CustomRoles = new();
 
-            Plugin.FileConfigs.LoadAll(string.Empty, (CustomRole Role) =>
-            {
-                if (!CustomRole.Validate(Role))
-                {
-                    LogManager.Warn($"[RL] Failed to register the UCR role with the ID {Role.Id} due to the validator check!");
-                    return;
-                }
+            FileConfigs.LoadAll();
+            FileConfigs.LoadAll(Server.Port.ToString());
 
-                if (!Roles.ContainsKey(Role.Id))
-                {
-                    Roles.Add(Role.Id, Role);
+            IEnumerable<int> removedRoles = oldRoles.Keys.Except(CustomRole.CustomRoles.Keys);
 
-                    if (Plugin.Instance.Config.EnableBasicLogs)
-                    {
-                        LogManager.Info($"[RL] Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
-                    }
+            foreach (int role in removedRoles)
+                SummonedCustomRole.RemoveSpecificRole(role);
 
-                    return;
-                }
-
-                LogManager.Warn($"[RL] Failed to register the UCR role with the ID {Role.Id}: apparently there's already another role with the same Id!\nId fixer deactivated [!]");
-            });
-
-            Plugin.FileConfigs.LoadAll(Server.Port.ToString(), (CustomRole Role) =>
-            {
-                if (!CustomRole.Validate(Role))
-                {
-                    LogManager.Warn($"[RL] Failed to register the UCR role with the ID {Role.Id} due to the validator check!");
-                    return;
-                }
-
-                if (!Roles.ContainsKey(Role.Id))
-                {
-                    Roles.Add(Role.Id, Role);
-
-                    if (Plugin.Instance.Config.EnableBasicLogs)
-                    {
-                        LogManager.Info($"[RL] Successfully registered the UCR role with the ID {Role.Id} and {Role.Name} as name!");
-                    }
-
-                    return;
-                }
-
-                LogManager.Warn($"[RL] Failed to register the UCR role with the ID {Role.Id}: apparently there's already another role with the same Id!\nId fixer deactivated [!]");
-            });
-
-            if (Roles.Count < CustomRole.CustomRoles.Count)
-            {
-                response = $"The reload command found a role that is loaded in the plugin but has not been loaded by the reload!\nYou can't remove custom roles without restarting the server!\nExpected {CustomRole.CustomRoles.Count} roles, found {Roles.Count}";
-                return true;
-            }
-
-            foreach (ICustomRole Role in CustomRole.List)
-            {
-                if (!Roles.ContainsKey(Role.Id))
-                {
-                    response = $"The reload command found a role that is loaded in the plugin but has not been loaded by the reload!\nYou can't remove custom roles without restarting the server!\nMissing role: {Role.Id}";
-                    return true;
-                }
-            }
-
-            // Ok now we can push the dictionary
-            CustomRole.CustomRoles = Roles;
-
-            response = $"\n>> UCR Reload Report <<\nReloaded {Roles.Count} custom roles.\nFound {CustomRole.CustomRoles.Count - Roles.Count} new roles.\n⚠ WARNING ⚠\nIf you have modified something like the health or the name the players that currently have this custom roles won't be affected by these changes!";
+            response = $"\nSuccessfully reloaded UncomplicatedCustomRoles\n<color=#5db30c>➕</color> Added <b>{CustomRole.CustomRoles.Count - (oldRoles.Count + removedRoles.Count())}</b> Custom Roles\n<color=#c23636>➖</color> Removed <b>{removedRoles.Count()}</b> Custom Roles\n\"<color=#00ffff>🔢</color> Loaded a total of <b>{CustomRole.CustomRoles.Count}</b> Custom Roles\n<color=#ffff00>⚠️</color> If you have changed some stats of the Custom Roles such as health and inventory the changes won't took place on already spawned players with these custom roles!";
             return true;
         }
     }

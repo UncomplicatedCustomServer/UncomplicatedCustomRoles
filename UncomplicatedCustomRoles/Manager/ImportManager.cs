@@ -2,12 +2,14 @@
 using Exiled.Loader;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using UncomplicatedCustomRoles.API.Attributes;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.Compatibility;
 using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.Manager
@@ -37,8 +39,7 @@ namespace UncomplicatedCustomRoles.Manager
 
         private static void Actor()
         {
-            if (Plugin.Instance.Config.EnableBasicLogs)
-                LogManager.Info($"Checking for CustomRole registered in other plugins to import...");
+            LogManager.Debug($"Checking for CustomRole registered in other plugins to import...");
 
             _alreadyLoaded = true;
 
@@ -60,7 +61,9 @@ namespace UncomplicatedCustomRoles.Manager
                             if (Plugin.Instance.Config.EnableBasicLogs)
                                 LogManager.Info($"Imported CustomRole {Role.Name} ({Role.Id}) through Attribute from plugin {plugin.Name} (v{plugin.Version})");
 
-                            CustomRole.Register(Role);
+                            // The public function is not CustomRole.Register BUT CompatibilityManager.RegisterCustomRole - it's hidden btw
+                            //CustomRole.Register(Role);
+                            CompatibilityManager.RegisterCustomRole(Role);
                         }
                     }
                     catch (Exception e)
@@ -68,6 +71,33 @@ namespace UncomplicatedCustomRoles.Manager
                         LogManager.Error($"Error while registering CustomRole from class by Attribute: {e.GetType().FullName} - {e.Message}\nType: {type.FullName} [{plugin.Name}] - Source: {e.Source}");
                     }
             }
+        }
+
+        internal static Assembly GetCallingAssembly()
+        {
+            var stackTrace = new StackTrace();
+
+            // Frame 0 = GetCallingAssembly
+            // Frame 1 = Foo
+            // Frame 2 = Main (o chi ha chiamato Foo)
+            for (int i = 1; i < stackTrace.FrameCount; i++)
+            {
+                var method = stackTrace.GetFrame(i).GetMethod();
+                var declaringType = method.DeclaringType;
+
+                if (declaringType != null)
+                {
+                    return declaringType.Assembly;
+                }
+            }
+
+            return null;
+        }
+
+        public static MethodBase GetCallingMethod()
+        {
+            StackTrace stackTrace = new();
+            return stackTrace.GetFrame(1).GetMethod();
         }
     }
 }

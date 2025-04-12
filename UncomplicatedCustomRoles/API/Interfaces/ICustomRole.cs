@@ -36,6 +36,8 @@ namespace UncomplicatedCustomRoles.API.Interfaces
 
         public abstract AhpBehaviour Ahp { get; set; }
 
+        public abstract HumeShieldBehaviour HumeShield { get; set; }
+
         public abstract List<Effect>? Effects { get; set; }
 
         public abstract StaminaBehaviour Stamina { get; set; }

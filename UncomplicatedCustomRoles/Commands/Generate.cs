@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Commands
 {
@@ -27,7 +28,7 @@ namespace UncomplicatedCustomRoles.Commands
             if (arguments.Count == 2)
                 port = (int)uint.Parse(arguments[1]);
 
-            string path = Plugin.FileConfigs.Dir;
+            string path = FileConfigs.Dir;
             if (port > 0)
                 path = Path.Combine(path, port.ToString());
 

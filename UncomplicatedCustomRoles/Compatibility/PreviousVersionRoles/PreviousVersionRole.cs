@@ -1,17 +1,18 @@
 ﻿using Exiled.API.Enums;
 using PlayerRoles;
-using System;
 using System.Collections.Generic;
+using System;
 using UncomplicatedCustomRoles.API.Enums;
-using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UnityEngine;
+using UncomplicatedCustomRoles.Manager;
+using UncomplicatedCustomRoles.API.Features;
 
-namespace UncomplicatedCustomRoles.Manager.Compatibility
+namespace UncomplicatedCustomRoles.Compatibility.PreviousVersionRoles
 {
 #nullable enable
 
-    class OldCustomRole
+    internal class PreviousVersionRole : IPreviousVersionRole
     {
         public virtual int Id { get; set; } = 1;
 

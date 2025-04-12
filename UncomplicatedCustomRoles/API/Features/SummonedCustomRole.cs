@@ -94,7 +94,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets whether the current <see cref="SummonedCustomRole"/> implements a coroutine for handling basic plugin features
         /// </summary>
-        public bool IsDefaultCoroutineRole => (Role.Health?.HumeShield ?? 0) > 0 && (Role.Health?.HumeShieldRegenerationAmount ?? 0) > 0;
+        public bool IsDefaultCoroutineRole => (Role.HumeShield?.Amount ?? 0) > 0 && (Role.HumeShield?.HumeShieldRegenerationAmount ?? 0) > 0;
 
         /// <summary>
         /// Gets if the current SummonedCustomRole is valid or not
@@ -180,7 +180,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public void Destroy()
         {
-            LogManager.Silent($"Destroying instance of CR {Role.Id} of PL {Player}");
+            LogManager.Silent($"Destroying instance {Id} of CR {Role.Id} of PL {Player}");
             Remove();
             List.Remove(this);
         }
@@ -237,7 +237,7 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             while (_internalValid && Player.IsAlive && IsDefaultCoroutineRole)
             {
-                if (EvaluateCustomActions() && Player.HumeShield < Role.Health.HumeShield && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.Health.HumeShieldRegenerationDelay && !_isRegeneratingHume)
+                if (EvaluateCustomActions() && Player.HumeShield < Role.HumeShield.Amount && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.HumeShieldRegenerationDelay && !_isRegeneratingHume)
                     Timing.RunCoroutine(HumeShieldCoroutine());
 
                 yield return Timing.WaitForSeconds(TickDuration);
@@ -296,9 +296,9 @@ namespace UncomplicatedCustomRoles.API.Features
         public IEnumerator<float> HumeShieldCoroutine()
         {
             _isRegeneratingHume = true;
-            while (_internalValid && Player.IsAlive && Player.HumeShield < Role.Health.HumeShield && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.Health.HumeShieldRegenerationDelay)
+            while (_internalValid && Player.IsAlive && Player.HumeShield < Role.HumeShield.Amount && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.HumeShieldRegenerationDelay)
             {
-                Player.HumeShield += Role.Health.HumeShieldRegenerationAmount;
+                Player.HumeShield += Role.HumeShield.HumeShieldRegenerationAmount;
                 yield return Timing.WaitForSeconds(1f);
             }
             _isRegeneratingHume = false;
@@ -538,6 +538,16 @@ namespace UncomplicatedCustomRoles.API.Features
             if (TryGet(player, out SummonedCustomRole role))
                 return role.ParseRemoteAdmin();
             return "\nCustom Role: None";
+        }
+
+        public static void RemoveSpecificRole(int id)
+        {
+            foreach (SummonedCustomRole role in List.Where(scr => scr.Role.Id == id))
+            {
+                role.Destroy();
+                role.Player.ClearBroadcasts();
+                role.Player.Broadcast(6, "You Custom Role has been <color=red>removed</color> as it has been removed from the list!");
+            }
         }
 
         /// <summary>

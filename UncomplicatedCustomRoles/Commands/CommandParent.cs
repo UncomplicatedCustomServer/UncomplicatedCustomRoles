@@ -30,6 +30,7 @@ namespace UncomplicatedCustomRoles.Commands
             RegisteredCommands.Add(new Generate());
             RegisteredCommands.Add(new Show());
             RegisteredCommands.Add(new Version());
+            RegisteredCommands.Add(new Debug());
         }
 
         public List<IUCRCommand> RegisteredCommands { get; } = new();

@@ -55,8 +55,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="API\Attributes\PluginCustomRole.cs" />
+    <Compile Include="API\Enums\LoadStatusType.cs" />
     <Compile Include="API\Features\Behaviour\AhpBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\HealthBehaviour.cs" />
+    <Compile Include="API\Features\Behaviour\HumeShieldBehaviour.cs" />
     <Compile Include="API\Features\CustomModules\CustomModule.cs" />
     <Compile Include="API\Features\CustomModules\CustomScpAnnouncer.cs" />
     <Compile Include="API\Features\CustomModules\DoNotTrigger096.cs" />
@@ -82,6 +84,7 @@
     <Compile Include="API\Struct\Quadruple.cs" />
     <Compile Include="API\Struct\Triplet.cs" />
     <Compile Include="Commands\CommandParent.cs" />
+    <Compile Include="Commands\Debug.cs" />
     <Compile Include="Commands\Generate.cs" />
     <Compile Include="Commands\List.cs" />
     <Compile Include="Commands\LogShare.cs" />
@@ -92,6 +95,10 @@
     <Compile Include="Commands\Spawn.cs" />
     <Compile Include="Commands\SpawnPoint.cs" />
     <Compile Include="Commands\Version.cs" />
+    <Compile Include="Compatibility\CompatibilityManager.cs" />
+    <Compile Include="Compatibility\PreviousVersionRoles\IPreviousVersionRole.cs" />
+    <Compile Include="Compatibility\PreviousVersionRoles\PreviousVersionRole.cs" />
+    <Compile Include="Compatibility\PreviousVersionRoles\FossuonCustomRole.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="API\Enums\CustomFlags.cs" />
     <Compile Include="API\Enums\SpawnType.cs" />
@@ -104,7 +111,6 @@
     <Compile Include="Integrations\ScriptedEvents.cs" />
     <Compile Include="API\Interfaces\IUCRCommand.cs" />
     <Compile Include="Integrations\UCI.cs" />
-    <Compile Include="Manager\Compatibility\OldCustomRole.cs" />
     <Compile Include="Manager\FileConfigs.cs" />
     <Compile Include="API\Features\Effect.cs" />
     <Compile Include="Manager\NET\HttpManager.cs" />
@@ -112,6 +118,7 @@
     <Compile Include="Manager\LogManager.cs" />
     <Compile Include="Manager\NET\SpawnPointApiCommunicator.cs" />
     <Compile Include="Manager\NET\VersionInfo.cs" />
+    <Compile Include="Manager\PlaceholderManager.cs" />
     <Compile Include="Manager\SpawnManager.cs" />
     <Compile Include="Manager\VersionManager.cs" />
     <Compile Include="Manager\YamlFlagsHandler.cs" />

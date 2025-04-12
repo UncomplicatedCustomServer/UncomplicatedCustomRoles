@@ -6,6 +6,7 @@ using System.Linq;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.Compatibility;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 
@@ -30,6 +31,12 @@ namespace UncomplicatedCustomRoles.API.Features
         /// The data is the Id, the role path, the error type and the error name
         /// </summary>
         internal static List<Tuple<string, string, string, string>> NotLoadedRoles { get; } = new();
+
+        /// <summary>
+        /// Gets a list of every outdated loaded roles.
+        /// The data is the CustomRole, the plugin Version and the role path
+        /// </summary>
+        internal static List<Tuple<CustomRole, Version, string>> OutdatedRoles { get; } = new();
 
         /// <summary>
         /// Gets or sets the <see cref="ICustomRole"/> unique Id
@@ -98,6 +105,11 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Gets or sets the <see cref="AhpBehaviour"/>
         /// </summary>
         public virtual AhpBehaviour Ahp { get; set; } = new();
+
+        /// <summary>
+        /// Gets or sets the <see cref="HumeShieldBehaviour"/>
+        /// </summary>
+        public virtual HumeShieldBehaviour HumeShield { get; set; } = new();
 
         /// <summary>
         /// Gets or sets the <see cref="Effect"/>
@@ -262,40 +274,22 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Required only if you want the custom role to be evaluated from UCR.
         /// </summary>
         /// <param name="customRole"></param>
-        public static void Register(ICustomRole Role, bool notLoadIfLoaded = false)
+        public static LoadStatusType Register(ICustomRole customRole, bool _ = false)
         {
-            if (!Validate(Role))
-            {
-                LogManager.Warn($"[Role Loader] Failed to load CustomRole: {Role}!\nFailed to validate the role!");
+            if (ImportManager.GetCallingAssembly().FullName != Plugin.Instance.Assembly.FullName)
+                return CompatibilityManager.RegisterCustomRole(customRole);
 
-                return;
+            if (!Validate(customRole))
+                return LoadStatusType.ValidatorError;
+
+            if (!CustomRoles.ContainsKey(customRole.Id))
+            {
+                CustomRoles.Add(customRole.Id, customRole);
+
+                return LoadStatusType.Success;
             }
 
-            if (!CustomRoles.ContainsKey(Role.Id))
-            {
-                CustomRoles.Add(Role.Id, Role);
-
-                if (Plugin.Instance.Config.EnableBasicLogs)
-                    LogManager.SmInfo($"[Role Loader] CustomRole {Role} successfully loaded!");
-
-                return;
-            }
-
-            if (notLoadIfLoaded)
-            {
-                LogManager.Debug($"[Role Loader] Can't load CustomRole {Role} due to misterious plugin settings!\nI really have NO IDEA why that happened lol");
-                return;
-            }
-
-            LogManager.Warn($"[Role Loader] Failed to register CustomRole {Role}:\nThere's already another CustomRole with the same Id!\nAssiging a new Id...");
-
-            int NewId = GetFirstFreeID(Role.Id);
-
-            LogManager.SmInfo($"[Role Loader] CustomRole {Role} successfully registered with a new Id: {NewId}");
-
-            Role.Id = NewId;
-
-            Register(Role, true);
+            return LoadStatusType.ValidatorError;
         }
 
         /// <summary>
@@ -332,19 +326,6 @@ namespace UncomplicatedCustomRoles.API.Features
             }
 
             return true;
-        }
-
-        /// <summary>
-        /// Get the first free id to register a new custom role
-        /// </summary>
-        /// <param name="Id"></param>
-        /// <returns></returns>
-        public static int GetFirstFreeID(int Id)
-        {
-            while (CustomRoles.ContainsKey(Id))
-                Id++;
-
-            return Id;
         }
 
         /// <summary>
