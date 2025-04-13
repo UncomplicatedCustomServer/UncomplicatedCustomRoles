@@ -63,4 +63,5 @@ Please consider donating something to support our work through **OpenCollective*
 **Italian:** `@foxworn`\
 **Russian:** `@naxefir`\
 **Deutsch:** `@seekedstroy`\
-**Polish:** `@.piwnica2137`
+**Polish:** `@.piwnica2137`\
+**Simplified Chinese** `@Raiden-Yayi`
