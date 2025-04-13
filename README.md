@@ -18,6 +18,7 @@
 - [&#127479;&#127482; Russian](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-RU.md)
 - [&#127465;&#127466; German](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-DE.md)
 - [&#127477;&#127473; Polski](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-PL.md)
+- [🇨🇳 Simplified Chinese](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-CN.md)
 
 ## What's UncomplicatedCustomRoles
 **UncomplicatedCustomRoles** or **UCR** is a plugin for [EXILED](https://github.com/ExMod-Team/EXILED) that allow you to create fully configurable and customizable custom role with YAML.\
@@ -62,4 +63,5 @@ Please consider donating something to support our work through **OpenCollective*
 **Italian:** `@foxworn`\
 **Russian:** `@naxefir`\
 **Deutsch:** `@seekedstroy`\
-**Polish:** `@.piwnica2137`
+**Polish:** `@.piwnica2137`\
+**Simplified Chinese** `@Raiden-Yayi`
