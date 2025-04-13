@@ -119,7 +119,15 @@ namespace UncomplicatedCustomRoles.Manager
                             player.Position = Room.List.Where(room => room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
                             break;
                         case SpawnType.RoomsSpawn:
-                            player.Position = Room.Get(Role.SpawnSettings.SpawnRooms.RandomItem()).Position.AddY(1.5f);
+                            RoomType roomType = Role.SpawnSettings.SpawnRooms.RandomItem();
+
+                            Room room = Room.Get(roomType);
+
+                            if (room is null)
+                                Log.Error("Failed to load room with RoomType " + roomType);
+
+                            player.Position = room.Position.AddY(1.5f);
+
                             break;
                         case SpawnType.SpawnPointSpawn:
                             if (Role.SpawnSettings.SpawnPoints is not null && Role.SpawnSettings.SpawnPoints.GetType() == typeof(List<string>) && SpawnPoint.TryGet(Role.SpawnSettings.SpawnPoints.RandomItem(), out SpawnPoint spawn))

@@ -42,7 +42,7 @@ namespace UncomplicatedCustomRoles.Extensions
         public static string BulkReplace(this string str, Dictionary<string, object> replace, string matrix = null)
         {
             foreach (KeyValuePair<string, object> kvp in replace)
-                str.Replace(matrix is null ? kvp.Key : matrix.Replace("<val>", kvp.Key), kvp.Value.ToString());
+                str = str.Replace(matrix is null ? kvp.Key : matrix.Replace("<val>", kvp.Key), kvp.Value.ToString());
 
             return str;
         }

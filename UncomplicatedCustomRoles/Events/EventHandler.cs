@@ -254,21 +254,11 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnHurt(HurtEventArgs ev)
         {
-            LogManager.Info($"HURT: {ev.Attacker?.Nickname} -> {ev.Player?.Nickname}");
-            try
-            {
-                // Update the LastDamageTime for some HumeShield features
-                if (ev.Player is not null && ev.Player.IsAlive && ev.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole))
-                    playerCustomRole.LastDamageTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (ev.Player is not null && ev.Player.IsAlive && ev.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole))
+                playerCustomRole.LastDamageTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-                // Heal the attacker (for stealing the life) if it has the flag
-                if (ev.Attacker is not null && ev.Attacker.IsAlive && ev.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole) && attackerCustomRole.GetModule(out LifeStealer lifeStealer))
-                    ev.Attacker.Heal(ev.Amount * (lifeStealer.Percentage / 100));
-            } 
-            catch (Exception e)
-            {
-                LogManager.Error(e.ToString());
-            }
+            if (ev.Attacker is not null && ev.Attacker.IsAlive && ev.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole) && attackerCustomRole.GetModule(out LifeStealer lifeStealer))
+                ev.Attacker.Heal(ev.Amount * (lifeStealer.Percentage / 100f));
         }
 
         public void OnEscaping(EscapingEventArgs Escaping)
