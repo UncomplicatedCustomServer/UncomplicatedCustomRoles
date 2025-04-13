@@ -19,7 +19,7 @@
 - [&#127479;&#127482; Russian](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-RU.md)
 - [&#127465;&#127466; German](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-DE.md)
 - [&#127477;&#127473; Polski](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-PL.md)
-- [🇨🇳; Simplified Chinese](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-CN.md)
+- [🇨🇳 Simplified Chinese](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-CN.md)
 
 ## 什么是UncomplicatedCustomRoles？
 **UncomplicatedCustomRoles** 或称为 **UCR** 是一个[EXILED](https://github.com/ExMod-Team/EXILED)插件，允许您使用 YAML 创建完全可配置和可定制的自定义角色。 \
