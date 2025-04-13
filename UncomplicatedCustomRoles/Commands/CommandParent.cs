@@ -40,6 +40,7 @@ namespace UncomplicatedCustomRoles.Commands
             RegisteredCommands.Add(new SpawnPoint());
             RegisteredCommands.Add(new Errors());
             RegisteredCommands.Add(new Generate());
+            RegisteredCommands.Add(new Update());
             RegisteredCommands.Add(new Owner());
             RegisteredCommands.Add(new Version());
             RegisteredCommands.Add(new Debug());

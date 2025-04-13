@@ -50,7 +50,9 @@ namespace UncomplicatedCustomRoles.Commands
             foreach (int role in removedRoles)
                 SummonedCustomRole.RemoveSpecificRole(role);
 
-            response = $"\nSuccessfully reloaded UncomplicatedCustomRoles\n<color=#5db30c>➕</color> Added <b>{CustomRole.CustomRoles.Count - (oldRoles.Count + removedRoles.Count())}</b> Custom Roles\n<color=#c23636>➖</color> Removed <b>{removedRoles.Count()}</b> Custom Roles\n\"<color=#00ffff>🔢</color> Loaded a total of <b>{CustomRole.CustomRoles.Count}</b> Custom Roles\n<color=#ffff00>⚠️</color> If you have changed some stats of the Custom Roles such as health and inventory the changes won't took place on already spawned players with these custom roles!";
+            int added = CustomRole.CustomRoles.Count - (oldRoles.Count + removedRoles.Count());
+
+            response = $"\nSuccessfully reloaded UncomplicatedCustomRoles\n<color=#5db30c>➕</color> Added <b>{(added <= 0 ? "0" : added)}</b> Custom Roles\n<color=#c23636>➖</color> Removed <b>{removedRoles.Count()}</b> Custom Roles\n<color=#00ffff>🔢</color> Loaded a total of <b>{CustomRole.CustomRoles.Count}</b> Custom Roles\n<color=#ffff00>⚠️</color> If you have changed some stats of the Custom Roles such as health and inventory the changes won't took place on already spawned players with these custom roles!";
             return true;
         }
     }

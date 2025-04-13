@@ -77,7 +77,7 @@ namespace UncomplicatedCustomRoles.Extensions
             Dictionary<TKey, TValue> newDictionary = new();
 
             foreach (KeyValuePair<TKey, TValue> kvp in dictionary)
-                newDictionary.AddItem(kvp);
+                newDictionary.Add(kvp.Key, kvp.Value);
 
             return newDictionary;
         }

@@ -9,14 +9,17 @@
  */
 
 using Exiled.Loader;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Compatibility.PreviousVersionRoles;
+using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Compatibility
@@ -30,8 +33,8 @@ namespace UncomplicatedCustomRoles.Compatibility
 
         private static readonly Dictionary<Type, Version> previousVersionRoles = new()
         {
+            { typeof(FossuonCustomRole), new(6, 0, 0) },
             { typeof(PreviousVersionRole), new(5, 0, 0) },
-            { typeof(FossuonCustomRole), new(6, 0, 0) }
         };
 
         private static readonly Dictionary<ICustomRole, Version> outdatedCustomRoles = new();
@@ -45,6 +48,9 @@ namespace UncomplicatedCustomRoles.Compatibility
 
             try
             {
+                if (!TypeCheck(content, out string error))
+                    throw new Exception(error);
+
                 role = Loader.Deserializer.Deserialize<CustomRole>(content);
             } catch (Exception ex)
             {
@@ -67,6 +73,7 @@ namespace UncomplicatedCustomRoles.Compatibility
                     throw ex;
             }
 
+            RolePaths.TryAdd(role, file);
             RegisterCustomRole(role);
         }
 
@@ -95,15 +102,10 @@ namespace UncomplicatedCustomRoles.Compatibility
             if (status is not LoadStatusType.SameId && outdatedCustomRoles.TryGetValue(role, out Version version))
                 LogManager.Info($"{prefix}The loaded CustomRole is made for UCR v{version.ToString(3)}. Consider updating it :)", ConsoleColor.Gray);
 
+            if (status is LoadStatusType.Success && outdatedCustomRoles.TryGetValue(role, out Version version2) && RolePaths.TryGetValue(role, out string path2))
+                CustomRole.OutdatedRoles.Add(new(role, version2, path2));
+
             return status;
-        }
-
-        internal static int GetFirstFreeId(int start = 1)
-        {
-            while (CustomRole.CustomRoles.ContainsKey(start))
-                start++;
-
-            return start;
         }
 
         public static string GetRoleFileElement(string content, string rowPart, bool removeSpaces = true) => GetRoleFileElement(content.Split(new string[] { Environment.NewLine }, StringSplitOptions.None), rowPart, removeSpaces);
@@ -125,10 +127,37 @@ namespace UncomplicatedCustomRoles.Compatibility
             if (ex.InnerException is not null)
                 message += $" -> {ex.InnerException.Message}";
 
-            if (ex.InnerException.InnerException is not null)
+            if (ex.InnerException is not null && ex.InnerException.InnerException is not null)
                 message += $" -> {ex.InnerException.InnerException.Message}";
 
             return message;
+        }
+
+        internal static int GetFirstFreeId(int start = 1)
+        {
+            while (CustomRole.CustomRoles.ContainsKey(start))
+                start++;
+
+            return start;
+        }
+
+        private static bool TypeCheck(string content, out string error)
+        {
+            error = null;
+            Dictionary<string, object> data = Loader.Deserializer.Deserialize<Dictionary<string, object>>(content);
+
+            SnakeCaseNamingStrategy namingStrategy = new();
+
+            foreach (PropertyInfo property in typeof(CustomRole).GetProperties().Where(p => p.CanWrite && p is not null && p.GetType() is not null))
+            {
+                if (!data.ContainsKey(namingStrategy.GetPropertyName(property.Name, false)))
+                    error = $"Given CustomRole doesn't contain the required property '{namingStrategy.GetPropertyName(property.Name, false)}' ({namingStrategy.GetPropertyName(property.PropertyType.Name, false)})";
+
+                if (error is not null)
+                    break;
+            }
+
+            return error is null;
         }
     }
 }

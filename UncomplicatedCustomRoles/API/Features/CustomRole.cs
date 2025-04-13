@@ -46,7 +46,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Gets a list of every outdated loaded roles.
         /// The data is the CustomRole, the plugin Version and the role path
         /// </summary>
-        internal static List<Tuple<CustomRole, Version, string>> OutdatedRoles { get; } = new();
+        internal static List<OutdatedCustomRole> OutdatedRoles { get; } = new();
 
         /// <summary>
         /// Gets or sets the <see cref="ICustomRole"/> unique Id
