@@ -13,11 +13,13 @@
 <br><br>
 
 ## 其他语言的自述文件
+- [&#127468;&#127463; Englisch](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/README.md)
 - [&#127467;&#127479; Français](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-FR.md)
 - [&#x1F1EE;&#x1F1F9; Italiano](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-IT.md)
 - [&#127479;&#127482; Russian](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-RU.md)
 - [&#127465;&#127466; German](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-DE.md)
 - [&#127477;&#127473; Polski](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-PL.md)
+- [🇨🇳; Simplified Chinese](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-CN.md)
 
 ## 什么是UncomplicatedCustomRoles？
 **UncomplicatedCustomRoles** 或称为 **UCR** 是一个[EXILED](https://github.com/ExMod-Team/EXILED)插件，允许您使用 YAML 创建完全可配置和可定制的自定义角色。 \
@@ -47,7 +49,7 @@ UncomplicatedCustomRoles 有一个简单便捷的 API 系统，供开发人员�
 您可以通过 **OpenCollective** 来捐赠一些东西支持我们: 
 <a href="https://opencollective.com/ucs"><img height="15" src="https://raw.githubusercontent.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/refs/heads/resources/oc_icon.png">&nbsp;&nbsp;Donate</a>
 
-## ；联系我们？
+## 联系我们？
 ### UncomplicatedCustomRoles
   **Discord:** [https://discord.gg/5StRGu8EJV](https://discord.gg/5StRGu8EJV)
 
@@ -62,4 +64,5 @@ UncomplicatedCustomRoles 有一个简单便捷的 API 系统，供开发人员�
 **意大利语:** `@foxworn`\
 **俄语:** `@naxefir`\
 **德语:** `@seekedstroy`\
-**波兰语:** `@.piwnica2137`
+**波兰语:** `@.piwnica2137`\
+**简体中文** `@.Raiden-Yayi`
