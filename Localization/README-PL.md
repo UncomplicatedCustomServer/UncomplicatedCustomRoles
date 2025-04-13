@@ -39,7 +39,7 @@
 
 ## Czym jest UncomplicatedCustomRoles?
 **UncomplicatedCustomRoles** (UCR) to plugin dla [EXILED](https://github.com/ExMod-Team/EXILED), który pozwala na tworzenie w pełni konfigurowalnych ról z użyciem YAML.\
-Możesz ustawić <ins>rolę</ins>, <ins>ilość HP</ins>, <ins>co się stanie po ucieczce</ins> i wiele więcej!
+Możesz ustawić <ins>rolę</ins>, <ins>ilość HP</ins>, <ins>rolę po ucieczce</ins> i wiele więcej!
 
 ## Funkcje
 **UCR** oferuje mnóstwo możliwości, m.in.:
