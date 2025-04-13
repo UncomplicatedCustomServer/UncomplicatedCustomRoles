@@ -65,4 +65,4 @@ UncomplicatedCustomRoles 有一个简单便捷的 API 系统，供开发人员�
 **俄语:** `@naxefir`\
 **德语:** `@seekedstroy`\
 **波兰语:** `@.piwnica2137`\
-**简体中文** `@.Raiden-Yayi`
+**简体中文** `@Raiden-Yayi`
