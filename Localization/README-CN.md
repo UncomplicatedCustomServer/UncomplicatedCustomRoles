@@ -30,7 +30,7 @@
 - 不限制数量的自定义角色
 - 自定义角色的配置文件将会在独立的文件中，而不是EXILED的配置文件中。
 - 更多功能请查询 [wiki](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki)
-- 来自 **Discord** 的活跃社区（对大陆服主或许没什么用的说）
+- 来自 **Discord** 的活跃社区
 - 服主的 __特殊权限和预览功能__
 - 用于处理插件和角色的游戏内命令
 
