@@ -60,6 +60,7 @@
     <Compile Include="API\Features\Behaviour\HealthBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\HumeShieldBehaviour.cs" />
     <Compile Include="API\Features\CustomModules\CustomModule.cs" />
+    <Compile Include="API\Features\CustomModules\CustomPermissions.cs" />
     <Compile Include="API\Features\CustomModules\CustomScpAnnouncer.cs" />
     <Compile Include="API\Features\CustomModules\DoNotTrigger096.cs" />
     <Compile Include="API\Features\CustomModules\DoNotTriggerTeslaGates.cs" />
@@ -129,6 +130,7 @@
     <Compile Include="Manager\YamlFlagsHandler.cs" />
     <Compile Include="Patches\Announcer.cs" />
     <Compile Include="Patches\DisabledEventPatch.cs" />
+    <Compile Include="Patches\PermissionPrefix.cs" />
     <Compile Include="Patches\PlayerEventPrefix.cs" />
     <Compile Include="Patches\PlayerInfoPatch.cs" />
     <Compile Include="Patches\Scp3114StranglePrefix.cs" />
