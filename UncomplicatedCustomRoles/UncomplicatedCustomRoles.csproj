@@ -128,7 +128,6 @@
     <Compile Include="Manager\VersionManager.cs" />
     <Compile Include="Manager\YamlFlagsHandler.cs" />
     <Compile Include="Patches\Announcer.cs" />
-    <Compile Include="Patches\InventoryLimitsPrefix.cs" />
     <Compile Include="Patches\DisabledEventPatch.cs" />
     <Compile Include="Patches\PlayerEventPrefix.cs" />
     <Compile Include="Patches\PlayerInfoPatch.cs" />

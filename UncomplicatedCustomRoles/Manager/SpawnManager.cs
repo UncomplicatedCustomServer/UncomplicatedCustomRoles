@@ -157,6 +157,10 @@ namespace UncomplicatedCustomRoles.Manager
         {
             try
             {
+                if (Role.CustomInventoryLimits is Dictionary<ItemCategory, sbyte> inventoryLimits && inventoryLimits.Count > 0)
+                    foreach (KeyValuePair<ItemCategory, sbyte> category in inventoryLimits)
+                        Player.SetCategoryLimit(category.Key, category.Value);
+
                 Player.ResetInventory(Role.Inventory);
 
                 LogManager.Silent($"Can we give any CustomItem? {Role.CustomItemsInventory.Count()}");
@@ -184,9 +188,15 @@ namespace UncomplicatedCustomRoles.Manager
                             }
 
                 Player.ClearAmmo();
+
                 if (Role.Ammo is not null && Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
                     foreach (KeyValuePair<AmmoType, ushort> Ammo in Role.Ammo)
+                    {
+                        if (Ammo.Value > Player.GetAmmoLimit(Ammo.Key))
+                            Player.SetAmmoLimit(Ammo.Key, Ammo.Value);
+
                         Player.AddAmmo(Ammo.Key, Ammo.Value);
+                    }
 
                 Player.ReferenceHub.nicknameSync.Network_playerInfoToShow |= PlayerInfoArea.Nickname;
 

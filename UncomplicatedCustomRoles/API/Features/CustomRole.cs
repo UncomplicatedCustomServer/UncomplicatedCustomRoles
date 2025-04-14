@@ -184,13 +184,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets or sets the custom inventory limits to override the default ones
         /// </summary>
-        public virtual Dictionary<ItemCategory, sbyte> CustomInventoryLimits { get; set; } = new()
-        {
-            {
-                ItemCategory.Medical,
-                2
-            }
-        };
+        public virtual Dictionary<ItemCategory, sbyte> CustomInventoryLimits { get; set; } = new();
 
         /// <summary>
         /// Gets or sets the inventory of the player

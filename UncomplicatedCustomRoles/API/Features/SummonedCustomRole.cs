@@ -8,6 +8,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Exiled.API.Enums;
 using Exiled.API.Features;
 using HarmonyLib;
 using MEC;
@@ -16,7 +17,6 @@ using PlayerRoles.PlayableScps;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Struct;
@@ -217,6 +217,18 @@ namespace UncomplicatedCustomRoles.API.Features
 
                 LogManager.Debug("Scale reset to 1, 1, 1");
                 Player.Scale = new(1, 1, 1);
+
+                // Reset ammo limit
+                if (Role.Ammo is Dictionary<AmmoType, ushort> ammoList && ammoList.Count > 0)
+                    foreach (AmmoType ammo in ammoList.Keys)
+                        if (Player.HasCustomAmmoLimit(ammo))
+                            Player.ResetAmmoLimit(ammo);
+
+                // Reset category limit
+                if (Role.CustomInventoryLimits is Dictionary<ItemCategory, sbyte> inventoryLimits && inventoryLimits.Count > 0)
+                    foreach (ItemCategory category in inventoryLimits.Keys)
+                        if (Player.HasCustomCategoryLimit(category))
+                            Player.ResetCategoryLimit(category);
 
                 if (IsCustomNickname)
                     Player.DisplayNickname = null;
