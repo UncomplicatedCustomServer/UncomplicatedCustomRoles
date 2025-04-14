@@ -124,7 +124,7 @@ namespace UncomplicatedCustomRoles.Manager
                             Room room = Room.Get(roomType);
 
                             if (room is null)
-                                Log.Error("Failed to load room with RoomType " + roomType);
+                                LogManager.Error("Failed to load room with RoomType " + roomType);
 
                             player.Position = room.Position.AddY(1.5f);
 
@@ -180,7 +180,7 @@ namespace UncomplicatedCustomRoles.Manager
                             catch (Exception ex)
                             {
                                 LogManager.Debug($"Error while giving a custom item.\nError: {ex.Message}");
-                                Log.Error(ex);
+                                LogManager.Error(ex.ToString());
                             }
 
                 Player.ClearAmmo();

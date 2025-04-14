@@ -11,6 +11,7 @@
 using CommandSystem;
 using Exiled.API.Features;
 using MEC;
+using PlayerRoles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,10 +44,16 @@ namespace UncomplicatedCustomRoles.Commands
                 return false;
             }
 
-            Tuple<string, Player>[] players;
+            IEnumerable<Tuple<string, Player>> players;
 
             if (arguments[0].Contains(","))
-                players = arguments.Select(p => new Tuple<string, Player>(p, Player.Get(p))).ToArray();
+                players = arguments.Select(p => new Tuple<string, Player>(p, Player.Get(p)));
+            else if (arguments[0] is "all")
+                players = Player.List.Select(p => new Tuple<string, Player>(null, p));
+            else if (arguments[0] is "spectators" or "spect")
+                players = Player.List.Where(p => p.Role.Type is RoleTypeId.Spectator or RoleTypeId.None).Select(p => new Tuple<string, Player>(null, p));
+            else if (arguments[0] is "alive" or "al")
+                players = Player.List.Where(p => p.Role.Type is not RoleTypeId.Spectator or RoleTypeId.None).Select(p => new Tuple<string, Player>(null, p));
             else
                 players = new[] { new Tuple<string, Player>(arguments[0], Player.Get(arguments[0])) };
 
@@ -57,7 +64,7 @@ namespace UncomplicatedCustomRoles.Commands
                 foreach (Tuple<string, Player> player in players)
                     result += SpawnPlayer(player, id, sync);
 
-            response = $"Spawning {players.Length} players as CustomRole {(sync ? "synchronously" : "asynchronously")}\n{result}";
+            response = $"Spawning {players.Count()} players as CustomRole {(sync ? "synchronously" : "asynchronously")}\n{result}";
             return true;
         }
 
