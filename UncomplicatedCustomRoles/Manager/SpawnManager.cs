@@ -129,6 +129,9 @@ namespace UncomplicatedCustomRoles.Manager
                     case SpawnType.ClassDCell:
                         player.Position = RoleTypeId.ClassD.GetRandomSpawnLocation().Position;
                         break;
+                    case SpawnType.RoleSpawn:
+                        player.Position = Role.SpawnSettings.SpawnRoles.RandomItem().GetRandomSpawnLocation().Position;
+                        break;
                 };
             }
 

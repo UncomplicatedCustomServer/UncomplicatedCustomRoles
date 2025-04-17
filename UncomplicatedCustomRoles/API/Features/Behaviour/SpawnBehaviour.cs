@@ -52,6 +52,14 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
         };
 
         /// <summary>
+        /// Gets or sets a <see cref="List{T}"/> of roles that will be evaluated as spawnpoints
+        /// </summary>
+        public List<RoleTypeId> SpawnRoles { get; set; } = new()
+        {
+            RoleTypeId.ClassD
+        };
+
+        /// <summary>
         /// Gets or sets a <see cref="List{T}"/> of SpawnPoints that will be evaluated as spawnpoints
         /// </summary>
         public List<string> SpawnPoints { get; set; } = new();

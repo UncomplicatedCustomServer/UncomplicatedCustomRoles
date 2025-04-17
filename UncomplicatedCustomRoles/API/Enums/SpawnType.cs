@@ -8,6 +8,7 @@
         SpawnPointSpawn,
         KeepRoleSpawn,
         KeepCurrentPositionSpawn,
-        ClassDCell
+        ClassDCell,
+        RoleSpawn
     }
 }
