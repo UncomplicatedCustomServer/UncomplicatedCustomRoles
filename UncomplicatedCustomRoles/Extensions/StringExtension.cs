@@ -1,4 +1,15 @@
-﻿using System.Collections.Generic;
+﻿/*
+ * This file is a part of the UncomplicatedCustomRoles project.
+ * 
+ * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
+ * 
+ * This file is licensed under the GNU Affero General Public License v3.0.
+ * You should have received a copy of the AGPL license along with this file.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using System.Collections.Generic;
+using System.Linq;
 
 namespace UncomplicatedCustomRoles.Extensions
 {
@@ -27,6 +38,22 @@ namespace UncomplicatedCustomRoles.Extensions
                     result.Add(ch);
 
             return string.Join(separator, result);
+        }
+
+        public static string BulkReplace(this string str, Dictionary<string, object> replace, string matrix = null)
+        {
+            foreach (KeyValuePair<string, object> kvp in replace.Where(kvp => kvp.Value is not null))
+                str = str.Replace(matrix is null ? kvp.Key : matrix.Replace("<val>", kvp.Key), kvp.Value.ToString());
+
+            return str;
+        }
+
+        public static string GenerateWithBuffer(this string str, int bufferSize)
+        {
+            for (int a = str.Length; a < bufferSize; a++)
+                str += " ";
+
+            return str;
         }
     }
 }

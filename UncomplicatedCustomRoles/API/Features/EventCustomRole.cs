@@ -1,4 +1,14 @@
-﻿using Exiled.API.Enums;
+﻿/*
+ * This file is a part of the UncomplicatedCustomRoles project.
+ * 
+ * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
+ * 
+ * This file is licensed under the GNU Affero General Public License v3.0.
+ * You should have received a copy of the AGPL license along with this file.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using Exiled.API.Enums;
 using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
 using System.Collections.Generic;
@@ -79,6 +89,11 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Gets or sets the <see cref="AhpBehaviour"/>
         /// </summary>
         public virtual AhpBehaviour Ahp { get; set; } = new();
+
+        /// <summary>
+        /// Gets or sets the <see cref="HumeShieldBehaviour"/>
+        /// </summary>
+        public virtual HumeShieldBehaviour HumeShield { get; set; } = new();
 
         /// <summary>
         /// Gets or sets the <see cref="Effect"/>
