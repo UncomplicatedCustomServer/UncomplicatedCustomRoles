@@ -18,6 +18,7 @@ namespace UncomplicatedCustomRoles.API.Enums
         SpawnPointSpawn,
         KeepRoleSpawn,
         KeepCurrentPositionSpawn,
-        ClassDCell
+        ClassDCell,
+        RoleSpawn
     }
 }
