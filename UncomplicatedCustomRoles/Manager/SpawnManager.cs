@@ -267,13 +267,14 @@ namespace UncomplicatedCustomRoles.Manager
                     else
                         Player.DisplayNickname = Nick;
 
-                    Timing.CallDelayed(3f, () =>
-                    {
-                        if (Role.Nickname.Contains(","))
-                            Player.DisplayNickname = Nick.Split(',').RandomItem();
-                        else
-                            Player.DisplayNickname = Nick;
-                    });
+                    if (Plugin.Instance.Config.OverrideRpNames) 
+                        Timing.CallDelayed(3f, () => // Override RPNames shit (sowwy andrew)
+                        {
+                            if (Role.Nickname.Contains(","))
+                                Player.DisplayNickname = Nick.Split(',').RandomItem();
+                            else
+                                Player.DisplayNickname = Nick;
+                        });
 
                     ChangedNick = true;
                 }

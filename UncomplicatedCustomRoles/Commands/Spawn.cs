@@ -47,7 +47,7 @@ namespace UncomplicatedCustomRoles.Commands
             IEnumerable<Tuple<string, Player>> players;
 
             if (arguments[0].Contains(","))
-                players = arguments.Select(p => new Tuple<string, Player>(p, Player.Get(p)));
+                players = arguments[0].Replace(" ", string.Empty).Split(',').Select(p => new Tuple<string, Player>(p, Player.Get(p)));
             else if (arguments[0] is "all")
                 players = Player.List.Select(p => new Tuple<string, Player>(null, p));
             else if (arguments[0] is "spectators" or "spect")

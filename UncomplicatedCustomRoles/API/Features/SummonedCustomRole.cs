@@ -23,8 +23,6 @@ using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Commands;
 using UncomplicatedCustomRoles.Manager;
 
-// Sashimi <3
-
 namespace UncomplicatedCustomRoles.API.Features
 {
 #pragma warning disable IDE1006 // Stili di denominazione
@@ -202,6 +200,12 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             try
             {
+                foreach (CustomModule module in _customModules.ToArray())
+                {
+                    module.OnRemoved();
+                    _customModules.Remove(module);
+                }
+
                 if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null && Role.BadgeColor.Length > 2 && Badge is not null && Badge is Triplet<string, string, bool> badge)
                 {
                     Player.RankName = badge.First;
@@ -232,12 +236,6 @@ namespace UncomplicatedCustomRoles.API.Features
 
                 if (IsCustomNickname)
                     Player.DisplayNickname = null;
-
-                foreach (CustomModule module in _customModules.ToArray())
-                {
-                    module.OnRemoved();
-                    _customModules.Remove(module);
-                }
 
                 if (IsDefaultCoroutineRole && GenericCoroutine.IsRunning)
                     Timing.KillCoroutines(GenericCoroutine);
@@ -331,7 +329,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public T GetModule<T>() where T : CustomModule => _customModules.Where(cm => cm.GetType() == typeof(T)).FirstOrDefault() as T;
+        public T GetModule<T>() where T : CustomModule => _customModules.FirstOrDefault(cm => cm.GetType() == typeof(T)) as T;
 
         /// <summary>
         /// Gets a <see cref="CustomModule"/> array that contains every custom module with the same type
@@ -352,7 +350,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <typeparam name="T"></typeparam>
         /// <param name="module"></param>
         /// <returns></returns>
-        public bool GetModule<T>(out T module) where T : CustomModule
+        public bool TryGetModule<T>(out T module) where T : CustomModule
         {
             module = GetModule<T>();
             return module != null;
@@ -383,7 +381,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <typeparam name="T"></typeparam>
         public void RemoveModule<T>() where T : CustomModule
         {
-            if (GetModule(out T module))
+            if (TryGetModule(out T module))
             {
                 module.OnRemoved();
                 _customModules.Remove(module);

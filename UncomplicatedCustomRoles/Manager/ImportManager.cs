@@ -63,51 +63,19 @@ namespace UncomplicatedCustomRoles.Manager
                         object[] attribs = type.GetCustomAttributes(typeof(PluginCustomRole), false);
                         if (attribs != null && attribs.Length > 0 && (type.IsSubclassOf(typeof(ICustomRole)) || type.IsSubclassOf(typeof(CustomRole)) || type.IsSubclassOf(typeof(EventCustomRole))))
                         {
-                            LogManager.Silent("Importing it!");
                             ActivePlugins.TryAdd(plugin);
 
                             ICustomRole Role = Activator.CreateInstance(type) as ICustomRole;
 
-                            if (Plugin.Instance.Config.EnableBasicLogs)
-                                LogManager.Info($"Imported CustomRole {Role.Name} ({Role.Id}) through Attribute from plugin {plugin.Name} (v{plugin.Version})");
-
-                            // The public function is not CustomRole.Register BUT CompatibilityManager.RegisterCustomRole - it's hidden btw
-                            //CustomRole.Register(Role);
-                            CompatibilityManager.RegisterCustomRole(Role);
+                            CustomRole.Register(Role);
+                            LogManager.Info($"CustomRole {Role} imported from external plugin {plugin.Name} (v{plugin.Version.ToString(3)})");
                         }
                     }
                     catch (Exception e)
                     {
-                        LogManager.Error($"Error while registering CustomRole from class by Attribute: {e.GetType().FullName} - {e.Message}\nType: {type.FullName} [{plugin.Name}] - Source: {e.Source}");
+                        LogManager.Error($"Error while registering CustomRole from class by Attribute:\nType: {type.FullName} [{plugin.Name}]\nException: {e}");
                     }
             }
-        }
-
-        internal static Assembly GetCallingAssembly()
-        {
-            var stackTrace = new StackTrace();
-
-            // Frame 0 = GetCallingAssembly
-            // Frame 1 = Foo
-            // Frame 2 = Main (o chi ha chiamato Foo)
-            for (int i = 1; i < stackTrace.FrameCount; i++)
-            {
-                var method = stackTrace.GetFrame(i).GetMethod();
-                var declaringType = method.DeclaringType;
-
-                if (declaringType != null)
-                {
-                    return declaringType.Assembly;
-                }
-            }
-
-            return null;
-        }
-
-        public static MethodBase GetCallingMethod()
-        {
-            StackTrace stackTrace = new();
-            return stackTrace.GetFrame(1).GetMethod();
         }
     }
 }

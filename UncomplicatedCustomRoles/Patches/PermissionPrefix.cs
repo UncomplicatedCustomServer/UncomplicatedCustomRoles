@@ -23,7 +23,7 @@ namespace UncomplicatedCustomRoles.Patches
     {
         static bool Prefix(Player player, string permission, ref bool __result)
         {
-            if (player.TryGetSummonedInstance(out SummonedCustomRole role) && role.GetModule(out CustomPermissions module) && module.Permissions.Contains(permission))
+            if (player.TryGetSummonedInstance(out SummonedCustomRole role) && role.TryGetModule(out CustomPermissions module) && module.Permissions.Contains(permission))
             {
                 __result = true;
                 return false;

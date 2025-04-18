@@ -64,6 +64,8 @@
     <Compile Include="API\Features\CustomModules\CustomScpAnnouncer.cs" />
     <Compile Include="API\Features\CustomModules\DoNotTrigger096.cs" />
     <Compile Include="API\Features\CustomModules\DoNotTriggerTeslaGates.cs" />
+    <Compile Include="API\Features\CustomModules\DropItemOnDeath.cs" />
+    <Compile Include="API\Features\CustomModules\DropNothingOnDeath.cs" />
     <Compile Include="API\Features\CustomModules\ItemBan.cs" />
     <Compile Include="API\Features\CustomModules\LifeStealer.cs" />
     <Compile Include="API\Features\CustomModules\NotAffectedByAppearance.cs" />
@@ -92,6 +94,7 @@
     <Compile Include="Commands\List.cs" />
     <Compile Include="Commands\LogShare.cs" />
     <Compile Include="Commands\Owner.cs" />
+    <Compile Include="Commands\Percentages.cs" />
     <Compile Include="Commands\Role.cs" />
     <Compile Include="Commands\Reload.cs" />
     <Compile Include="Commands\Spawn.cs" />

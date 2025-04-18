@@ -1,3 +1,13 @@
+/*
+ * This file is a part of the UncomplicatedCustomRoles project.
+ * 
+ * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
+ * 
+ * This file is licensed under the GNU Affero General Public License v3.0.
+ * You should have received a copy of the AGPL license along with this file.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
 using System;
 using Exiled.API.Enums;
 using Exiled.API.Features;
@@ -168,7 +178,7 @@ namespace UncomplicatedCustomRoles
 
             if (Config.EnableBasicLogs)
             {
-                LogManager.Info($"Thanks for using UncomplicatedCustomRoles v{Version.ToString(3)} by {Author}!");
+                LogManager.Info($"Thanks for using UncomplicatedCustomRoles v{Version.ToString(3)} by {Author}!", ConsoleColor.Blue);
                 LogManager.Info("For support and to remain updated please join our Discord: https://discord.gg/5StRGu8EJV", ConsoleColor.DarkYellow);
             }
         }

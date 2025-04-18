@@ -87,6 +87,14 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         public virtual void Execute()
         { }
 
+        /// <summary>
+        /// Try to get a value from the <see cref="Args"/> and if not present just return a default value.
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="def"></param>
+        /// <returns></returns>
+        public string TryGetValue(string param, string def = null) => Args.TryGetValue(param, out string value) ? value : def;
+
 #nullable enable
         internal static List<CustomModule> Load(List<object> modules, SummonedCustomRole summonedCustomRole)
         {

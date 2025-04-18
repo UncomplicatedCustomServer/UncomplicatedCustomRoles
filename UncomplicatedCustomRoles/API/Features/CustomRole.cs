@@ -274,27 +274,10 @@ namespace UncomplicatedCustomRoles.API.Features
         }
 
         /// <summary>
-        /// Register a new <see cref="ICustomRole"/>.
-        /// Required only if you want the custom role to be evaluated from UCR.
+        /// Register a new <see cref="ICustomRole"/> instance.
         /// </summary>
         /// <param name="customRole"></param>
-        public static LoadStatusType Register(ICustomRole customRole, bool _ = false)
-        {
-            if (ImportManager.GetCallingAssembly().FullName != Plugin.Instance.Assembly.FullName)
-                return CompatibilityManager.RegisterCustomRole(customRole);
-
-            if (!Validate(customRole, out string _))
-                return LoadStatusType.ValidatorError;
-
-            if (!CustomRoles.ContainsKey(customRole.Id))
-            {
-                CustomRoles.Add(customRole.Id, customRole);
-
-                return LoadStatusType.Success;
-            }
-
-            return LoadStatusType.ValidatorError;
-        }
+        public static LoadStatusType Register(ICustomRole customRole) => CompatibilityManager.RegisterCustomRole(customRole);
 
         /// <summary>
         /// Unregister a registered <see cref="ICustomRole"/>.
@@ -336,6 +319,21 @@ namespace UncomplicatedCustomRoles.API.Features
             }
 
             return true;
+        }
+
+        internal static LoadStatusType InternalRegister(ICustomRole customRole)
+        {
+            if (!Validate(customRole, out string _))
+                return LoadStatusType.ValidatorError;
+
+            if (!CustomRoles.ContainsKey(customRole.Id))
+            {
+                CustomRoles.Add(customRole.Id, customRole);
+
+                return LoadStatusType.Success;
+            }
+
+            return LoadStatusType.ValidatorError;
         }
     }
 }

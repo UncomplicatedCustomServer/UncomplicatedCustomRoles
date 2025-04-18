@@ -26,6 +26,7 @@ using Exiled.Events.EventArgs.Warhead;
 using PlayerRoles.Ragdolls;
 using Exiled.Events.EventArgs.Scp096;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
+using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -128,7 +129,7 @@ namespace UncomplicatedCustomRoles.Events
                 if (customRole.HasModule<TutorialRagdoll>())
                     RagdollAppearanceQueue.Add(ev.Player.Id);
 
-                if (customRole.GetModule(out CustomScpAnnouncer announcer) && ev.Player.ReferenceHub.GetTeam() is not Team.SCPs)
+                if (customRole.TryGetModule(out CustomScpAnnouncer announcer) && ev.Player.ReferenceHub.GetTeam() is not Team.SCPs)
                     TerminationQueue.Add(ev.Player.Id, new(announcer, DateTimeOffset.Now));
             }
         }
@@ -257,7 +258,7 @@ namespace UncomplicatedCustomRoles.Events
             if (ev.Player is not null && ev.Player.IsAlive && ev.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole))
                 playerCustomRole.LastDamageTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-            if (ev.Attacker is not null && ev.Attacker.IsAlive && ev.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole) && attackerCustomRole.GetModule(out LifeStealer lifeStealer))
+            if (ev.Attacker is not null && ev.Attacker.IsAlive && ev.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole) && attackerCustomRole.TryGetModule(out LifeStealer lifeStealer))
                 ev.Attacker.Heal(ev.Amount * (lifeStealer.Percentage / 100f));
         }
 

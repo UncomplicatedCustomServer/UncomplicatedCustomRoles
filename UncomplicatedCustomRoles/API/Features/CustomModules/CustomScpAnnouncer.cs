@@ -19,6 +19,6 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
             "name"
         };
 
-        internal string RoleName => Args.TryGetValue("name", out string name) ? name : "SCP 404";
+        internal string RoleName => TryGetValue("name", "SCP 404");
     }
 }

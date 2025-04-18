@@ -79,7 +79,7 @@ namespace UncomplicatedCustomRoles.Compatibility
 
         public static LoadStatusType RegisterCustomRole(ICustomRole role)
         {
-            LoadStatusType status = CustomRole.Register(role);
+            LoadStatusType status = CustomRole.InternalRegister(role);
 
             if (status is LoadStatusType.Success)
                 LogManager.Info($"{prefix}Successfully loaded CustomRole {role}!", ConsoleColor.DarkGray);
