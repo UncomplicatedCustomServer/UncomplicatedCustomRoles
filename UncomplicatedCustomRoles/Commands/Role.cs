@@ -30,7 +30,7 @@ namespace UncomplicatedCustomRoles.Commands
         {
             if (arguments.Count > 1)
             {
-                response = "Usage: ucr role <Player ID or Name>";
+                response = "Usage: ucr role (Player ID or Name)";
                 return false;
             }
 
