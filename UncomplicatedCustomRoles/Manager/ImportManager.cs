@@ -1,13 +1,25 @@
-﻿using Exiled.API.Interfaces;
+﻿/*
+ * This file is a part of the UncomplicatedCustomRoles project.
+ * 
+ * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
+ * 
+ * This file is licensed under the GNU Affero General Public License v3.0.
+ * You should have received a copy of the AGPL license along with this file.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using Exiled.API.Interfaces;
 using Exiled.Loader;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using UncomplicatedCustomRoles.API.Attributes;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.Compatibility;
 using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.Manager
@@ -37,8 +49,7 @@ namespace UncomplicatedCustomRoles.Manager
 
         private static void Actor()
         {
-            if (Plugin.Instance.Config.EnableBasicLogs)
-                LogManager.Info($"Checking for CustomRole registered in other plugins to import...");
+            LogManager.Debug($"Checking for CustomRole registered in other plugins to import...");
 
             _alreadyLoaded = true;
 
@@ -52,20 +63,17 @@ namespace UncomplicatedCustomRoles.Manager
                         object[] attribs = type.GetCustomAttributes(typeof(PluginCustomRole), false);
                         if (attribs != null && attribs.Length > 0 && (type.IsSubclassOf(typeof(ICustomRole)) || type.IsSubclassOf(typeof(CustomRole)) || type.IsSubclassOf(typeof(EventCustomRole))))
                         {
-                            LogManager.Silent("Importing it!");
                             ActivePlugins.TryAdd(plugin);
 
                             ICustomRole Role = Activator.CreateInstance(type) as ICustomRole;
 
-                            if (Plugin.Instance.Config.EnableBasicLogs)
-                                LogManager.Info($"Imported CustomRole {Role.Name} ({Role.Id}) through Attribute from plugin {plugin.Name} (v{plugin.Version})");
-
                             CustomRole.Register(Role);
+                            LogManager.Info($"CustomRole {Role} imported from external plugin {plugin.Name} (v{plugin.Version.ToString(3)})");
                         }
                     }
                     catch (Exception e)
                     {
-                        LogManager.Error($"Error while registering CustomRole from class by Attribute: {e.GetType().FullName} - {e.Message}\nType: {type.FullName} [{plugin.Name}] - Source: {e.Source}");
+                        LogManager.Error($"Error while registering CustomRole from class by Attribute:\nType: {type.FullName} [{plugin.Name}]\nException: {e}");
                     }
             }
         }

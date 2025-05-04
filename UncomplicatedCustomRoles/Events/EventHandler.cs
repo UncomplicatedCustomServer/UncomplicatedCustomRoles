@@ -1,4 +1,14 @@
-﻿using Exiled.API.Features;
+﻿/*
+ * This file is a part of the UncomplicatedCustomRoles project.
+ * 
+ * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
+ * 
+ * This file is licensed under the GNU Affero General Public License v3.0.
+ * You should have received a copy of the AGPL license along with this file.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using Exiled.API.Features;
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.Manager;
 using MEC;
@@ -16,6 +26,7 @@ using Exiled.Events.EventArgs.Warhead;
 using PlayerRoles.Ragdolls;
 using Exiled.Events.EventArgs.Scp096;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
+using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -118,7 +129,7 @@ namespace UncomplicatedCustomRoles.Events
                 if (customRole.HasModule<TutorialRagdoll>())
                     RagdollAppearanceQueue.Add(ev.Player.Id);
 
-                if (customRole.GetModule(out CustomScpAnnouncer announcer) && ev.Player.ReferenceHub.GetTeam() is not Team.SCPs)
+                if (customRole.TryGetModule(out CustomScpAnnouncer announcer) && ev.Player.ReferenceHub.GetTeam() is not Team.SCPs)
                     TerminationQueue.Add(ev.Player.Id, new(announcer, DateTimeOffset.Now));
             }
         }
@@ -244,13 +255,11 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnHurt(HurtEventArgs ev)
         {
-            // Update the LastDamageTime for some HumeShield features
             if (ev.Player is not null && ev.Player.IsAlive && ev.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole))
                 playerCustomRole.LastDamageTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-            // Heal the attacker (for stealing the life) if it has the flag
-            if (ev.Attacker is not null && ev.Attacker.IsAlive && ev.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole) && attackerCustomRole.GetModule(out LifeStealer lifeStealer))
-                ev.Attacker.Heal(ev.Amount * (lifeStealer.Percentage / 100));
+            if (ev.Attacker is not null && ev.Attacker.IsAlive && ev.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole) && attackerCustomRole.TryGetModule(out LifeStealer lifeStealer))
+                ev.Attacker.Heal(ev.Amount * (lifeStealer.Percentage / 100f));
         }
 
         public void OnEscaping(EscapingEventArgs Escaping)

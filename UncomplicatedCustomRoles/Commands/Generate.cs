@@ -1,9 +1,20 @@
-﻿using CommandSystem;
+﻿/*
+ * This file is a part of the UncomplicatedCustomRoles project.
+ * 
+ * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
+ * 
+ * This file is licensed under the GNU Affero General Public License v3.0.
+ * You should have received a copy of the AGPL license along with this file.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using CommandSystem;
 using Exiled.Loader;
 using System.Collections.Generic;
 using System.IO;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Commands
 {
@@ -27,7 +38,7 @@ namespace UncomplicatedCustomRoles.Commands
             if (arguments.Count == 2)
                 port = (int)uint.Parse(arguments[1]);
 
-            string path = Plugin.FileConfigs.Dir;
+            string path = FileConfigs.Dir;
             if (port > 0)
                 path = Path.Combine(path, port.ToString());
 

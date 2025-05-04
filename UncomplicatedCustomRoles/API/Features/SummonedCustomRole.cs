@@ -1,4 +1,15 @@
-﻿using Exiled.API.Features;
+﻿/*
+ * This file is a part of the UncomplicatedCustomRoles project.
+ * 
+ * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
+ * 
+ * This file is licensed under the GNU Affero General Public License v3.0.
+ * You should have received a copy of the AGPL license along with this file.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using Exiled.API.Enums;
+using Exiled.API.Features;
 using HarmonyLib;
 using MEC;
 using PlayerRoles;
@@ -6,14 +17,11 @@ using PlayerRoles.PlayableScps;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Commands;
 using UncomplicatedCustomRoles.Manager;
-
-// Sashimi <3
 
 namespace UncomplicatedCustomRoles.API.Features
 {
@@ -94,7 +102,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets whether the current <see cref="SummonedCustomRole"/> implements a coroutine for handling basic plugin features
         /// </summary>
-        public bool IsDefaultCoroutineRole => (Role.Health?.HumeShield ?? 0) > 0 && (Role.Health?.HumeShieldRegenerationAmount ?? 0) > 0;
+        public bool IsDefaultCoroutineRole => (Role.HumeShield?.Amount ?? 0) > 0 && (Role.HumeShield?.RegenerationAmount ?? 0) > 0;
 
         /// <summary>
         /// Gets if the current SummonedCustomRole is valid or not
@@ -180,7 +188,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public void Destroy()
         {
-            LogManager.Silent($"Destroying instance of CR {Role.Id} of PL {Player}");
+            LogManager.Silent($"Destroying instance {Id} of CR {Role.Id} of PL {Player}");
             Remove();
             List.Remove(this);
         }
@@ -192,6 +200,12 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             try
             {
+                foreach (CustomModule module in _customModules.ToArray())
+                {
+                    module.OnRemoved();
+                    _customModules.Remove(module);
+                }
+
                 if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null && Role.BadgeColor.Length > 2 && Badge is not null && Badge is Triplet<string, string, bool> badge)
                 {
                     Player.RankName = badge.First;
@@ -208,14 +222,20 @@ namespace UncomplicatedCustomRoles.API.Features
                 LogManager.Debug("Scale reset to 1, 1, 1");
                 Player.Scale = new(1, 1, 1);
 
+                // Reset ammo limit
+                if (Role.Ammo is Dictionary<AmmoType, ushort> ammoList && ammoList.Count > 0)
+                    foreach (AmmoType ammo in ammoList.Keys)
+                        if (Player.HasCustomAmmoLimit(ammo))
+                            Player.ResetAmmoLimit(ammo);
+
+                // Reset category limit
+                if (Role.CustomInventoryLimits is Dictionary<ItemCategory, sbyte> inventoryLimits && inventoryLimits.Count > 0)
+                    foreach (ItemCategory category in inventoryLimits.Keys)
+                        if (Player.HasCustomCategoryLimit(category))
+                            Player.ResetCategoryLimit(category);
+
                 if (IsCustomNickname)
                     Player.DisplayNickname = null;
-
-                foreach (CustomModule module in _customModules.ToArray())
-                {
-                    module.OnRemoved();
-                    _customModules.Remove(module);
-                }
 
                 if (IsDefaultCoroutineRole && GenericCoroutine.IsRunning)
                     Timing.KillCoroutines(GenericCoroutine);
@@ -237,7 +257,7 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             while (_internalValid && Player.IsAlive && IsDefaultCoroutineRole)
             {
-                if (EvaluateCustomActions() && Player.HumeShield < Role.Health.HumeShield && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.Health.HumeShieldRegenerationDelay && !_isRegeneratingHume)
+                if (EvaluateCustomActions() && Player.HumeShield < Role.HumeShield.Amount && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.RegenerationDelay && !_isRegeneratingHume)
                     Timing.RunCoroutine(HumeShieldCoroutine());
 
                 yield return Timing.WaitForSeconds(TickDuration);
@@ -282,9 +302,9 @@ namespace UncomplicatedCustomRoles.API.Features
 
             if (Plugin.HttpManager.Credits.TryGetValue(Player.UserId, out Triplet<string, string, bool> tag))
                 if (IsEmployee)
-                    output += $"                                 <color=#168eba>[UCR EMPLOYEE]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>";
+                    output += $"\n<color=#168eba>[UCR EMPLOYEE]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>";
                 else
-                    output += $"                                 <color=#168eba>[UCR CONTRIBUTOR]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>";
+                    output += $"\n<color=#168eba>[UCR CONTRIBUTOR]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>";
 
             return output;
         }
@@ -296,9 +316,9 @@ namespace UncomplicatedCustomRoles.API.Features
         public IEnumerator<float> HumeShieldCoroutine()
         {
             _isRegeneratingHume = true;
-            while (_internalValid && Player.IsAlive && Player.HumeShield < Role.Health.HumeShield && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.Health.HumeShieldRegenerationDelay)
+            while (_internalValid && Player.IsAlive && Player.HumeShield < Role.HumeShield.Amount && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.RegenerationDelay)
             {
-                Player.HumeShield += Role.Health.HumeShieldRegenerationAmount;
+                Player.HumeShield += Role.HumeShield.RegenerationAmount;
                 yield return Timing.WaitForSeconds(1f);
             }
             _isRegeneratingHume = false;
@@ -309,7 +329,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public T GetModule<T>() where T : CustomModule => _customModules.Where(cm => cm.GetType() == typeof(T)).FirstOrDefault() as T;
+        public T GetModule<T>() where T : CustomModule => _customModules.FirstOrDefault(cm => cm.GetType() == typeof(T)) as T;
 
         /// <summary>
         /// Gets a <see cref="CustomModule"/> array that contains every custom module with the same type
@@ -330,7 +350,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <typeparam name="T"></typeparam>
         /// <param name="module"></param>
         /// <returns></returns>
-        public bool GetModule<T>(out T module) where T : CustomModule
+        public bool TryGetModule<T>(out T module) where T : CustomModule
         {
             module = GetModule<T>();
             return module != null;
@@ -361,7 +381,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <typeparam name="T"></typeparam>
         public void RemoveModule<T>() where T : CustomModule
         {
-            if (GetModule(out T module))
+            if (TryGetModule(out T module))
             {
                 module.OnRemoved();
                 _customModules.Remove(module);
@@ -538,6 +558,16 @@ namespace UncomplicatedCustomRoles.API.Features
             if (TryGet(player, out SummonedCustomRole role))
                 return role.ParseRemoteAdmin();
             return "\nCustom Role: None";
+        }
+
+        public static void RemoveSpecificRole(int id)
+        {
+            foreach (SummonedCustomRole role in List.Where(scr => scr.Role.Id == id))
+            {
+                role.Destroy();
+                role.Player.ClearBroadcasts();
+                role.Player.Broadcast(6, "You Custom Role has been <color=red>removed</color> as it has been removed from the list!");
+            }
         }
 
         /// <summary>

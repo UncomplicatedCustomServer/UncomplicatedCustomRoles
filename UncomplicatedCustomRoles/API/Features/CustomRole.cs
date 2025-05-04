@@ -1,4 +1,14 @@
-﻿using Exiled.API.Enums;
+﻿/*
+ * This file is a part of the UncomplicatedCustomRoles project.
+ * 
+ * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
+ * 
+ * This file is licensed under the GNU Affero General Public License v3.0.
+ * You should have received a copy of the AGPL license along with this file.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using Exiled.API.Enums;
 using PlayerRoles;
 using System;
 using System.Collections.Generic;
@@ -6,6 +16,7 @@ using System.Linq;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.Compatibility;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 
@@ -29,7 +40,13 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Gets a list of every not loaded custom role.
         /// The data is the Id, the role path, the error type and the error name
         /// </summary>
-        internal static List<Tuple<string, string, string, string>> NotLoadedRoles { get; } = new();
+        internal static List<ErrorCustomRole> NotLoadedRoles { get; } = new();
+
+        /// <summary>
+        /// Gets a list of every outdated loaded roles.
+        /// The data is the CustomRole, the plugin Version and the role path
+        /// </summary>
+        internal static List<OutdatedCustomRole> OutdatedRoles { get; } = new();
 
         /// <summary>
         /// Gets or sets the <see cref="ICustomRole"/> unique Id
@@ -100,6 +117,11 @@ namespace UncomplicatedCustomRoles.API.Features
         public virtual AhpBehaviour Ahp { get; set; } = new();
 
         /// <summary>
+        /// Gets or sets the <see cref="HumeShieldBehaviour"/>
+        /// </summary>
+        public virtual HumeShieldBehaviour HumeShield { get; set; } = new();
+
+        /// <summary>
         /// Gets or sets the <see cref="Effect"/>
         /// </summary>
         public virtual List<Effect>? Effects { get; set; } = new();
@@ -162,13 +184,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets or sets the custom inventory limits to override the default ones
         /// </summary>
-        public virtual Dictionary<ItemCategory, sbyte> CustomInventoryLimits { get; set; } = new()
-        {
-            {
-                ItemCategory.Medical,
-                2
-            }
-        };
+        public virtual Dictionary<ItemCategory, sbyte> CustomInventoryLimits { get; set; } = new();
 
         /// <summary>
         /// Gets or sets the inventory of the player
@@ -258,94 +274,10 @@ namespace UncomplicatedCustomRoles.API.Features
         }
 
         /// <summary>
-        /// Register a new <see cref="ICustomRole"/>.
-        /// Required only if you want the custom role to be evaluated from UCR.
+        /// Register a new <see cref="ICustomRole"/> instance.
         /// </summary>
         /// <param name="customRole"></param>
-        public static void Register(ICustomRole Role, bool notLoadIfLoaded = false)
-        {
-            if (!Validate(Role))
-            {
-                LogManager.Warn($"[Role Loader] Failed to load CustomRole: {Role}!\nFailed to validate the role!");
-
-                return;
-            }
-
-            if (!CustomRoles.ContainsKey(Role.Id))
-            {
-                CustomRoles.Add(Role.Id, Role);
-
-                if (Plugin.Instance.Config.EnableBasicLogs)
-                    LogManager.SmInfo($"[Role Loader] CustomRole {Role} successfully loaded!");
-
-                return;
-            }
-
-            if (notLoadIfLoaded)
-            {
-                LogManager.Debug($"[Role Loader] Can't load CustomRole {Role} due to misterious plugin settings!\nI really have NO IDEA why that happened lol");
-                return;
-            }
-
-            LogManager.Warn($"[Role Loader] Failed to register CustomRole {Role}:\nThere's already another CustomRole with the same Id!\nAssiging a new Id...");
-
-            int NewId = GetFirstFreeID(Role.Id);
-
-            LogManager.SmInfo($"[Role Loader] CustomRole {Role} successfully registered with a new Id: {NewId}");
-
-            Role.Id = NewId;
-
-            Register(Role, true);
-        }
-
-        /// <summary>
-        /// Validate a <see cref="ICustomRole"/>
-        /// </summary>
-        /// <param name="Role"></param>
-        /// <returns></returns>
-        [Obsolete("This method should not be used as was intended for the first versions of UCR and now the plugin can handle also things that are reported as errors here!", false)]
-        public static bool Validate(ICustomRole Role)
-        {
-            if (Role is null)
-                return false;
-
-            if (Role.SpawnSettings is null)
-            {
-                LogManager.Warn($"Is kinda useless registering a role with no spawn_settings.\nFound (or not found) in role: {Role.Name} ({Role.Id})");
-                return false;
-            }
-
-            if (Role.SpawnSettings.Spawn == SpawnType.ZoneSpawn && Role.SpawnSettings.SpawnZones.Count() < 1)
-            {
-                LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the ZoneSpawn as SpawnType the List SpawnZones can't be empty!");
-                return false;
-            }
-            else if (Role.SpawnSettings.Spawn == SpawnType.RoomsSpawn && Role.SpawnSettings.SpawnRooms.Count() < 1)
-            {
-                LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the RoomSpawn as SpawnType the List SpawnRooms can't be empty!");
-                return false;
-            }
-            else if (Role.SpawnSettings.Spawn == SpawnType.SpawnPointSpawn && (Role.SpawnSettings.SpawnPoints is null || Role.SpawnSettings.SpawnPoints.Count == 0))
-            {
-                LogManager.Warn($"The UCR custom role with the ID {Role.Id} failed the check: if you select the SpawnPointSpawn as SpawnType the SpawnPoint can't be empty or null!");
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Get the first free id to register a new custom role
-        /// </summary>
-        /// <param name="Id"></param>
-        /// <returns></returns>
-        public static int GetFirstFreeID(int Id)
-        {
-            while (CustomRoles.ContainsKey(Id))
-                Id++;
-
-            return Id;
-        }
+        public static LoadStatusType Register(ICustomRole customRole) => CompatibilityManager.RegisterCustomRole(customRole);
 
         /// <summary>
         /// Unregister a registered <see cref="ICustomRole"/>.
@@ -355,6 +287,53 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             if (CustomRoles.ContainsKey(customRole.Id))
                 CustomRoles.Remove(customRole.Id);
+        }
+
+        internal static bool Validate(ICustomRole role, out string error)
+        {
+            error = "Role seems to be null";
+
+            if (role is null)
+                return false;
+
+            if (role.SpawnSettings is null)
+            {
+                error = $"Role has no spawn_settings";
+                return false;
+            }
+
+            if (role.SpawnSettings.Spawn is SpawnType.ZoneSpawn && role.SpawnSettings.SpawnZones.Count() < 1)
+            {
+                error = "If the SpawnType is ZoneSpawn the list SpawnZones shouldn't be empty";
+                return false;
+            }
+            else if (role.SpawnSettings.Spawn is SpawnType.RoomsSpawn && role.SpawnSettings.SpawnRooms.Count() < 1)
+            {
+                error = "If the SpawnType is RoomsSpawn the list SpawnRooms shouldn't be empty";
+                return false;
+            }
+            else if (role.SpawnSettings.Spawn is SpawnType.SpawnPointSpawn && (role.SpawnSettings.SpawnPoints is null || role.SpawnSettings.SpawnPoints.Count == 0))
+            {
+                error = "If the SpawnType is SpawnPointSpawn the list SpawnPoints shouldn't be empty";
+                return false;
+            }
+
+            return true;
+        }
+
+        internal static LoadStatusType InternalRegister(ICustomRole customRole)
+        {
+            if (!Validate(customRole, out string _))
+                return LoadStatusType.ValidatorError;
+
+            if (!CustomRoles.ContainsKey(customRole.Id))
+            {
+                CustomRoles.Add(customRole.Id, customRole);
+
+                return LoadStatusType.Success;
+            }
+
+            return LoadStatusType.SameId;
         }
     }
 }

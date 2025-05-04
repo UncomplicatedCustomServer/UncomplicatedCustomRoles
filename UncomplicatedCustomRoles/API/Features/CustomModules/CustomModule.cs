@@ -1,4 +1,14 @@
-﻿using Exiled.Events.EventArgs.Interfaces;
+﻿/*
+ * This file is a part of the UncomplicatedCustomRoles project.
+ * 
+ * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
+ * 
+ * This file is licensed under the GNU Affero General Public License v3.0.
+ * You should have received a copy of the AGPL license along with this file.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using Exiled.Events.EventArgs.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,12 +45,12 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         /// Gets the args of the current <see cref="CustomModule"/>
         /// </summary>
         /// <remarks>Every value is a <see cref="string"/></remarks>
-        internal Dictionary<string, string> Args { get; private set; }
+        public Dictionary<string, string> Args { get; private set; }
 
         /// <summary>
         /// Gets the instance of the <see cref="SummonedCustomRole"/> in which the current <see cref="CustomModule"/> is embedded
         /// </summary>
-        internal SummonedCustomRole CustomRole { get; private set; }
+        public SummonedCustomRole CustomRole { get; private set; }
 
         internal void Initialize(SummonedCustomRole summonedCustomRole, Dictionary<string, string> args)
         {
@@ -76,6 +86,14 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         /// <remark>This won't be invoked by UCR</remark>
         public virtual void Execute()
         { }
+
+        /// <summary>
+        /// Try to get a value from the <see cref="Args"/> and if not present just return a default value.
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="def"></param>
+        /// <returns></returns>
+        public string TryGetValue(string param, string def = null) => Args.TryGetValue(param, out string value) ? value : def;
 
 #nullable enable
         internal static List<CustomModule> Load(List<object> modules, SummonedCustomRole summonedCustomRole)
