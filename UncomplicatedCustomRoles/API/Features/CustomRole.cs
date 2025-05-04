@@ -333,7 +333,7 @@ namespace UncomplicatedCustomRoles.API.Features
                 return LoadStatusType.Success;
             }
 
-            return LoadStatusType.ValidatorError;
+            return LoadStatusType.SameId;
         }
     }
 }
