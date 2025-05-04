@@ -26,7 +26,7 @@ namespace UncomplicatedCustomRoles.Commands
 
         public string Description { get; } = "View info about a specific Custom Role";
 
-        public string RequiredPermission { get; } = "ucr.list";
+        public string RequiredPermission { get; } = "ucr.info";
 
         public bool Executor(List<string> arguments, ICommandSender sender, out string response)
         {
