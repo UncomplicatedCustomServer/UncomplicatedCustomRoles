@@ -8,21 +8,23 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.Events.EventArgs.Interfaces;
-using Exiled.Events.Features;
 using HarmonyLib;
+using LabApi.Events;
+using LabApi.Events.Arguments.Interfaces;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.Extensions;
 
+// REVIEW (CAN BE VERY WRONG!!!)
+
 namespace UncomplicatedCustomRoles.Patches
 {
-    [HarmonyPatch(typeof(Event<object>), nameof(Event<object>.InvokeSafely))]
+    [HarmonyPatch(typeof(EventManager), nameof(EventManager.InvokeEvent))]
     internal class PlayerEventPrefix
     {
         public static void Prefix(object arg)
         {
-            if (arg is IDeniableEvent deniable && !deniable.IsAllowed)
+            if (arg is ICancellableEvent deniable && !deniable.IsAllowed)
                 return;
 
             if (arg is IPlayerEvent ev && ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole))
@@ -31,7 +33,7 @@ namespace UncomplicatedCustomRoles.Patches
 
                 foreach (CustomModule module in customRole.CustomModules)
                     if (module.TriggerOnEvents.Contains(name))
-                        if (!module.OnEvent(name, ev) && arg is IDeniableEvent deniableEvent)
+                        if (!module.OnEvent(name, ev) && arg is ICancellableEvent deniableEvent)
                             deniableEvent.IsAllowed = false;
             }
         }

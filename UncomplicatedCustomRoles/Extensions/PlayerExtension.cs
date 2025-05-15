@@ -93,10 +93,9 @@ namespace UncomplicatedCustomRoles.Extensions
         }
 
         /// <summary>
-        /// Try to get the current <see cref="SummonedCustomRole"/> of a <see cref="Player"/> if it's one.
+        /// Try to get the current <see cref="SummonedCustomRole"/> of a <see cref="Player"/> if it has one.
         /// </summary>
         /// <param name="player"></param>
-        /// <param name="role"></param>
         /// <returns>true if the player is currently <see cref="SummonedCustomRole"/></returns>
         public static bool TryGetSummonedInstance(this Player player, out SummonedCustomRole summonedInstance)
         {
@@ -105,14 +104,29 @@ namespace UncomplicatedCustomRoles.Extensions
         }
 
         /// <summary>
-        /// Get the current <see cref="SummonedCustomRole"/> of a <see cref="Player"/> if it's one.
+        /// Try to get the current <see cref="SummonedCustomRole"/> of a <see cref="ReferenceHub"/> if it has one.
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns>true if the player is currently <see cref="SummonedCustomRole"/></returns>
+        public static bool TryGetSummonedInstance(this ReferenceHub player, out SummonedCustomRole summonedInstance)
+        {
+            summonedInstance = GetSummonedInstance(player);
+            return summonedInstance != null;
+        }
+
+        /// <summary>
+        /// Get the current <see cref="SummonedCustomRole"/> of a <see cref="Player"/> if it has one.
         /// </summary>
         /// <param name="player"></param>
         /// <returns>The current <see cref="SummonedCustomRole"/> if the player has one, otherwise <see cref="null"/></returns>
-        public static SummonedCustomRole GetSummonedInstance(this Player player)
-        {
-            return SummonedCustomRole.Get(player);
-        }
+        public static SummonedCustomRole GetSummonedInstance(this Player player) => SummonedCustomRole.Get(player);
+
+        /// <summary>
+        /// Get the current <see cref="SummonedCustomRole"/> of a <see cref="ReferenceHub"/> if it has one.
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
+        public static SummonedCustomRole GetSummonedInstance(this ReferenceHub player) => SummonedCustomRole.Get(player);
 
         /// <summary>
         /// Try to remove a <see cref="ICustomRole"/> from a <see cref="Player"/> if it has one.

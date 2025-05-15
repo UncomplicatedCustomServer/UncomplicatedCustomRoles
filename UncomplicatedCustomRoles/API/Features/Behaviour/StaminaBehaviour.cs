@@ -8,8 +8,8 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Features;
-using Exiled.API.Features.Roles;
+using LabApi.Features.Wrappers;
+using PlayerRoles.FirstPersonControl;
 
 namespace UncomplicatedCustomRoles.API.Features.Behaviour
 {
@@ -33,16 +33,8 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
         /// <summary>
         /// Apply the current instance of <see cref="StaminaBehaviour"/> to the given <see cref="Player"/>
         /// </summary>
-        /// <param name="player"></param>
-        public void Apply(Player player)
-        {
-            if (player.Role is FpcRole Fpc)
-            {
-                Fpc.StaminaRegenMultiplier = RegenMultiplier;
-                Fpc.StaminaUsageMultiplier = UsageMultiplier;
-            }
-
-            player.IsUsingStamina = !Infinite;
-        }
+        /// <param name="_"></param>
+        public void Apply(Player _)
+        { }
     }
 }

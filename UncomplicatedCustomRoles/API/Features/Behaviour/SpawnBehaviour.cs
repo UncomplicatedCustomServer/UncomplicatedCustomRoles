@@ -8,11 +8,11 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Enums;
 using PlayerRoles;
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Enums;
+using MapGeneration;
 
 namespace UncomplicatedCustomRoles.API.Features.Behaviour
 {
@@ -51,14 +51,14 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
         /// <summary>
         /// Gets or sets a <see cref="List{T}"/> of zones that will be evaluated as spawnpoints
         /// </summary>
-        public List<ZoneType> SpawnZones { get; set; } = new();
+        public List<FacilityZone> SpawnZones { get; set; } = new();
 
         /// <summary>
         /// Gets or sets a <see cref="List{T}"/> of rooms that will be evaluated as spawnpoints
         /// </summary>
-        public List<RoomType> SpawnRooms { get; set; } = new()
+        public List<RoomName> SpawnRooms { get; set; } = new()
         {
-            RoomType.LczClassDSpawn
+            RoomName.LczClassDSpawn
         };
 
         /// <summary>

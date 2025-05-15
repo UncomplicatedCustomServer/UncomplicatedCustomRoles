@@ -1,4 +1,4 @@
-﻿using Exiled.API.Features.Pickups;
+﻿using LabApi.Features.Wrappers;
 using System.Linq;
 using UnityEngine;
 
@@ -8,7 +8,7 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
     {
         public override void OnRemoved()
         {
-            foreach (Pickup pickup in Pickup.List.Where(p => Vector3.Distance(p.Position, CustomRole.Player.Position) < 1f && p.PreviousOwner.Id == CustomRole.Player.Id))
+            foreach (Pickup pickup in Pickup.List.Where(p => Vector3.Distance(p.Position, CustomRole.Player.Position) < 1f && p.LastOwner.PlayerId == CustomRole.Player.PlayerId))
                 pickup.Destroy();
         }
     }

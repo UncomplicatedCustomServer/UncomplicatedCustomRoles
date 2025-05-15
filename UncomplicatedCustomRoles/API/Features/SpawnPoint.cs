@@ -8,7 +8,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Features;
+using LabApi.Features.Wrappers;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +42,7 @@ namespace UncomplicatedCustomRoles.API.Features
         public Vector3 RoomRotation => new(RoomRotationBase.First, RoomRotationBase.Second, RoomRotationBase.Third);
 
         [JsonIgnore]
-        public Room Room => RoomId != "" ? Room.List.Where(room => room.Identifier.name == RoomId).FirstOrDefault() : null;
+        public Room Room => RoomId != "" ? Room.List.Where(room => room.GameObject.name == RoomId).FirstOrDefault() : null;
 
         [JsonIgnore]
         public bool HasRoom => Room is not null;
@@ -58,7 +58,7 @@ namespace UncomplicatedCustomRoles.API.Features
             List.Add(this);
         }
 
-        public SpawnPoint(string name, Player player) : this(name, player.CurrentRoom?.Identifier.name ?? string.Empty, (player.CurrentRoom is not null ? player.CurrentRoom.Position - player.Position : player.Position).ToTriplet(), new(player.Rotation.x, player.Rotation.y, player.Rotation.z, player.Rotation.w), player.CurrentRoom?.Rotation.eulerAngles.ToTriplet() ?? new(0f, 0f, 0f)) { }
+        public SpawnPoint(string name, Player player) : this(name, player.Room?.GameObject.name ?? string.Empty, (player.Room is not null ? player.Room.Position - player.Position : player.Position).ToTriplet(), new(player.Rotation.x, player.Rotation.y, player.Rotation.z, player.Rotation.w), player.Room?.Rotation.eulerAngles.ToTriplet() ?? new(0f, 0f, 0f)) { }
 
         public void Destroy() => List.Remove(this);
 
@@ -80,7 +80,7 @@ namespace UncomplicatedCustomRoles.API.Features
             player.Rotation = Rotation;
         }
 
-        public override string ToString() => $"SpawnPoint '{Name}' at {Room?.Name ?? "Fixed Position"} ({Position} @ {RoomRotation}) [{HasRoom}]";
+        public override string ToString() => $"SpawnPoint '{Name}' at {Room.Name} ({Position} @ {RoomRotation}) [{HasRoom}]";
 
         public static SpawnPoint Get(string name) => List.Where(sp => sp.Name == name).FirstOrDefault();
 

@@ -203,10 +203,10 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets or sets the ammo inventory of the player
         /// </summary>
-        public virtual Dictionary<AmmoType, ushort> Ammo { get; set; } = new()
+        public virtual Dictionary<ItemType, ushort> Ammo { get; set; } = new()
         {
             {
-                AmmoType.Nato9,
+                ItemType.Ammo9x19,
                 10
             }
         };

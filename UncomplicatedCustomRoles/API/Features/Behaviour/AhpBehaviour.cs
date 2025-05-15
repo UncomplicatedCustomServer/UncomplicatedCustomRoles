@@ -8,7 +8,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Features;
+using LabApi.Features.Wrappers;
 
 namespace UncomplicatedCustomRoles.API.Features.Behaviour
 {
@@ -51,7 +51,7 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
         public void Apply(Player player)
         {
             if (Amount > 0)
-                player.AddAhp(Amount, Limit, Decay, Efficacy, Sustain, Persistant);
+                player.CreateAhpProcess(Amount, Limit, Decay, Efficacy, Sustain, Persistant);
         }
     }
 }

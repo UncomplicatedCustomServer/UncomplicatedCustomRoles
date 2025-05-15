@@ -8,7 +8,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.Events.EventArgs.Interfaces;
+using LabApi.Events.Arguments.Interfaces;
 using System.Collections.Generic;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules

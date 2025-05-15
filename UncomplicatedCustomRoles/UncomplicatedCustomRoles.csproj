@@ -141,6 +141,7 @@
     <Compile Include="Patches\Scp3114StranglePrefix.cs" />
     <Compile Include="Patches\ServerNamePatch.cs" />
     <Compile Include="Patches\SetRolePatch.cs" />
+    <Compile Include="Patches\StaminaUsagePatch.cs" />
     <Compile Include="Patches\TeamPatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="API\Interfaces\ICustomRole.cs" />

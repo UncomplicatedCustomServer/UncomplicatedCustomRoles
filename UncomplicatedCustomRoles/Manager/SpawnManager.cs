@@ -8,29 +8,24 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Enums;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Exiled.CustomItems.API.Features;
 using System;
 using UncomplicatedCustomRoles.Extensions;
 using MEC;
-using Exiled.Permissions.Extensions;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Interfaces;
-using Exiled.API.Extensions;
 using PlayerRoles;
 using PlayerStatsSystem;
 using Subtitles;
 using Utils.Networking;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
-using System.Text.RegularExpressions;
 using UncomplicatedCustomRoles.Integrations;
 using LabApi.Features.Wrappers;
-using UncomplicatedCustomRoles.Commands;
+using MapGeneration;
 
 // Mormora, la gente mormora
 // falla tacere praticando l'allegria
@@ -95,7 +90,7 @@ namespace UncomplicatedCustomRoles.Manager
                 }
 
                 // This will allow us to avoid the loop of another OnSpawning
-                Spawn.Spawning.TryAdd(player.Id);
+                Spawn.Spawning.TryAdd(player.UserId);
 
                 Vector3 BasicPosition = player.Position;
 
@@ -104,7 +99,7 @@ namespace UncomplicatedCustomRoles.Manager
                 if (Role.SpawnSettings.Spawn == SpawnType.KeepRoleSpawn)
                     SpawnFlag = RoleSpawnFlags.UseSpawnpoint;
 
-                player.Role.Set(Role.Role, SpawnFlag);
+                player.SetRole(Role.Role, RoleChangeReason.Respawn, SpawnFlag);
 
                 if (Role.SpawnSettings.Spawn == SpawnType.KeepCurrentPositionSpawn)
                     player.Position = BasicPosition;
@@ -120,9 +115,9 @@ namespace UncomplicatedCustomRoles.Manager
                             player.Position = Room.List.Where(room => room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
                             break;
                         case SpawnType.RoomsSpawn:
-                            RoomType roomType = Role.SpawnSettings.SpawnRooms.RandomItem();
+                            RoomName roomType = Role.SpawnSettings.SpawnRooms.RandomItem();
 
-                            Room room = Room.Get(roomType);
+                            Room room = Room.Get(roomType).FirstOrDefault();
 
                             if (room is null)
                                 LogManager.Error("Failed to load room with RoomType " + roomType);

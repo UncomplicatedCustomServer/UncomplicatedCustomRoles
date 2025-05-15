@@ -1,4 +1,4 @@
-﻿using Exiled.API.Features.Pickups;
+﻿using LabApi.Features.Wrappers;
 using MEC;
 using System;
 using System.Collections.Generic;
@@ -17,7 +17,7 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         public override void OnRemoved()
         {
             if (Item is ItemType item)
-                Timing.CallDelayed(0.5f, () => Pickup.CreateAndSpawn(item, CustomRole.Player.Position));
+                Timing.CallDelayed(0.5f, () => Pickup.Create(item, CustomRole.Player.Position));
         }
     }
 }
