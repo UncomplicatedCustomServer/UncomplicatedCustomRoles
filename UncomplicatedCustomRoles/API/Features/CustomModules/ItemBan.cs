@@ -8,7 +8,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Features.Pickups;
+using LabApi.Features.Wrappers;
 using System;
 using System.Collections.Generic;
 

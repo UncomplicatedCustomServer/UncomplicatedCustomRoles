@@ -9,7 +9,6 @@
  */
 
 using Exiled.API.Enums;
-using Exiled.API.Features;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -30,6 +29,8 @@ using Utils.Networking;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using System.Text.RegularExpressions;
 using UncomplicatedCustomRoles.Integrations;
+using LabApi.Features.Wrappers;
+using UncomplicatedCustomRoles.Commands;
 
 // Mormora, la gente mormora
 // falla tacere praticando l'allegria
@@ -231,8 +232,7 @@ namespace UncomplicatedCustomRoles.Manager
                             continue;
                         }
                         LogManager.Debug($"Enabling effect {effect.EffectType} to {Player.Nickname} for {effect.Duration} (i:{effect.Intensity})");
-                        Player.EnableEffect(effect.EffectType, effect.Duration);
-                        Player.ChangeEffectIntensity(effect.EffectType, effect.Intensity, effect.Duration);
+                        Player.EnableEffect(effect.EffectType, effect.Intensity, effect.Duration);
                     }
                 }
                 LogManager.Silent($"Found {PermanentEffects.Count} permament effects");
@@ -240,20 +240,20 @@ namespace UncomplicatedCustomRoles.Manager
                 if (Role.SpawnBroadcast != string.Empty)
                 {
                     Player.ClearBroadcasts();
-                    Player.Broadcast(Role.SpawnBroadcastDuration, Role.SpawnBroadcast);
+                    Player.SendBroadcast(Role.SpawnBroadcast, Role.SpawnBroadcastDuration);
                 }
 
                 if (Role.SpawnHint != string.Empty)
-                    Player.ShowHint(Role.SpawnHint, Role.SpawnHintDuration);
+                    Player.SendHint(Role.SpawnHint, Role.SpawnHintDuration);
 
                 Triplet<string, string, bool>? Badge = null;
                 if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null && Role.BadgeColor.Length > 2)
                 {
-                    Badge = new(Player.RankName ?? "", Player.RankColor ?? "", Player.ReferenceHub.serverRoles.HasBadgeHidden);
-                    LogManager.Debug($"Badge detected, putting {Role.BadgeName}@{Role.BadgeColor} to player {Player.Id}");
+                    Badge = new(Player.ReferenceHub.serverRoles.Network_myText ?? "", Player.ReferenceHub.serverRoles.Network_myColor ?? "", Player.ReferenceHub.serverRoles.HasBadgeHidden);
+                    LogManager.Debug($"Badge detected, putting {Role.BadgeName}@{Role.BadgeColor} to player {Player.PlayerId}");
 
-                    Player.RankName = Role.BadgeName.Replace("@hidden", "");
-                    Player.RankColor = Role.BadgeColor;
+                    Player.ReferenceHub.serverRoles.SetText(Role.BadgeName.Replace("@hidden", ""));
+                    Player.ReferenceHub.serverRoles.SetColor(Role.BadgeColor);
 
                     if (Role.BadgeName.Contains("@hidden"))
                         if (Player.ReferenceHub.serverRoles.TryHideTag())
@@ -266,17 +266,17 @@ namespace UncomplicatedCustomRoles.Manager
                 {
                     string Nick = PlaceholderManager.ApplyPlaceholders(Role.Nickname, Player, Role);
                     if (Role.Nickname.Contains(","))
-                        Player.DisplayNickname = Nick.Split(',').RandomItem();
+                        Player.DisplayName = Nick.Split(',').RandomItem();
                     else
-                        Player.DisplayNickname = Nick;
+                        Player.DisplayName = Nick;
 
                     if (Plugin.Instance.Config.OverrideRpNames) 
                         Timing.CallDelayed(3f, () => // Override RPNames shit (sowwy andrew)
                         {
                             if (Role.Nickname.Contains(","))
-                                Player.DisplayNickname = Nick.Split(',').RandomItem();
+                                Player.DisplayName = Nick.Split(',').RandomItem();
                             else
-                                Player.DisplayNickname = Nick;
+                                Player.DisplayName = Nick;
                         });
 
                     ChangedNick = true;
@@ -353,15 +353,15 @@ namespace UncomplicatedCustomRoles.Manager
             }
 
             // Now let's assign
-            if (!player.IsCuffed)
+            if (!player.IsDisarmed)
                 return Default;
-            else if (player.IsCuffed && player.Cuffer is not null)
-                if (player.Cuffer.TryGetSummonedInstance(out SummonedCustomRole role) && AsCuffedByCustomRole.ContainsKey(role.Role.Id))
+            else if (player.IsDisarmed && player.DisarmedBy is not null)
+                if (player.DisarmedBy.TryGetSummonedInstance(out SummonedCustomRole role) && AsCuffedByCustomRole.ContainsKey(role.Role.Id))
                     return AsCuffedByCustomRole[role.Role.Id];
-                else if (AsCuffedByInternalTeam.ContainsKey(player.Cuffer.Role.Team))
-                    return AsCuffedByInternalTeam[player.Cuffer.Role.Team];
+                else if (AsCuffedByInternalTeam.ContainsKey(player.DisarmedBy.Team))
+                    return AsCuffedByInternalTeam[player.DisarmedBy.Team];
 
-            LogManager.Silent($"Returing default type for escaping evaluation of player {player.Id} who's cuffed by {player.Cuffer?.Role.Team}");
+            LogManager.Silent($"Returing default type for escaping evaluation of player {player.PlayerId} who's cuffed by {player.DisarmedBy?.Team}");
             return Default;
         }
 

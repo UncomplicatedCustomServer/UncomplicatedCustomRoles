@@ -8,23 +8,23 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Features;
+using LabApi.Features.Wrappers;
 using MEC;
+using Mirror;
 using PlayerRoles;
 using System;
+using System.Reflection;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 
-/*
- * > 05/06/2024 - A really really good day :)
-*/
-
 namespace UncomplicatedCustomRoles.Extensions
 {
     public static class PlayerExtension
     {
+        private static MethodInfo sendSpawnMessage;
+      
         /// <summary>
         /// Check if a <see cref="Player"/> is currently a <see cref="ICustomRole"/>.
         /// </summary>
@@ -131,7 +131,7 @@ namespace UncomplicatedCustomRoles.Extensions
                 {
                     Vector3 OriginalPosition = player.Position;
 
-                    player.Role.Set(Role, RoleSpawnFlags.AssignInventory);
+                    player.SetRole(Role, RoleChangeReason.Destroyed, RoleSpawnFlags.AssignInventory);
 
                     player.Position = OriginalPosition;
                 }
@@ -174,12 +174,12 @@ namespace UncomplicatedCustomRoles.Extensions
             if (customInfo is null || customInfo.Length < 1)
             {
                 LogManager.Silent("Applying only role name (order: NICK-ROLE)");
-                player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = $"{player.DisplayNickname}\n{role}";
+                player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = $"{player.DisplayName}\n{role}";
             }
             else
             {
                 LogManager.Silent("Applying role name and custom info (CI-NICK-ROLE)");
-                player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = $"{ProcessCustomInfo(customInfo)}\n{player.DisplayNickname}\n{role}";
+                player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = $"{ProcessCustomInfo(customInfo)}\n{player.DisplayName}\n{role}";
             }
         }
 
@@ -189,5 +189,19 @@ namespace UncomplicatedCustomRoles.Extensions
         /// <param name="customInfo"></param>
         /// <returns></returns>
         private static string ProcessCustomInfo(string customInfo) => customInfo.Replace("[br]", "\n");
+
+        internal static void SetScale(this Player player, Vector3 scale)
+        {
+            sendSpawnMessage ??= typeof(NetworkServer).GetMethod("SendSpawnMessage", BindingFlags.NonPublic | BindingFlags.Static);
+
+            if (scale == player.ReferenceHub.transform.localScale)
+                return;
+
+            player.ReferenceHub.transform.localScale = scale;
+
+            if (sendSpawnMessage is not null)
+                foreach (Player target in Player.List)
+                    sendSpawnMessage.Invoke(null, new object[] { player.ReferenceHub.netIdentity, target.Connection });
+        }
     }
 }

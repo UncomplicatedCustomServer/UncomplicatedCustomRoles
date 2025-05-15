@@ -11,6 +11,9 @@
 using Discord;
 using Exiled.API.Features;
 using Exiled.Loader;
+using LabApi.Features.Console;
+using LabApi.Loader;
+using LabApi.Loader.Features.Yaml;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -30,31 +33,31 @@ namespace UncomplicatedCustomRoles.Manager
         public static void Debug(string message)
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Debug.ToString(), message));
-            Log.Debug(message);
+            Logger.Debug(message);
         }
 
         public static void SmInfo(string message, string label = "Info")
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), label, message));
-            Log.Send($"[{Plugin.Instance.Assembly.GetName().Name}] {message}", LogLevel.Info, ConsoleColor.Gray);
+            Logger.Raw($"[{Plugin.Instance.Name}] {message}", ConsoleColor.Gray);
         }
 
         public static void Info(string message, ConsoleColor color = ConsoleColor.Cyan)
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Info.ToString(), message));
-            Log.Send($"[{Plugin.Instance.Assembly.GetName().Name}] {message}", LogLevel.Info, color);
+            Logger.Raw($"[{Plugin.Instance.Name}] {message}", color);
         }
 
         public static void Warn(string message, string error = "CS0000")
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Warn.ToString(), message, error));
-            Log.Warn(message);
+            Logger.Warn(message);
         }
 
         public static void Error(string message, string error = "CS0000")
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Warn.ToString(), message, error));
-            Log.Error(message);
+            Logger.Error(message);
         }
 
         public static void Silent(string message) => History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "Silent", message));
@@ -80,7 +83,7 @@ namespace UncomplicatedCustomRoles.Manager
             stringContent += "\n======== BEGIN CUSTOM ROLES ========\n";
 
             foreach (ICustomRole Role in CustomRole.CustomRoles.Values)
-                stringContent += $"{Loader.Serializer.Serialize(Role)}\n\n---\n\n";
+                stringContent += $"{YamlConfigParser.Serializer.Serialize(Role)}\n\n---\n\n";
 
             HttpStatusCode Response = Plugin.HttpManager.ShareLogs(stringContent, out content);
 

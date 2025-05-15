@@ -8,9 +8,8 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Enums;
-using Exiled.API.Features;
 using HarmonyLib;
+using LabApi.Features.Wrappers;
 using MEC;
 using PlayerRoles;
 using PlayerRoles.PlayableScps;
@@ -21,6 +20,7 @@ using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Commands;
+using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.API.Features
@@ -208,22 +208,22 @@ namespace UncomplicatedCustomRoles.API.Features
 
                 if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null && Role.BadgeColor.Length > 2 && Badge is not null && Badge is Triplet<string, string, bool> badge)
                 {
-                    Player.RankName = badge.First;
-                    Player.RankColor = badge.Second;
+                    Player.ReferenceHub.serverRoles.SetText(badge.First);
+                    Player.ReferenceHub.serverRoles.SetColor(badge.Second);
                     Player.ReferenceHub.serverRoles.RefreshLocalTag();
 
                     LogManager.Debug($"Badge detected, fixed");
                 }
 
                 Player.ReferenceHub.nicknameSync.Network_playerInfoToShow = PlayerInfoArea;
-                Player.IsUsingStamina = true;
+                //Player.IsUsingStamina = true;
                 Player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = string.Empty;
 
                 LogManager.Debug("Scale reset to 1, 1, 1");
-                Player.Scale = new(1, 1, 1);
-
+                Player.SetScale(new(1, 1, 1));
+                 
                 // Reset ammo limit
-                if (Role.Ammo is Dictionary<AmmoType, ushort> ammoList && ammoList.Count > 0)
+                if (Role.Ammo is Dictionary<ItemType, ushort> ammoList && ammoList.Count > 0)
                     foreach (AmmoType ammo in ammoList.Keys)
                         if (Player.HasCustomAmmoLimit(ammo))
                             Player.ResetAmmoLimit(ammo);
@@ -565,8 +565,7 @@ namespace UncomplicatedCustomRoles.API.Features
             foreach (SummonedCustomRole role in List.Where(scr => scr.Role.Id == id))
             {
                 role.Destroy();
-                role.Player.ClearBroadcasts();
-                role.Player.Broadcast(6, "You Custom Role has been <color=red>removed</color> as it has been removed from the list!");
+                role.Player.SendBroadcast("You Custom Role has been <color=red>removed</color> as it has been removed from the list!", 6);
             }
         }
 

@@ -9,22 +9,23 @@
  */
 
 using System;
-using Exiled.API.Enums;
-using Exiled.API.Features;
 using UncomplicatedCustomRoles.Integrations;
 using UncomplicatedCustomRoles.Manager;
 using Handler = UncomplicatedCustomRoles.Events.EventHandler;
-using PlayerHandler = Exiled.Events.Handlers.Player;
-using Scp049Handler = Exiled.Events.Handlers.Scp049;
-using Scp096Handler = Exiled.Events.Handlers.Scp096;
-using ServerHandler = Exiled.Events.Handlers.Server;
-using Scp330Handler = Exiled.Events.Handlers.Scp330;
-using WarheadHandler = Exiled.Events.Handlers.Warhead;
+using PlayerHandler = LabApi.Events.Handlers.PlayerEvents;
+using Scp049Handler = LabApi.Events.Handlers.Scp049Events;
+using Scp096Handler = LabApi.Events.Handlers.Scp096Events;
+using ServerHandler = LabApi.Events.Handlers.ServerEvents;
+using WarheadHandler = LabApi.Events.Handlers.WarheadEvents;
+// MISSING using Scp330Handler = Exiled.Events.Handlers.Scp330;
 using UncomplicatedCustomRoles.API.Features;
 using HarmonyLib;
 using UncomplicatedCustomRoles.Manager.NET;
 using UncomplicatedCustomRoles.Patches;
 using System.Threading.Tasks;
+using LabApi.Loader.Features.Plugins;
+using LabApi.Loader.Features.Plugins.Enums;
+using LabApi.Features.Wrappers;
 
 namespace UncomplicatedCustomRoles
 {
@@ -32,15 +33,15 @@ namespace UncomplicatedCustomRoles
     {
         public override string Name => "UncomplicatedCustomRoles";
 
-        public override string Prefix => "UncomplicatedCustomRoles";
+        public override string Description => "Customize your SCP:SL server with Custom Roles!";
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
         public override Version Version { get; } = new(7, 0, 0);
 
-        public override Version RequiredExiledVersion { get; } = new(9, 1, 0);
+        public override Version RequiredApiVersion => new(0, 7, 0);
 
-        public override PluginPriority Priority => PluginPriority.Higher;
+        public override LoadPriority Priority => LoadPriority.Highest;
 
         internal static Plugin Instance;
 
@@ -50,7 +51,7 @@ namespace UncomplicatedCustomRoles
 
         internal Harmony _harmony;
 
-        public override void OnEnabled()
+        public override void Enable()
         {
             Instance = this;
 
@@ -64,30 +65,29 @@ namespace UncomplicatedCustomRoles
             CustomRole.CustomRoles.Clear();
             CustomRole.NotLoadedRoles.Clear();
 
-            ServerHandler.RespawningTeam += Handler.OnRespawningWave;
+            ServerHandler.WaveRespawning += Handler.OnRespawningWave;
             ServerHandler.RoundStarted += Handler.OnRoundStarted;
             ServerHandler.RoundEnded += Handler.OnRoundEnded;
             ServerHandler.WaitingForPlayers += Handler.OnWaitingForPlayers;
 
             PlayerHandler.ActivatingGenerator += Handler.OnGenerator;
             PlayerHandler.Dying += Handler.OnDying;
-            PlayerHandler.Died += Handler.OnDied;
+            PlayerHandler.Death += Handler.OnDied;
             PlayerHandler.SpawningRagdoll += Handler.OnRagdollSpawn;
-            PlayerHandler.Spawned += Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole += Handler.OnChangingRole;
-            PlayerHandler.ReceivingEffect += Handler.OnReceivingEffect;
+            PlayerHandler.UpdatingEffect += Handler.OnReceivingEffect;
             PlayerHandler.Escaping += Handler.OnEscaping;
             PlayerHandler.UsedItem += Handler.OnItemUsed;
             PlayerHandler.Hurting += Handler.OnHurting;
             PlayerHandler.Hurt += Handler.OnHurt;
             PlayerHandler.PickingUpItem += Handler.OnPickingUp;
-            PlayerHandler.Verified += Handler.OnVerified;
+            PlayerHandler.Joined += Handler.OnVerified;
 
-            Scp049Handler.FinishingRecall += Handler.OnFinishingRecall;
+            Scp049Handler.ResurrectingBody += Handler.OnFinishingRecall;
 
             Scp096Handler.AddingTarget += Handler.OnAddingTarget;
 
-            Scp330Handler.InteractingScp330 += Handler.OnInteractingScp330;
+            PlayerHandler.InteractingScp330 += Handler.OnInteractingScp330;
 
             WarheadHandler.Starting += Handler.OnWarheadLever;
 
@@ -116,11 +116,9 @@ namespace UncomplicatedCustomRoles
             CustomRoleEventHandler.RegisterEvents();
 
             RespawnTimer.Enable();
-
-            base.OnEnabled();
         }
 
-        public override void OnDisabled()
+        public override void Disable()
         {
             RespawnTimer.Disable();
 
@@ -128,31 +126,29 @@ namespace UncomplicatedCustomRoles
 
             _harmony.UnpatchAll();
 
-            ServerHandler.RespawningTeam -= Handler.OnRespawningWave;
-            ServerHandler.RoundEnded -= Handler.OnRoundEnded;
+            ServerHandler.WaveRespawning -= Handler.OnRespawningWave;
             ServerHandler.RoundStarted -= Handler.OnRoundStarted;
+            ServerHandler.RoundEnded -= Handler.OnRoundEnded;
             ServerHandler.WaitingForPlayers -= Handler.OnWaitingForPlayers;
 
-            // PlayerHandler.Verified -= Handler.OnVerified;
             PlayerHandler.ActivatingGenerator -= Handler.OnGenerator;
             PlayerHandler.Dying -= Handler.OnDying;
-            PlayerHandler.Died -= Handler.OnDied;
+            PlayerHandler.Death -= Handler.OnDied;
             PlayerHandler.SpawningRagdoll -= Handler.OnRagdollSpawn;
-            PlayerHandler.Spawned -= Handler.OnPlayerSpawned;
             PlayerHandler.ChangingRole -= Handler.OnChangingRole;
-            PlayerHandler.ReceivingEffect -= Handler.OnReceivingEffect;
+            PlayerHandler.UpdatingEffect -= Handler.OnReceivingEffect;
             PlayerHandler.Escaping -= Handler.OnEscaping;
             PlayerHandler.UsedItem -= Handler.OnItemUsed;
             PlayerHandler.Hurting -= Handler.OnHurting;
             PlayerHandler.Hurt -= Handler.OnHurt;
             PlayerHandler.PickingUpItem -= Handler.OnPickingUp;
-            PlayerHandler.Verified -= Handler.OnVerified;
+            PlayerHandler.Joined -= Handler.OnVerified;
 
-            Scp049Handler.FinishingRecall -= Handler.OnFinishingRecall;
+            Scp049Handler.ResurrectingBody -= Handler.OnFinishingRecall;
 
             Scp096Handler.AddingTarget -= Handler.OnAddingTarget;
 
-            Scp330Handler.InteractingScp330 -= Handler.OnInteractingScp330;
+            PlayerHandler.InteractingScp330 -= Handler.OnInteractingScp330;
 
             WarheadHandler.Starting -= Handler.OnWarheadLever;
 
@@ -161,8 +157,6 @@ namespace UncomplicatedCustomRoles
             Handler = null;
 
             Instance = null;
-
-            base.OnDisabled();
         }
 
         /// <summary>
