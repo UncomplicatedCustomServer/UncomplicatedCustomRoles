@@ -8,8 +8,8 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Features;
-using Exiled.Loader;
+using LabApi.Loader.Features.Paths;
+using LabApi.Loader.Features.Yaml;
 using System;
 using System.IO;
 using UncomplicatedCustomRoles.API.Features;
@@ -19,7 +19,7 @@ namespace UncomplicatedCustomRoles.Manager
 {
     internal static class FileConfigs
     {
-        internal static string Dir = Path.Combine(Paths.Configs, "UncomplicatedCustomRoles");
+        internal static string Dir = Path.Combine(PathManager.Configs.FullName, "UncomplicatedCustomRoles");
 
         public static bool Is(string localDir = "") => Directory.Exists(Path.Combine(Dir, localDir));
 
@@ -77,7 +77,7 @@ namespace UncomplicatedCustomRoles.Manager
             if (!Is(localDir))
             {
                 Directory.CreateDirectory(Path.Combine(Dir, localDir));
-                File.WriteAllText(Path.Combine(Dir, localDir, "example-role.yml"), Loader.Serializer.Serialize(new CustomRole()
+                File.WriteAllText(Path.Combine(Dir, localDir, "example-role.yml"), YamlConfigParser.Serializer.Serialize(new CustomRole()
                 {
                     Id = CompatibilityManager.GetFirstFreeId()
                 }));

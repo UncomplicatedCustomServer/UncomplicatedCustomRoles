@@ -9,10 +9,7 @@
  */
 
 using Discord;
-using Exiled.API.Features;
-using Exiled.Loader;
 using LabApi.Features.Console;
-using LabApi.Loader;
 using LabApi.Loader.Features.Yaml;
 using System;
 using System.Collections.Generic;
@@ -30,13 +27,18 @@ namespace UncomplicatedCustomRoles.Manager
 
         public static bool MessageSent { get; internal set; } = false;
 
+        public static bool DebugEnabled => Plugin.Instance.Config.Debug;
+
         public static void Debug(string message)
         {
+            if (!DebugEnabled)
+                return;
+
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Debug.ToString(), message));
             Logger.Debug(message);
         }
 
-        public static void SmInfo(string message, string label = "Info")
+        public static void SmInfo(string message, string label = "INFO")
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), label, message));
             Logger.Raw($"[{Plugin.Instance.Name}] {message}", ConsoleColor.Gray);

@@ -8,7 +8,6 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Enums;
 using PlayerRoles;
 using System.Collections.Generic;
 using System;
@@ -17,6 +16,8 @@ using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UnityEngine;
 using UncomplicatedCustomRoles.Manager;
 using UncomplicatedCustomRoles.API.Features;
+using UncomplicatedCustomRoles.Compatibility.PreviousVersionElements.Enums;
+using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.Compatibility.PreviousVersionRoles
 {
@@ -96,10 +97,10 @@ namespace UncomplicatedCustomRoles.Compatibility.PreviousVersionRoles
 
         public virtual List<uint> CustomItemsInventory { get; set; } = new();
 
-        public virtual Dictionary<AmmoType, ushort> Ammo { get; set; } = new()
+        public virtual Dictionary<ExiledAmmoType, ushort> Ammo { get; set; } = new()
         {
             {
-                AmmoType.Nato9,
+                ExiledAmmoType.Nato9,
                 10
             }
         };
@@ -142,7 +143,7 @@ namespace UncomplicatedCustomRoles.Compatibility.PreviousVersionRoles
                 CustomInventoryLimits = CustomInventoryLimits,
                 Inventory = Inventory,
                 CustomItemsInventory = CustomItemsInventory,
-                Ammo = Ammo,
+                Ammo = Ammo.ConvertItemTypes(),
                 DamageMultiplier = DamageMultiplier,
                 SpawnSettings = SpawnSettings,
                 CustomFlags = CustomFlagsConversion(),

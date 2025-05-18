@@ -11,6 +11,7 @@
 using HarmonyLib;
 using LabApi.Events;
 using LabApi.Events.Arguments.Interfaces;
+using LabApi.Features.Console;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.Extensions;
@@ -30,6 +31,8 @@ namespace UncomplicatedCustomRoles.Patches
             if (arg is IPlayerEvent ev && ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole))
             {
                 string name = arg.GetType().Name.Replace("EventArgs", string.Empty);
+
+                Logger.Info($"Got event {name} for player {ev.Player.Nickname}");
 
                 foreach (CustomModule module in customRole.CustomModules)
                     if (module.TriggerOnEvents.Contains(name))

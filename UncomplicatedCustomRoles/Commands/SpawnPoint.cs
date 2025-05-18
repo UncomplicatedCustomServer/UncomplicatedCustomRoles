@@ -9,7 +9,7 @@
  */
 
 using CommandSystem;
-using Exiled.API.Features;
+using LabApi.Features.Wrappers;
 using System.Collections.Generic;
 using SpawnPointInstance = UncomplicatedCustomRoles.API.Features.SpawnPoint;
 using UncomplicatedCustomRoles.Manager.NET;

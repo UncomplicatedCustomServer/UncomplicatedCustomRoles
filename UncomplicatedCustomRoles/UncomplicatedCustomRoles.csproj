@@ -104,7 +104,12 @@
     <Compile Include="Compatibility\CompatibilityManager.cs" />
     <Compile Include="Compatibility\ErrorCustomRole.cs" />
     <Compile Include="Compatibility\OutdatedCustomRole.cs" />
+    <Compile Include="Compatibility\PreviousVersionElements\BonolisSpawnBehaviour.cs" />
+    <Compile Include="Compatibility\PreviousVersionElements\Enums\ExiledAmmoType.cs" />
+    <Compile Include="Compatibility\PreviousVersionElements\Enums\ExiledRoomType.cs" />
+    <Compile Include="Compatibility\PreviousVersionElements\Enums\ExiledZoneType.cs" />
     <Compile Include="Compatibility\PreviousVersionElements\FossuonHealthBehaviour.cs" />
+    <Compile Include="Compatibility\PreviousVersionRoles\BonolisCustomRole.cs" />
     <Compile Include="Compatibility\PreviousVersionRoles\IPreviousVersionRole.cs" />
     <Compile Include="Compatibility\PreviousVersionRoles\PreviousVersionRole.cs" />
     <Compile Include="Compatibility\PreviousVersionRoles\FossuonCustomRole.cs" />
@@ -112,6 +117,7 @@
     <Compile Include="API\Enums\CustomFlags.cs" />
     <Compile Include="API\Enums\SpawnType.cs" />
     <Compile Include="Events\EventHandler.cs" />
+    <Compile Include="Extensions\CompatibilityExtension.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
     <Compile Include="Extensions\ListExtension.cs" />
     <Compile Include="Extensions\MirrorExtension.cs" />
@@ -134,8 +140,6 @@
     <Compile Include="Manager\VersionManager.cs" />
     <Compile Include="Manager\YamlFlagsHandler.cs" />
     <Compile Include="Patches\Announcer.cs" />
-    <Compile Include="Patches\DisabledEventPatch.cs" />
-    <Compile Include="Patches\PermissionPrefix.cs" />
     <Compile Include="Patches\PlayerEventPrefix.cs" />
     <Compile Include="Patches\PlayerInfoPatch.cs" />
     <Compile Include="Patches\Scp3114StranglePrefix.cs" />
@@ -146,7 +150,6 @@
     <Compile Include="Plugin.cs" />
     <Compile Include="API\Interfaces\ICustomRole.cs" />
     <Compile Include="API\Interfaces\IEffect.cs" />
-    <Compile Include="Integrations\RespawnTimer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

@@ -8,9 +8,10 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Features;
-using Exiled.Events.EventArgs.Player;
-using Exiled.Loader;
+using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Features;
+using LabApi.Features.Wrappers;
+using LabApi.Loader;
 using MEC;
 using Newtonsoft.Json;
 using System;
@@ -21,8 +22,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using UncomplicatedCustomRoles.API.Struct;
-
-using PlayerHandler = Exiled.Events.Handlers.Player;
+using UncomplicatedCustomRoles.Extensions;
+using PlayerHandler = LabApi.Events.Handlers.PlayerEvents;
 
 namespace UncomplicatedCustomRoles.Manager.NET
 {
@@ -97,17 +98,17 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         internal void RegisterEvents()
         {
-            PlayerHandler.Verified += OnVerified;
+            PlayerHandler.Joined += OnVerified;
         }
 
         internal void UnregisterEvents()
         {
-            PlayerHandler.Verified -= OnVerified;
+            PlayerHandler.Joined -= OnVerified;
         }
 
-        public void OnVerified(VerifiedEventArgs ev) => ApplyCreditTag(ev.Player);
+        public void OnVerified(PlayerJoinedEventArgs ev) => ApplyCreditTag(ev.Player);
 
-        private bool CheckForDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "Newtonsoft.Json");
+        private bool CheckForDependency() => PluginLoader.Dependencies.Any(assembly => assembly.GetName().Name == "Newtonsoft.Json");
 
         public HttpResponseMessage HttpGetRequest(string url)
         {
@@ -220,9 +221,9 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
             Triplet<string, string, bool> Tag = GetCreditTag(player);
             
-            if (player.RankName is not null && player.RankName != string.Empty)
+            if (player.ReferenceHub.serverRoles.Network_myText is not null && player.ReferenceHub.serverRoles.Network_myText != string.Empty)
             {
-                if (Credits.Any(k => k.Value.First == player.RankName && k.Value.Second == player.RankColor))
+                if (Credits.Any(k => k.Value.First == player.ReferenceHub.serverRoles.Network_myText && k.Value.Second == player.ReferenceHub.serverRoles.Network_myColor))
                     _alreadyManaged = true;
 
                 if (!Tag.Third)
@@ -231,8 +232,8 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
             if (Tag.First is not null && Tag.Second is not null)
             {
-                player.RankName = Tag.First;
-                player.RankColor = Tag.Second;
+                player.ReferenceHub.serverRoles.SetText(Tag.First);
+                player.ReferenceHub.serverRoles.SetColor(Tag.Second);
             }
         }
 
@@ -256,7 +257,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         internal HttpStatusCode ShareLogs(string data, out HttpContent httpContent)
         {
-            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&plugin_version={Plugin.Instance.Version.ToString(4)}&hash={VersionManager.HashFile(Plugin.Instance.Assembly.GetPath())}", data);
+            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={LabApiProperties.CurrentVersion}&using_labapi=true&plugin_version={Plugin.Instance.Version.ToString(4)}&hash={VersionManager.HashFile(Plugin.Instance.Assembly.GetPath())}", data);
             httpContent = Status.Content;
             return Status.StatusCode;
         }

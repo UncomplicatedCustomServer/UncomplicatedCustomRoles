@@ -166,9 +166,9 @@ namespace UncomplicatedCustomRoles.API.Features
         private void EvaluateRoleBase()
         {
             if (Role.Role.GetTeam() != Role.Team && Role.Role.GetTeam() is not Team.SCPs && Role.Team is Team.SCPs)
-                _roleBase = Player.Role.Base as FpcStandardScp;
+                _roleBase = Player.RoleBase as FpcStandardScp;
             else if (Role.Role.GetTeam() != Role.Team && Role.Role.GetTeam() is Team.SCPs && Role.Team is not Team.SCPs)
-                _roleBase = Player.Role.Base as HumanRole;
+                _roleBase = Player.RoleBase as HumanRole;
         }
 
         /// <summary>
@@ -224,18 +224,16 @@ namespace UncomplicatedCustomRoles.API.Features
                  
                 // Reset ammo limit
                 if (Role.Ammo is Dictionary<ItemType, ushort> ammoList && ammoList.Count > 0)
-                    foreach (AmmoType ammo in ammoList.Keys)
-                        if (Player.HasCustomAmmoLimit(ammo))
-                            Player.ResetAmmoLimit(ammo);
+                    foreach (ItemType ammo in ammoList.Keys)
+                        Player.ResetAmmoLimit(ammo);
 
                 // Reset category limit
                 if (Role.CustomInventoryLimits is Dictionary<ItemCategory, sbyte> inventoryLimits && inventoryLimits.Count > 0)
                     foreach (ItemCategory category in inventoryLimits.Keys)
-                        if (Player.HasCustomCategoryLimit(category))
-                            Player.ResetCategoryLimit(category);
+                        Player.ResetCategoryLimit(category);
 
                 if (IsCustomNickname)
-                    Player.DisplayNickname = null;
+                    Player.DisplayName = null;
 
                 if (IsDefaultCoroutineRole && GenericCoroutine.IsRunning)
                     Timing.KillCoroutines(GenericCoroutine);
@@ -268,7 +266,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Parse the current <see cref="SummonedCustomRole"/> instance as a RemoteAdmin text part
         /// </summary>
         /// <returns></returns>
-        internal string ParseRemoteAdmin() => $"\n\n<size=26><color=#f55505>UncomplicatedCustomRoles</color></size>\nCustom Role: ({Role.Id}) <color={Exiled.API.Extensions.RoleExtensions.GetColor(Role.Role).ToHex()}>{Role.Name}</color>{LoadRoleFlags()}\n{LoadBadge()}";
+        internal string ParseRemoteAdmin() => $"\n\n<size=26><color=#f55505>UncomplicatedCustomRoles</color></size>\nCustom Role: ({Role.Id}) <color={Role.Role.GetColor().ToHex()}>{Role.Name}</color>{LoadRoleFlags()}\n{LoadBadge()}";
 
         private string LoadRoleFlags()
         {
@@ -410,14 +408,14 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public static SummonedCustomRole Get(Player player) => List.Where(scr => scr.Player.Id == player.Id).FirstOrDefault();
+        public static SummonedCustomRole Get(Player player) => List.Where(scr => scr.Player.PlayerId == player.PlayerId).FirstOrDefault();
 
         /// <summary>
         /// Gets a <see cref="SummonedCustomRole"/> instance by the <see cref="ReferenceHub"/>
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public static SummonedCustomRole Get(ReferenceHub player) => List.Where(scr => scr.Player.Id == player.PlayerId).FirstOrDefault();
+        public static SummonedCustomRole Get(ReferenceHub player) => List.Where(scr => scr.Player.PlayerId == player.PlayerId).FirstOrDefault();
 
         /// <summary>
         /// Gets a <see cref="SummonedCustomRole"/> instance by the Id
@@ -577,10 +575,9 @@ namespace UncomplicatedCustomRoles.API.Features
             foreach (SummonedCustomRole Role in List)
                 if (Role.InfiniteEffects.Count() > 0)
                     foreach (IEffect Effect in Role.InfiniteEffects)
-                        if (!Role.Player.ActiveEffects.Contains(Role.Player.GetEffect(Effect.EffectType)))
-                            Role.Player.EnableEffect(Effect.EffectType, Effect.Intensity, float.MaxValue);
+                        Role.Player.ReferenceHub.playerEffectsController.ChangeState(Effect.EffectType, Effect.Intensity, float.MaxValue, false);
         }
 
-        public override string ToString() => $"Player {Player.Nickname} ({Player.Id}) - CustomRole {Role.Id} ({Role.Nickname})";
+        public override string ToString() => $"Player {Player.Nickname} ({Player.PlayerId}) - CustomRole {Role.Id} ({Role.Nickname})";
     }
 }

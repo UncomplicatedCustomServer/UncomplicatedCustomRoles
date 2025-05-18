@@ -8,25 +8,22 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Interfaces;
-using Exiled.Loader;
+using LabApi.Loader;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using UncomplicatedCustomRoles.API.Attributes;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
-using UncomplicatedCustomRoles.Compatibility;
 using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.Manager
 {
     internal class ImportManager
     {
-        public static readonly List<IPlugin<IConfig>> ActivePlugins = new();
+        public static readonly List<LabApi.Loader.Features.Plugins.Plugin> ActivePlugins = new();
 
         public static readonly List<Assembly> AvailableAssemblies = new()
         {
@@ -53,27 +50,27 @@ namespace UncomplicatedCustomRoles.Manager
 
             _alreadyLoaded = true;
 
-            foreach (IPlugin<IConfig> plugin in Loader.Plugins.Where(plugin => plugin.Name != Plugin.Instance.Name))
+            foreach (KeyValuePair<LabApi.Loader.Features.Plugins.Plugin, Assembly> plugin in PluginLoader.Plugins.Where(plugin => plugin.Key.Name != Plugin.Instance.Name))
             {
-                AvailableAssemblies.Add(plugin.Assembly);
-                LogManager.Silent($"[Import Manager] Passing plugin {plugin.Name}");
-                foreach (Type type in plugin.Assembly.GetTypes())
+                AvailableAssemblies.Add(plugin.Value);
+                LogManager.Silent($"[Import Manager] Passing plugin {plugin.Key.Name}");
+                foreach (Type type in plugin.Value.GetTypes())
                     try
                     {
                         object[] attribs = type.GetCustomAttributes(typeof(PluginCustomRole), false);
                         if (attribs != null && attribs.Length > 0 && (type.IsSubclassOf(typeof(ICustomRole)) || type.IsSubclassOf(typeof(CustomRole)) || type.IsSubclassOf(typeof(EventCustomRole))))
                         {
-                            ActivePlugins.TryAdd(plugin);
+                            ActivePlugins.TryAdd(plugin.Key);
 
                             ICustomRole Role = Activator.CreateInstance(type) as ICustomRole;
 
                             CustomRole.Register(Role);
-                            LogManager.Info($"CustomRole {Role} imported from external plugin {plugin.Name} (v{plugin.Version.ToString(3)})");
+                            LogManager.Info($"CustomRole {Role} imported from external plugin {plugin.Key.Name} (v{plugin.Key.Version.ToString(3)})");
                         }
                     }
                     catch (Exception e)
                     {
-                        LogManager.Error($"Error while registering CustomRole from class by Attribute:\nType: {type.FullName} [{plugin.Name}]\nException: {e}");
+                        LogManager.Error($"Error while registering CustomRole from class by Attribute:\nType: {type.FullName} [{plugin.Key.Name}]\nException: {e}");
                     }
             }
         }

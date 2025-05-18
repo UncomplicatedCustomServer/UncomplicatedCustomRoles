@@ -9,7 +9,7 @@
  */
 
 using CommandSystem;
-using Exiled.API.Features;
+using LabApi.Features.Wrappers;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.API.Features;
@@ -30,7 +30,7 @@ namespace UncomplicatedCustomRoles.Commands
 
         public bool Executor(List<string> arguments, ICommandSender sender, out string response)
         {
-            if (!Round.IsStarted)
+            if (!Round.IsRoundInProgress)
             {
                 response = "Sorry but you can't use this command if the round is not started!";
                 return false;

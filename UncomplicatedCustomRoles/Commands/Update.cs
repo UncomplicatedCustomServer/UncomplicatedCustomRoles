@@ -1,5 +1,5 @@
 ﻿using CommandSystem;
-using Exiled.Loader;
+using LabApi.Loader.Features.Yaml;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -47,6 +47,6 @@ namespace UncomplicatedCustomRoles.Commands
             return true;
         }
 
-        private static void UpdateRole(OutdatedCustomRole role) => File.WriteAllText(role.Path, Loader.Serializer.Serialize(role.CustomRole));
+        private static void UpdateRole(OutdatedCustomRole role) => File.WriteAllText(role.Path, YamlConfigParser.Serializer.Serialize(role.CustomRole));
     }
 }

@@ -9,8 +9,7 @@
  */
 
 using CommandSystem;
-using Exiled.API.Enums;
-using Exiled.API.Extensions;
+using MapGeneration;
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features;
@@ -57,9 +56,9 @@ namespace UncomplicatedCustomRoles.Commands
 
             if (role.SpawnSettings is not null)
                 if (role.SpawnSettings.Spawn is SpawnType.RoomsSpawn)
-                    data.Add("<color=#632300>🚪</color> Spawn rooms:", string.Join(", ", role?.SpawnSettings?.SpawnRooms ?? new List<RoomType>()));
+                    data.Add("<color=#632300>🚪</color> Spawn rooms:", string.Join(", ", role?.SpawnSettings?.SpawnRooms ?? new List<string>()));
                 else if (role.SpawnSettings.Spawn is SpawnType.ZoneSpawn)
-                    data.Add("<color=#632300>🚪</color> Spawn zones:", string.Join(", ", role?.SpawnSettings?.SpawnZones ?? new List<ZoneType>()));
+                    data.Add("<color=#632300>🚪</color> Spawn zones:", string.Join(", ", role?.SpawnSettings?.SpawnZones ?? new List<FacilityZone>()));
                 else if (role.SpawnSettings.Spawn is SpawnType.SpawnPointSpawn)
                     data.Add("<color=#632300>🚪</color> Spawn points:", string.Join(", ", role?.SpawnSettings?.SpawnPoints ?? new List<string>()));
 

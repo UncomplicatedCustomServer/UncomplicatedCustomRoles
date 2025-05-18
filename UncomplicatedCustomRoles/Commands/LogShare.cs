@@ -16,7 +16,7 @@ using System.Net.Http;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
-using Exiled.API.Features;
+using LabApi.Features.Console;
 
 namespace UncomplicatedCustomRoles.Commands
 {
@@ -52,14 +52,14 @@ namespace UncomplicatedCustomRoles.Commands
                     if (Response is HttpStatusCode.OK)
                     {
                         Dictionary<string, string> Data = JsonConvert.DeserializeObject<Dictionary<string, string>>(Plugin.HttpManager.RetriveString(Content));
-                        Log.Info($"[ShareTheLog] Successfully shared the UCR logs with the developers!\nSend this Id to the developers: {Data["id"]}\n\nTook {DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start}ms");
+                        Logger.Info($"[ShareTheLog] Successfully shared the UCR logs with the developers!\nSend this Id to the developers: {Data["id"]}\n\nTook {DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start}ms");
                     } 
                     else
-                        Log.Info($"Failed to share the UCR logs with the developers: Server says: {Response}");
+                        Logger.Info($"Failed to share the UCR logs with the developers: Server says: {Response}");
                 }
                 catch (Exception e) 
                 { 
-                    Log.Error(e.ToString()); 
+                    Logger.Error(e.ToString()); 
                 }
             });
             

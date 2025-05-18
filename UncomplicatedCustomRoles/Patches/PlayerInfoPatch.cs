@@ -8,8 +8,8 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.Loader;
 using HarmonyLib;
+using LabApi.Loader;
 using RemoteAdmin.Communication;
 using System;
 using System.Collections.Generic;
@@ -59,7 +59,7 @@ namespace UncomplicatedCustomRoles.Patches
         internal static void TryPatchCedMod()
         {
             LogManager.Silent("Trying to patch CedMod");
-            Assembly cedModAssembly = Loader.Plugins.Where(p => p.Name is "CedMod").FirstOrDefault()?.Assembly;
+            Assembly cedModAssembly = PluginLoader.Plugins.FirstOrDefault(p => p.Key.Name is "CedMod").Value;
             MethodInfo targetMethod = cedModAssembly?.GetType("CedMod.Patches.RaPlayerPatch")?.GetMethod("RaPlayerCoRoutine");
 
             if (targetMethod is not null)

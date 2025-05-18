@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using LabApi.Loader.Features.Plugins;
 using LabApi.Loader.Features.Plugins.Enums;
 using LabApi.Features.Wrappers;
+using System.Reflection;
 
 namespace UncomplicatedCustomRoles
 {
@@ -42,6 +43,8 @@ namespace UncomplicatedCustomRoles
         public override Version RequiredApiVersion => new(0, 7, 0);
 
         public override LoadPriority Priority => LoadPriority.Highest;
+
+        public Assembly Assembly => Assembly.GetExecutingAssembly();
 
         internal static Plugin Instance;
 
@@ -111,18 +114,11 @@ namespace UncomplicatedCustomRoles
             _harmony = new($"com.ucs.ucr_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
             PlayerInfoPatch.TryPatchCedMod();
-
-            // Register custom event handlers for custom roles
-            CustomRoleEventHandler.RegisterEvents();
-
-            RespawnTimer.Enable();
         }
 
         public override void Disable()
         {
-            RespawnTimer.Disable();
-
-            CustomRoleEventHandler.UnregisterEvents();
+            ScriptedEvents.UnregisterCustomActions();
 
             _harmony.UnpatchAll();
 

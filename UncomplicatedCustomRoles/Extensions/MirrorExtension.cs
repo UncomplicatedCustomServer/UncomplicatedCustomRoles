@@ -244,7 +244,7 @@ namespace UncomplicatedCustomRoles.Extensions
                 if (target != player || !isRisky)
                     target.Connection.Send(writer.ToArraySegment());
                 else
-                    Log.Error($"Prevent Seld-Desync of {player.Nickname} with {type}");
+                    LabApi.Features.Console.Logger.Error($"Prevent Seld-Desync of {player.Nickname} with {type}");
             }
 
             NetworkWriterPool.Return(writer);

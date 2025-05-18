@@ -8,25 +8,16 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Features;
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.Manager;
 using MEC;
-using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
-using Exiled.Events.EventArgs.Server;
-using Exiled.Events.EventArgs.Scp049;
 using UncomplicatedCustomRoles.Extensions;
 using System;
 using UncomplicatedCustomRoles.API.Features;
-using Exiled.Events.EventArgs.Scp330;
 using CustomPlayerEffects;
 using UncomplicatedCustomRoles.API.Interfaces;
-using Exiled.Events.EventArgs.Warhead;
-using PlayerRoles.Ragdolls;
-using Exiled.Events.EventArgs.Scp096;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
-using UnityEngine;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Arguments.Scp049Events;
 using LabApi.Events.Arguments.WarheadEvents;
@@ -273,7 +264,7 @@ namespace UncomplicatedCustomRoles.Events
             if (Escaping.Player.TryGetSummonedInstance(out SummonedCustomRole summoned))
             {
                 if (summoned.Role.CanEscape)
-                    LogManager.Debug($"Player {Escaping.Player.Nickname} triggered the escaping event as {Escaping.Player.Role.Name}");
+                    LogManager.Debug($"Player {Escaping.Player.Nickname} triggered the escaping event as {Escaping.Player.Role}");
 
                 LogManager.Debug($"Player IS a custom role: {summoned.Role.Name}");
 

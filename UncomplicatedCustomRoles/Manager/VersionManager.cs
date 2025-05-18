@@ -8,14 +8,14 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Features;
-using Exiled.Loader;
+using LabApi.Features.Console;
 using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Net;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager.NET;
 
 namespace UncomplicatedCustomRoles.Manager
@@ -48,11 +48,10 @@ namespace UncomplicatedCustomRoles.Manager
             if (VersionInfo.PreRelease)
             {
                 LogManager.Info($"\nNOTICE!\nYou are currently using the version v{Plugin.Instance.Version.ToString(4)}, who's a PRE-RELEASE or an EXPERIMENTAL RELESE of UncomplicatedCustomRoles!\nLatest stable release: {Plugin.HttpManager.LatestVersion}\nNOTE: This is NOT a stable version, so there can be bugs and malfunctions, for this reason we do not recommend use in production.");
-                if (VersionInfo.ForceDebug && !Log.DebugEnabled.Contains(Plugin.Instance.Assembly))
+                if (VersionInfo.ForceDebug && !(Plugin.Instance.Config?.Debug ?? true))
                 {
                     LogManager.Info("Debug logs have been activated!");
                     Plugin.Instance.Config.Debug = true;
-                    Log.DebugEnabled.Add(Plugin.Instance.Assembly);
                 }
             }
             else

@@ -8,8 +8,8 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Features;
-using Exiled.Loader;
+using LabApi.Features.Wrappers;
+using LabApi.Loader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +26,7 @@ namespace UncomplicatedCustomRoles.Integrations
         /// <summary>
         /// Gets the <see cref="System.Reflection.Assembly"/> of ScriptedEvents
         /// </summary>
-        internal static Assembly Assembly => Loader.GetPlugin("ScriptedEvents")?.Assembly;
+        internal static Assembly Assembly => PluginLoader.Plugins.FirstOrDefault(p => p.Key.Name is "ScriptedEvents").Value;
 
         /// <summary>
         /// Gets the <see cref="Type"/> of the API class

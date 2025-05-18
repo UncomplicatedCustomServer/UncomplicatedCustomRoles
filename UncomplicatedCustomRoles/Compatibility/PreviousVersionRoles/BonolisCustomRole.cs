@@ -1,14 +1,4 @@
-﻿/*
- * This file is a part of the UncomplicatedCustomRoles project.
- * 
- * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
- * 
- * This file is licensed under the GNU Affero General Public License v3.0.
- * You should have received a copy of the AGPL license along with this file.
- * If not, see <https://www.gnu.org/licenses/>.
- */
-
-using PlayerRoles;
+﻿using PlayerRoles;
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
@@ -21,11 +11,7 @@ using UnityEngine;
 namespace UncomplicatedCustomRoles.Compatibility.PreviousVersionRoles
 {
 #nullable enable
-
-    /// <summary>
-    /// Custom Role of the version v6.0.0 "Fossuon"
-    /// </summary>
-    public class FossuonCustomRole : IPreviousVersionRole
+    internal class BonolisCustomRole : IPreviousVersionRole
     {
         public virtual int Id { get; set; } = 1;
 
@@ -49,9 +35,11 @@ namespace UncomplicatedCustomRoles.Compatibility.PreviousVersionRoles
 
         public virtual List<Team> IsFriendOf { get; set; } = new();
 
-        public virtual FossuonHealthBehaviour Health { get; set; } = new();
+        public virtual HealthBehaviour Health { get; set; } = new();
 
         public virtual AhpBehaviour Ahp { get; set; } = new();
+
+        public virtual HumeShieldBehaviour HumeShield { get; set; } = new();
 
         public virtual List<Effect>? Effects { get; set; } = new();
 
@@ -83,13 +71,7 @@ namespace UncomplicatedCustomRoles.Compatibility.PreviousVersionRoles
 
         public virtual float SpawnHintDuration { get; set; } = 5;
 
-        public virtual Dictionary<ItemCategory, sbyte> CustomInventoryLimits { get; set; } = new()
-        {
-            {
-                ItemCategory.Medical,
-                2
-            }
-        };
+        public virtual Dictionary<ItemCategory, sbyte> CustomInventoryLimits { get; set; } = new();
 
         public virtual List<ItemType> Inventory { get; set; } = new()
         {
@@ -109,7 +91,7 @@ namespace UncomplicatedCustomRoles.Compatibility.PreviousVersionRoles
 
         public virtual float DamageMultiplier { get; set; } = 1;
 
-        public virtual SpawnBehaviour? SpawnSettings { get; set; } = new();
+        public virtual BonolisSpawnBehaviour? SpawnSettings { get; set; } = new();
 
         public virtual List<object>? CustomFlags { get; set; } = null;
 
@@ -130,19 +112,9 @@ namespace UncomplicatedCustomRoles.Compatibility.PreviousVersionRoles
                 Team = Team,
                 RoleAppearance = RoleAppearance,
                 IsFriendOf = IsFriendOf,
-                Health = new()
-                {
-                    Amount = Health.Amount,
-                    Maximum = Health.Maximum
-                },
+                Health = Health,
                 Ahp = Ahp,
-                HumeShield = new()
-                {
-                    Amount = Health.HumeShield,
-                    Maximum = Health.HumeShield,
-                    RegenerationAmount = Health.HumeShieldRegenerationAmount,
-                    RegenerationDelay = Health.HumeShieldRegenerationDelay
-                },
+                HumeShield = HumeShield,
                 Effects = Effects,
                 Stamina = Stamina,
                 MaxScp330Candies = MaxScp330Candies,
@@ -158,7 +130,19 @@ namespace UncomplicatedCustomRoles.Compatibility.PreviousVersionRoles
                 CustomItemsInventory = CustomItemsInventory,
                 Ammo = Ammo.ConvertItemTypes(),
                 DamageMultiplier = DamageMultiplier,
-                SpawnSettings = SpawnSettings,
+                SpawnSettings = SpawnSettings is null ? null : new()
+                {
+                    CanReplaceRoles = SpawnSettings.CanReplaceRoles,
+                    MaxPlayers = SpawnSettings.MaxPlayers,
+                    MinPlayers = SpawnSettings.MinPlayers,
+                    SpawnChance = SpawnSettings.SpawnChance,
+                    Spawn = SpawnSettings.Spawn,
+                    SpawnZones = SpawnSettings.SpawnZones.ConvertZoneTypes(),
+                    SpawnRooms = SpawnSettings.SpawnRooms.ConvertRoomTypes(),
+                    SpawnRoles = SpawnSettings.SpawnRoles,
+                    SpawnPoints = SpawnSettings.SpawnPoints,
+                    RequiredPermission = new PlayerPermissions[] { }
+                },
                 CustomFlags = CustomFlags,
                 IgnoreSpawnSystem = IgnoreSpawnSystem
             };

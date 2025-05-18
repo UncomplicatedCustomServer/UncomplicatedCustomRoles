@@ -56,9 +56,9 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
         /// <summary>
         /// Gets or sets a <see cref="List{T}"/> of rooms that will be evaluated as spawnpoints
         /// </summary>
-        public List<RoomName> SpawnRooms { get; set; } = new()
+        public List<string> SpawnRooms { get; set; } = new()
         {
-            RoomName.LczClassDSpawn
+            "LCZ_ClassDSpawn"
         };
 
         /// <summary>
@@ -75,8 +75,8 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
         public List<string> SpawnPoints { get; set; } = new();
 
         /// <summary>
-        /// Gets or sets the required Exiled.Permission to spawn as the given <see cref="ICustomRole"/>
+        /// Gets or sets the required PlayerPermission to spawn as the given <see cref="ICustomRole"/>
         /// </summary>
-        public string? RequiredPermission { get; set; } = string.Empty;
+        public PlayerPermissions[]? RequiredPermission { get; set; } = new PlayerPermissions[] { };
     }
 }

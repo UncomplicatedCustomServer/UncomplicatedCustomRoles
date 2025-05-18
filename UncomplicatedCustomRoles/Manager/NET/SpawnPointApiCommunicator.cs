@@ -8,7 +8,8 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Features;
+using LabApi.Features.Wrappers;
+using LabApi.Loader.Features.Paths;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -33,7 +34,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// <summary>
         /// Gets the file path for the local spawnpoints of this server
         /// </summary>
-        public static string FilePath => Path.Combine(Paths.Configs, $".{Server.Port}-spawnpoints.json");
+        public static string FilePath => Path.Combine(PathManager.Configs.FullName, $".{Server.Port}-spawnpoints.json");
 
         /// <summary>
         /// Gets whether the spawnpoints should be local or "global"

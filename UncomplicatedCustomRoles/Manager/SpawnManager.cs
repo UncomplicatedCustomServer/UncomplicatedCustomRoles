@@ -26,6 +26,7 @@ using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.Integrations;
 using LabApi.Features.Wrappers;
 using MapGeneration;
+using CommandSystem;
 
 // Mormora, la gente mormora
 // falla tacere praticando l'allegria
@@ -109,18 +110,18 @@ namespace UncomplicatedCustomRoles.Manager
                     switch (Role.SpawnSettings.Spawn)
                     {
                         case SpawnType.ZoneSpawn:
-                            player.Position = Room.List.Where(room => room.Zone == Role.SpawnSettings.SpawnZones.RandomItem() && room.TeslaGate is null && room.Type is not RoomType.EzShelter).GetRandomValue().Position.AddY(1.5f);
+                            player.Position = Room.List.Where(room => room.Zone == Role.SpawnSettings.SpawnZones.RandomItem() && room.GameObject.GetComponentInChildren<TeslaGate>() is null && room.Name is not RoomName.EzEvacShelter).RandomValue().Position.AddY(1.5f);
                             break;
                         case SpawnType.CompleteRandomSpawn:
-                            player.Position = Room.List.Where(room => room.TeslaGate is null).GetRandomValue().Position.AddY(1.5f);
+                            player.Position = Room.List.Where(room => room.GameObject.GetComponentInChildren<TeslaGate>() is null).RandomValue().Position.AddY(1.5f);
                             break;
                         case SpawnType.RoomsSpawn:
-                            RoomName roomType = Role.SpawnSettings.SpawnRooms.RandomItem();
+                            string roomType = Role.SpawnSettings.SpawnRooms.RandomItem();
 
-                            Room room = Room.Get(roomType).FirstOrDefault();
+                            Room room = Room.List.Where(r => r.GameObject.name.RemoveBracketsOnEndOfName() == roomType).RandomValue();
 
                             if (room is null)
-                                LogManager.Error("Failed to load room with RoomType " + roomType);
+                                LogManager.Error("Failed to load room with Room Name " + roomType + "!\nMake sure it exists!");
 
                             player.Position = room.Position.AddY(1.5f);
 
@@ -414,7 +415,7 @@ namespace UncomplicatedCustomRoles.Manager
             foreach (ICustomRole Role in CustomRole.CustomRoles.Values.Where(cr => cr.SpawnSettings is not null))
                 if (!Role.IgnoreSpawnSystem && Player.List.Count(pl => !pl.IsHost) >= Role.SpawnSettings.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
                 {
-                    if (Role.SpawnSettings.RequiredPermission is not null && Role.SpawnSettings.RequiredPermission != string.Empty && !player.CheckPermission(Role.SpawnSettings.RequiredPermission))
+                    if (Role.SpawnSettings.RequiredPermission is not null && !(player as ICommandSender).CheckPermission(Role.SpawnSettings.RequiredPermission))
                     {
                         LogManager.Silent($"[NOTICE] Ignoring the role {Role.Id} [{Role.Name}] while creating the list for the player {player.Nickname} due to: cannot [permissions].");
                         continue;
@@ -463,7 +464,7 @@ namespace UncomplicatedCustomRoles.Manager
         private static IEnumerable<Player> LoadAppearanceAffectedPlayers(Player target)
         {
             List<Player> result = new();
-            foreach (Player player in Player.List.Where(p => p.Id != target.Id))
+            foreach (Player player in Player.List.Where(p => p.PlayerId != target.PlayerId))
                 if (player.TryGetSummonedInstance(out SummonedCustomRole role) && !role.HasModule<NotAffectedByAppearance>())
                     result.Add(player);
                 else if (!player.TryGetSummonedInstance(out _))

@@ -9,7 +9,7 @@
  */
 
 using CommandSystem;
-using Exiled.Loader;
+using LabApi.Loader.Features.Yaml;
 using System.Collections.Generic;
 using System.IO;
 using UncomplicatedCustomRoles.API.Features;
@@ -42,7 +42,7 @@ namespace UncomplicatedCustomRoles.Commands
             if (port > 0)
                 path = Path.Combine(path, port.ToString());
 
-            File.WriteAllText(Path.Combine(path, $"{arguments[0].Replace(".yml", "")}.yml"), Loader.Serializer.Serialize(new CustomRole()));
+            File.WriteAllText(Path.Combine(path, $"{arguments[0].Replace(".yml", "")}.yml"), YamlConfigParser.Serializer.Serialize(new CustomRole()));
 
             response = $"New default role generated at {path} but has not been loaded!";
             return true;

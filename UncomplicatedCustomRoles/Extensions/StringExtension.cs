@@ -55,5 +55,15 @@ namespace UncomplicatedCustomRoles.Extensions
 
             return str;
         }
+
+        public static string RemoveBracketsOnEndOfName(this string name)
+        {
+            var bracketStart = name.IndexOf('(') - 1;
+
+            if (bracketStart > 0)
+                name = name.Remove(bracketStart, name.Length - bracketStart);
+
+            return name;
+        }
     }
 }

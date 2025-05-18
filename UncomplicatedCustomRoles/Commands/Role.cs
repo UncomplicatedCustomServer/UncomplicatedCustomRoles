@@ -9,7 +9,7 @@
  */
 
 using CommandSystem;
-using Exiled.API.Features;
+using LabApi.Features.Wrappers;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.API.Features;
@@ -46,11 +46,11 @@ namespace UncomplicatedCustomRoles.Commands
 
                 if (Player.TryGetSummonedInstance(out SummonedCustomRole summoned))
                 {
-                    response = $"Player {Player.Nickname} {Player.UserId} [{Player.Id}] is the custom role {summoned.Role.Name} [{summoned.Role.Id}]";
+                    response = $"Player {Player.Nickname} {Player.UserId} [{Player.PlayerId}] is the custom role {summoned.Role.Name} [{summoned.Role.Id}]";
                     return true;
                 }
 
-                response = $"Player {Player.Nickname} {Player.UserId} [{Player.Id}] is not a custom role!";
+                response = $"Player {Player.Nickname} {Player.UserId} [{Player.PlayerId}] is not a custom role!";
                 return true;
             }
             else
@@ -58,9 +58,9 @@ namespace UncomplicatedCustomRoles.Commands
                 response = "Custom roles of every player:";
                 foreach (Player Player in Player.List.Where(p => !p.IsHost))
                     if (Player.TryGetSummonedInstance(out SummonedCustomRole summoned))
-                        response += $"\n - Player {Player.Nickname} {Player.UserId} [{Player.Id}] is the custom role {summoned.Role.Name} [{summoned.Role.Id}]";
+                        response += $"\n - Player {Player.Nickname} {Player.UserId} [{Player.PlayerId}] is the custom role {summoned.Role.Name} [{summoned.Role.Id}]";
                     else
-                        response += $"\n - Player {Player.Nickname} {Player.UserId} [{Player.Id}] is not a custom role!";
+                        response += $"\n - Player {Player.Nickname} {Player.UserId} [{Player.PlayerId}] is not a custom role!";
                 return true;
             }
         }

@@ -8,7 +8,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.Loader;
+using LabApi.Loader.Features.Yaml;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
@@ -51,14 +51,14 @@ namespace UncomplicatedCustomRoles.Compatibility
                 if (!TypeCheck(content, out string error))
                     throw new Exception(error);
 
-                role = Loader.Deserializer.Deserialize<CustomRole>(content);
+                role = YamlConfigParser.Deserializer.Deserialize<CustomRole>(content);
             } catch (Exception ex)
             {
                 // Try to decode older roles in order to make everything work
                 foreach (KeyValuePair<Type, Version> kvp in previousVersionRoles)
                     try
                     {
-                        object data = Loader.Deserializer.Deserialize(content, kvp.Key);
+                        object data = YamlConfigParser.Deserializer.Deserialize(content, kvp.Key);
                         if (data is IPreviousVersionRole prevRole)
                         {
                             role = prevRole.ToCustomRole();
@@ -144,7 +144,7 @@ namespace UncomplicatedCustomRoles.Compatibility
         private static bool TypeCheck(string content, out string error)
         {
             error = null;
-            Dictionary<string, object> data = Loader.Deserializer.Deserialize<Dictionary<string, object>>(content);
+            Dictionary<string, object> data = YamlConfigParser.Deserializer.Deserialize<Dictionary<string, object>>(content);
 
             SnakeCaseNamingStrategy namingStrategy = new();
 

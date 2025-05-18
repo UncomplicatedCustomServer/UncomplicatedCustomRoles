@@ -1,0 +1,77 @@
+﻿// -----------------------------------------------------------------------
+// <copyright file="RoomType.cs" company="ExMod Team">
+// Copyright (c) ExMod Team. All rights reserved.
+// Licensed under the CC BY-SA 3.0 license.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace UncomplicatedCustomRoles.Compatibility.PreviousVersionElements.Enums
+{
+    public enum ExiledRoomType
+    {
+        Unknown,
+        LczArmory,
+        LczCurve,
+        LczStraight,
+        Lcz914,
+        LczCrossing,
+        LczTCross,
+        LczCafe,
+        LczPlants,
+        LczToilets,
+        LczAirlock,
+        Lcz173,
+        LczClassDSpawn,
+        LczCheckpointB,
+        LczGlassBox,
+        LczCheckpointA,
+        Hcz079,
+        HczEzCheckpointA,
+        HczEzCheckpointB,
+        HczArmory,
+        Hcz939,
+        HczHid,
+        Hcz049,
+        HczCrossing,
+        Hcz106,
+        HczNuke,
+        HczTesla,
+        HczCurve,
+        Hcz096,
+        EzVent,
+        EzIntercom,
+        EzGateA,
+        EzDownstairsPcs,
+        EzCurve,
+        EzPcs,
+        EzCrossing,
+        EzCollapsedTunnel,
+        EzConference,
+        EzChef,
+        EzStraight,
+        EzStraightColumn,
+        EzCafeteria,
+        EzUpstairsPcs,
+        EzGateB,
+        EzShelter,
+        Pocket,
+        Surface,
+        HczStraight,
+        EzTCross,
+        Lcz330,
+        EzCheckpointHallwayA,
+        EzCheckpointHallwayB,
+        HczTestRoom,
+        HczElevatorA,
+        HczElevatorB,
+        HczCrossRoomWater,
+        HczCornerDeep,
+        HczIntersectionJunk,
+        HczIntersection,
+        HczStraightC,
+        HczStraightPipeRoom,
+        HczStraightVariant,
+        EzSmallrooms,
+
+    }
+}
