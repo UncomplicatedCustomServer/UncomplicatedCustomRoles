@@ -11,7 +11,13 @@
 using HarmonyLib;
 using LabApi.Events;
 using LabApi.Events.Arguments.Interfaces;
+using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Events.Handlers;
 using LabApi.Features.Console;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.Extensions;
@@ -20,25 +26,29 @@ using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.Patches
 {
-    [HarmonyPatch(typeof(EventManager), nameof(EventManager.InvokeEvent))]
     internal class PlayerEventPrefix
     {
-        public static void Prefix(object arg)
+        private static IEnumerable<MethodInfo> PatchedMethods = new List<MethodInfo>();
+
+        private static void Prefix(IPlayerEvent ev)
         {
-            if (arg is ICancellableEvent deniable && !deniable.IsAllowed)
-                return;
+            Logger.Info($"Patched ev {ev.GetType().FullName}");
+        }
 
-            if (arg is IPlayerEvent ev && ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole))
-            {
-                string name = arg.GetType().Name.Replace("EventArgs", string.Empty);
+        internal static void Patch(Harmony harmony)
+        {
+            HarmonyMethod prefixMethod = new(typeof(PlayerEventPrefix).GetMethod("Prefix", BindingFlags.Static | BindingFlags.NonPublic));
 
-                Logger.Info($"Got event {name} for player {ev.Player.Nickname}");
+            PatchedMethods = typeof(PlayerEvents).GetMethods().Where(m => m.Name.StartsWith("On"));
 
-                foreach (CustomModule module in customRole.CustomModules)
-                    if (module.TriggerOnEvents.Contains(name))
-                        if (!module.OnEvent(name, ev) && arg is ICancellableEvent deniableEvent)
-                            deniableEvent.IsAllowed = false;
-            }
+            foreach (MethodInfo method in PatchedMethods)
+                harmony.Patch(method, prefix: prefixMethod);
+        }
+
+        internal static void Unpatch(Harmony harmony)
+        {
+            foreach (MethodInfo method in PatchedMethods)
+                harmony.Unpatch(method, HarmonyPatchType.All);
         }
     }
 }

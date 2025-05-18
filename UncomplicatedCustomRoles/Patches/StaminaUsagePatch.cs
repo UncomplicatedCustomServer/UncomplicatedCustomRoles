@@ -7,7 +7,7 @@ using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.Patches
 {
-    [HarmonyPatch(typeof(Inventory), nameof(Inventory.StaminaUsageMultiplier))]
+    [HarmonyPatch(typeof(Inventory), "get_StaminaUsageMultiplier")]
     public class StaminaUsagePatch
     {
         public static bool Prefix(FpcStateProcessor __instance, ref float __result)
@@ -22,7 +22,7 @@ namespace UncomplicatedCustomRoles.Patches
         }
     }
 
-    [HarmonyPatch(typeof(Inventory), nameof(Inventory.StaminaRegenMultiplier))]
+    [HarmonyPatch(typeof(Inventory), "get_StaminaRegenMultiplier")]
     public class StaminaRegenPatch
     {
         public static bool Prefix(FpcStateProcessor __instance, ref float __result)

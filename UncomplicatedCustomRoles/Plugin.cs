@@ -27,6 +27,8 @@ using LabApi.Loader.Features.Plugins;
 using LabApi.Loader.Features.Plugins.Enums;
 using LabApi.Features.Wrappers;
 using System.Reflection;
+using LabApi.Events;
+using LabApi.Events.Arguments.Interfaces;
 
 namespace UncomplicatedCustomRoles
 {
@@ -113,12 +115,17 @@ namespace UncomplicatedCustomRoles
             // Patch with Harmony
             _harmony = new($"com.ucs.ucr_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
+
+            PlayerEventPrefix.Patch(_harmony);
+
             PlayerInfoPatch.TryPatchCedMod();
         }
 
         public override void Disable()
         {
             ScriptedEvents.UnregisterCustomActions();
+
+            PlayerEventPrefix.Unpatch(_harmony);
 
             _harmony.UnpatchAll();
 
