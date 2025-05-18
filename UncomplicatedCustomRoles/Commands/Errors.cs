@@ -44,7 +44,7 @@ namespace UncomplicatedCustomRoles.Commands
                     response += $"\n<color=#00FFFF>🔢</color> Line: {yamlException.Start.Line}, Column: {yamlException.Start.Column}";
 
                 response += $"\n<color=red>❌</color> Error: {errorCustomRole.Message}";
-                response += $"\n<color=#FFFF00>💡</color> Suggestion: {GetSuggestionFromMessage(errorCustomRole.Exception.Message)}\n";
+                response += $"\n<color=#FFFF00>💡</color> Suggestion: {(errorCustomRole.Exception is not null && errorCustomRole.Exception.Message is not null ? GetSuggestionFromMessage(errorCustomRole.Exception.Message) : string.Empty)}\n";
             }
 
             return true;
