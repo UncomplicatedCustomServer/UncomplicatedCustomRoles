@@ -8,8 +8,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Enums;
-using Exiled.API.Features;
+using LabApi.Features.Wrappers;
 using MEC;
 using PlayerRoles;
 using System.Collections.Generic;
@@ -60,11 +59,11 @@ namespace UncomplicatedCustomRoles.API.Features
                 SummonedCustomRole.InfiniteEffectActor();
 
                 // Really funny we have also to check for SCPs near the escaping point
-                foreach (Player Player in Player.List.Where(player => player.IsScp && Vector3.Distance(new(123.85f, 988.8f, 18.9f), player.Position) < 7.5f))
+                foreach (Player player in Player.List.Where(player => player.IsSCP && Vector3.Distance(new(123.85f, 988.8f, 18.9f), player.Position) < 7.5f))
                 {
                     LogManager.Debug("Calling respawn event for player -> position -- It's an SCP!");
                     // Let's make this SCP escape
-                    Plugin.Instance.Handler.OnEscaping(new(Player, RoleTypeId.ChaosConscript, EscapeScenario.None));
+                    Plugin.Instance.Handler.OnEscaping(new(player.ReferenceHub, RoleTypeId.ChaosConscript, global::Escape.EscapeScenarioType.Custom));
                 }
 
                 yield return Timing.WaitForSeconds(2.5f);

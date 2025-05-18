@@ -1,5 +1,6 @@
 ﻿using Footprinting;
 using PlayerRoles;
+using PlayerRoles.FirstPersonControl;
 using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Extensions
@@ -30,5 +31,14 @@ namespace UncomplicatedCustomRoles.Extensions
         public static bool TryGetRoleBase(this RoleTypeId roleType, out PlayerRoleBase roleBase) => PlayerRoleLoader.TryGetRoleTemplate(roleType, out roleBase);
 
         public static bool TryGetRoleBase<T>(this RoleTypeId roleType, out T roleBase) where T : PlayerRoleBase => PlayerRoleLoader.TryGetRoleTemplate(roleType, out roleBase);
+
+        public static Vector3 GetRandomSpawnLocation(this RoleTypeId roleType)
+        {
+            if (roleType.TryGetRoleBase(out FpcStandardRoleBase fpcRole) && fpcRole.SpawnpointHandler != null && fpcRole.SpawnpointHandler.TryGetSpawnpoint(out Vector3 position, out float horizontalRotation))
+                return position;
+
+            return Vector3.zero;
+        }
+
     }
 }

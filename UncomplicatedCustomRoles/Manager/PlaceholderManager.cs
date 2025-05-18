@@ -20,12 +20,12 @@ namespace UncomplicatedCustomRoles.Manager
         public static string ApplyPlaceholders(string origin, Player player, ICustomRole role) => origin.BulkReplace(new()
             {
                 { "nick", player.Nickname },
-                { "displayname", player.DisplayNickname },
+                { "displayname", player.DisplayName },
                 { "rand", Random.Range(0, 10) },
                 { "dnumber", Random.Range(1000, 10000) },
                 { "unitid", player.UnitId },
-                { "unitname", player.UnitName },
-                { "rolename", player.Role.Name },
+                { "unitname", string.Empty },
+                { "rolename", player.Role.GetFullName() },
                 { "customrolename", role.Name },
                 { "customroleid", role.Id },
                 { "customrolebadge", role.BadgeName },

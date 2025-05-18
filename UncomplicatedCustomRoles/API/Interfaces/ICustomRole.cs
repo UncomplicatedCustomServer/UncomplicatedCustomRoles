@@ -8,7 +8,6 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Enums;
 using PlayerRoles;
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.API.Features.Behaviour;

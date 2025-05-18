@@ -8,7 +8,6 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Enums;
 using UncomplicatedCustomRoles.API.Interfaces;
 
 namespace UncomplicatedCustomRoles.Manager
@@ -18,7 +17,7 @@ namespace UncomplicatedCustomRoles.Manager
         /// <summary>
         /// Gets or sets the <see cref="EffectType"/> of the effect
         /// </summary>
-        public EffectType EffectType { get; set; } = EffectType.MovementBoost;
+        public string EffectType { get; set; } = "MovementBoost";
 
         /// <summary>
         /// Gets or sets the duration of the effect

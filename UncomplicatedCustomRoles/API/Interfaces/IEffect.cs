@@ -7,14 +7,12 @@
  * You should have received a copy of the AGPL license along with this file.
  * If not, see <https://www.gnu.org/licenses/>.
  */
-
-using Exiled.API.Enums;
     
 namespace UncomplicatedCustomRoles.API.Interfaces
 {
     public interface IEffect
     {
-        public abstract EffectType EffectType { get; set; }
+        public abstract string EffectType { get; set; }
 
         public abstract float Duration { get; set; }
 

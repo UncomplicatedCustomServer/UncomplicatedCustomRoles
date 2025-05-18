@@ -28,7 +28,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets the <see cref="Assembly"/> of the plugin Exiled.Loader
         /// </summary>
-        public static Assembly EventHandlerAssembly => PluginLoader.Plugins.Where(plugin => plugin.Name is "Exiled.Events").FirstOrDefault()?.Assembly;
+        public static Assembly EventHandlerAssembly => PluginLoader.Plugins.FirstOrDefault(p => p.Key.Name is "Exiled.Events").Value;
 
         /// <summary>
         /// Gets the <see cref="Type"/> of the class Exiled.Events.Handlers.Players
@@ -79,6 +79,10 @@ namespace UncomplicatedCustomRoles.API.Features
                 LogManager.Error($"Failed to act CustomRoleEventHandler::LoadListeners() - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
             }
         }
-        
-        internal static void InvokeAll(object ev, ref Evargs)
+
+        internal static void InvokeAll(object ev, ref object evArgs)
+        {
+
+        }
+    }
 }

@@ -8,10 +8,12 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Enums;
-using Exiled.Events.EventArgs.Player;
+using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Events.Arguments.ServerEvents;
 using PlayerRoles;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
@@ -183,10 +185,10 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets or sets the ammo inventory of the player
         /// </summary>
-        public virtual Dictionary<AmmoType, ushort> Ammo { get; set; } = new()
+        public virtual Dictionary<ItemType, ushort> Ammo { get; set; } = new()
         {
             {
-                AmmoType.Nato9,
+                ItemType.Ammo9x19,
                 10
             }
         };
@@ -223,553 +225,823 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Called before kicking a <see cref="API.Features.Player"/> from the server.
         /// </summary>
         /// <param name="ev">The <see cref="KickingEventArgs"/> instance.</param>
-        public virtual void OnKicking(KickingEventArgs ev) { }
+        public virtual void OnKicking(PlayerKickingEventArgs ev) { }
 
         /// <summary>
         /// Called after a <see cref="API.Features.Player"/> has been kicked from the server.
         /// </summary>
         /// <param name="ev">The <see cref="KickedEventArgs"/> instance.</param>
-        public virtual void OnKicked(KickedEventArgs ev) { }
+        public virtual void OnKicked(PlayerKickedEventArgs ev) { }
 
         /// <summary>
         /// Called before banning a <see cref="API.Features.Player"/> from the server.
         /// </summary>
         /// <param name="ev">The <see cref="BanningEventArgs"/> instance.</param>
-        public virtual void OnBanning(BanningEventArgs ev) { }
+        public virtual void OnBanning(PlayerBanningEventArgs ev) { }
 
         /// <summary>
         /// Called before a player's danger state changes.
         /// </summary>
         /// <param name="ev">The <see cref="ChangingDangerStateEventArgs"/> instance.</param>
-        public virtual void OnChangingDangerState(ChangingDangerStateEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnChangingDangerState(object ev) { }
 
         /// <summary>
         /// Called after a player has been banned from the server.
         /// </summary>
         /// <param name="ev">The <see cref="BannedEventArgs"/> instance.</param>
-        public virtual void OnBanned(BannedEventArgs ev) { }
+        public virtual void OnBanned(PlayerBannedEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/>  earns an achievement.
         /// </summary>
         /// <param name="ev">The <see cref="EarningAchievementEventArgs"/> instance.</param>
-        public virtual void OnEarningAchievement(EarningAchievementEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnEarningAchievement(object ev) { }
 
         /// <summary>
         /// Called before using a usable item.
         /// </summary>
         /// <param name="ev">The <see cref="UsingItemEventArgs"/> instance.</param>
-        public virtual void OnUsingItem(UsingItemEventArgs ev) { }
+        public virtual void OnUsingItem(PlayerUsingItemEventArgs ev) { }
 
         /// <summary>
         /// Called before completed using of a usable item.
         /// </summary>
         /// <param name="ev">The <see cref="UsingItemEventArgs"/> instance.</param>
-        public virtual void OnUsingItemCompleted(UsingItemCompletedEventArgs ev) { }
+        [Obsolete("Only works on EXILED due to the need of a patch, please refer to OnUsedItem")]
+        public virtual void OnUsingItemCompleted(object ev) { }
 
         /// <summary>
         /// Called after a <see cref="API.Features.Player"/> used a <see cref="API.Features.Items.Usable"/> item.
         /// </summary>
         /// <param name="ev">The <see cref="UsedItemEventArgs"/> instance.</param>
-        public virtual void OnUsedItem(UsedItemEventArgs ev) { }
+        public virtual void OnUsedItem(PlayerUsedItemEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> has stopped the use of a <see cref="API.Features.Items.Usable"/> item.
         /// </summary>
         /// <param name="ev">The <see cref="CancellingItemUseEventArgs"/> instance.</param>
-        public virtual void OnCancellingItemUse(CancellingItemUseEventArgs ev) { }
+        public virtual void OnCancellingItemUse(PlayerCancellingUsingItemEventArgs ev) { }
 
         /// <summary>
         /// Called after a <see cref="API.Features.Player"/> has stopped the use of a <see cref="API.Features.Items.Usable"/> item.
         /// </summary>
         /// <param name="ev">The <see cref="CancelledItemUseEventArgs"/> instance.</param>
-        public virtual void OnCancelledItemUse(CancelledItemUseEventArgs ev) { }
+        public virtual void OnCancelledItemUse(PlayerCancelledUsingItemEventArgs ev) { }
 
         /// <summary>
         /// Called after a <see cref="API.Features.Player"/> interacted with something.
         /// </summary>
         /// <param name="ev">The <see cref="InteractedEventArgs"/> instance.</param>
-        public virtual void OnInteracted(InteractedEventArgs ev) { }
+        [Obsolete("The generic interaction event is not available in LabAPI, please handle every interaction in a separate method.")]
+        public virtual void OnInteracted(object ev) { }
 
         /// <summary>
         /// Called before spawning a <see cref="API.Features.Player"/> ragdoll.
         /// </summary>
         /// <param name="ev">The <see cref="SpawningRagdollEventArgs"/> instance.</param>
-        public virtual void OnSpawningRagdoll(SpawningRagdollEventArgs ev) { }
+        public virtual void OnSpawningRagdoll(PlayerSpawningRagdollEventArgs ev) { }
 
         /// <summary>
         /// Called after spawning a <see cref="API.Features.Player"/> ragdoll.
         /// </summary>
         /// <param name="ev">The <see cref="SpawnedRagdollEventArgs"/> instance.</param>
-        public virtual void OnSpawnedRagdoll(SpawnedRagdollEventArgs ev) { }
+        public virtual void OnSpawnedRagdoll(PlayerSpawnedRagdollEventArgs ev) { }
 
         /// <summary>
         /// Called before activating the warhead panel.
         /// </summary>
         /// <param name="ev">The <see cref="ActivatingWarheadPanelEventArgs"/> instance.</param>
-        public virtual void OnActivatingWarheadPanel(ActivatingWarheadPanelEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnActivatingWarheadPanel(object ev) { }
 
         /// <summary>
         /// Called before activating a workstation.
         /// </summary>
         /// <param name="ev">The <see cref="ActivatingWorkstation"/> instance.</param>
-        public virtual void OnActivatingWorkstation(ActivatingWorkstationEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnActivatingWorkstation(object ev) { }
 
         /// <summary>
         /// Called before deactivating a workstation.
         /// </summary>
         /// <param name="ev">The <see cref="DeactivatingWorkstationEventArgs"/> instance.</param>
-        public virtual void OnDeactivatingWorkstation(DeactivatingWorkstationEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnDeactivatingWorkstation(object ev) { }
 
         /// <summary>
         /// Called after a <see cref="API.Features.Player"/> has left the server.
         /// </summary>
         /// <param name="ev">The <see cref="LeftEventArgs"/> instance.</param>
-        public virtual void OnLeft(LeftEventArgs ev) { }
+        public virtual void OnLeft(PlayerLeftEventArgs ev) { }
 
         /// <summary>
         /// Called after a <see cref="API.Features.Player"/> died.
         /// </summary>
         /// <param name="ev">The <see cref="DiedEventArgs"/> instance.</param>
-        public virtual void OnDied(DiedEventArgs ev) { }
+        public virtual void OnDied(PlayerDeathEventArgs ev) { }
 
         /// <summary>
         /// Called before changing a <see cref="API.Features.Player"/> role.
         /// </summary>
         /// <param name="ev">The <see cref="ChangingRoleEventArgs"/> instance.</param>
         /// <remarks>If <see cref="ChangingRoleEventArgs.IsAllowed"/> is set to <see langword="false"/> when Escape is <see langword="true"/>, tickets will still be given to the escapee's team even though they will 'fail' to escape. Use <see cref="Escaping"/> to block escapes instead.</remarks>
-        public virtual void OnChangingRole(ChangingRoleEventArgs ev) { }
+        public virtual void OnChangingRole(PlayerChangingRoleEventArgs ev) { }
 
         /// <summary>
         /// Called before throwing a grenade.
         /// </summary>
         /// <param name="ev">The <see cref="ThrownProjectileEventArgs"/> instance.</param>
-        public virtual void OnThrowingProjectile(ThrownProjectileEventArgs ev) { }
+        public virtual void OnThrowingProjectile(PlayerThrowingProjectileEventArgs ev) { }
+
+        /// <summary>
+        /// Called after threw a grenade.
+        /// </summary>
+        /// <param name="ev">The <see cref="ThrownProjectileEventArgs"/> instance.</param>
+        public virtual void OnThrewProjectile(PlayerThrewProjectileEventArgs ev) { }
 
         /// <summary>
         /// Called before receving a throwing request.
         /// </summary>
         /// <param name="ev">The <see cref="ThrowingRequestEventArgs"/> instance.</param>
-        public virtual void OnThrowingRequest(ThrowingRequestEventArgs ev) { }
+        [Obsolete("Please refer to OnThrowingItem")]
+        public virtual void OnThrowingRequest(object ev) { }
+
+        /// <summary>
+        /// Called before a <see cref="API.Features.Player"/> throws an item.
+        /// </summary>
+        /// <param name="ev"></param>
+        public virtual void OnThrowingItem(PlayerThrowingItemEventArgs ev) { }
+
+        /// <summary>
+        /// Called after threw an item.
+        /// </summary>
+        /// <param name="ev">The <see cref="ThrownProjectileEventArgs"/> instance.</param>
+        public virtual void OnThrewItem(PlayerThrewItemEventArgs ev) { }
 
         /// <summary>
         /// Called before dropping an item.
         /// </summary>
         /// <param name="ev">The <see cref="DroppingItemEventArgs"/> instance.</param>
-        public virtual void OnDroppingItem(DroppingItemEventArgs ev) { }
+        public virtual void OnDroppingItem(PlayerDroppingItemEventArgs ev) { }
 
         /// <summary>
         /// Called after dropping an item.
         /// </summary>
         /// <param name="ev">The <see cref="DroppedItemEventArgs"/> instance.</param>
-        public virtual void OnDroppedItem(DroppedItemEventArgs ev) { }
+        public virtual void OnDroppedItem(PlayerDroppedItemEventArgs ev) { }
 
         /// <summary>
         /// Called before dropping a null item.
         /// </summary>
         /// <param name="ev">The <see cref="DroppingNothingEventArgs"/> instance.</param>
-        public virtual void OnDroppingNothing(DroppingNothingEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnDroppingNothing(object ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> picks up an item.
         /// </summary>
         /// <param name="ev">The <see cref="PickingUpItemEventArgs"/> instance.</param>
-        public virtual void OnPickingUpItem(PickingUpItemEventArgs ev) { }
+        public virtual void OnPickingUpItem(PlayerPickingUpItemEventArgs ev) { }
 
         /// <summary>
         /// Called before handcuffing a <see cref="API.Features.Player"/>.
         /// </summary>
         /// <param name="ev">The <see cref="HandcuffingEventArgs"/> instance.</param>
-        public virtual void OnHandcuffing(HandcuffingEventArgs ev) { }
+        public virtual void OnHandcuffing(PlayerCuffingEventArgs ev) { }
+
+        /// <summary>
+        /// Called after handcuffing a <see cref="API.Features.Player"/>.
+        /// </summary>
+        /// <param name="ev">The <see cref="HandcuffingEventArgs"/> instance.</param>
+        public virtual void OnHandcuffed(PlayerCuffedEventArgs ev) { }
 
         /// <summary>
         /// Called before freeing a handcuffed <see cref="API.Features.Player"/>.
         /// </summary>
         /// <param name="ev">The <see cref="RemovingHandcuffsEventArgs"/> instance.</param>
-        public virtual void OnRemovingHandcuffs(RemovingHandcuffsEventArgs ev) { }
+        public virtual void OnRemovingHandcuffs(PlayerUncuffingEventArgs ev) { }
+
+        /// <summary>
+        /// Called after freeing a handcuffed <see cref="API.Features.Player"/>.
+        /// </summary>
+        /// <param name="ev">The <see cref="RemovingHandcuffsEventArgs"/> instance.</param>
+        public virtual void OnRemovedHandcuffs(PlayerUncuffedEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> escapes.
         /// </summary>
         /// <param name="ev">The <see cref="EscapingEventArgs"/> instance.</param>
-        public virtual void OnEscaping(EscapingEventArgs ev) { }
+        public virtual void OnEscaping(PlayerEscapingEventArgs ev) { }
 
         /// <summary>
-        /// Called before a <see cref="API.Features.Player"/> begins speaking to the intercom.
+        /// Called before a <see cref="API.Features.Player"/> escapes.
+        /// </summary>
+        /// <param name="ev">The <see cref="EscapingEventArgs"/> instance.</param>
+        public virtual void OnEscaped(PlayerEscapedEventArgs ev) { }
+
+        /// <summary>
+        /// Called before a <see cref="API.Features.Player"/> begins speaking in the intercom.
         /// </summary>
         /// <param name="ev">The <see cref="IntercomSpeakingEventArgs"/> instance.</param>
-        public virtual void OnIntercomSpeaking(IntercomSpeakingEventArgs ev) { }
+        public virtual void OnIntercomSpeaking(PlayerUsingIntercomEventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> finished speaking in the intercom.
+        /// </summary>
+        /// <param name="ev">The <see cref="IntercomSpeakingEventArgs"/> instance.</param>
+        public virtual void OnIntercomSpeakingFinished(PlayerUsedIntercomEventArgs ev) { }
 
         /// <summary>
         /// Called after a <see cref="API.Features.Player"/> shoots a weapon.
         /// </summary>
         /// <param name="ev">The <see cref="ShotEventArgs"/> instance.</param>
-        public virtual void OnShot(ShotEventArgs ev) { }
+        public virtual void OnShot(PlayerShotWeaponEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> shoots a weapon.
         /// </summary>
         /// <param name="ev">The <see cref="ShootingEventArgs"/> instance.</param>
-        public virtual void OnShooting(ShootingEventArgs ev) { }
+        public virtual void OnShooting(PlayerShootingWeaponEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> enters the pocket dimension.
         /// </summary>
         /// <param name="ev">The <see cref="EnteringPocketDimensionEventArgs"/> instance.</param>
-        public virtual void OnEnteringPocketDimension(EnteringPocketDimensionEventArgs ev) { }
+        public virtual void OnEnteringPocketDimension(PlayerEnteringPocketDimensionEventArgs ev) { }
 
         /// <summary>
-        /// Called before a <see cref="API.Features.Player"/> escapes the pocket dimension.
+        /// Called after a <see cref="API.Features.Player"/> enters the pocket dimension.
+        /// </summary>
+        /// <param name="ev">The <see cref="EnteringPocketDimensionEventArgs"/> instance.</param>
+
+        public virtual void OnEnteredPocketDimension(PlayerEnteredPocketDimensionEventArgs ev) { }
+
+        /// <summary>
+        /// Called before a <see cref="API.Features.Player"/> leaves the pocket dimension.
         /// </summary>
         /// <param name="ev">The <see cref="EscapingPocketDimensionEventArgs"/> instance.</param>
-        public virtual void OnEscapingPocketDimension(EscapingPocketDimensionEventArgs ev) { }
+        [Obsolete("Not available on LabAPI, please see OnLeftPocketDimension")]
+        public virtual void OnEscapingPocketDimension(object ev) { }
+
+        /// <summary>
+        /// Called before a <see cref="API.Features.Player"/> leaves the pocket dimension.
+        /// </summary>
+        /// <param name="ev">The <see cref="EscapingPocketDimensionEventArgs"/> instance.</param>
+        public virtual void OnLeavingPocketDimension(PlayerLeavingPocketDimensionEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> fails to escape the pocket dimension.
         /// </summary>
         /// <param name="ev">The <see cref="FailingEscapePocketDimensionEventArgs"/> instance.</param>
-        public virtual void OnFailingEscapePocketDimension(FailingEscapePocketDimensionEventArgs ev) { }
+        [Obsolete("Not available on LabAPI, please see OnLeftPocketDimension")]
+        public virtual void OnFailingEscapePocketDimension(object ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> left the pocket dimension.
+        /// </summary>
+        /// <param name="ev">The <see cref="EscapingPocketDimensionEventArgs"/> instance.</param>
+        public virtual void OnLeftPocketDimension(PlayerLeftPocketDimensionEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> enters killer collision.
         /// </summary>
         /// <param name="ev">The <see cref="EnteringKillerCollisionEventArgs"/> instance.</param>
-        public virtual void OnEnteringKillerCollision(EnteringKillerCollisionEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnEnteringKillerCollision(object ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> reloads a weapon.
         /// </summary>
         /// <param name="ev">The <see cref="ReloadingWeaponEventArgs"/> instance.</param>
-        public virtual void OnReloadingWeapon(ReloadingWeaponEventArgs ev) { }
+        public virtual void OnReloadingWeapon(PlayerReloadingWeaponEventArgs ev) { }
 
         /// <summary>
         /// Called before spawning a <see cref="API.Features.Player"/>.
         /// </summary>
         /// <param name="ev">The <see cref="SpawningEventArgs"/> instance.</param>
-        public virtual void OnSpawning(SpawningEventArgs ev) { }
+        public virtual void OnSpawning(PlayerSpawningEventArgs ev) { }
 
         /// <summary>
         /// Called after a <see cref="API.Features.Player"/> has spawned.
         /// </summary>
         /// <param name="ev">The <see cref="SpawnedEventArgs"/> instance.</param>
-        public virtual void OnSpawned(SpawnedEventArgs ev) { }
+        public virtual void OnSpawned(PlayerSpawnedEventArgs ev) { }
 
         /// <summary>
         /// Called after a <see cref="API.Features.Player"/> held item changes.
         /// </summary>
         /// <param name="ev">The <see cref="ChangedItemEventArgs"/> instance.</param>
-        public virtual void OnChangedItem(ChangedItemEventArgs ev) { }
+        public virtual void OnChangedItem(PlayerChangedItemEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> held item changes.
         /// </summary>
         /// <param name="ev">The <see cref="ChangingItemEventArgs"/> instance.</param>
-        public virtual void OnChangingItem(ChangingItemEventArgs ev) { }
+        public virtual void OnChangingItem(PlayerChangingItemEventArgs ev) { }
 
         /// <summary>
         /// Called before changing a <see cref="API.Features.Player"/> group.
         /// </summary>
         /// <param name="ev">The <see cref="ChangingGroupEventArgs"/> instance.</param>
-        public virtual void OnChangingGroup(ChangingGroupEventArgs ev) { }
+        public virtual void OnChangingGroup(PlayerGroupChangingEventArgs ev) { }
+
+        /// <summary>
+        /// Called after changing a <see cref="API.Features.Player"/> group.
+        /// </summary>
+        /// <param name="ev">The <see cref="ChangingGroupEventArgs"/> instance.</param>
+        public virtual void OnChangedGroup(PlayerGroupChangedEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> interacts with an elevator.
         /// </summary>
         /// <param name="ev">The <see cref="InteractingElevatorEventArgs"/> instance.</param>
-        public virtual void OnInteractingElevator(InteractingElevatorEventArgs ev) { }
+        public virtual void OnInteractingElevator(PlayerInteractingElevatorEventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> interacts with an elevator.
+        /// </summary>
+        /// <param name="ev">The <see cref="InteractingElevatorEventArgs"/> instance.</param>
+        public virtual void OnInteractedElevator(PlayerInteractedElevatorEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> interacts with a locker.
         /// </summary>
         /// <param name="ev">The <see cref="InteractingLockerEventArgs"/> instance.</param>
-        public virtual void OnInteractingLocker(InteractingLockerEventArgs ev) { }
+        public virtual void OnInteractingLocker(PlayerInteractingLockerEventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> interacts with a locker.
+        /// </summary>
+        /// <param name="ev">The <see cref="InteractingLockerEventArgs"/> instance.</param>
+        public virtual void OnInteractedLocker(PlayerInteractedLockerEventArgs ev) { }
+
+        /// <summary>
+        /// Called before a <see cref="API.Features.Player"/> interacts with a generator.
+        /// </summary>
+        /// <param name="ev">The <see cref="InteractingLockerEventArgs"/> instance.</param>
+        public virtual void OnInteractingGenerator(PlayerInteractingGeneratorEventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> interacts with a generator.
+        /// </summary>
+        /// <param name="ev">The <see cref="InteractingLockerEventArgs"/> instance.</param>
+        public virtual void OnInteractedGenerator(PlayerInteractedGeneratorEventArgs ev) { }
+
+        /// <summary>
+        /// Called before a <see cref="API.Features.Player"/> interacts with a door.
+        /// </summary>
+        /// <param name="ev">The <see cref="InteractingLockerEventArgs"/> instance.</param>
+        public virtual void OnInteractingDoor(PlayerInteractingDoorEventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> interacts with a door.
+        /// </summary>
+        /// <param name="ev">The <see cref="InteractingLockerEventArgs"/> instance.</param>
+        public virtual void OnInteractedDoor(PlayerInteractedDoorEventArgs ev) { }
+
+        /// <summary>
+        /// Called before a <see cref="API.Features.Player"/> interacts with SCP-330.
+        /// </summary>
+        /// <param name="ev">The <see cref="InteractingLockerEventArgs"/> instance.</param>
+        public virtual void OnInteractingScp330(PlayerInteractingScp330EventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> interacts with SCP-330.
+        /// </summary>
+        /// <param name="ev">The <see cref="InteractingLockerEventArgs"/> instance.</param>
+        public virtual void OnInteractedScp330(PlayerInteractedScp330EventArgs ev) { }
+
+        /// <summary>
+        /// Called before a <see cref="API.Features.Player"/> interacts with a door.
+        /// </summary>
+        /// <param name="ev">The <see cref="InteractingLockerEventArgs"/> instance.</param>
+        public virtual void OnInteractingShootingTarget(PlayerInteractingShootingTargetEventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> interacts with a door.
+        /// </summary>
+        /// <param name="ev">The <see cref="InteractingLockerEventArgs"/> instance.</param>
+        public virtual void OnInteractedShootingTarget(PlayerInteractedShootingTargetEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> triggers a tesla.
         /// </summary>
         /// <param name="ev">The <see cref="TriggeringTeslaEventArgs"/> instance.</param>
-        public virtual void OnTriggeringTesla(TriggeringTeslaEventArgs ev) { }
+        public virtual void OnTriggeringTesla(PlayerTriggeringTeslaEventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> triggers a tesla.
+        /// </summary>
+        /// <param name="ev">The <see cref="TriggeringTeslaEventArgs"/> instance.</param>
+        public virtual void OnTriggeredTesla(PlayerTriggeredTeslaEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> receives a status effect.
         /// </summary>
         /// <param name="ev">The <see cref="ReceivingEffectEventArgs"/> instance.</param>
-        public virtual void OnReceivingEffect(ReceivingEffectEventArgs ev) { }
+        [Obsolete("Not available on LabAPI, please refer to OnUpdatedEffect")]
+        public virtual void OnReceivingEffect(object ev) { }
+
+        /// <summary>
+        /// Called before a <see cref="API.Features.Player"/> receives a status effect.
+        /// </summary>
+        /// <param name="ev"></param>
+        public virtual void OnUpdatingEffect(PlayerEffectUpdatingEventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> receives a status effect.
+        /// </summary>
+        /// <param name="ev"></param>
+        public virtual void OnUpdatedEffect(PlayerEffectUpdatedEventArgs ev) { }
 
         /// <summary>
         /// Called before a user's radio battery charge is changed.
         /// </summary>
         /// <param name="ev">The <see cref="UsingRadioBatteryEventArgs"/> instance.</param>
-        public virtual void OnUsingRadioBattery(UsingRadioBatteryEventArgs ev) { }
+        [Obsolete("Not available on LabAPI, please refer to OnUsingRadio")]
+        public virtual void OnUsingRadioBattery(object ev) { }
+
+        /// <summary>
+        /// Called before a <see cref="API.Features.Player"/> uses a Radio.
+        /// </summary>
+        /// <param name="ev"></param>
+        public virtual void OnUsingRadio(PlayerUsingRadioEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> MicroHID state is changed.
         /// </summary>
         /// <param name="ev">The <see cref="ChangingMicroHIDStateEventArgs"/> instance.</param>
-        public virtual void OnChangingMicroHIDState(ChangingMicroHIDStateEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnChangingMicroHIDState(object ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> MicroHID energy is changed.
         /// </summary>
         /// <param name="ev">The <see cref="UsingMicroHIDEnergyEventArgs"/> instance.</param>
-        public virtual void OnUsingMicroHIDEnergy(UsingMicroHIDEnergyEventArgs ev) { }
-
-        /// <summary>
-        /// Called before a <see cref="API.Features.Player"/> interacts with a shooting target.
-        /// </summary>
-        /// <param name="ev">The <see cref="InteractingShootingTargetEventArgs"/> instance.</param>
-        public virtual void OnInteractingShootingTarget(InteractingShootingTargetEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnUsingMicroHIDEnergy(object ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> damages a shooting target.
         /// </summary>
         /// <param name="ev">The <see cref="DamagingShootingTargetEventArgs"/> instance.</param>
-        public virtual void OnDamagingShootingTarget(DamagingShootingTargetEventArgs ev) { }
+        public virtual void OnDamagingShootingTarget(PlayerDamagingShootingTargetEventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> damages a shooting target.
+        /// </summary>
+        /// <param name="ev">The <see cref="DamagingShootingTargetEventArgs"/> instance.</param>
+        public virtual void OnDamagedShootingTarget(PlayerDamagedShootingTargetEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> flips a coin.
         /// </summary>
         /// <param name="ev">The <see cref="FlippingCoinEventArgs"/> instance.</param>
-        public virtual void OnFlippingCoin(FlippingCoinEventArgs ev) { }
+        public virtual void OnFlippingCoin(PlayerFlippingCoinEventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> flips a coin.
+        /// </summary>
+        /// <param name="ev">The <see cref="FlippingCoinEventArgs"/> instance.</param>
+        public virtual void OnFlippedCoin(PlayerFlippedCoinEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> toggles the flashlight.
         /// </summary>
         /// <param name="ev">The <see cref="TogglingFlashlightEventArgs"/> instance.</param>
-        public virtual void OnTogglingFlashlight(TogglingFlashlightEventArgs ev) { }
+        public virtual void OnTogglingFlashlight(PlayerTogglingFlashlightEventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> toggles the flashlight.
+        /// </summary>
+        /// <param name="ev">The <see cref="TogglingFlashlightEventArgs"/> instance.</param>
+        public virtual void OnToggledFlashlight(PlayerToggledFlashlightEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> unloads a weapon.
         /// </summary>
         /// <param name="ev">The <see cref="UnloadingWeaponEventArgs"/> instance.</param>
-        public virtual void OnUnloadingWeapon(UnloadingWeaponEventArgs ev) { }
+        public virtual void OnUnloadingWeapon(PlayerUnloadingWeaponEventArgs ev) { }
 
         /// <summary>
-        /// Called before a <see cref="API.Features.Player"/> triggers an aim action.
+        /// Called before a <see cref="API.Features.Player"/> unloads a weapon.
+        /// </summary>
+        /// <param name="ev">The <see cref="UnloadingWeaponEventArgs"/> instance.</param>
+        public virtual void OnUnloadedWeapon(PlayerUnloadedWeaponEventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> triggers an aim action.
         /// </summary>
         /// <param name="ev">The <see cref="AimingDownSightEventArgs"/> instance.</param>
-        public virtual void OnAimingDownSight(AimingDownSightEventArgs ev) { }
+        public virtual void OnAimingDownSight(PlayerAimedWeaponEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> toggles the weapon's flashlight.
         /// </summary>
         /// <param name="ev">The <see cref="TogglingWeaponFlashlightEventArgs"/> instance.</param>
-        public virtual void OnTogglingWeaponFlashlight(TogglingWeaponFlashlightEventArgs ev) { }
+        public virtual void OnTogglingWeaponFlashlight(PlayerTogglingWeaponFlashlightEventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> toggles the weapon's flashlight.
+        /// </summary>
+        /// <param name="ev">The <see cref="TogglingWeaponFlashlightEventArgs"/> instance.</param>
+        public virtual void OnToggledWeaponFlashlight(PlayerToggledWeaponFlashlightEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> dryfires a weapon.
         /// </summary>
         /// <param name="ev">The <see cref="DryfiringWeaponEventArgs"/> instance.</param>
-        public virtual void OnDryfiringWeapon(DryfiringWeaponEventArgs ev) { }
+        public virtual void OnDryfiringWeapon(PlayerDryFiringWeaponEventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> dryfires a weapon.
+        /// </summary>
+        /// <param name="ev">The <see cref="DryfiringWeaponEventArgs"/> instance.</param>
+        public virtual void OnDryfiredWeapon(PlayerDryFiredWeaponEventArgs ev) { }
 
         /// <summary>
         /// Invoked after a <see cref="API.Features.Player"/> presses the voicechat key.
         /// </summary>
         /// <param name="ev">The <see cref="VoiceChattingEventArgs"/> instance.</param>
-        public virtual void OnVoiceChatting(VoiceChattingEventArgs ev) { }
+        [Obsolete("Not available on LabAPI, please refer to OnSendingVoiceMessage")]
+        public virtual void OnVoiceChatting(object ev) { }
+
+        /// <summary>
+        /// Called before a <see cref="API.Features.Player"/> sends a Voice Message.
+        /// </summary>
+        /// <param name="ev"></param>
+        public virtual void OnSendingVoiceMessage(PlayerSendingVoiceMessageEventArgs ev) { }
+
+        /// <summary>
+        /// Called before a <see cref="API.Features.Player"/> receives a Voice Message.
+        /// </summary>
+        /// <param name="ev"></param>
+        public virtual void OnReceivingVoiceMessage(PlayerReceivingVoiceMessageEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> makes noise.
         /// </summary>
         /// <param name="ev">The <see cref="MakingNoiseEventArgs"/> instance.</param>
-        public virtual void OnMakingNoise(MakingNoiseEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnMakingNoise(object ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> jumps.
         /// </summary>
         /// <param name="ev">The <see cref="JumpingEventArgs"/> instance.</param>
-        public virtual void OnJumping(JumpingEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnJumping(object ev) { }
 
         /// <summary>
         /// Called after a <see cref="API.Features.Player"/> lands.
         /// </summary>
         /// <param name="ev">The <see cref="LandingEventArgs"/> instance.</param>
-        public virtual void OnLanding(LandingEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnLanding(object ev) { }
 
         /// <summary>
         /// Called after a <see cref="API.Features.Player"/> presses the transmission key.
         /// </summary>
         /// <param name="ev">The <see cref="TransmittingEventArgs"/> instance.</param>
-        public virtual void OnTransmitting(TransmittingEventArgs ev) { }
+        [Obsolete("Not available on LabAPI, please refer to OnUsingRadio")]
+        public virtual void OnTransmitting(object ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> changes move state.
         /// </summary>
         /// <param name="ev">The <see cref="ChangingMoveStateEventArgs"/> instance.</param>
-        public virtual void OnChangingMoveState(ChangingMoveStateEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnChangingMoveState(object ev) { }
 
         /// <summary>
         /// Called after a <see cref="API.Features.Player"/> changes spectated player.
         /// </summary>
         /// <param name="ev">The <see cref="ChangingSpectatedPlayerEventArgs"/> instance.</param>
-        public virtual void OnChangingSpectatedPlayer(ChangingSpectatedPlayerEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnChangingSpectatedPlayer(object ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> toggles the NoClip mode.
         /// </summary>
         /// <param name="ev">The <see cref="TogglingNoClipEventArgs"/> instance.</param>
-        public virtual void OnTogglingNoClip(TogglingNoClipEventArgs ev) { }
+        public virtual void OnTogglingNoClip(PlayerTogglingNoclipEventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> toggles the NoClip mode.
+        /// </summary>
+        /// <param name="ev">The <see cref="TogglingNoClipEventArgs"/> instance.</param>
+        public virtual void OnToggledNoClip(PlayerToggledNoclipEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> toggles overwatch.
         /// </summary>
         /// <param name="ev">The <see cref="TogglingOverwatchEventArgs"/> instance.</param>
-        public virtual void OnTogglingOverwatch(TogglingOverwatchEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnTogglingOverwatch(object ev) { }
 
         /// <summary>
         /// Called before turning the radio on/off.
         /// </summary>
         /// <param name="ev">The <see cref="TogglingRadioEventArgs"/> instance.</param>
-        public virtual void OnTogglingRadio(TogglingRadioEventArgs ev) { }
+        public virtual void OnTogglingRadio(PlayerTogglingRadioEventArgs ev) { }
+
+        /// <summary>
+        /// Called after turning the radio on/off.
+        /// </summary>
+        /// <param name="ev">The <see cref="TogglingRadioEventArgs"/> instance.</param>
+        public virtual void OnToggledRadio(PlayerToggledRadioEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> searches a Pickup.
         /// </summary>
         /// <param name="ev">The <see cref="SearchingPickupEventArgs"/> instance.</param>
-        public virtual void OnSearchPickupRequest(SearchingPickupEventArgs ev) { }
+        public virtual void OnSearchPickupRequest(PlayerSearchingPickupEventArgs ev) { }
 
         /// <summary>
-        /// Called before a <see cref="API.Features.Player"/> searches a Pickup.
+        /// Called after a <see cref="API.Features.Player"/> searches a Pickup.
+        /// </summary>
+        /// <param name="ev">The <see cref="SearchingPickupEventArgs"/> instance.</param>
+        public virtual void OnSearchedPickupRequest(PlayerSearchedPickupEventArgs ev) { }
+
+        /// <summary>
+        /// Called before a <see cref="API.Features.Player"/> sends a message inside the admin chat.
         /// </summary>
         /// <param name="ev">The <see cref="SendingAdminChatMessageEventsArgs"/> instance.</param>
-        public virtual void OnSendingAdminChatMessage(SendingAdminChatMessageEventsArgs ev) { }
+        public virtual void OnSendingAdminChatMessage(SendingAdminChatEventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> sent a message inside the admin chat.
+        /// </summary>
+        /// <param name="ev">The <see cref="SendingAdminChatMessageEventsArgs"/> instance.</param>
+        public virtual void OnSentAdminChatMessage(SentAdminChatEventArgs ev) { }
 
         /// <summary>
         /// Called after a <see cref="T:Exiled.API.Features.Player" /> has an item added to their inventory.
         /// </summary>
         /// <param name="ev">The <see cref="ItemAddedEventArgs"/> event handler. </param>
-        public virtual void OnItemAdded(ItemAddedEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnItemAdded(object ev) { }
 
         /// <summary>
         /// Called after a <see cref="T:Exiled.API.Features.Player" /> has an item removed from their inventory.
         /// </summary>
         /// <param name="ev">The <see cref="ItemRemovedEventArgs"/> event handler. </param>
-        public virtual void OnItemRemoved(ItemRemovedEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnItemRemoved(object ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> enters in an environmental hazard.
         /// </summary>
         /// <param name="ev">The <see cref="EnteringEnvironmentalHazardEventArgs"/> instance. </param>
-        public virtual void OnEnteringEnvironmentalHazard(EnteringEnvironmentalHazardEventArgs ev) { }
+        public virtual void OnEnteringEnvironmentalHazard(PlayerEnteringHazardEventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> enters in an environmental hazard.
+        /// </summary>
+        /// <param name="ev">The <see cref="EnteringEnvironmentalHazardEventArgs"/> instance. </param>
+        public virtual void OnEnteredEnvironmentalHazard(PlayerEnteredHazardEventArgs ev) { }
 
         /// <summary>
         /// Called when a <see cref="API.Features.Player"/> stays on an environmental hazard.
         /// </summary>
         /// <param name="ev">The <see cref="StayingOnEnvironmentalHazardEventArgs"/> instance. </param>
-        public virtual void OnStayingOnEnvironmentalHazard(StayingOnEnvironmentalHazardEventArgs ev) { }
+        public virtual void OnStayingOnEnvironmentalHazard(PlayersStayingInHazardEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> exits from an environmental hazard.
         /// </summary>
         /// <param name="ev">The <see cref="ExitingEnvironmentalHazardEventArgs"/> instance. </param>
-        public virtual void OnExitingEnvironmentalHazard(ExitingEnvironmentalHazardEventArgs ev) { }
+        public virtual void OnExitingEnvironmentalHazard(PlayerLeavingHazardEventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="API.Features.Player"/> exited from an environmental hazard.
+        /// </summary>
+        /// <param name="ev">The <see cref="ExitingEnvironmentalHazardEventArgs"/> instance. </param>
+        public virtual void OnExitedEnvironmentalHazard(PlayerLeftHazardEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> damage a window.
         /// </summary>
         /// <param name="ev">The <see cref="DamagingWindowEventArgs"/> instance. </param>
-        public virtual void OnPlayerDamageWindow(DamagingWindowEventArgs ev) { }
+        public virtual void OnPlayerDamageWindow(PlayerDamagingWindowEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> unlocks a generator.
         /// </summary>
         /// <param name="ev">The <see cref="UnlockingGeneratorEventArgs"/> instance. </param>
-        public virtual void OnUnlockingGenerator(UnlockingGeneratorEventArgs ev) { }
+        public virtual void OnUnlockingGenerator(PlayerUnlockingGeneratorEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> opens a generator.
         /// </summary>
         /// <param name="ev">The <see cref="OpeningGeneratorEventArgs"/> instance. </param>
-        public virtual void OnOpeningGenerator(OpeningGeneratorEventArgs ev) { }
+        public virtual void OnOpeningGenerator(PlayerOpeningGeneratorEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> closes a generator.
         /// </summary>
         /// <param name="ev">The <see cref="ClosingGeneratorEventArgs"/> instance. </param>
-        public virtual void OnClosingGenerator(ClosingGeneratorEventArgs ev) { }
+        public virtual void OnClosingGenerator(PlayerClosingGeneratorEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> turns on the generator by switching lever.
         /// </summary>
         /// <param name="ev">The <see cref="ActivatingGeneratorEventArgs"/> instance. </param>
-        public virtual void OnActivatingGenerator(ActivatingGeneratorEventArgs ev) { }
+        public virtual void OnActivatingGenerator(PlayerActivatingGeneratorEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> turns off the generator by switching lever.
         /// </summary>
         /// <param name="ev">The <see cref="StoppingGeneratorEventArgs"/> instance. </param>
-        public virtual void OnStoppingGenerator(StoppingGeneratorEventArgs ev) { }
-
-        /// <summary>
-        /// Called before a <see cref="API.Features.Player"/> interacts with a door.
-        /// </summary>
-        /// <param name="ev">The <see cref="InteractingDoorEventArgs"/> instance. </param>
-        public virtual void OnInteractingDoor(InteractingDoorEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnStoppingGenerator(object ev) { }
 
         /// <summary>
         /// Called before dropping ammo.
         /// </summary>
         /// <param name="ev">The <see cref="DroppingAmmoEventArgs"/> instance. </param>
-        public virtual void OnDroppingAmmo(DroppingAmmoEventArgs ev) { }
+        public virtual void OnDroppingAmmo(PlayerDroppingAmmoEventArgs ev) { }
 
         /// <summary>
         /// Called after dropping ammo.
         /// </summary>
         /// <param name="ev">The <see cref="DroppedAmmoEventArgs"/> instance. </param>
-        public virtual void OnDroppedAmmo(DroppedAmmoEventArgs ev) { }
+        public virtual void OnDroppedAmmo(PlayerDroppedAmmoEventArgs ev) { }
 
         /// <summary>
-        /// Called before muting a user.
+        /// Called before being muted.
         /// </summary>
         /// <param name="ev">The <see cref="IssuingMuteEventArgs"/> instance. </param>
-        public virtual void OnIssuingMute(IssuingMuteEventArgs ev) { }
+        public virtual void OnIssuingMute(PlayerMutingEventArgs ev) { }
 
         /// <summary>
-        /// Called before unmuting a user.
+        /// Called after being muted.
+        /// </summary>
+        /// <param name="ev">The <see cref="IssuingMuteEventArgs"/> instance. </param>
+        public virtual void OnIssuedMute(PlayerMutedEventArgs ev) { }
+
+        /// <summary>
+        /// Called before being unmuted.
         /// </summary>
         /// <param name="ev">The <see cref="RevokingMuteEventArgs"/> instance. </param>
-        public virtual void OnRevokingMute(RevokingMuteEventArgs ev) { }
+        public virtual void OnRevokingMute(PlayerUnmutingEventArgs ev) { }
+
+        /// <summary>
+        /// Called after being unmuted.
+        /// </summary>
+        /// <param name="ev">The <see cref="RevokingMuteEventArgs"/> instance. </param>
+        public virtual void OnRevokedMute(PlayerUnmutedEventArgs ev) { }
 
         /// <summary>
         /// Called before a user's radio preset is changed.
         /// </summary>
         /// <param name="ev">The <see cref="ChangingRadioPresetEventArgs"/> instance. </param>
-        public virtual void OnChangingRadioPreset(ChangingRadioPresetEventArgs ev) { }
+        public virtual void OnChangingRadioPreset(PlayerChangingRadioRangeEventArgs ev) { }
 
         /// <summary>
         /// Called before hurting a player.
         /// </summary>
         /// <param name="ev">The <see cref="HurtingEventArgs"/> instance. </param>
-        public virtual void OnHurting(HurtingEventArgs ev) { }
+        public virtual void OnHurting(PlayerHurtingEventArgs ev) { }
 
         /// <summary>
         /// Called ater a <see cref="API.Features.Player"/> being hurt.
         /// </summary>
         /// <param name="ev">The <see cref="HurtingEventArgs"/> instance. </param>
-        public virtual void OnHurt(HurtEventArgs ev) { }
+        public virtual void OnHurt(PlayerHurtEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> is healed.
         /// </summary>
         /// <param name="ev">The <see cref="HealingEventArgs"/> instance. </param>
-        public virtual void OnHealing(HealingEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnHealing(object ev) { }
 
         /// <summary>
         /// Called after a <see cref="API.Features.Player"/> is healed.
         /// </summary>
         /// <param name="ev">The <see cref="HealedEventArgs"/> instance. </param>
-        public virtual void OnHealed(HealedEventArgs ev) { }
+        [Obsolete("Not available on LabAPI")]
+        public virtual void OnHealed(object ev) { }
 
         /// <summary>
         /// Called before a <see cref="API.Features.Player"/> dies.
         /// </summary>
         /// <param name="ev">The <see cref="DyingEventArgs"/> instance. </param>
-        public virtual void OnDying(DyingEventArgs ev) { }
+        public virtual void OnDying(PlayerDyingEventArgs ev) { }
 
         /// <summary>
         /// Called before a <see cref="Player"/>'s custom display name is changed.
         /// </summary>
         /// <param name="ev">The <see cref="ChangingNicknameEventArgs"/> instance.</param>
-        public virtual void OnChangingNickname(ChangingNicknameEventArgs ev) { }
+        public virtual void OnChangingNickname(PlayerChangingNicknameEventArgs ev) { }
+
+        /// <summary>
+        /// Called after a <see cref="Player"/>'s custom display name is changed.
+        /// </summary>
+        /// <param name="ev">The <see cref="ChangingNicknameEventArgs"/> instance.</param>
+        public virtual void OnChangedNickname(PlayerChangedNicknameEventArgs ev) { }
     }
 }

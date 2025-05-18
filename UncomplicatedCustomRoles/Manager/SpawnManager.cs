@@ -83,14 +83,14 @@ namespace UncomplicatedCustomRoles.Manager
                     return;
                 }
 
-                if (!doBypassRoleOverwrite && !Role.SpawnSettings.CanReplaceRoles.Contains(player.Role.Type))
+                if (!doBypassRoleOverwrite && !Role.SpawnSettings.CanReplaceRoles.Contains(player.Role))
                 {
                     LogManager.Debug($"Can't spawn the player {player.Nickname} as UCR custom role {Role.Name} because it's role is not in the overwrittable list of custom role!\nStrange because this should be managed correctly by the plugin!");
                     return;
                 }
 
                 // This will allow us to avoid the loop of another OnSpawning
-                Spawn.Spawning.TryAdd(player.UserId);
+                Spawn.Spawning.TryAdd(player.PlayerId);
 
                 Vector3 BasicPosition = player.Position;
 
@@ -130,15 +130,15 @@ namespace UncomplicatedCustomRoles.Manager
                                 spawn.Spawn(player);
                             else
                             {
-                                LogManager.Warn($"Failed to spawn player {player.Nickname} ({player.Id}) as CustomRole {Role.Name} ({Role.Id}): selected SpawnPoint '{Role.SpawnSettings.SpawnPoints}' does not exists, set the spawn position to the previous one...");
+                                LogManager.Warn($"Failed to spawn player {player.Nickname} ({player.PlayerId}) as CustomRole {Role.Name} ({Role.Id}): selected SpawnPoint '{Role.SpawnSettings.SpawnPoints}' does not exists, set the spawn position to the previous one...");
                                 player.Position = BasicPosition;
                             }
                             break;
                         case SpawnType.ClassDCell:
-                            player.Position = RoleTypeId.ClassD.GetRandomSpawnLocation().Position;
+                            player.Position = RoleTypeId.ClassD.GetRandomSpawnLocation();
                             break;                    
                         case SpawnType.RoleSpawn:
-                            player.Position = Role.SpawnSettings.SpawnRoles.RandomItem().GetRandomSpawnLocation().Position;
+                            player.Position = Role.SpawnSettings.SpawnRoles.RandomItem().GetRandomSpawnLocation();
                             break;
                     }
                     ;
@@ -170,14 +170,8 @@ namespace UncomplicatedCustomRoles.Manager
                             {
                                 if (UCI.HasCustomItem(itemId, out _))
                                 {
-                                    LogManager.Debug($"Going to give CustomItem (UCR) {itemId} to {Player.Id}");
+                                    LogManager.Debug($"Going to give CustomItem (UCR) {itemId} to {Player.PlayerId}");
                                     UCI.GiveCustomItem(itemId, Player);
-                                }
-                                else
-                                {
-                                    CustomItem item = CustomItem.Get(itemId) ?? null;
-                                    LogManager.Debug($"Going to give CustomItem (EXILED) {item.Id} ({item.Name} - {item.Type}) to {Player.Id}");
-                                    item?.Give(Player);
                                 }
                             }
                             catch (Exception ex)
@@ -188,8 +182,8 @@ namespace UncomplicatedCustomRoles.Manager
 
                 Player.ClearAmmo();
 
-                if (Role.Ammo is not null && Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
-                    foreach (KeyValuePair<AmmoType, ushort> Ammo in Role.Ammo)
+                if (Role.Ammo is not null && Role.Ammo.GetType() == typeof(Dictionary<ItemType, ushort>) && Role.Ammo.Count() > 0)
+                    foreach (KeyValuePair<ItemType, ushort> Ammo in Role.Ammo)
                     {
                         if (Ammo.Value > Player.GetAmmoLimit(Ammo.Key))
                             Player.SetAmmoLimit(Ammo.Key, Ammo.Value);
@@ -213,7 +207,7 @@ namespace UncomplicatedCustomRoles.Manager
                 Role.Stamina?.Apply(Player);
 
                 if (Role.Scale != Vector3.zero && Role.Scale != Vector3.one)
-                    Player.Scale = Role.Scale;
+                    Player.SetScale(Role.Scale);
 
                 List<IEffect> PermanentEffects = new();
                 if (Role.Effects.Count() > 0 && Role.Effects != null)
@@ -227,7 +221,7 @@ namespace UncomplicatedCustomRoles.Manager
                             continue;
                         }
                         LogManager.Debug($"Enabling effect {effect.EffectType} to {Player.Nickname} for {effect.Duration} (i:{effect.Intensity})");
-                        Player.EnableEffect(effect.EffectType, effect.Intensity, effect.Duration);
+                        Player.ReferenceHub.playerEffectsController.ChangeState(effect.EffectType, effect.Intensity, effect.Duration, false);
                     }
                 }
                 LogManager.Silent($"Found {PermanentEffects.Count} permament effects");
@@ -288,11 +282,11 @@ namespace UncomplicatedCustomRoles.Manager
 
                 new SummonedCustomRole(Player, Role, Badge, PermanentEffects, InfoArea, ChangedNick);
 
-                if (Spawn.Spawning.Contains(Player.Id))
-                    Spawn.Spawning.Remove(Player.Id);
+                if (Spawn.Spawning.Contains(Player.PlayerId))
+                    Spawn.Spawning.Remove(Player.PlayerId);
 
-                if (API.Features.Escape.Bucket.Contains(Player.Id))
-                    API.Features.Escape.Bucket.Remove(Player.Id);
+                if (API.Features.Escape.Bucket.Contains(Player.PlayerId))
+                    API.Features.Escape.Bucket.Remove(Player.PlayerId);
 
                 LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})! [2VDS]");
             }
@@ -386,7 +380,7 @@ namespace UncomplicatedCustomRoles.Manager
 #pragma warning disable CS8602 // <Element> can be null at this point! (added a check!)
         public static ICustomRole? DoEvaluateSpawnForPlayer(Player player, RoleTypeId? role = null)
         {
-            role ??= player.Role?.Type;
+            role ??= player.Role;
 
             if (role is null)
                 return null;

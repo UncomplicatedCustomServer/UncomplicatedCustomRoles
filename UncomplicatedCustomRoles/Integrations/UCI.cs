@@ -8,8 +8,8 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Features;
-using Exiled.Loader;
+using LabApi.Features.Wrappers;
+using LabApi.Loader;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -19,7 +19,7 @@ namespace UncomplicatedCustomRoles.Integrations
 {
     internal class UCI
     {
-        public static Assembly Assembly => Loader.Plugins.FirstOrDefault(p => p.Name is "UncomplicatedCustomItems")?.Assembly;
+        public static Assembly Assembly => PluginLoader.Plugins.FirstOrDefault(p => p.Key.Name is "UncomplicatedCustomItems").Value;
 
         public static Type Utilities => Assembly?.GetType("UncomplicatedCustomItems.API.Utilities");
 

@@ -8,11 +8,15 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+using GameCore;
+using InventorySystem.Configs;
 using LabApi.Features.Wrappers;
 using MEC;
 using Mirror;
 using PlayerRoles;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
@@ -217,5 +221,86 @@ namespace UncomplicatedCustomRoles.Extensions
                 foreach (Player target in Player.List)
                     sendSpawnMessage.Invoke(null, new object[] { player.ReferenceHub.netIdentity, target.Connection });
         }
+
+        // REF https://gitlab.com/exmod-team/EXILED/-/blob/master/EXILED/Exiled.API/Features/Player.cs?ref_type=heads#L2558
+        internal static void SetCategoryLimit(this Player player, ItemCategory category, sbyte limit)
+        {
+            int index = InventorySystem.Configs.InventoryLimits.StandardCategoryLimits.Where(x => x.Value >= 0).OrderBy(x => x.Key).ToList().FindIndex(x => x.Key == category);
+
+            if (index is -1)
+                return;
+
+            MirrorExtensions.SendFakeSyncObject(player, ServerConfigSynchronizer.Singleton.netIdentity, typeof(ServerConfigSynchronizer), writer =>
+            {
+                writer.WriteULong(1ul);
+                writer.WriteUInt(1);
+                writer.WriteByte((byte)SyncList<sbyte>.Operation.OP_SET);
+                writer.WriteInt(index);
+                writer.WriteSByte(limit);
+            });
+        }
+
+        // REF https://gitlab.com/exmod-team/EXILED/-/blob/master/EXILED/Exiled.API/Features/Player.cs?ref_type=heads#L2584
+        internal static void ResetCategoryLimit(this Player player, ItemCategory category)
+        {
+            int index = InventorySystem.Configs.InventoryLimits.StandardCategoryLimits.Where(x => x.Value >= 0).OrderBy(x => x.Key).ToList().FindIndex(x => x.Key == category);
+
+            if (index is -1) 
+                return;
+
+            MirrorExtensions.SendFakeSyncObject(player, ServerConfigSynchronizer.Singleton.netIdentity, typeof(ServerConfigSynchronizer), writer =>
+            {
+                writer.WriteULong(1ul);
+                writer.WriteUInt(1);
+                writer.WriteByte((byte)SyncList<sbyte>.Operation.OP_SET);
+                writer.WriteInt(index);
+                writer.WriteSByte(ServerConfigSynchronizer.Singleton.CategoryLimits[index]);
+            });
+        }
+
+        internal static void ResetInventory(this Player player, IEnumerable<ItemType> items)
+        {
+            player.ClearInventory();
+            foreach (ItemType item in items)
+                player.AddItem(item);
+        }
+
+        // REF https://gitlab.com/exmod-team/EXILED/-/blob/master/EXILED/Exiled.API/Features/Player.cs?ref_type=heads#L2458
+        internal static ushort GetAmmoLimit(this Player player, ItemType type, bool ignoreArmor = false)
+        {
+            if (ignoreArmor)
+                return ServerConfigSynchronizer.Singleton.AmmoLimitsSync.FirstOrDefault(x => x.AmmoType == type).Limit;
+
+            return InventoryLimits.GetAmmoLimit(type, player.ReferenceHub);
+        }
+
+        // REF https://gitlab.com/exmod-team/EXILED/-/blob/master/EXILED/Exiled.API/Features/Player.cs?ref_type=heads#L2479
+        internal static void SetAmmoLimit(this Player player, ItemType type, ushort limit)
+        {
+            int index = ServerConfigSynchronizer.Singleton.AmmoLimitsSync.FindIndex(x => x.AmmoType == type);
+            MirrorExtensions.SendFakeSyncObject(player, ServerConfigSynchronizer.Singleton.netIdentity, typeof(ServerConfigSynchronizer), writer =>
+            {
+                writer.WriteULong(2ul);
+                writer.WriteUInt(1);
+                writer.WriteByte((byte)SyncList<ServerConfigSynchronizer.AmmoLimit>.Operation.OP_SET);
+                writer.WriteInt(index);
+                writer.WriteAmmoLimit(new() { Limit = limit, AmmoType = type, });
+            });
+        }
+
+        // REF https://gitlab.com/exmod-team/EXILED/-/blob/master/EXILED/Exiled.API/Features/Player.cs?ref_type=heads#L2499
+        internal static void ResetAmmoLimit(this Player player, ItemType type)
+        {
+            int index = ServerConfigSynchronizer.Singleton.AmmoLimitsSync.FindIndex(x => x.AmmoType == type);
+            MirrorExtensions.SendFakeSyncObject(player, ServerConfigSynchronizer.Singleton.netIdentity, typeof(ServerConfigSynchronizer), writer =>
+            {
+                writer.WriteULong(2ul);
+                writer.WriteUInt(1);
+                writer.WriteByte((byte)SyncList<ServerConfigSynchronizer.AmmoLimit>.Operation.OP_SET);
+                writer.WriteInt(index);
+                writer.WriteAmmoLimit(ServerConfigSynchronizer.Singleton.AmmoLimitsSync[index]);
+            });
+        }
+
     }
 }

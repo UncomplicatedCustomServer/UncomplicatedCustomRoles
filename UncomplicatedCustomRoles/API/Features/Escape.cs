@@ -8,7 +8,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Features;
+using LabApi.Features.Wrappers;
 using MEC;
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.Extensions;
@@ -24,8 +24,8 @@ namespace UncomplicatedCustomRoles.API.Features
 
         public static void AddBucket(Player player, float waitingTime = 5f)
         {
-            Bucket.TryAdd(player.Id);
-            Timing.CallDelayed(waitingTime, () => Bucket.Remove(player.Id));
+            Bucket.TryAdd(player.PlayerId);
+            Timing.CallDelayed(waitingTime, () => Bucket.Remove(player.PlayerId));
         }
     }
 }
