@@ -104,7 +104,9 @@
     <Compile Include="Compatibility\CompatibilityManager.cs" />
     <Compile Include="Compatibility\ErrorCustomRole.cs" />
     <Compile Include="Compatibility\OutdatedCustomRole.cs" />
+    <Compile Include="Compatibility\PreviousVersionElements\CaparezzaSpawnBehaviour.cs" />
     <Compile Include="Compatibility\PreviousVersionElements\FossuonHealthBehaviour.cs" />
+    <Compile Include="Compatibility\PreviousVersionRoles\CaparezzaCustomRole.cs" />
     <Compile Include="Compatibility\PreviousVersionRoles\IPreviousVersionRole.cs" />
     <Compile Include="Compatibility\PreviousVersionRoles\PreviousVersionRole.cs" />
     <Compile Include="Compatibility\PreviousVersionRoles\FossuonCustomRole.cs" />
@@ -112,6 +114,7 @@
     <Compile Include="API\Enums\CustomFlags.cs" />
     <Compile Include="API\Enums\SpawnType.cs" />
     <Compile Include="Events\EventHandler.cs" />
+    <Compile Include="Extensions\CompatibilityExtension.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
     <Compile Include="Extensions\ListExtension.cs" />
     <Compile Include="Extensions\PlayerExtension.cs" />
