@@ -415,7 +415,7 @@ namespace UncomplicatedCustomRoles.Manager
             foreach (ICustomRole Role in CustomRole.CustomRoles.Values.Where(cr => cr.SpawnSettings is not null))
                 if (!Role.IgnoreSpawnSystem && Player.List.Count(pl => !pl.IsHost) >= Role.SpawnSettings.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
                 {
-                    if (Role.SpawnSettings.RequiredPermission is not null && !(player as ICommandSender).CheckPermission(Role.SpawnSettings.RequiredPermission))
+                    if (Role.SpawnSettings.RequiredPermission is not null && Role.SpawnSettings.RequiredPermission.Length > 0 && !(player as ICommandSender).CheckPermission(Role.SpawnSettings.RequiredPermission))
                     {
                         LogManager.Silent($"[NOTICE] Ignoring the role {Role.Id} [{Role.Name}] while creating the list for the player {player.Nickname} due to: cannot [permissions].");
                         continue;

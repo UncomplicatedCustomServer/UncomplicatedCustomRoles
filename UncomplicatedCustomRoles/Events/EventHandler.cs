@@ -176,7 +176,7 @@ namespace UncomplicatedCustomRoles.Events
             if (!Round.IsRoundStarted)
                 return;
 
-            if (ev.NewRole is RoleTypeId.Spectator || ev.NewRole is RoleTypeId.None || ev.NewRole is RoleTypeId.Filmmaker)
+            if (ev.NewRole is RoleTypeId.Spectator or RoleTypeId.None or RoleTypeId.Filmmaker or RoleTypeId.Overwatch) 
                 return;
 
             if (Spawn.Spawning.Contains(ev.Player.PlayerId))
@@ -184,7 +184,6 @@ namespace UncomplicatedCustomRoles.Events
 
             if (ev.Player.HasCustomRole())
                 return;
-
 
             if (Plugin.Instance.Config.IgnoreNpcs && ev.Player.IsNpc)
                 return;
