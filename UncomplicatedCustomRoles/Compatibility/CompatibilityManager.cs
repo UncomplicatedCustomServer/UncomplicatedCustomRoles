@@ -33,6 +33,7 @@ namespace UncomplicatedCustomRoles.Compatibility
 
         private static readonly Dictionary<Type, Version> previousVersionRoles = new()
         {
+            { typeof(CaparezzaCustomRole), new(8, 0, 0) },
             { typeof(FossuonCustomRole), new(6, 0, 0) },
             { typeof(PreviousVersionRole), new(5, 0, 0) },
         };
