@@ -117,8 +117,8 @@ namespace UncomplicatedCustomRoles.Manager
                             break;
                         case SpawnType.RoomsSpawn:
                             string roomType = Role.SpawnSettings.SpawnRooms.RandomItem();
-
-                            Room room = Room.List.Where(r => r.GameObject.name.RemoveBracketsOnEndOfName() == roomType).RandomValue();
+                            
+                            Room room = Room.List.Where(r => r.GameObject.name.RemoveBracketsOnEndOfName() == roomType && r is not null).RandomValue();
 
                             if (room is null)
                                 LogManager.Error("Failed to load room with Room Name " + roomType + "!\nMake sure it exists!");

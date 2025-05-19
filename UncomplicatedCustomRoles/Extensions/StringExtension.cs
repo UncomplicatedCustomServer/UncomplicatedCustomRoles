@@ -58,7 +58,7 @@ namespace UncomplicatedCustomRoles.Extensions
 
         public static string RemoveBracketsOnEndOfName(this string name)
         {
-            var bracketStart = name.IndexOf('(') - 1;
+            var bracketStart = name.IndexOf('(');
 
             if (bracketStart > 0)
                 name = name.Remove(bracketStart, name.Length - bracketStart);

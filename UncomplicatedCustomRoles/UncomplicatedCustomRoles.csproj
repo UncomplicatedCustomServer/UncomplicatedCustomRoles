@@ -35,7 +35,7 @@
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x64\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>embedded</DebugType>
+    <DebugType>pdbonly</DebugType>
     <PlatformTarget>x64</PlatformTarget>
     <LangVersion>11</LangVersion>
     <ErrorReport>prompt</ErrorReport>
@@ -46,7 +46,7 @@
     <OutputPath>bin\x64\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>embedded</DebugType>
     <PlatformTarget>x64</PlatformTarget>
     <LangVersion>11</LangVersion>
     <ErrorReport>prompt</ErrorReport>
@@ -140,6 +140,7 @@
     <Compile Include="Manager\VersionManager.cs" />
     <Compile Include="Manager\YamlFlagsHandler.cs" />
     <Compile Include="Patches\Announcer.cs" />
+    <Compile Include="Patches\MakingNoise.cs" />
     <Compile Include="Patches\PlayerEventPrefix.cs" />
     <Compile Include="Patches\PlayerInfoPatch.cs" />
     <Compile Include="Patches\Scp3114StranglePrefix.cs" />
@@ -168,24 +169,12 @@
     <Reference Include="Assembly-CSharp-Publicized">
       <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-Publicized.dll</HintPath>
     </Reference>
-    <Reference Include="BouncyCastle.Cryptography, Version=2.0.0.0, Culture=neutral, PublicKeyToken=072edcf4a5328938, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\BouncyCastle.Cryptography.dll</HintPath>
-    </Reference>
-    <Reference Include="Caress, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\Caress.dll</HintPath>
-    </Reference>
     <Reference Include="CommandSystem.Core">
       <HintPath>..\..\..\..\Desktop\EXILED_REF\References_141\CommandSystem.Core.dll</HintPath>
     </Reference>
     <Reference Include="DnsClient, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\DnsClient.dll</HintPath>
-    </Reference>
-    <Reference Include="Facepunch.Steamworks.Win64, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\Facepunch.Steamworks.Win64.dll</HintPath>
     </Reference>
     <Reference Include="Mirror">
       <HintPath>$(EXILED_REFERENCES)\Mirror.dll</HintPath>

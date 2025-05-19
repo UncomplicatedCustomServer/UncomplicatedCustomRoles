@@ -8,16 +8,17 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+using LabApi.Events.Arguments.Interfaces;
 using LabApi.Loader;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Reflection;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
-
-// FULL REWORK NEEDED (SEE PATCH)
+using Utf8Json.Formatters;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
@@ -34,9 +35,6 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Gets the <see cref="Type"/> of the class Exiled.Events.Handlers.Players
         /// </summary>
         public static Type PlayerHandler => EventHandlerAssembly?.GetTypes().Where(x => x.FullName == "Exiled.Events.Handlers.Player").FirstOrDefault();
-
-        // A big thanks to Zer0Two -> https://discord.com/channels/656673194693885975/656673194693885981/1275184277146828932 && https://github.com/UnifiedSL/UnifiedEconomy/blob/master/UnifiedEconomy/Helpers/Events/EventHandlerUtils.cs
-        private static readonly List<Tuple<EventInfo, Delegate>> DynamicHandlers = new();
 
         /// <summary>
         /// Gets the <see cref="SummonedCustomRole"/> instance related to this <see cref="CustomRoleEventHandler"/>
@@ -80,9 +78,19 @@ namespace UncomplicatedCustomRoles.API.Features
             }
         }
 
-        internal static void InvokeAll(object ev, ref object evArgs)
+        internal void InvokeSafely(IPlayerEvent playerEvent)
         {
+            if (playerEvent is ICancellableEvent cancellableEvent && !cancellableEvent.IsAllowed)
+                return;
 
+            if (Listeners.TryGetValue(playerEvent.GetType(), out Tuple<object, MethodInfo> listener))
+                listener.Item2.Invoke(listener.Item1, new object[] { playerEvent });
+        }
+
+        internal static void InvokeAll(IPlayerEvent ev)
+        {
+            foreach (SummonedCustomRole summonedCustomRole in SummonedCustomRole.List)
+                summonedCustomRole.EventHandler?.InvokeSafely(ev);
         }
     }
 }

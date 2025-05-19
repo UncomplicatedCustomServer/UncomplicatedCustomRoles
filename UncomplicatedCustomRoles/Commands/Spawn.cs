@@ -47,7 +47,7 @@ namespace UncomplicatedCustomRoles.Commands
             IEnumerable<Tuple<string, Player>> players;
 
             if (arguments[0].Contains(","))
-                players = arguments[0].Replace(" ", string.Empty).Split(',').Select(p => new Tuple<string, Player>(p, Player.Get(p)));
+                players = arguments[0].Replace(" ", string.Empty).Split(',').Select(p => new Tuple<string, Player>(p, Player.Get(int.Parse(p))));
             else if (arguments[0] is "all")
                 players = Player.List.Select(p => new Tuple<string, Player>(null, p));
             else if (arguments[0] is "spectators" or "spect")
@@ -55,7 +55,7 @@ namespace UncomplicatedCustomRoles.Commands
             else if (arguments[0] is "alive" or "al")
                 players = Player.List.Where(p => p.Role is not RoleTypeId.Spectator or RoleTypeId.None).Select(p => new Tuple<string, Player>(null, p));
             else
-                players = new[] { new Tuple<string, Player>(arguments[0], Player.Get(arguments[0])) };
+                players = new[] { new Tuple<string, Player>(arguments[0], Player.Get(int.Parse(arguments[0]))) };
 
             string result = string.Empty;
             bool sync = arguments.Count > 2 && arguments[2] == "sync";

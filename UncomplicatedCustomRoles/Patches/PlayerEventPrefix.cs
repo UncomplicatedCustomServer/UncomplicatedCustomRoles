@@ -21,6 +21,8 @@ using System.Reflection;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.Extensions;
+using UncomplicatedCustomRoles.Manager;
+using static PlayerArms;
 
 // REVIEW (CAN BE VERY WRONG!!!)
 
@@ -32,14 +34,31 @@ namespace UncomplicatedCustomRoles.Patches
 
         private static void Prefix(IPlayerEvent ev)
         {
-            Logger.Info($"Patched ev {ev.GetType().FullName}");
+            try
+            {
+                CustomRoleEventHandler.InvokeAll(ev);
+
+                if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole))
+                {
+                    string name = ev.GetType().Name.Replace("EventArgs", string.Empty);
+
+                    foreach (CustomModule module in customRole.CustomModules)
+                        if (module.TriggerOnEvents.Contains(name))
+                            if (!module.OnEvent(name, ev) && ev is ICancellableEvent deniableEvent)
+                                deniableEvent.IsAllowed = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error(ex.ToString());
+            }
         }
 
         internal static void Patch(Harmony harmony)
         {
             HarmonyMethod prefixMethod = new(typeof(PlayerEventPrefix).GetMethod("Prefix", BindingFlags.Static | BindingFlags.NonPublic));
 
-            PatchedMethods = typeof(PlayerEvents).GetMethods().Where(m => m.Name.StartsWith("On"));
+            PatchedMethods = typeof(PlayerEvents).GetMethods().Where(m => m.Name.StartsWith("On") && m.GetParameters().Length > 0 && typeof(IPlayerEvent).IsAssignableFrom(m.GetParameters()[0].ParameterType));
 
             foreach (MethodInfo method in PatchedMethods)
                 harmony.Patch(method, prefix: prefixMethod);

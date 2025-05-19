@@ -8,17 +8,11 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System.Collections.Generic;
+using System;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
+    [Obsolete("Not available on LabAPI")]
     public class CustomPermissions : CustomModule
-    {
-        public override List<string> RequiredArgs => new()
-        {
-            "permissions"
-        };
-
-        internal string[] Permissions => Args.TryGetValue("permissions", out string permissions) ? permissions.Replace(" ", string.Empty).Split(',') : new string[] { };
-    }
+    { }
 }

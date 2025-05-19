@@ -33,6 +33,7 @@ namespace UncomplicatedCustomRoles.Compatibility
 
         private static readonly Dictionary<Type, Version> previousVersionRoles = new()
         {
+            { typeof(BonolisCustomRole), new(7, 0, 0) },
             { typeof(FossuonCustomRole), new(6, 0, 0) },
             { typeof(PreviousVersionRole), new(5, 0, 0) },
         };
@@ -48,8 +49,8 @@ namespace UncomplicatedCustomRoles.Compatibility
 
             try
             {
-                if (!TypeCheck(content, out string error))
-                    throw new Exception(error);
+                /*if (!TypeCheck(content, out string error))
+                    throw new Exception(error);*/
 
                 role = YamlConfigParser.Deserializer.Deserialize<CustomRole>(content);
             } catch (Exception ex)
