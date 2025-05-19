@@ -257,7 +257,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         internal HttpStatusCode ShareLogs(string data, out HttpContent httpContent)
         {
-            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={LabApiProperties.CurrentVersion}&using_labapi=true&plugin_version={Plugin.Instance.Version.ToString(4)}&hash={VersionManager.HashFile(Plugin.Instance.Assembly.GetPath())}", data);
+            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={LabApiProperties.CurrentVersion}&using_labapi=true&plugin_version={Plugin.Instance.Version.ToString(4)}&hash={VersionManager.HashFile(Plugin.Instance.FilePath)}", data);
             httpContent = Status.Content;
             return Status.StatusCode;
         }
@@ -265,7 +265,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
 #nullable enable
         internal async Task<Tuple<HttpStatusCode, string?>> VersionInfo()
         {
-            HttpResponseMessage message = await HttpClient.GetAsync($"{Endpoint.Replace("/v2", "")}/vinfo/info?v={Plugin.Instance.Version.ToString(4)}");
+            HttpResponseMessage message = await HttpClient.GetAsync($"{Endpoint.Replace("/v2", "")}/vinfo/info?v={Plugin.Instance.Version.ToString(4)}&labapi=true");
 
             if (message.StatusCode != HttpStatusCode.OK)
                 return new(message.StatusCode, null);

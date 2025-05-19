@@ -5,8 +5,6 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using Org.BouncyCastle.Bcpg.Sig;
-
 namespace UncomplicatedCustomRoles.Extensions
 {
     using System;

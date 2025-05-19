@@ -1,4 +1,5 @@
-﻿using MapGeneration;
+﻿using LabApi.Loader;
+using MapGeneration;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -138,8 +139,5 @@ namespace UncomplicatedCustomRoles.Extensions
 
             return result;
         }
-
-        // ASSEMBLY
-        public static string GetPath(this Assembly assembly) => new Uri(assembly.CodeBase).LocalPath;
     }
 }

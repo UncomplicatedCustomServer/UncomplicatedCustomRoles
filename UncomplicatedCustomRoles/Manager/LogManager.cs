@@ -31,23 +31,24 @@ namespace UncomplicatedCustomRoles.Manager
 
         public static void Debug(string message)
         {
+            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Debug.ToString(), message));
+
             if (!DebugEnabled)
                 return;
 
-            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Debug.ToString(), message));
             Logger.Debug(message);
         }
 
         public static void SmInfo(string message, string label = "INFO")
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), label, message));
-            Logger.Raw($"[{Plugin.Instance.Name}] {message}", ConsoleColor.Gray);
+            Logger.Raw($"[{label}] [{Plugin.Instance.Name}] {message}", ConsoleColor.Gray);
         }
 
         public static void Info(string message, ConsoleColor color = ConsoleColor.Cyan)
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Info.ToString(), message));
-            Logger.Raw($"[{Plugin.Instance.Name}] {message}", color);
+            Logger.Raw($"[INFO] [{Plugin.Instance.Name}] {message}", color);
         }
 
         public static void Warn(string message, string error = "CS0000")

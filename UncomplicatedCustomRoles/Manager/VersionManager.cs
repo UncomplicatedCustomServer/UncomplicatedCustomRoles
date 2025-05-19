@@ -33,7 +33,7 @@ namespace UncomplicatedCustomRoles.Manager
 
             if (data.Item1 is not HttpStatusCode.OK || data.Item2 is null)
             {
-                LogManager.Warn($"Failed to gain the current version info from our central servers: API endpoint says {data.Item1}");
+                LogManager.Warn($"Failed to gain the current version ({Plugin.Instance.Version.ToString(4)}) info from our central servers: API endpoint says {data.Item1}");
                 return;
             }
 
@@ -60,7 +60,7 @@ namespace UncomplicatedCustomRoles.Manager
             }
 
             // Check integrity
-            string hash = HashFile(Plugin.Instance.Assembly.GetPath());
+            string hash = HashFile(Plugin.Instance.FilePath);
             if (hash != VersionInfo.Hash)
             {
                 HashNotMatchMessageSender(hash);
