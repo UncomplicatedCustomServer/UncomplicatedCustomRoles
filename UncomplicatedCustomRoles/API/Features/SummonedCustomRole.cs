@@ -158,6 +158,9 @@ namespace UncomplicatedCustomRoles.API.Features
 
             EventHandler = new(this);
             List.Add(this);
+
+            if (Role is EventCustomRole eventCustomRole)
+                eventCustomRole.OnSpawned(this);
         }
 
         /// <summary>

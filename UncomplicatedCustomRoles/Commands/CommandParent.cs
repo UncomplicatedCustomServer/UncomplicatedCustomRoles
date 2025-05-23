@@ -1,12 +1,4 @@
-﻿using CommandSystem;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using UncomplicatedCustomRoles.API.Interfaces;
-using UncomplicatedCustomRoles.Manager;
-using UncomplicatedCustomRoles.Extensions;
-
-/*
+﻿/*
  * This file is a part of the UncomplicatedCustomRoles project.
  * 
  * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
@@ -15,6 +7,14 @@ using UncomplicatedCustomRoles.Extensions;
  * You should have received a copy of the AGPL license along with this file.
  * If not, see <https://www.gnu.org/licenses/>.
  */
+
+using CommandSystem;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.Manager;
+using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.Commands
 {
