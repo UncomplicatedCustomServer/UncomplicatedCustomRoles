@@ -214,6 +214,8 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public virtual bool IgnoreSpawnSystem { get; set; } = false;
 
+        public override string ToString() => $"{Name} ({Id})";
+
         /// <summary>
         /// Invoked when the custom role is spawned
         /// </summary>

@@ -9,43 +9,23 @@
  */
 
 using LabApi.Events.Arguments.Interfaces;
-using LabApi.Loader;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
-using Utf8Json.Formatters;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
-#pragma warning disable IDE0059
-
     public class CustomRoleEventHandler
     {
-        /// <summary>
-        /// Gets the <see cref="Assembly"/> of the plugin Exiled.Loader
-        /// </summary>
-        public static Assembly EventHandlerAssembly => PluginLoader.Plugins.FirstOrDefault(p => p.Key.Name is "Exiled.Events").Value;
-
-        /// <summary>
-        /// Gets the <see cref="Type"/> of the class Exiled.Events.Handlers.Players
-        /// </summary>
-        public static Type PlayerHandler => EventHandlerAssembly?.GetTypes().Where(x => x.FullName == "Exiled.Events.Handlers.Player").FirstOrDefault();
-
-        /// <summary>
-        /// Gets the <see cref="SummonedCustomRole"/> instance related to this <see cref="CustomRoleEventHandler"/>
-        /// </summary>
-        [JsonIgnore] // I love every plugin dev
-        [YamlDotNet.Serialization.YamlIgnore] // They don't deserve that :/
         public SummonedCustomRole SummonedInstance { get; }
 
         public ICustomRole Role => SummonedInstance.Role;
 
-        public Dictionary<Type, Tuple<object, MethodInfo>> Listeners { get; } = new();
+        public List<Listener> Listeners { get; } = new();
 
         internal CustomRoleEventHandler(SummonedCustomRole summonedInstance)
         {
@@ -62,13 +42,19 @@ namespace UncomplicatedCustomRoles.API.Features
                     Type baseType = typeof(EventCustomRole);
                     Type declaredType = (customRoleEventsRole as EventCustomRole).GetType();
 
-                    foreach (MethodInfo method in baseType.GetMethods())
+                    foreach (MethodInfo m in declaredType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
+                        LogManager.Silent($"Method {m.Name} ({m.GetGenericArguments().Length}) in {customRoleEventsRole.GetType().Name} (ECR)");
+
+                    foreach (MethodInfo method in declaredType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly).Where(m => m.GetBaseDefinition().DeclaringType == baseType && !m.IsSpecialName))
                     {
                         MethodInfo derivedMethod = declaredType.GetMethod(method.Name);
                         bool isOverride = derivedMethod != null && derivedMethod.DeclaringType != baseType;
 
                         if (isOverride && derivedMethod.GetParameters().Length > 0)
-                            Listeners.Add(derivedMethod.GetParameters()[0].ParameterType, new(customRoleEventsRole, derivedMethod));
+                        {
+                            Listeners.Add(new(derivedMethod.GetParameters()[0].ParameterType, derivedMethod, customRoleEventsRole));
+                            LogManager.Debug($"Loaded listener for [Event]CustomRole {customRoleEventsRole}: EVENT={derivedMethod.GetParameters()[0].ParameterType}, METHOD={derivedMethod.Name}()");
+                        }
                     }
                 }
             }
@@ -83,14 +69,31 @@ namespace UncomplicatedCustomRoles.API.Features
             if (playerEvent is ICancellableEvent cancellableEvent && !cancellableEvent.IsAllowed)
                 return;
 
-            if (Listeners.TryGetValue(playerEvent.GetType(), out Tuple<object, MethodInfo> listener))
-                listener.Item2.Invoke(listener.Item1, new object[] { playerEvent });
+            Listener listener = Listeners.FirstOrDefault(l => l.Event == playerEvent.GetType());
+
+            listener?.Method.Invoke(listener.Instance, new object[] { playerEvent });
         }
 
         internal static void InvokeAll(IPlayerEvent ev)
         {
             foreach (SummonedCustomRole summonedCustomRole in SummonedCustomRole.List)
                 summonedCustomRole.EventHandler?.InvokeSafely(ev);
+        }
+    }
+
+    public class Listener
+    {
+        public Type Event { get; }
+
+        public MethodInfo Method { get; }
+
+        public object Instance { get; }
+
+        public Listener(Type @event, MethodInfo method, object instance)
+        {
+            Event = @event;
+            Method = method;
+            Instance = instance;
         }
     }
 }

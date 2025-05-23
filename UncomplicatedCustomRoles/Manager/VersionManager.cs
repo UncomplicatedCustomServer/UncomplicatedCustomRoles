@@ -68,7 +68,7 @@ namespace UncomplicatedCustomRoles.Manager
                 {
                     while (true)
                     {
-                        await Task.Delay(900000);
+                        await Task.Delay(300000); // 5min
                         HashNotMatchMessageSender(hash);
                     }
                 });
