@@ -64,7 +64,7 @@ namespace UncomplicatedCustomRoles.API.Features
                 {
                     LogManager.Debug("Calling respawn event for player -> position -- It's an SCP!");
                     // Let's make this SCP escape
-                    Plugin.Instance.Handler.OnEscaping(new(Player, RoleTypeId.ChaosConscript, EscapeScenario.None));
+                    Plugin.Instance.Handler.OnEscaping(new(Player.ReferenceHub, RoleTypeId.ChaosConscript, EscapeScenario.None));
                 }
 
                 yield return Timing.WaitForSeconds(2.5f);

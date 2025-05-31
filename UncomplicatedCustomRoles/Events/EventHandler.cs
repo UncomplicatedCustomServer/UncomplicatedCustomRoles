@@ -26,7 +26,6 @@ using Exiled.Events.EventArgs.Warhead;
 using PlayerRoles.Ragdolls;
 using Exiled.Events.EventArgs.Scp096;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
-using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -247,7 +246,7 @@ namespace UncomplicatedCustomRoles.Events
                         return;
                     }
 
-                    if (attackerCustomRole?.HasModule<PacifismUntilDamage>() ?? false)
+                    if (playerCustomRole?.HasModule<PacifismUntilDamage>() ?? false)
                         Hurting.IsAllowed = false;
                 }
             }
