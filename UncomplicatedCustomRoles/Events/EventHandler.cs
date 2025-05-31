@@ -243,7 +243,7 @@ namespace UncomplicatedCustomRoles.Events
                         return;
                     }
 
-                    if (attackerCustomRole?.HasModule<PacifismUntilDamage>() ?? false)
+                    if (playerCustomRole?.HasModule<PacifismUntilDamage>() ?? false)
                         Hurting.IsAllowed = false;
                 }
             }
