@@ -26,37 +26,37 @@ namespace UncomplicatedCustomRoles.Integrations
         /// <summary>
         /// Gets the <see cref="System.Reflection.Assembly"/> of ScriptedEvents
         /// </summary>
-        internal static Assembly Assembly => PluginLoader.Plugins.FirstOrDefault(p => p.Key.Name is "ScriptedEvents").Value;
+        internal static Assembly Assembly = PluginLoader.Plugins.FirstOrDefault(p => p.Key.Name is "ScriptedEvents").Value;
 
         /// <summary>
         /// Gets the <see cref="Type"/> of the API class
         /// </summary>
-        internal static Type Class => Assembly?.GetType("ScriptedEvents.API.Features.ApiHelper");
+        internal static Type Class = Assembly?.GetType("ScriptedEvents.API.Features.ApiHelper");
 
         /// <summary>
         /// Gets the main class of Scripted Events
         /// </summary>
-        internal static object MainClass => Assembly?.GetType("ScriptedEvents.MainPlugin")?.GetProperty("Singleton").GetValue(null, null);
+        internal static object MainClass = Assembly?.GetType("ScriptedEvents.MainPlugin")?.GetProperty("Singleton").GetValue(null, null);
 
         /// <summary>
         /// Gets the current version of ScriptedEvents
         /// </summary>
-        internal static Version Version => (Version)(Assembly?.GetType("ScriptedEvents.MainPlugin")?.GetProperty("Version")?.GetValue(MainClass, null) ?? new Version(0, 0, 0));
+        internal static Version Version = (Version)(Assembly?.GetType("ScriptedEvents.MainPlugin")?.GetProperty("Version")?.GetValue(MainClass, null) ?? new Version(0, 0, 0));
 
         /// <summary>
         /// Gets the RegisterCustomAction method
         /// </summary>
-        internal static MethodInfo AddMethod => Class?.GetMethod("RegisterCustomAction");
+        internal static MethodInfo AddMethod = Class?.GetMethod("RegisterCustomAction");
 
         /// <summary>
         /// Gets the UnregisterCustomAction method
         /// </summary>
-        internal static MethodInfo RemoveMethod => Class?.GetMethod("UnregisterCustomAction");
+        internal static MethodInfo RemoveMethod = Class?.GetMethod("UnregisterCustomAction");
 
         /// <summary>
         /// Gets the GetPlayers method
         /// </summary>
-        internal static MethodInfo GetPlayerMethod => Class?.GetMethod("GetPlayers");
+        internal static MethodInfo GetPlayerMethod = Class?.GetMethod("GetPlayers");
 
         /// <summary>
         /// Gets whether the integration can be invoked

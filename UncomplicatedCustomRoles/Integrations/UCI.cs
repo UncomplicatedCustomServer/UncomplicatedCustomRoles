@@ -19,13 +19,19 @@ namespace UncomplicatedCustomRoles.Integrations
 {
     internal class UCI
     {
-        public static Assembly Assembly => PluginLoader.Plugins.FirstOrDefault(p => p.Key.Name is "UncomplicatedCustomItems").Value;
+        public static Assembly Assembly = PluginLoader.Plugins.FirstOrDefault(p => p.Key.Name is "UncomplicatedCustomItems").Value;
 
-        public static Type Utilities => Assembly?.GetType("UncomplicatedCustomItems.API.Utilities");
+        public static Type Utilities = Assembly?.GetType("UncomplicatedCustomItems.API.Utilities");
 
-        public static Type SummonedCustomItem => Assembly?.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem");
+        public static Type SummonedCustomItem = Assembly?.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem");
 
-        public static bool Available => Utilities is not null && SummonedCustomItem is not null;
+        public static Type ICustomItem = Assembly?.GetType("UncomplicatedCustomItems.Interfaces.ICustomItem");
+
+        public static MethodInfo HasCustomItemMethod = Utilities?.GetMethod("IsCustomItem", BindingFlags.Public | BindingFlags.Static);
+
+        public static MethodInfo GetCustomItemMethod = Utilities?.GetMethod("GetCustomItem", BindingFlags.Public | BindingFlags.Static);
+
+        public static bool Available => HasCustomItemMethod is not null && GetCustomItemMethod is not null;
 
         public static bool HasCustomItem(uint id, out object customItem)
         {
@@ -38,16 +44,12 @@ namespace UncomplicatedCustomRoles.Integrations
 
             try
             {
-                MethodInfo hasCustomItem = Utilities.GetMethod("IsCustomItem", BindingFlags.Public | BindingFlags.Static);
-                MethodInfo getCustomItem = Utilities.GetMethod("GetCustomItem", BindingFlags.Public | BindingFlags.Static);
+                if ((bool)HasCustomItemMethod.Invoke(null, new object[] { id }))
+                {
+                    customItem = GetCustomItemMethod.Invoke(null, new object[] { id });
 
-                if (hasCustomItem is not null && getCustomItem is not null)
-                    if ((bool)hasCustomItem.Invoke(null, new object[] { id }))
-                    {
-                        customItem = getCustomItem.Invoke(null, new object[] { id });
-
-                        return customItem is not null;
-                    }
+                    return customItem is not null;
+                }
 
                 return false;
             }
@@ -68,7 +70,7 @@ namespace UncomplicatedCustomRoles.Integrations
             try
             {
                 if (HasCustomItem(id, out object customItem) && customItem is not null)
-                    SummonedCustomItem.GetConstructor(new Type[] { Assembly.GetType("UncomplicatedCustomItems.Interfaces.ICustomItem"), typeof(Player) }).Invoke(new object[] { customItem, player });
+                    SummonedCustomItem.GetConstructor(new Type[] { ICustomItem, typeof(Player) }).Invoke(new object[] { customItem, player });
             }
             catch (Exception e)
             {

@@ -8,7 +8,6 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using GameCore;
 using InventorySystem.Configs;
 using LabApi.Features.Wrappers;
 using MEC;

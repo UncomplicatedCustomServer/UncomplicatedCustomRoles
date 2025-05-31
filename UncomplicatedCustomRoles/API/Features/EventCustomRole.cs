@@ -13,7 +13,6 @@ using LabApi.Events.Arguments.ServerEvents;
 using PlayerRoles;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
@@ -518,18 +517,6 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         /// <param name="ev">The <see cref="ReloadingWeaponEventArgs"/> instance.</param>
         public virtual void OnReloadingWeapon(PlayerReloadingWeaponEventArgs ev) { }
-
-        /// <summary>
-        /// Called before spawning a <see cref="API.Features.Player"/>.
-        /// </summary>
-        /// <param name="ev">The <see cref="SpawningEventArgs"/> instance.</param>
-        public virtual void OnSpawning(PlayerSpawningEventArgs ev) { }
-
-        /// <summary>
-        /// Called after a <see cref="API.Features.Player"/> has spawned.
-        /// </summary>
-        /// <param name="ev">The <see cref="SpawnedEventArgs"/> instance.</param>
-        public virtual void OnSpawned(PlayerSpawnedEventArgs ev) { }
 
         /// <summary>
         /// Called after a <see cref="API.Features.Player"/> held item changes.

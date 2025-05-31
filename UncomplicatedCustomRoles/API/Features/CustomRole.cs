@@ -9,7 +9,6 @@
  */
 
 using PlayerRoles;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.API.Enums;

@@ -41,10 +41,7 @@ namespace UncomplicatedCustomRoles.API.Features
                     Type baseType = typeof(EventCustomRole);
                     Type declaredType = (customRoleEventsRole as EventCustomRole).GetType();
 
-                    foreach (MethodInfo m in declaredType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
-                        LogManager.Silent($"Method {m.Name} ({m.GetGenericArguments().Length}) in {customRoleEventsRole.GetType().Name} (ECR)");
-
-                    foreach (MethodInfo method in declaredType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly).Where(m => m.GetBaseDefinition().DeclaringType == baseType && !m.IsSpecialName))
+                    foreach (MethodInfo method in declaredType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly).Where(m => m.GetBaseDefinition().DeclaringType == baseType && !m.IsSpecialName && m.Name is not "OnSpawned"))
                     {
                         MethodInfo derivedMethod = declaredType.GetMethod(method.Name);
                         bool isOverride = derivedMethod != null && derivedMethod.DeclaringType != baseType;
