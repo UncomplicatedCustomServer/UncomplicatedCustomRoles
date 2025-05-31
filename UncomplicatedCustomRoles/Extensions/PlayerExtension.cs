@@ -225,7 +225,7 @@ namespace UncomplicatedCustomRoles.Extensions
         // REF https://gitlab.com/exmod-team/EXILED/-/blob/master/EXILED/Exiled.API/Features/Player.cs?ref_type=heads#L2558
         internal static void SetCategoryLimit(this Player player, ItemCategory category, sbyte limit)
         {
-            int index = InventorySystem.Configs.InventoryLimits.StandardCategoryLimits.Where(x => x.Value >= 0).OrderBy(x => x.Key).ToList().FindIndex(x => x.Key == category);
+            int index = InventoryLimits.StandardCategoryLimits.Where(x => x.Value >= 0).OrderBy(x => x.Key).ToList().FindIndex(x => x.Key == category);
 
             if (index is -1)
                 return;
@@ -260,6 +260,9 @@ namespace UncomplicatedCustomRoles.Extensions
 
         internal static void ResetInventory(this Player player, IEnumerable<ItemType> items)
         {
+            if (items is null)
+                return;
+
             player.ClearInventory();
             foreach (ItemType item in items)
                 player.AddItem(item);
