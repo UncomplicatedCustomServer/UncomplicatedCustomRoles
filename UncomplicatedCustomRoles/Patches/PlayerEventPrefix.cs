@@ -9,11 +9,8 @@
  */
 
 using HarmonyLib;
-using LabApi.Events;
 using LabApi.Events.Arguments.Interfaces;
-using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
-using LabApi.Features.Console;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,9 +19,6 @@ using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
-using static PlayerArms;
-
-// REVIEW (CAN BE VERY WRONG!!!)
 
 namespace UncomplicatedCustomRoles.Patches
 {
@@ -40,7 +34,7 @@ namespace UncomplicatedCustomRoles.Patches
 
                 if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole))
                 {
-                    string name = ev.GetType().Name.Replace("EventArgs", string.Empty);
+                    string name = ev.GetType().Name.Replace("EventArgs", string.Empty).Replace("Player", string.Empty);
 
                     foreach (CustomModule module in customRole.CustomModules)
                         if (module.TriggerOnEvents.Contains(name))

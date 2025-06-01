@@ -57,6 +57,12 @@ namespace UncomplicatedCustomRoles.Manager
                     if (FileName.StartsWith("."))
                         return;
 
+                    if (FileName.EndsWith(".dll"))
+                    {
+                        PluginImportManager.Load(FileName);
+                        return;
+                    }
+
                     CompatibilityManager.ParseAndLoadCustomRole(FileName);
                 }
                 catch (Exception ex)

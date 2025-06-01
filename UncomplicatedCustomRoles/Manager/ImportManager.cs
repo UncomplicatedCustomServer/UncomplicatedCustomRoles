@@ -39,9 +39,15 @@ namespace UncomplicatedCustomRoles.Manager
             if (_alreadyLoaded)
                 return;
 
-            ActivePlugins.Clear();
             // Call a delayed task
             Task.Run(Actor);
+        }
+
+        public static void Unload()
+        {
+            ActivePlugins.Clear();
+            AvailableAssemblies.Clear();
+            AvailableAssemblies.Add(Plugin.Instance.Assembly);
         }
 
         private static void Actor()

@@ -102,6 +102,8 @@ namespace UncomplicatedCustomRoles
                 VersionManager.Init();
             });
 
+            ImportManager.Unload();
+
             FileConfigs.Welcome();
             FileConfigs.Welcome(Server.Port.ToString());
             FileConfigs.LoadAll();

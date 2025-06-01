@@ -136,6 +136,7 @@
     <Compile Include="Manager\NET\SpawnPointApiCommunicator.cs" />
     <Compile Include="Manager\NET\VersionInfo.cs" />
     <Compile Include="Manager\PlaceholderManager.cs" />
+    <Compile Include="Manager\PluginImportManager.cs" />
     <Compile Include="Manager\SpawnManager.cs" />
     <Compile Include="Manager\VersionManager.cs" />
     <Compile Include="Manager\YamlFlagsHandler.cs" />
@@ -159,47 +160,33 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>$(EXILED_REFERENCES)\0Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-firstpass.dll</HintPath>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\..\..\..\Desktop\EXILED_REF\References141\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-Publicized">
-      <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-Publicized.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\EXILED_REF\References141\Assembly-CSharp-Publicized.dll</HintPath>
     </Reference>
     <Reference Include="CommandSystem.Core">
-      <HintPath>$(EXILED_REFERENCES)\CommandSystem.Core.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\EXILED_REF\References141\CommandSystem.Core.dll</HintPath>
     </Reference>
-    <Reference Include="DnsClient, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\DnsClient.dll</HintPath>
+    <Reference Include="Mirror-Publicized">
+      <HintPath>..\..\..\..\Desktop\EXILED_REF\References141\Mirror-Publicized.dll</HintPath>
     </Reference>
-    <Reference Include="Mirror">
-      <HintPath>$(EXILED_REFERENCES)\Mirror.dll</HintPath>
-    </Reference>
-    <Reference Include="Mirror.Components, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\Mirror.Components.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\Mono.Security.dll</HintPath>
-    </Reference>
-    <Reference Include="Pooling, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\Pooling.dll</HintPath>
+    <Reference Include="Pooling">
+      <HintPath>..\..\..\..\Desktop\EXILED_REF\References141\Pooling.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\EXILED_REF\References141\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\EXILED_REF\References141\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Lib.Harmony">
+      <Version>2.2.2</Version>
+    </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.3</Version>
     </PackageReference>
@@ -221,9 +208,6 @@
     <PackageReference Include="System.Security.Cryptography.X509Certificates">
       <Version>4.3.2</Version>
     </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="$(EXILED_REFERENCES)\0Harmony.dll" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
