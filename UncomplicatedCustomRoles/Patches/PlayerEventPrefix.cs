@@ -31,7 +31,7 @@ namespace UncomplicatedCustomRoles.Patches
             try
             {
                 CustomRoleEventHandler.InvokeAll(ev);
-
+                if (ev.Player == null || ev.Player.IsHost) return; 
                 if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole))
                 {
                     string name = ev.GetType().Name.Replace("EventArgs", string.Empty).Replace("Player", string.Empty);
