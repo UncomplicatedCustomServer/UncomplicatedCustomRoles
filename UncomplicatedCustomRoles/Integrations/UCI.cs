@@ -68,7 +68,7 @@ namespace UncomplicatedCustomRoles.Integrations
             try
             {
                 if (HasCustomItem(id, out object customItem) && customItem is not null)
-                    SummonedCustomItem.GetConstructor(new Type[] { Assembly.GetType("UncomplicatedCustomItems.Interfaces.ICustomItem"), typeof(Player) }).Invoke(new object[] { customItem, player });
+                    SummonedCustomItem.GetConstructor(new Type[] { Assembly.GetType("UncomplicatedCustomItems.API.Interfaces.ICustomItem"), typeof(Player) }).Invoke(new object[] { customItem, player });
             }
             catch (Exception e)
             {
