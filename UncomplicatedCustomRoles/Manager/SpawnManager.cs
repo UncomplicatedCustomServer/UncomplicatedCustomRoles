@@ -413,7 +413,7 @@ namespace UncomplicatedCustomRoles.Manager
             };
 
             foreach (ICustomRole Role in CustomRole.CustomRoles.Values.Where(cr => cr.SpawnSettings is not null))
-                if (!Role.IgnoreSpawnSystem && Player.List.Count(pl => !pl.IsHost) >= Role.SpawnSettings.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
+                if (!Role.IgnoreSpawnSystem && Player.ReadyList.Count(pl => !pl.IsHost) >= Role.SpawnSettings.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
                 {
                     if (Role.SpawnSettings.RequiredPermission is not null && Role.SpawnSettings.RequiredPermission.Length > 0 && !(player as ICommandSender).CheckPermission(Role.SpawnSettings.RequiredPermission))
                     {
@@ -464,7 +464,7 @@ namespace UncomplicatedCustomRoles.Manager
         private static IEnumerable<Player> LoadAppearanceAffectedPlayers(Player target)
         {
             List<Player> result = new();
-            foreach (Player player in Player.List.Where(p => p.PlayerId != target.PlayerId))
+            foreach (Player player in Player.ReadyList.Where(p => p.PlayerId != target.PlayerId))
                 if (player.TryGetSummonedInstance(out SummonedCustomRole role) && !role.HasModule<NotAffectedByAppearance>())
                     result.Add(player);
                 else if (!player.TryGetSummonedInstance(out _))

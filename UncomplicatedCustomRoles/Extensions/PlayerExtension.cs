@@ -217,7 +217,7 @@ namespace UncomplicatedCustomRoles.Extensions
             player.ReferenceHub.transform.localScale = scale;
 
             if (sendSpawnMessage is not null)
-                foreach (Player target in Player.List)
+                foreach (Player target in Player.ReadyList)
                     sendSpawnMessage.Invoke(null, new object[] { player.ReferenceHub.netIdentity, target.Connection });
         }
 

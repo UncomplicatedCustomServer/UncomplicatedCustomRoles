@@ -60,7 +60,7 @@ namespace UncomplicatedCustomRoles.API.Features
                 SummonedCustomRole.InfiniteEffectActor();
 
                 // Really funny we have also to check for SCPs near the escaping point
-                foreach (Player player in Player.List.Where(player => player.IsSCP && Vector3.Distance(new(123.85f, 988.8f, 18.9f), player.Position) < 7.5f))
+                foreach (Player player in Player.ReadyList.Where(player => player.IsSCP && Vector3.Distance(new(123.85f, 988.8f, 18.9f), player.Position) < 7.5f))
                 {
                     LogManager.Debug("Calling respawn event for player -> position -- It's an SCP!");
                     

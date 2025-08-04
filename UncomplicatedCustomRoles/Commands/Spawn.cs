@@ -49,11 +49,11 @@ namespace UncomplicatedCustomRoles.Commands
             if (arguments[0].Contains(","))
                 players = arguments[0].Replace(" ", string.Empty).Split(',').Select(p => new Tuple<string, Player>(p, Player.Get(int.Parse(p))));
             else if (arguments[0] is "all")
-                players = Player.List.Select(p => new Tuple<string, Player>(null, p));
+                players = Player.ReadyList.Select(p => new Tuple<string, Player>(null, p));
             else if (arguments[0] is "spectators" or "spect")
-                players = Player.List.Where(p => p.Role is RoleTypeId.Spectator or RoleTypeId.None).Select(p => new Tuple<string, Player>(null, p));
+                players = Player.ReadyList.Where(p => p.Role is RoleTypeId.Spectator or RoleTypeId.None).Select(p => new Tuple<string, Player>(null, p));
             else if (arguments[0] is "alive" or "al")
-                players = Player.List.Where(p => p.Role is not RoleTypeId.Spectator or RoleTypeId.None).Select(p => new Tuple<string, Player>(null, p));
+                players = Player.ReadyList.Where(p => p.Role is not RoleTypeId.Spectator or RoleTypeId.None).Select(p => new Tuple<string, Player>(null, p));
             else
                 players = new[] { new Tuple<string, Player>(arguments[0], Player.Get(int.Parse(arguments[0]))) };
 
