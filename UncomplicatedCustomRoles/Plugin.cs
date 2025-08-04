@@ -17,7 +17,6 @@ using Scp049Handler = LabApi.Events.Handlers.Scp049Events;
 using Scp096Handler = LabApi.Events.Handlers.Scp096Events;
 using ServerHandler = LabApi.Events.Handlers.ServerEvents;
 using WarheadHandler = LabApi.Events.Handlers.WarheadEvents;
-// MISSING using Scp330Handler = Exiled.Events.Handlers.Scp330;
 using UncomplicatedCustomRoles.API.Features;
 using HarmonyLib;
 using UncomplicatedCustomRoles.Manager.NET;
