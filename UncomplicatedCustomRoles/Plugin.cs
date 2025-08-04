@@ -38,9 +38,9 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(8, 0, 0, 2);
+        public override Version Version { get; } = new(8, 0, 0, 3);
 
-        public override Version RequiredApiVersion => new(1, 0, 2);
+        public override Version RequiredApiVersion => new(1, 1, 1);
 
         public override LoadPriority Priority => LoadPriority.Highest;
 
@@ -85,6 +85,7 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Hurt += Handler.OnHurt;
             PlayerHandler.PickingUpItem += Handler.OnPickingUp;
             PlayerHandler.Joined += Handler.OnVerified;
+            PlayerHandler.RequestedRaPlayerInfo += Handler.OnRequestedRaPlayerInfo;
 
             Scp049Handler.ResurrectingBody += Handler.OnFinishingRecall;
 
@@ -117,8 +118,6 @@ namespace UncomplicatedCustomRoles
             _harmony.PatchAll();
 
             PlayerEventPrefix.Patch(_harmony);
-
-            PlayerInfoPatch.TryPatchCedMod();
         }
 
         public override void Disable()
@@ -146,6 +145,7 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Hurt -= Handler.OnHurt;
             PlayerHandler.PickingUpItem -= Handler.OnPickingUp;
             PlayerHandler.Joined -= Handler.OnVerified;
+            PlayerHandler.RequestedRaPlayerInfo -= Handler.OnRequestedRaPlayerInfo;
 
             Scp049Handler.ResurrectingBody -= Handler.OnFinishingRecall;
 
@@ -178,14 +178,6 @@ namespace UncomplicatedCustomRoles
                 LogManager.Info($"Thanks for using UncomplicatedCustomRoles v{Version.ToString(3)} by {Author}!", ConsoleColor.Blue);
                 LogManager.Info("To receive support and to stay up-to-date, join our official Discord server: https://discord.gg/5StRGu8EJV", ConsoleColor.DarkYellow);
             }
-        }
-
-        /// <summary>
-        /// Invoked before EXILED starts to unload every plugin
-        /// </summary>
-        public void OnStartingUnloadingPlugins()
-        {
-            ScriptedEvents.UnregisterCustomActions();
         }
     }
 }

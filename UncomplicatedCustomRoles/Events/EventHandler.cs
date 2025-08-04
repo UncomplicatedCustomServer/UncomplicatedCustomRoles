@@ -376,5 +376,10 @@ namespace UncomplicatedCustomRoles.Events
             yield return Timing.WaitForSeconds(0.1f);
             SpawnManager.SummonCustomSubclass(Player, Id, DoBypassRoleOverwrite);
         }
+
+        public void OnRequestedRaPlayerInfo(PlayerRequestedRaPlayerInfoEventArgs ev)
+        {
+            ev.InfoBuilder.Append(SummonedCustomRole.TryParseRemoteAdmin(ev.Target.ReferenceHub));
+        }
     }
 }

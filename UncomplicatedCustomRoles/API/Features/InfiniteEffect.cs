@@ -13,6 +13,7 @@ using MEC;
 using PlayerRoles;
 using System.Collections.Generic;
 using System.Linq;
+using LabApi.Events.Arguments.PlayerEvents;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 
@@ -62,8 +63,14 @@ namespace UncomplicatedCustomRoles.API.Features
                 foreach (Player player in Player.List.Where(player => player.IsSCP && Vector3.Distance(new(123.85f, 988.8f, 18.9f), player.Position) < 7.5f))
                 {
                     LogManager.Debug("Calling respawn event for player -> position -- It's an SCP!");
+                    
+                    // Get the zone
+                    var zone = global::Escape.EscapeZones.FirstOrDefault(escapeZone => escapeZone.Contains(player.Position));
+                    if (zone == default)
+                        continue;
+                    
                     // Let's make this SCP escape
-                    Plugin.Instance.Handler.OnEscaping(new(player.ReferenceHub, RoleTypeId.ChaosConscript, global::Escape.EscapeScenarioType.Custom));
+                    Plugin.Instance.Handler.OnEscaping(new PlayerEscapingEventArgs(player.ReferenceHub, RoleTypeId.CustomRole, RoleTypeId.CustomRole, global::Escape.EscapeScenarioType.Custom, zone));
                 }
 
                 yield return Timing.WaitForSeconds(2.5f);

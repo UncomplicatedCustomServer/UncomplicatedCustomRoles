@@ -293,7 +293,7 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             string output = "Badge: ";
 
-            if (Role.BadgeColor != string.Empty && Role.BadgeName != string.Empty)
+            if (!string.IsNullOrEmpty(Role.BadgeColor) && !string.IsNullOrEmpty(Role.BadgeName))
                 if (SpawnManager.colorMap.ContainsKey(Role.BadgeColor))
                     output += $"<color={SpawnManager.colorMap[Role.BadgeColor]}>{Role.BadgeName}</color>";
                 else
