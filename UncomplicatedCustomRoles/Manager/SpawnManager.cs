@@ -192,14 +192,7 @@ namespace UncomplicatedCustomRoles.Manager
                         Player.AddAmmo(Ammo.Key, Ammo.Value);
                     }
 
-                Player.ReferenceHub.nicknameSync.Network_playerInfoToShow |= PlayerInfoArea.Nickname;
-
                 PlayerInfoArea InfoArea = Player.ReferenceHub.nicknameSync.Network_playerInfoToShow;
-
-                if (Role.OverrideRoleName)
-                    Player.ApplyCustomInfoAndRoleName(Role);
-                else
-                    Player.ApplyClearCustomInfo(PlaceholderManager.ApplyPlaceholders(Role.CustomInfo, Player, Role));
 
                 // Apply every required stats
                 Role.Health?.Apply(Player);
@@ -260,7 +253,7 @@ namespace UncomplicatedCustomRoles.Manager
                     else
                         Player.DisplayName = Nick;
 
-                    if (Plugin.Instance.Config.OverrideRpNames) 
+                    if (Plugin.Instance.Config.OverrideRpNames)
                         Timing.CallDelayed(3f, () => // Override RPNames shit (sowwy andrew)
                         {
                             if (Role.Nickname.Contains(","))
@@ -271,6 +264,11 @@ namespace UncomplicatedCustomRoles.Manager
 
                     ChangedNick = true;
                 }
+                
+                if (Role.OverrideRoleName)
+                    Player.ApplyCustomInfoAndRoleName(Role);
+                else
+                    Player.ApplyClearCustomInfo(PlaceholderManager.ApplyPlaceholders(Role.CustomInfo, Player, Role), Role.Nickname);
 
                 // We need the role appereance also here!
                 if (Role.RoleAppearance != Role.Role)

@@ -8,25 +8,27 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using InventorySystem.Items.Usables.Scp330;
 using System.Collections.Generic;
-using InventorySystem.Items;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
-    public class FullCandyBag : CustomModule
+    public class ColorfulNickname : CustomModule
     {
         public override List<string> RequiredArgs => new()
         {
-            "candies"
+            "color"
         };
 
-        internal List<CandyKindID> Kinds => Args.TryGetValue("candies", out object kinds) ? kinds as List<CandyKindID> : new();
+        internal string Color => TryGetStringValue("color", string.Empty);
 
         public override void OnAdded()
         {
-            foreach (CandyKindID kind in Kinds)
-                CustomRole.Player.GiveCandy(kind, ItemAddReason.AdminCommand);
+            if (Color == string.Empty)
+                return;
+
+            string nick = CustomRole.Player.DisplayName.Replace("<color=#855439>*</color>", "");
+            string color = Color.StartsWith("#") ? Color : $"#{Color}";
+            CustomRole.Player.CustomInfo = CustomRole.Player.CustomInfo.Replace(nick, $"<color={color}>{nick}</color>");
         }
     }
 }

@@ -14,6 +14,7 @@ using MEC;
 using PlayerRoles;
 using UncomplicatedCustomRoles.Extensions;
 using System;
+using System.Linq;
 using UncomplicatedCustomRoles.API.Features;
 using CustomPlayerEffects;
 using UncomplicatedCustomRoles.API.Interfaces;
@@ -26,6 +27,7 @@ using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Features.Wrappers;
 using PlayerStatsSystem;
 using LabApi.Events.Arguments.Scp096Events;
+using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -46,6 +48,16 @@ namespace UncomplicatedCustomRoles.Events
             InfiniteEffect.Stop();
             InfiniteEffect.EffectAssociationAllowed = true;
             InfiniteEffect.Start();
+        }
+        
+        public static void OnJoined(PlayerJoinedEventArgs ev)
+        {
+            // Sync role appearance
+            foreach (SummonedCustomRole role in SummonedCustomRole.List.Where(role => role.Appearance != RoleTypeId.None))
+                role.Player.ChangeAppearance(role.Appearance, new Player[] { ev.Player });
+
+            foreach (SummonedCustomRole role in SummonedCustomRole.List.Where(role => role.Scale != Vector3.one))
+                role.Player.Scale = role.Scale;
         }
         
         public static void OnInteractingScp330(PlayerInteractingScp330EventArgs ev)
@@ -218,7 +230,8 @@ namespace UncomplicatedCustomRoles.Events
                         LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - FROM ATTACKER");
                         return;
                     }
-                    else if (attackerCustomRole?.HasModule<PacifismUntilDamage>() ?? false)
+
+                    if (attackerCustomRole?.HasModule<PacifismUntilDamage>() ?? false)
                         attackerCustomRole.RemoveModules<PacifismUntilDamage>();
 
                     if (Hurting.DamageHandler is StandardDamageHandler standardDamageHandler)

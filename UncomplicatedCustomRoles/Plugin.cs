@@ -82,6 +82,7 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Hurt += Handler.OnHurt;
             PlayerHandler.PickingUpItem += Handler.OnPickingUp;
             PlayerHandler.RequestedRaPlayerInfo += Handler.OnRequestedRaPlayerInfo;
+            PlayerHandler.Joined += Handler.OnJoined;
 
             Scp049Handler.ResurrectingBody += Handler.OnFinishingRecall;
 
@@ -143,6 +144,7 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Hurt -= Handler.OnHurt;
             PlayerHandler.PickingUpItem -= Handler.OnPickingUp;
             PlayerHandler.RequestedRaPlayerInfo -= Handler.OnRequestedRaPlayerInfo;
+            PlayerHandler.Joined -= Handler.OnJoined;
 
             Scp049Handler.ResurrectingBody -= Handler.OnFinishingRecall;
 

@@ -11,6 +11,7 @@
 using PlayerRoles;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.API.Interfaces;
@@ -236,7 +237,7 @@ namespace UncomplicatedCustomRoles.API.Features
         public virtual void OnSpawned(SummonedCustomRole role)
         { }
 
-        public override string ToString() => $"{Name} ({Id})";
+        public override string ToString() => $"{Regex.Replace(Name, "<color=.*?>(.*?)</color>", "$1")} ({Id})";
 
 #nullable disable
         /// <summary>
