@@ -21,7 +21,7 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
             "item_type"
         };
 
-        public ItemType? Type => Args.TryGetValue("item_type", out string itemType) && Enum.TryParse(itemType, out ItemType type) ? type : null;
+        public ItemType? Type => StringArgs.TryGetValue("item_type", out string itemType) && Enum.TryParse(itemType, out ItemType type) ? type : null;
 
         public static bool ValidatePickup(SummonedCustomRole role, Pickup pickup)
         {
