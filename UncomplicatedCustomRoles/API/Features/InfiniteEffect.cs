@@ -59,18 +59,12 @@ namespace UncomplicatedCustomRoles.API.Features
             {
                 SummonedCustomRole.InfiniteEffectActor();
 
-                // Really funny we have also to check for SCPs near the escaping point
-                foreach (Player player in Player.ReadyList.Where(player => player.IsSCP && Vector3.Distance(new(123.85f, 988.8f, 18.9f), player.Position) < 7.5f))
+                foreach (Bounds escapeZone in global::Escape.EscapeZones)
                 {
-                    LogManager.Debug("Calling respawn event for player -> position -- It's an SCP!");
-                    
-                    // Get the zone
-                    var zone = global::Escape.EscapeZones.FirstOrDefault(escapeZone => escapeZone.Contains(player.Position));
-                    if (zone == default)
-                        continue;
-                    
-                    // Let's make this SCP escape
-                    Plugin.Instance.Handler.OnEscaping(new PlayerEscapingEventArgs(player.ReferenceHub, RoleTypeId.CustomRole, RoleTypeId.CustomRole, global::Escape.EscapeScenarioType.Custom, zone));
+                    IEnumerable<SummonedCustomRole> escapingRoles = SummonedCustomRole.List.Where(role => role.Player.IsSCP && escapeZone.Contains(role.Player.Position) && role.Role.CanEscape);
+
+                    foreach (SummonedCustomRole role in escapingRoles)
+                        Plugin.Instance.Handler.OnEscaping(new(role.Player.ReferenceHub, role.Player.Role, RoleTypeId.ChaosConscript, global::Escape.EscapeScenarioType.Custom, escapeZone));
                 }
 
                 yield return Timing.WaitForSeconds(2.5f);

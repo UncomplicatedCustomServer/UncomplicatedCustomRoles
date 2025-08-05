@@ -19,7 +19,6 @@ using System.Linq;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Struct;
-using UncomplicatedCustomRoles.Commands;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
 
@@ -39,7 +38,7 @@ namespace UncomplicatedCustomRoles.API.Features
         public string Id { get; }
 
         /// <summary>
-        /// Gets the <see cref="Exiled.API.Features.Player"/>
+        /// Gets the <see cref="LabApi.Features.Wrappers.Player"/>
         /// </summary>
         public Player Player { get; }
 
@@ -223,7 +222,7 @@ namespace UncomplicatedCustomRoles.API.Features
                 Player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = string.Empty;
 
                 LogManager.Debug("Scale reset to 1, 1, 1");
-                Player.SetScale(new(1, 1, 1));
+                Player.Scale = new(1, 1, 1);
                  
                 // Reset ammo limit
                 if (Role.Ammo is Dictionary<ItemType, ushort> ammoList && ammoList.Count > 0)
@@ -407,7 +406,7 @@ namespace UncomplicatedCustomRoles.API.Features
         public static List<SummonedCustomRole> Get(ICustomRole role) => List.Where(scr => scr.Role == role).ToList();
 
         /// <summary>
-        /// Gets a <see cref="SummonedCustomRole"/> instance by the <see cref="Exiled.API.Features.Player"/>
+        /// Gets a <see cref="SummonedCustomRole"/> instance by the <see cref="LabApi.Features.Wrappers.Player"/>
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
@@ -428,7 +427,7 @@ namespace UncomplicatedCustomRoles.API.Features
         public static SummonedCustomRole Get(string id) => List.Where(scr => scr.Id == id).FirstOrDefault();
 
         /// <summary>
-        /// Try to get a <see cref="SummonedCustomRole"/> by the <see cref="Exiled.API.Features.Player"/>
+        /// Try to get a <see cref="SummonedCustomRole"/> by the <see cref="LabApi.Features.Wrappers.Player"/>
         /// </summary>
         /// <param name="player"></param>
         /// <param name="role"></param>

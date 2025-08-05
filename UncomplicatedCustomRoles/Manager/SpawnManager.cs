@@ -197,7 +197,7 @@ namespace UncomplicatedCustomRoles.Manager
                 PlayerInfoArea InfoArea = Player.ReferenceHub.nicknameSync.Network_playerInfoToShow;
 
                 if (Role.OverrideRoleName)
-                    Player.ApplyCustomInfoAndRoleName(PlaceholderManager.ApplyPlaceholders(Role.CustomInfo, Player, Role), Role.Name);
+                    Player.ApplyCustomInfoAndRoleName(Role);
                 else
                     Player.ApplyClearCustomInfo(PlaceholderManager.ApplyPlaceholders(Role.CustomInfo, Player, Role));
 
@@ -208,7 +208,7 @@ namespace UncomplicatedCustomRoles.Manager
                 Role.Stamina?.Apply(Player);
 
                 if (Role.Scale != Vector3.zero && Role.Scale != Vector3.one)
-                    Player.SetScale(Role.Scale);
+                    Player.Scale = Role.Scale;
 
                 List<IEffect> PermanentEffects = new();
                 if (Role.Effects.Count() > 0 && Role.Effects != null)

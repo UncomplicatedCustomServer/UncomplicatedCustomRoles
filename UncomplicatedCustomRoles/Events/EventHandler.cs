@@ -33,31 +33,21 @@ namespace UncomplicatedCustomRoles.Events
     {
         private static List<int> RagdollAppearanceQueue { get; } = new();
 
-        private static List<int> FirstRoundPlayers { get; } = new();
-
         private static Dictionary<int, Tuple<CustomScpAnnouncer, DateTimeOffset>> TerminationQueue { get; } = new();
-
-        private static bool Started { get; set; } = false;
 
         public void OnWaitingForPlayers()
         {
-            Started = false;
             Plugin.Instance.OnFinishedLoadingPlugins();
         }
 
         public void OnRoundStarted()
         {
-            Started = true;
-            FirstRoundPlayers.Clear();
-
             // Starts the infinite effect thing
             InfiniteEffect.Stop();
             InfiniteEffect.EffectAssociationAllowed = true;
             InfiniteEffect.Start();
         }
-
-        public void OnVerified(PlayerJoinedEventArgs ev) => FirstRoundPlayers.Add(ev.Player.PlayerId);
-
+        
         public void OnInteractingScp330(PlayerInteractingScp330EventArgs ev)
         {
             if (!ev.IsAllowed)
@@ -157,7 +147,6 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnRoundEnded(RoundEndedEventArgs _)
         {
-            Started = false;
             InfiniteEffect.Terminate();
             LogManager.MessageSent = false;
         }
@@ -188,19 +177,20 @@ namespace UncomplicatedCustomRoles.Events
             if (Plugin.Instance.Config.IgnoreNpcs && ev.Player.IsNpc)
                 return;
 
-            if (Started || !FirstRoundPlayers.Contains(ev.Player.PlayerId))
+            if (ev.ChangeReason != RoleChangeReason.LateJoin && ev.ChangeReason != RoleChangeReason.RoundStart)
             {
                 if (Plugin.Instance.Config.AllowOnlyNaturalSpawns && !Spawn.SpawnQueue.Contains(ev.Player.PlayerId))
                 {
                     LogManager.Debug("The player is not in the queue for respawning!");
                     return;
                 }
-                else if (Spawn.SpawnQueue.Contains(ev.Player.PlayerId))
+
+                if (Spawn.SpawnQueue.Contains(ev.Player.PlayerId))
                 {
                     Spawn.SpawnQueue.Remove(ev.Player.PlayerId);
                 }
             }
-
+            
             ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(ev.Player, ev.NewRole);
 
             if (Role is not null)

@@ -16,7 +16,6 @@ using PlayerRoles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
@@ -26,8 +25,6 @@ namespace UncomplicatedCustomRoles.Extensions
 {
     public static class PlayerExtension
     {
-        private static MethodInfo sendSpawnMessage;
-      
         /// <summary>
         /// Check if a <see cref="Player"/> is currently a <see cref="ICustomRole"/>.
         /// </summary>
@@ -166,37 +163,53 @@ namespace UncomplicatedCustomRoles.Extensions
         /// <param name="value"></param>
         public static void ApplyClearCustomInfo(this Player player, string value)
         {
-            player.ReferenceHub.nicknameSync.Network_playerInfoToShow = string.IsNullOrEmpty(value) ? player.ReferenceHub.nicknameSync.Network_playerInfoToShow & ~PlayerInfoArea.CustomInfo : player.ReferenceHub.nicknameSync.Network_playerInfoToShow |= PlayerInfoArea.CustomInfo;
-            player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = ProcessCustomInfo(value);
-        }
-
-        /// <summary>
-        /// Changes the CustomInfo of a <see cref="Player"/> overriding also the player Role
-        /// </summary>
-        /// <param name="player"></param>
-        /// <param name="customInfo"></param>
-        /// <param name="role"></param>
-        public static void ApplyCustomInfoAndRoleName(this Player player, string customInfo, string role)
-        {
-            player.ReferenceHub.nicknameSync.Network_playerInfoToShow |= PlayerInfoArea.CustomInfo;
-            player.ReferenceHub.nicknameSync.Network_playerInfoToShow &= ~PlayerInfoArea.Role; // Hide role
-            player.ReferenceHub.nicknameSync.Network_playerInfoToShow &= ~PlayerInfoArea.Nickname; // Hide nickname
-
-            if (role.Contains("</"))
-                LogManager.Error($"Failed to apply CustomInfo with Role name at PlayerExtension::ApplyCustomInfoAndRoleName(%Player, string, string): role name can't contains any end tag like </color>, </b>, </size> etc...!\nCustomInfo won't be applied to player {player.Nickname} ({player.PlayerId}) -- Found: {role}");
-
-            if (customInfo.StartsWith("<"))
-                LogManager.Error($"Failed to apply CustomInfo with Role name at PlayerExtension::ApplyCustomInfoAndRoleName(%Player, string, string): role custom_info can't contains any tag like </olor>, <b>, <size> etc...!\nCustomInfo won't be applied to player {player.Nickname} ({player.PlayerId}) -- Found: {customInfo}");
-
-            if (customInfo is null || customInfo.Length < 1)
+            if (!NicknameSync.ValidateCustomInfo(value, out string error))
             {
-                LogManager.Silent("Applying only role name (order: NICK-ROLE)");
-                player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = $"{player.DisplayName}\n{role}";
+                LogManager.Error($"Custom info is not valid: {error}");
+                value = string.Empty;
+            }
+            player.InfoArea = string.IsNullOrEmpty(value)
+                ? player.InfoArea & ~PlayerInfoArea.CustomInfo
+                : player.InfoArea | PlayerInfoArea.CustomInfo;
+            player.CustomInfo = ProcessCustomInfo(value);
+        }
+        
+        /// <summary>
+        /// Changes the CustomInfo of a <see cref="Player"/> and overrides the player Role
+        /// </summary>
+        public static void ApplyCustomInfoAndRoleName(this Player player, ICustomRole role)
+        {
+            player.InfoArea |= PlayerInfoArea.CustomInfo;
+            player.InfoArea &= ~PlayerInfoArea.Role;
+            player.InfoArea &= ~PlayerInfoArea.Nickname;
+        
+            string customInfo = PlaceholderManager.ApplyPlaceholders(role.CustomInfo, player, role);
+            string roleName = role.Name;
+            
+            if (!customInfo.Contains("<color=#") && roleName.Contains("<color=#"))
+            {
+                LogManager.Error("Role name color requires custom info color. Defaulting role name.");
+                player.InfoArea &= ~PlayerInfoArea.CustomInfo;
+                player.InfoArea |= PlayerInfoArea.Role | PlayerInfoArea.Nickname;
+                ApplyClearCustomInfo(player, customInfo);
+                return;
+            }
+        
+            if (!NicknameSync.ValidateCustomInfo(customInfo, out string error))
+            {
+                LogManager.Error($"Custom info is not valid: {error}");
+                customInfo = string.Empty;
+            }
+        
+            if (string.IsNullOrEmpty(customInfo))
+            {
+                LogManager.Silent("Applying only role name (NICK-ROLE)");
+                player.CustomInfo = $"{player.DisplayName}\n{roleName}";
             }
             else
             {
                 LogManager.Silent("Applying role name and custom info (CI-NICK-ROLE)");
-                player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = $"{ProcessCustomInfo(customInfo)}\n{player.DisplayName}\n{role}";
+                player.CustomInfo = $"{ProcessCustomInfo(customInfo)}\n{player.DisplayName}\n{role}";
             }
         }
 
@@ -206,20 +219,6 @@ namespace UncomplicatedCustomRoles.Extensions
         /// <param name="customInfo"></param>
         /// <returns></returns>
         private static string ProcessCustomInfo(string customInfo) => customInfo.Replace("[br]", "\n");
-
-        internal static void SetScale(this Player player, Vector3 scale)
-        {
-            sendSpawnMessage ??= typeof(NetworkServer).GetMethod("SendSpawnMessage", BindingFlags.NonPublic | BindingFlags.Static);
-
-            if (scale == player.ReferenceHub.transform.localScale)
-                return;
-
-            player.ReferenceHub.transform.localScale = scale;
-
-            if (sendSpawnMessage is not null)
-                foreach (Player target in Player.ReadyList)
-                    sendSpawnMessage.Invoke(null, new object[] { player.ReferenceHub.netIdentity, target.Connection });
-        }
 
         // REF https://gitlab.com/exmod-team/EXILED/-/blob/master/EXILED/Exiled.API/Features/Player.cs?ref_type=heads#L2558
         internal static void SetCategoryLimit(this Player player, ItemCategory category, sbyte limit)

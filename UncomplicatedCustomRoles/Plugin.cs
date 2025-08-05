@@ -15,6 +15,7 @@ using Handler = UncomplicatedCustomRoles.Events.EventHandler;
 using PlayerHandler = LabApi.Events.Handlers.PlayerEvents;
 using Scp049Handler = LabApi.Events.Handlers.Scp049Events;
 using Scp096Handler = LabApi.Events.Handlers.Scp096Events;
+using Scp079Handler  = LabApi.Events.Handlers.Scp079Events;
 using ServerHandler = LabApi.Events.Handlers.ServerEvents;
 using WarheadHandler = LabApi.Events.Handlers.WarheadEvents;
 using UncomplicatedCustomRoles.API.Features;
@@ -83,12 +84,13 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Hurting += Handler.OnHurting;
             PlayerHandler.Hurt += Handler.OnHurt;
             PlayerHandler.PickingUpItem += Handler.OnPickingUp;
-            PlayerHandler.Joined += Handler.OnVerified;
             PlayerHandler.RequestedRaPlayerInfo += Handler.OnRequestedRaPlayerInfo;
 
             Scp049Handler.ResurrectingBody += Handler.OnFinishingRecall;
 
             Scp096Handler.AddingTarget += Handler.OnAddingTarget;
+            
+            Scp079Handler.Recontaining += Handler.OnScp079Recontainment;
 
             PlayerHandler.InteractingScp330 += Handler.OnInteractingScp330;
 
@@ -143,13 +145,14 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Hurting -= Handler.OnHurting;
             PlayerHandler.Hurt -= Handler.OnHurt;
             PlayerHandler.PickingUpItem -= Handler.OnPickingUp;
-            PlayerHandler.Joined -= Handler.OnVerified;
             PlayerHandler.RequestedRaPlayerInfo -= Handler.OnRequestedRaPlayerInfo;
 
             Scp049Handler.ResurrectingBody -= Handler.OnFinishingRecall;
 
             Scp096Handler.AddingTarget -= Handler.OnAddingTarget;
 
+            Scp079Handler.Recontaining -= Handler.OnScp079Recontainment;
+            
             PlayerHandler.InteractingScp330 -= Handler.OnInteractingScp330;
 
             WarheadHandler.Starting -= Handler.OnWarheadLever;
