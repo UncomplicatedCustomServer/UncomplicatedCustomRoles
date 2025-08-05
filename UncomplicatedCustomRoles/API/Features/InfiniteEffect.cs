@@ -8,13 +8,11 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using LabApi.Features.Wrappers;
 using MEC;
 using PlayerRoles;
 using System.Collections.Generic;
 using System.Linq;
-using LabApi.Events.Arguments.PlayerEvents;
-using UncomplicatedCustomRoles.Manager;
+using UncomplicatedCustomRoles.Events;
 using UnityEngine;
 
 #nullable enable
@@ -64,7 +62,7 @@ namespace UncomplicatedCustomRoles.API.Features
                     IEnumerable<SummonedCustomRole> escapingRoles = SummonedCustomRole.List.Where(role => role.Player.IsSCP && escapeZone.Contains(role.Player.Position) && role.Role.CanEscape);
 
                     foreach (SummonedCustomRole role in escapingRoles)
-                        Plugin.Instance.Handler.OnEscaping(new(role.Player.ReferenceHub, role.Player.Role, RoleTypeId.ChaosConscript, global::Escape.EscapeScenarioType.Custom, escapeZone));
+                        EventHandler.OnEscaping(new(role.Player.ReferenceHub, role.Player.Role, RoleTypeId.ChaosConscript, global::Escape.EscapeScenarioType.Custom, escapeZone));
                 }
 
                 yield return Timing.WaitForSeconds(2.5f);

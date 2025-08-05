@@ -35,12 +35,12 @@ namespace UncomplicatedCustomRoles.Events
 
         private static Dictionary<int, Tuple<CustomScpAnnouncer, DateTimeOffset>> TerminationQueue { get; } = new();
 
-        public void OnWaitingForPlayers()
+        public static void OnWaitingForPlayers()
         {
             Plugin.Instance.OnFinishedLoadingPlugins();
         }
 
-        public void OnRoundStarted()
+        public static void OnRoundStarted()
         {
             // Starts the infinite effect thing
             InfiniteEffect.Stop();
@@ -48,7 +48,7 @@ namespace UncomplicatedCustomRoles.Events
             InfiniteEffect.Start();
         }
         
-        public void OnInteractingScp330(PlayerInteractingScp330EventArgs ev)
+        public static void OnInteractingScp330(PlayerInteractingScp330EventArgs ev)
         {
             if (!ev.IsAllowed)
                 return;
@@ -61,7 +61,7 @@ namespace UncomplicatedCustomRoles.Events
             }
         }
 
-        public void OnReceivingEffect(PlayerEffectUpdatingEventArgs ev)
+        public static void OnReceivingEffect(PlayerEffectUpdatingEventArgs ev)
         {
             if (ev.Player is null)
                 return;
@@ -79,7 +79,7 @@ namespace UncomplicatedCustomRoles.Events
                     ev.IsAllowed = false;
         }
 
-        public void OnFinishingRecall(Scp049ResurrectingBodyEventArgs ev)
+        public static void OnFinishingRecall(Scp049ResurrectingBodyEventArgs ev)
         {
             ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(ev.Target, RoleTypeId.Scp0492);
             LogManager.Silent($"{ev.Target} recalled by {ev.Player}, found {Role?.Id} {Role?.Name}");
@@ -91,25 +91,25 @@ namespace UncomplicatedCustomRoles.Events
             }
         }
 
-        public void OnGenerator(PlayerActivatingGeneratorEventArgs ev)
+        public static void OnGenerator(PlayerActivatingGeneratorEventArgs ev)
         {
             if (ev.Player.ReferenceHub.GetTeam() is Team.SCPs)
                 ev.IsAllowed = false;
         }
 
-        public void OnWarheadLever(WarheadStartingEventArgs ev)
+        public static void OnWarheadLever(WarheadStartingEventArgs ev)
         {
             if (ev.Player.ReferenceHub.GetTeam() is Team.SCPs)
                 ev.IsAllowed = false;
         }
 
-        public void OnScp079Recontainment(Scp079RecontainingEventArgs ev)
+        public static void OnScp079Recontainment(Scp079RecontainingEventArgs ev)
         {
             if (ev.Player.ReferenceHub.GetTeam() is Team.SCPs)
                 ev.IsAllowed = false;
         }
 
-        public void OnDying(PlayerDyingEventArgs ev)
+        public static void OnDying(PlayerDyingEventArgs ev)
         { 
             if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole))
             {
@@ -121,7 +121,7 @@ namespace UncomplicatedCustomRoles.Events
             }
         }
 
-        public void OnDied(PlayerDeathEventArgs ev)
+        public static void OnDied(PlayerDeathEventArgs ev)
         {
             if (TerminationQueue.TryGetValue(ev.Player.PlayerId, out Tuple<CustomScpAnnouncer, DateTimeOffset> data) && (DateTimeOffset.Now - data.Item2).Milliseconds < 1300)
                 SpawnManager.HandleRecontainmentAnnoucement(ev.DamageHandler, data.Item1);
@@ -131,7 +131,7 @@ namespace UncomplicatedCustomRoles.Events
             SpawnManager.ClearCustomTypes(ev.Player);
         }
 
-        public void OnRagdollSpawn(PlayerSpawningRagdollEventArgs ev)
+        public static void OnRagdollSpawn(PlayerSpawningRagdollEventArgs ev)
         {
             if (ev.Player is null) 
                 return;
@@ -145,13 +145,13 @@ namespace UncomplicatedCustomRoles.Events
             Ragdoll.SpawnRagdoll(ev.Player, ev.DamageHandler);
         }
 
-        public void OnRoundEnded(RoundEndedEventArgs _)
+        public static void OnRoundEnded(RoundEndedEventArgs _)
         {
             InfiniteEffect.Terminate();
             LogManager.MessageSent = false;
         }
 
-        public void OnChangingRole(PlayerChangingRoleEventArgs ev)
+        public static void OnChangingRole(PlayerChangingRoleEventArgs ev)
         {
             if (ev.Player is null)
                 return;
@@ -203,7 +203,7 @@ namespace UncomplicatedCustomRoles.Events
             LogManager.Debug($"No CustomRole found for player {ev.Player.Nickname}, allowing natural spawn with {ev.NewRole}");
         }
 
-        public void OnHurting(PlayerHurtingEventArgs Hurting)
+        public static void OnHurting(PlayerHurtingEventArgs Hurting)
         {
             if (!Hurting.IsAllowed)
                 return;
@@ -239,7 +239,7 @@ namespace UncomplicatedCustomRoles.Events
             }
         }
 
-        public void OnHurt(PlayerHurtEventArgs ev)
+        public static void OnHurt(PlayerHurtEventArgs ev)
         {
             if (ev.Player is not null && ev.Player.IsAlive && ev.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole))
                 playerCustomRole.LastDamageTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -248,7 +248,7 @@ namespace UncomplicatedCustomRoles.Events
                 ev.Attacker.Heal(standardDamageHandler.Damage * (lifeStealer.Percentage / 100f));
         }
 
-        public void OnEscaping(PlayerEscapingEventArgs Escaping)
+        public static void OnEscaping(PlayerEscapingEventArgs Escaping)
         {                
             if (Escaping.Player.TryGetSummonedInstance(out SummonedCustomRole summoned))
             {
@@ -321,7 +321,7 @@ namespace UncomplicatedCustomRoles.Events
             }
         }
 
-        public void OnRespawningWave(WaveRespawningEventArgs ev)
+        public static void OnRespawningWave(WaveRespawningEventArgs ev)
         {
             LogManager.Silent("Respawning wave");
             if (Spawn.DoHandleWave)
@@ -331,13 +331,13 @@ namespace UncomplicatedCustomRoles.Events
                 Spawn.DoHandleWave = true;
         }
 
-        public void OnItemUsed(PlayerUsedItemEventArgs ev)
+        public static void OnItemUsed(PlayerUsedItemEventArgs ev)
         {
             if (ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole summoned) && ev.UsableItem.Type is ItemType.SCP500)
                 summoned?.InfiniteEffects.RemoveAll(effect => effect is not null && effect.Removable);
         }
 
-        public void OnAddingTarget(Scp096AddingTargetEventArgs ev)
+        public static void OnAddingTarget(Scp096AddingTargetEventArgs ev)
         {
             if (!ev.IsAllowed)
                 return;
@@ -355,7 +355,7 @@ namespace UncomplicatedCustomRoles.Events
             }
         }
 
-        public void OnPickingUp(PlayerPickingUpItemEventArgs ev)
+        public static void OnPickingUp(PlayerPickingUpItemEventArgs ev)
         {
             if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
                 ev.IsAllowed = ItemBan.ValidatePickup(summonedInstance, ev.Pickup);
@@ -367,7 +367,7 @@ namespace UncomplicatedCustomRoles.Events
             SpawnManager.SummonCustomSubclass(Player, Id, DoBypassRoleOverwrite);
         }
 
-        public void OnRequestedRaPlayerInfo(PlayerRequestedRaPlayerInfoEventArgs ev)
+        public static void OnRequestedRaPlayerInfo(PlayerRequestedRaPlayerInfoEventArgs ev)
         {
             ev.InfoBuilder.Append(SummonedCustomRole.TryParseRemoteAdmin(ev.Target.ReferenceHub));
         }

@@ -27,7 +27,7 @@ namespace UncomplicatedCustomRoles.Manager
 
         public static readonly List<Assembly> AvailableAssemblies = new()
         {
-            Plugin.Instance.Assembly
+            Plugin.Assembly
         };
 
         public const float WaitingTime = 5f;
@@ -47,7 +47,7 @@ namespace UncomplicatedCustomRoles.Manager
         {
             ActivePlugins.Clear();
             AvailableAssemblies.Clear();
-            AvailableAssemblies.Add(Plugin.Instance.Assembly);
+            AvailableAssemblies.Add(Plugin.Assembly);
         }
 
         private static void Actor()

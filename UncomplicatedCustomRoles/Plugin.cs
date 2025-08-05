@@ -36,7 +36,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Description => "Customize your SCP:SL server with Custom Roles!";
 
-        public override string Author => "FoxWorn3365, Dr.Agenda";
+        public override string Author => "FoxWorn3365, Dr.Agenda, MedveMarci";
 
         public override Version Version { get; } = new(8, 0, 0, 3);
 
@@ -44,11 +44,9 @@ namespace UncomplicatedCustomRoles
 
         public override LoadPriority Priority => LoadPriority.Highest;
 
-        public Assembly Assembly => Assembly.GetExecutingAssembly();
+        public static Assembly Assembly => Assembly.GetExecutingAssembly();
 
         internal static Plugin Instance;
-
-        internal Handler Handler;
 
         internal static HttpManager HttpManager;
 
@@ -62,7 +60,6 @@ namespace UncomplicatedCustomRoles
             LogManager.History.Clear();
             API.Features.Escape.Bucket.Clear();
 
-            Handler = new();
             HttpManager = new("ucr");
 
             CustomRole.CustomRoles.Clear();
@@ -119,8 +116,6 @@ namespace UncomplicatedCustomRoles
             _harmony.PatchAll();
 
             PlayerEventPrefix.Patch(_harmony);
-            
-            RespawnTimer.Enable();
         }
 
         public override void Disable()
@@ -161,11 +156,7 @@ namespace UncomplicatedCustomRoles
 
             HttpManager.UnregisterEvents();
 
-            Handler = null;
-
             Instance = null;
-            
-            RespawnTimer.Disable();
         }
 
         /// <summary>
