@@ -9,6 +9,7 @@
  */
 
 using System.Collections.Generic;
+using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
@@ -25,9 +26,13 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         {
             if (Color == string.Empty)
                 return;
-
             string nick = CustomRole.Player.DisplayName.Replace("<color=#855439>*</color>", "");
             string color = Color.StartsWith("#") ? Color : $"#{Color}";
+            if (!Misc.AcceptedColours.Contains(color.Replace("#", "")))
+            {
+                LogManager.Warn($"The color {color} is not acceptable by the game in ColorfulNicknames! Please use a valid hex color code.");
+                return;
+            }
             CustomRole.Player.CustomInfo = CustomRole.Player.CustomInfo.Replace(nick, $"<color={color}>{nick}</color>");
         }
     }
