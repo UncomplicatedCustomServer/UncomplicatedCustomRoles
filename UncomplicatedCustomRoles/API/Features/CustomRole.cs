@@ -20,7 +20,6 @@ using UnityEngine;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
-#pragma warning disable CS0618 // Il tipo o il membro è obsoleto
 #nullable enable
     public class CustomRole : ICustomRole
     {

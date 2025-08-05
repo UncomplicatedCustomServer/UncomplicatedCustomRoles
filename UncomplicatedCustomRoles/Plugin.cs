@@ -119,6 +119,8 @@ namespace UncomplicatedCustomRoles
             _harmony.PatchAll();
 
             PlayerEventPrefix.Patch(_harmony);
+            
+            RespawnTimer.Enable();
         }
 
         public override void Disable()
@@ -162,6 +164,8 @@ namespace UncomplicatedCustomRoles
             Handler = null;
 
             Instance = null;
+            
+            RespawnTimer.Disable();
         }
 
         /// <summary>
