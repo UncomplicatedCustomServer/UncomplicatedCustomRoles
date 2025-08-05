@@ -20,8 +20,6 @@ using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Integrations
 {
-#pragma warning disable CS8974 // Conversione del gruppo di metodi in un tipo non delegato
-
     internal class RespawnTimer
     {
         // Get the IPlugin<IConfig> of the RespawnTimer plugin 
@@ -58,11 +56,13 @@ namespace UncomplicatedCustomRoles.Integrations
             if (TimerView.GetMethod("AddReplaceHelper") is null)
                 return;
 
+#pragma warning disable CS8974 // Conversione del gruppo di metodi in un tipo non delegato
             TimerView.GetMethod("AddReplaceHelper").Invoke(null, new object[]
             {
                 RespawnTimerTextKey,
                 GetPublicRoleName
             });
+#pragma warning restore CS8974 // Conversione del gruppo di metodi in un tipo non delegato
 
             LogManager.Debug("Compatibility loader for RespawnTimer: success");
         }

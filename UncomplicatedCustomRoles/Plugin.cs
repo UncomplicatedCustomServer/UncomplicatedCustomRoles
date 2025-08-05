@@ -112,9 +112,6 @@ namespace UncomplicatedCustomRoles
             _harmony.PatchAll();
             PlayerInfoPatch.TryPatchCedMod();
 
-            // Register custom event handlers for custom roles
-            CustomRoleEventHandler.RegisterEvents();
-
             RespawnTimer.Enable();
 
             base.OnEnabled();
@@ -123,8 +120,6 @@ namespace UncomplicatedCustomRoles
         public override void OnDisabled()
         {
             RespawnTimer.Disable();
-
-            CustomRoleEventHandler.UnregisterEvents();
 
             _harmony.UnpatchAll();
 

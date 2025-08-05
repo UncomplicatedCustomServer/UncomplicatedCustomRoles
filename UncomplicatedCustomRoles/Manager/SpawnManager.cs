@@ -388,7 +388,7 @@ namespace UncomplicatedCustomRoles.Manager
         }
 
 #nullable enable
-#pragma warning disable CS8602 // <Element> can be null at this point! (added a check!)
+#pragma warning disable CS8602 // Possibile deferenziamento di un valore Null
         public static ICustomRole? DoEvaluateSpawnForPlayer(Player player, RoleTypeId? role = null)
         {
             role ??= player.Role?.Type;

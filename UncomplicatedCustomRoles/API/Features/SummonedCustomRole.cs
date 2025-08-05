@@ -368,7 +368,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Add a new <see cref="CustomModule"/> to the current <see cref="SummonedCustomRole"/> instance
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        public void AddModule(Type type, Dictionary<string, string>? args = null)
+        public void AddModule(Type type, Dictionary<string, object>? args = null)
         {
             if (CustomModule.FastAdd(type, this, args) is CustomModule module)
                 _customModules.Add(module);
