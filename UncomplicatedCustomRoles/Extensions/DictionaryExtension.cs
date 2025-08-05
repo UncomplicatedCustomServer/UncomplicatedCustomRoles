@@ -62,6 +62,16 @@ namespace UncomplicatedCustomRoles.Extensions
             return Data;
         }
 
+        public static Dictionary<string, object> ConvertKeyToString<TKey, TValue>(this Dictionary<TKey, TValue> dictionary)
+        {
+            Dictionary<string, object> result = new();
+
+            foreach (KeyValuePair<TKey, TValue> kvp in dictionary)
+                result.Add(kvp.Key.ToString(), kvp.Value);
+
+            return result;
+        }
+
         public static Dictionary<string, string> ConvertToString<TKey, TValue>(this Dictionary<TKey, TValue> dictionary)
         {
             Dictionary<string, string> result = new();

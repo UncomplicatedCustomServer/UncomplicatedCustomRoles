@@ -12,7 +12,7 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
             "item"
         };
 
-        public ItemType? Item => Args.TryGetValue("item", out string rawItem) && Enum.TryParse(rawItem, out ItemType item) && item is not ItemType.None ? item : null;
+        public ItemType? Item => StringArgs.TryGetValue("item", out string rawItem) && Enum.TryParse(rawItem, out ItemType item) && item is not ItemType.None ? item : null;
 
         public override void OnRemoved()
         {

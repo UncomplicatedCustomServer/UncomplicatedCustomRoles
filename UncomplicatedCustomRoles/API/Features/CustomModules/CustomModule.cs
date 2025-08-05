@@ -12,6 +12,7 @@ using Exiled.Events.EventArgs.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
@@ -45,14 +46,19 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         /// Gets the args of the current <see cref="CustomModule"/>
         /// </summary>
         /// <remarks>Every value is a <see cref="string"/></remarks>
-        public Dictionary<string, string> Args { get; private set; }
+        public Dictionary<string, object> Args { get; private set; }
+
+        /// <summary>
+        /// Gets the args of the current <see cref="CustomModule"/> with the value converted as string
+        /// </summary>
+        public Dictionary<string, string> StringArgs => Args.ConvertToString();
 
         /// <summary>
         /// Gets the instance of the <see cref="SummonedCustomRole"/> in which the current <see cref="CustomModule"/> is embedded
         /// </summary>
         public SummonedCustomRole CustomRole { get; private set; }
 
-        internal void Initialize(SummonedCustomRole summonedCustomRole, Dictionary<string, string> args)
+        internal void Initialize(SummonedCustomRole summonedCustomRole, Dictionary<string, object> args)
         {
             CustomRole = summonedCustomRole;
             Args = args;
@@ -88,23 +94,31 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         { }
 
         /// <summary>
+        /// Try to get a generic <see cref="object"/> value from the <see cref="Args"/> and if not present just return a default value.
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="def"></param>
+        /// <returns></returns>
+        public object TryGetValue(string param, object def = null) => Args.TryGetValue(param, out object value) ? value : def;
+
+        /// <summary>
         /// Try to get a value from the <see cref="Args"/> and if not present just return a default value.
         /// </summary>
         /// <param name="param"></param>
         /// <param name="def"></param>
         /// <returns></returns>
-        public string TryGetValue(string param, string def = null) => Args.TryGetValue(param, out string value) ? value : def;
+        public string TryGetStringValue(string param, string def = null) => StringArgs.TryGetValue(param, out string value) ? value : def;
 
 #nullable enable
         internal static List<CustomModule> Load(List<object> modules, SummonedCustomRole summonedCustomRole)
         {
             LogManager.Silent($"[CM Loader] Initialize loading for {summonedCustomRole}\nPreloaded {YamlFlagsHandler.Modules.Length} modules...");
 
-            Dictionary<string, Dictionary<string, string>?> data = YamlFlagsHandler.Decode(modules) ?? new();
+            Dictionary<string, Dictionary<string, object>?> data = YamlFlagsHandler.Decode(modules) ?? new();
 
             List<CustomModule> mods = new();
 
-            foreach (KeyValuePair<string, Dictionary<string, string>?> module in data)
+            foreach (KeyValuePair<string, Dictionary<string, object>?> module in data)
                 if (InitializeCustomModule(module.Key, module.Value, YamlFlagsHandler.Modules, summonedCustomRole) is CustomModule mod)
                     mods.Add(mod);
 
@@ -113,7 +127,7 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
             return mods;
         }
 
-        internal static CustomModule? FastAdd(Type type, SummonedCustomRole role, Dictionary<string, string>? args = null)
+        internal static CustomModule? FastAdd(Type type, SummonedCustomRole role, Dictionary<string, object>? args = null)
         {
             if (Activator.CreateInstance(type) is not CustomModule module)
             {
@@ -127,7 +141,7 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
             return module;
         }
 
-        private static CustomModule? InitializeCustomModule(string name, Dictionary<string, string>? args, Type[] types, SummonedCustomRole summonedCustomRole)
+        private static CustomModule? InitializeCustomModule(string name, Dictionary<string, object>? args, Type[] types, SummonedCustomRole summonedCustomRole)
         {
             try
             {

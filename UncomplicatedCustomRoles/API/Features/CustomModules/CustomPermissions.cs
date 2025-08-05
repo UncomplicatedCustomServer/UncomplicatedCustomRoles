@@ -19,6 +19,6 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
             "permissions"
         };
 
-        internal string[] Permissions => Args.TryGetValue("permissions", out string permissions) ? permissions.Replace(" ", string.Empty).Split(',') : new string[] { };
+        internal string[] Permissions => StringArgs.TryGetValue("permissions", out string permissions) ? permissions.Replace(" ", string.Empty).Split(',') : new string[] { };
     }
 }
