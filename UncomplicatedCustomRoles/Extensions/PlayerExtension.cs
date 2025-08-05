@@ -165,7 +165,7 @@ namespace UncomplicatedCustomRoles.Extensions
         {
             if (!NicknameSync.ValidateCustomInfo(value, out string error))
             {
-                LogManager.Error($"Custom info is not valid: {error}");
+                LogManager.Error($"CustomInfo color tags is not correct. Setting CustomInfo to empty.\nError: {error}");
                 value = string.Empty;
             }
             player.InfoArea = string.IsNullOrEmpty(value)
@@ -186,30 +186,37 @@ namespace UncomplicatedCustomRoles.Extensions
             string customInfo = PlaceholderManager.ApplyPlaceholders(role.CustomInfo, player, role);
             string roleName = role.Name;
             
+            if (!NicknameSync.ValidateCustomInfo(customInfo, out string error))
+            {
+                LogManager.Error($"CustomInfo color tags is not correct. Setting CustomInfo to empty.\nRole: {role}.\nError: {error}");
+                customInfo = string.Empty;
+            }
+            
             if (!customInfo.Contains("<color=#") && roleName.Contains("<color=#"))
             {
-                LogManager.Error("Role name color requires custom info color. Defaulting role name.");
+                LogManager.Error("Role name color requires custom info color. Setting RoleName to default. Role: " + role);
                 player.InfoArea &= ~PlayerInfoArea.CustomInfo;
                 player.InfoArea |= PlayerInfoArea.Role | PlayerInfoArea.Nickname;
                 ApplyClearCustomInfo(player, customInfo);
                 return;
             }
         
-            if (!NicknameSync.ValidateCustomInfo(customInfo, out string error))
-            {
-                LogManager.Error($"Custom info is not valid: {error}");
-                customInfo = string.Empty;
-            }
-        
             if (string.IsNullOrEmpty(customInfo))
             {
                 LogManager.Silent("Applying only role name (NICK-ROLE)");
+                if (!NicknameSync.ValidateCustomInfo(roleName, out string errorRole))
+                {
+                    LogManager.Error($"RoleName color tags is not correct. Showing default PlayerInfo.\nRole: {role}.\nError: {errorRole}");
+                    player.InfoArea &= ~PlayerInfoArea.CustomInfo;
+                    player.InfoArea |= PlayerInfoArea.Role | PlayerInfoArea.Nickname;
+                    return;
+                }
                 player.CustomInfo = $"{player.DisplayName}\n{roleName}";
             }
             else
             {
                 LogManager.Silent("Applying role name and custom info (CI-NICK-ROLE)");
-                player.CustomInfo = $"{ProcessCustomInfo(customInfo)}\n{player.DisplayName}\n{role}";
+                player.CustomInfo = $"{ProcessCustomInfo(customInfo)}\n{player.DisplayName}\n{roleName}";
             }
         }
 
