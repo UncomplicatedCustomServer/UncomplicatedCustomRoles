@@ -26,6 +26,9 @@ using Exiled.Events.EventArgs.Warhead;
 using PlayerRoles.Ragdolls;
 using Exiled.Events.EventArgs.Scp096;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
+using System.Linq;
+using Exiled.API.Extensions;
+using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -56,7 +59,17 @@ namespace UncomplicatedCustomRoles.Events
             InfiniteEffect.Start();
         }
 
-        public void OnVerified(VerifiedEventArgs ev) => FirstRoundPlayers.Add(ev.Player.Id);
+        public void OnVerified(VerifiedEventArgs ev)
+        {
+            FirstRoundPlayers.Add(ev.Player.Id);
+
+            // Sync role appearance
+            foreach (SummonedCustomRole role in SummonedCustomRole.List.Where(role => role.Appearance != RoleTypeId.None))
+                role.Player.ChangeAppearance(role.Appearance, new Player[] { ev.Player });
+
+            foreach (SummonedCustomRole role in SummonedCustomRole.List.Where(role => role.Scale != Vector3.one))
+                role.Player.Scale = role.Scale;
+        }
 
         public void OnInteractingScp330(InteractingScp330EventArgs ev)
         {
@@ -188,7 +201,6 @@ namespace UncomplicatedCustomRoles.Events
             if (ev.Player.HasCustomRole())
                 return;
 
-
             if (Plugin.Instance.Config.IgnoreNpcs && ev.Player.IsNPC)
                 return;
 
@@ -237,7 +249,9 @@ namespace UncomplicatedCustomRoles.Events
 
                     Hurting.DamageHandler.Damage *= attackerCustomRole.Role.DamageMultiplier;
                 }
-                else if (Hurting.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole))
+                
+                // Divided because they can be both CR
+                if (Hurting.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole))
                 {
                     if (playerCustomRole.Role.IsFriendOf is not null && playerCustomRole.Role.IsFriendOf.Contains(Hurting.Attacker.ReferenceHub.GetTeam()))
                     {

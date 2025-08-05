@@ -22,6 +22,7 @@ using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Commands;
 using UncomplicatedCustomRoles.Manager;
+using UnityEngine;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
@@ -124,6 +125,10 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public IReadOnlyCollection<CustomModule> CustomModules => _customModules;
 
+        internal RoleTypeId Appearance => Role.RoleAppearance != Role.Role ? Role.RoleAppearance : RoleTypeId.None;
+
+        internal Vector3 Scale => Role.Scale != Vector3.one && Role.Scale != Vector3.zero ? Role.Scale : Vector3.one; 
+
         private PlayerRoleBase _roleBase { get; set; } = null;
 
         private bool _internalValid { get; set; }
@@ -221,6 +226,8 @@ namespace UncomplicatedCustomRoles.API.Features
 
                 LogManager.Debug("Scale reset to 1, 1, 1");
                 Player.Scale = new(1, 1, 1);
+
+                Player.RemoveHandcuffs();
 
                 // Reset ammo limit
                 if (Role.Ammo is Dictionary<AmmoType, ushort> ammoList && ammoList.Count > 0)
