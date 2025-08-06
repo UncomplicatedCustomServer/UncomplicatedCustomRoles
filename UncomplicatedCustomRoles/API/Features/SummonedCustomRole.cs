@@ -248,6 +248,10 @@ namespace UncomplicatedCustomRoles.API.Features
                 if (IsDefaultCoroutineRole && GenericCoroutine.IsRunning)
                     Timing.KillCoroutines(GenericCoroutine);
                 
+                // Remove effects
+                Player.DisableAllEffects();
+                InfiniteEffects.Clear();
+                
                 if (Role is EventCustomRole eventCustomRole)
                     eventCustomRole.OnRemoved(this);
             }
