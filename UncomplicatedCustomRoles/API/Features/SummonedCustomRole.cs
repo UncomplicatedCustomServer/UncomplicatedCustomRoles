@@ -247,6 +247,9 @@ namespace UncomplicatedCustomRoles.API.Features
 
                 if (IsDefaultCoroutineRole && GenericCoroutine.IsRunning)
                     Timing.KillCoroutines(GenericCoroutine);
+                
+                if (Role is EventCustomRole eventCustomRole)
+                    eventCustomRole.OnRemoved(this);
             }
             catch (Exception e)
             {

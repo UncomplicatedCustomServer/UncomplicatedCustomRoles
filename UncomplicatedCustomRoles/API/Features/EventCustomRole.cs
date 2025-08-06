@@ -224,6 +224,13 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <param name="role"></param>
         public virtual void OnSpawned(SummonedCustomRole role)
         { }
+        
+        /// <summary>
+        /// Invoked when the custom role is spawned
+        /// </summary>
+        /// <param name="role"></param>
+        public virtual void OnRemoved(SummonedCustomRole role)
+        { }
 
         /// <summary>
         /// Called before kicking a <see cref="LabApi.Features.Wrappers.Player"/> from the server.
