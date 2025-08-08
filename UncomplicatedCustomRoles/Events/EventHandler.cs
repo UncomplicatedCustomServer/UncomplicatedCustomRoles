@@ -384,5 +384,14 @@ namespace UncomplicatedCustomRoles.Events
         {
             ev.InfoBuilder.Append(SummonedCustomRole.TryParseRemoteAdmin(ev.Target.ReferenceHub));
         }
+        
+        public static void OnRaPlayerListAddingPlayer(PlayerRaPlayerListAddingPlayerEventArgs ev)
+        {
+            if (ev.Target.TryGetSummonedInstance(out SummonedCustomRole customRole))
+            {
+                if (customRole.TryGetModule(out ColorfulRaName colorfulRaName))
+                    ev.Body = ev.Body.Replace("{RA_ClassColor}", $"#{colorfulRaName.Color.TrimStart('#')}");
+            }
+        }
     }
 }
