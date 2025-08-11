@@ -117,7 +117,7 @@ namespace UncomplicatedCustomRoles.Events
 
         public static void OnScp079Recontainment(Scp079RecontainingEventArgs ev)
         {
-            if (ev.Player.ReferenceHub.GetTeam() is Team.SCPs)
+            if (ev.Activator is not null && ev.Activator.Team == Team.SCPs)
                 ev.IsAllowed = false;
         }
 
