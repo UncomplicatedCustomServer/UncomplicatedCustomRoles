@@ -27,6 +27,7 @@ using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Features.Wrappers;
 using PlayerStatsSystem;
 using LabApi.Events.Arguments.Scp096Events;
+using PlayerRoles.PlayableScps.Scp079;
 using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Events
@@ -118,6 +119,12 @@ namespace UncomplicatedCustomRoles.Events
         public static void OnScp079Recontainment(Scp079RecontainingEventArgs ev)
         {
             if (ev.Activator is not null && ev.Activator.Team == Team.SCPs)
+                ev.IsAllowed = false;
+        }
+
+        public static void OnDamagingWindow(PlayerDamagingWindowEventArgs ev)
+        {
+            if (ev.Player.Team == Team.SCPs && ev.Window.name == UnityEngine.Object.FindAnyObjectByType<Scp079Recontainer>()?._activatorGlass.name)
                 ev.IsAllowed = false;
         }
 

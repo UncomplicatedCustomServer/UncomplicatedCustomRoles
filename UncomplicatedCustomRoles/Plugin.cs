@@ -84,6 +84,7 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.RequestedRaPlayerInfo += Handler.OnRequestedRaPlayerInfo;
             PlayerHandler.RaPlayerListAddingPlayer += Handler.OnRaPlayerListAddingPlayer;
             PlayerHandler.Joined += Handler.OnJoined;
+            PlayerHandler.DamagingWindow += Handler.OnDamagingWindow;
 
             Scp049Handler.ResurrectingBody += Handler.OnFinishingRecall;
 
@@ -147,6 +148,7 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.RequestedRaPlayerInfo -= Handler.OnRequestedRaPlayerInfo;
             PlayerHandler.RaPlayerListAddingPlayer -= Handler.OnRaPlayerListAddingPlayer;
             PlayerHandler.Joined -= Handler.OnJoined;
+            PlayerHandler.DamagingWindow -= Handler.OnDamagingWindow;
 
             Scp049Handler.ResurrectingBody -= Handler.OnFinishingRecall;
 
