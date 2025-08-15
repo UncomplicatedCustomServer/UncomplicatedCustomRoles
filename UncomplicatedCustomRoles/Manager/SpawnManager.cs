@@ -91,7 +91,7 @@ namespace UncomplicatedCustomRoles.Manager
                 }
 
                 // This will allow us to avoid the loop of another OnSpawning
-                Spawn.Spawning.TryAdd(player.PlayerId);
+                Spawn.Spawning.Add(player.PlayerId);
 
                 Vector3 BasicPosition = player.Position;
 
@@ -163,8 +163,8 @@ namespace UncomplicatedCustomRoles.Manager
 
                 Player.ResetInventory(Role.Inventory);
 
-                LogManager.Silent($"Can we give any CustomItem? {Role.CustomItemsInventory.Count()}");
-                if (Role.CustomItemsInventory.Count() > 0)
+                LogManager.Silent($"Can we give any CustomItem? {Role.CustomItemsInventory.Count}");
+                if (Role.CustomItemsInventory.Any())
                     foreach (uint itemId in Role.CustomItemsInventory)
                         if (!Player.IsInventoryFull)
                             try
@@ -183,7 +183,7 @@ namespace UncomplicatedCustomRoles.Manager
 
                 Player.ClearAmmo();
 
-                if (Role.Ammo is not null && Role.Ammo.GetType() == typeof(Dictionary<ItemType, ushort>) && Role.Ammo.Count() > 0)
+                if (Role.Ammo is not null && Role.Ammo.GetType() == typeof(Dictionary<ItemType, ushort>) && Role.Ammo.Any())
                     foreach (KeyValuePair<ItemType, ushort> Ammo in Role.Ammo)
                     {
                         if (Ammo.Value > Player.GetAmmoLimit(Ammo.Key))
@@ -204,7 +204,7 @@ namespace UncomplicatedCustomRoles.Manager
                     Player.Scale = Role.Scale;
 
                 List<IEffect> PermanentEffects = new();
-                if (Role.Effects.Count() > 0 && Role.Effects != null)
+                if (Role.Effects.Any() && Role.Effects != null)
                 {
                     foreach (IEffect effect in Role.Effects)
                     {
@@ -343,11 +343,11 @@ namespace UncomplicatedCustomRoles.Manager
             // Now let's assign
             if (!player.IsDisarmed)
                 return Default;
-            else if (player.IsDisarmed && player.DisarmedBy is not null)
-                if (player.DisarmedBy.TryGetSummonedInstance(out SummonedCustomRole role) && AsCuffedByCustomRole.ContainsKey(role.Role.Id))
-                    return AsCuffedByCustomRole[role.Role.Id];
-                else if (AsCuffedByInternalTeam.ContainsKey(player.DisarmedBy.Team))
-                    return AsCuffedByInternalTeam[player.DisarmedBy.Team];
+            if (player.IsDisarmed && player.DisarmedBy is not null)
+                if (player.DisarmedBy.TryGetSummonedInstance(out SummonedCustomRole role) && AsCuffedByCustomRole.TryGetValue(role.Role.Id, out var customEscapeRole))
+                    return customEscapeRole;
+                else if (AsCuffedByInternalTeam.TryGetValue(player.DisarmedBy.Team, out var internalEscapeRole))
+                    return internalEscapeRole;
 
             LogManager.Silent($"Returing default type for escaping evaluation of player {player.PlayerId} who's cuffed by {player.DisarmedBy?.Team}");
             return Default;
@@ -384,55 +384,99 @@ namespace UncomplicatedCustomRoles.Manager
             if (role is null)
                 return null;
 
-            RoleTypeId NewRole = (RoleTypeId)role;
+            RoleTypeId newRole = (RoleTypeId)role;
 
-            Dictionary<RoleTypeId, List<ICustomRole>> RolePercentage = new()
-            {
-                { RoleTypeId.ClassD, new() },
-                { RoleTypeId.Scientist, new() },
-                { RoleTypeId.NtfPrivate, new() },
-                { RoleTypeId.NtfSergeant, new() },
-                { RoleTypeId.NtfCaptain, new() },
-                { RoleTypeId.NtfSpecialist, new() },
-                { RoleTypeId.ChaosConscript, new() },
-                { RoleTypeId.ChaosMarauder, new() },
-                { RoleTypeId.ChaosRepressor, new() },
-                { RoleTypeId.ChaosRifleman, new() },
-                { RoleTypeId.Tutorial, new() },
-                { RoleTypeId.Scp049, new() },
-                { RoleTypeId.Scp0492, new() },
-                { RoleTypeId.Scp079, new() },
-                { RoleTypeId.Scp173, new() },
-                { RoleTypeId.Scp939, new() },
-                { RoleTypeId.Scp096, new() },
-                { RoleTypeId.Scp106, new() },
-                { RoleTypeId.Scp3114, new() },
-                { RoleTypeId.FacilityGuard, new() }
-            };
-
-            foreach (ICustomRole Role in CustomRole.CustomRoles.Values.Where(cr => cr.SpawnSettings is not null))
-                if (!Role.IgnoreSpawnSystem && Player.ReadyList.Count(pl => !pl.IsHost) >= Role.SpawnSettings.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
-                {
-                    if (Role.SpawnSettings.RequiredPermission is not null && Role.SpawnSettings.RequiredPermission.Length > 0 && !(player as ICommandSender).CheckPermission(Role.SpawnSettings.RequiredPermission))
-                    {
-                        LogManager.Silent($"[NOTICE] Ignoring the role {Role.Id} [{Role.Name}] while creating the list for the player {player.Nickname} due to: cannot [permissions].");
-                        continue;
-                    }
-
-                    foreach (RoleTypeId RoleType in Role.SpawnSettings.CanReplaceRoles)
-                        for (int a = 0; a < Role.SpawnSettings.SpawnChance; a++)
-                            RolePercentage[RoleType].Add(Role);
-                }
-
+            // If already a custom role, don't evaluate
             if (player.HasCustomRole())
             {
                 LogManager.Debug("Was evalutating role select for an already custom role player, stopping");
                 return null;
             }
 
-            if (RolePercentage.ContainsKey(NewRole))
-                if (UnityEngine.Random.Range(0, 100) < RolePercentage[NewRole].Count())
-                    return CustomRole.CustomRoles[RolePercentage[NewRole].RandomItem().Id];
+            // Build candidate list and total weights for the target base role
+            // Avoid LINQ allocations in hot path
+            List<ICustomRole> candidates = new();
+            List<float> weights = new();
+
+            // Count non-host ready players (avoid LINQ)
+            int nonHostPlayers = 0;
+            foreach (var pl in Player.ReadyList)
+                if (!pl.IsHost)
+                    nonHostPlayers++;
+
+            foreach (ICustomRole cr in CustomRole.CustomRoles.Values)
+            {
+                if (cr is null || cr.SpawnSettings is null)
+                    continue;
+
+                if (cr.IgnoreSpawnSystem)
+                    continue;
+
+                if (nonHostPlayers < cr.SpawnSettings.MinPlayers)
+                    continue;
+
+                if (SummonedCustomRole.Count(cr) >= cr.SpawnSettings.MaxPlayers)
+                    continue;
+
+                // Handle required permissions (array). If any required perm is missing, skip.
+                var required = cr.SpawnSettings.RequiredPermission;
+                if (required != null && required.Length > 0)
+                {
+                    bool hasAll = true;
+                    var sender = player as CommandSystem.ICommandSender;
+                    foreach (var perm in required)
+                    {
+                        if (sender == null || !sender.CheckPermission(perm))
+                        {
+                            hasAll = false;
+                            break;
+                        }
+                    }
+                    if (!hasAll)
+                    {
+                        LogManager.Silent($"[NOTICE] Ignoring the role {cr.Id} [{cr.Name}] while creating the list for the player {player.Nickname} due to: cannot [permissions].");
+                        continue;
+                    }
+                }
+
+                // Only gather weight if this custom role can replace the current target base role
+                bool canReplace = false;
+                foreach (var r in cr.SpawnSettings.CanReplaceRoles)
+                    if (r == newRole) { canReplace = true; break; }
+                if (!canReplace)
+                    continue;
+
+                float w = cr.SpawnSettings.SpawnChance;
+                if (w <= 0f)
+                    continue;
+
+                candidates.Add(cr);
+                weights.Add(w);
+            }
+
+            if (candidates.Count == 0)
+                return null;
+
+            // Preserve original behavior: natural spawn vs custom spawn gate via random < totalWeight (clamped at 100)
+            float totalWeight = 0f;
+            for (int i = 0; i < weights.Count; i++) totalWeight += weights[i];
+
+            float threshold = totalWeight > 100f ? 100f : totalWeight;
+            if (UnityEngine.Random.Range(0f, 100f) >= threshold)
+            {
+                LogManager.Debug($"No CustomRole found for player {player.Nickname}, allowing natural spawn with {newRole}");
+                return null;
+            }
+
+            // Weighted pick without building duplicate entries
+            float pick = UnityEngine.Random.Range(0f, totalWeight);
+            float cum = 0f;
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                cum += weights[i];
+                if (pick < cum)
+                    return candidates[i];
+            }
 
             return null;
         }

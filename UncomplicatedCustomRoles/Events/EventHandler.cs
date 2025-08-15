@@ -29,6 +29,7 @@ using PlayerStatsSystem;
 using LabApi.Events.Arguments.Scp096Events;
 using PlayerRoles.PlayableScps.Scp079;
 using UnityEngine;
+using System.Collections.Concurrent;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -36,7 +37,7 @@ namespace UncomplicatedCustomRoles.Events
     {
         private static List<int> RagdollAppearanceQueue { get; } = new();
 
-        private static Dictionary<int, Tuple<CustomScpAnnouncer, DateTimeOffset>> TerminationQueue { get; } = new();
+        private static ConcurrentDictionary<int, Tuple<CustomScpAnnouncer, DateTimeOffset>> TerminationQueue { get; } = new();
 
         public static void OnWaitingForPlayers()
         {
@@ -136,7 +137,7 @@ namespace UncomplicatedCustomRoles.Events
                     RagdollAppearanceQueue.Add(ev.Player.PlayerId);
 
                 if (customRole.TryGetModule(out CustomScpAnnouncer announcer) && ev.Player.ReferenceHub.GetTeam() is not Team.SCPs)
-                    TerminationQueue.Add(ev.Player.PlayerId, new(announcer, DateTimeOffset.Now));
+                    TerminationQueue[ev.Player.PlayerId] = new(announcer, DateTimeOffset.Now);
             }
         }
 
@@ -145,7 +146,7 @@ namespace UncomplicatedCustomRoles.Events
             if (TerminationQueue.TryGetValue(ev.Player.PlayerId, out Tuple<CustomScpAnnouncer, DateTimeOffset> data) && (DateTimeOffset.Now - data.Item2).Milliseconds < 1300)
                 SpawnManager.HandleRecontainmentAnnoucement(ev.DamageHandler, data.Item1);
 
-            TerminationQueue.TryRemove(ev.Player.PlayerId);
+            TerminationQueue.TryRemove(ev.Player.PlayerId, out _);
 
             SpawnManager.ClearCustomTypes(ev.Player);
         }

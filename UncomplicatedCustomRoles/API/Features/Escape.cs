@@ -20,11 +20,11 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets the escape bucket to avoid the spam of SubclassSpawn of a custom role during the spawn
         /// </summary>
-        public static List<int> Bucket { get; } = new();
+        public static HashSet<int> Bucket { get; } = new();
 
         public static void AddBucket(Player player, float waitingTime = 5f)
         {
-            Bucket.TryAdd(player.PlayerId);
+            Bucket.Add(player.PlayerId);
             Timing.CallDelayed(waitingTime, () => Bucket.Remove(player.PlayerId));
         }
     }

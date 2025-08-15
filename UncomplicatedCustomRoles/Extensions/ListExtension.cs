@@ -11,7 +11,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
 
 namespace UncomplicatedCustomRoles.Extensions
 {
@@ -31,16 +30,40 @@ namespace UncomplicatedCustomRoles.Extensions
             if (list is null)
                 return "null value";
 
-            string Data = $"[{list.GetType().FullName}] List<{list.GetType().GetGenericArguments()[0].FullName}> ({list.Count}) [\n";
+            string data = $"[{list.GetType().FullName}] List<{list.GetType().GetGenericArguments()[0].FullName}> ({list.Count}) [\n";
 
             foreach (T element in list)
-                Data += $"{element},\n";
+                data += $"{element},\n";
 
-            Data += "];";
+            data += "];";
 
-            return Data;
+            return data;
         }
 
-        public static T RandomValue<T>(this IEnumerable<T> list) => list.Count() < 1 ? default : list.ElementAt(UnityEngine.Random.Range(0, list.Count()));
+        public static T RandomValue<T>(this IEnumerable<T> source)
+        {
+            if (source is null)
+                return default;
+
+            if (source is IList<T> list)
+            {
+                int count = list.Count;
+                if (count == 0)
+                    return default;
+                return list[UnityEngine.Random.Range(0, count)];
+            }
+
+            if (source is T[] arr)
+            {
+                if (arr.Length == 0)
+                    return default;
+                return arr[UnityEngine.Random.Range(0, arr.Length)];
+            }
+
+            var tmp = source.ToArray();
+            if (tmp.Length == 0)
+                return default;
+            return tmp[UnityEngine.Random.Range(0, tmp.Length)];
+        }
     }
 }
