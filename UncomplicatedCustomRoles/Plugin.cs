@@ -25,6 +25,8 @@ using HarmonyLib;
 using UncomplicatedCustomRoles.Manager.NET;
 using UncomplicatedCustomRoles.Patches;
 using System.Threading.Tasks;
+using UncomplicatedCustomRoles.Events;
+using LabApi.Events.CustomHandlers;
 
 namespace UncomplicatedCustomRoles
 {
@@ -45,6 +47,8 @@ namespace UncomplicatedCustomRoles
         internal static Plugin Instance;
 
         internal Handler Handler;
+
+        internal LabApiEventHandler LabApiEventHandler;
 
         internal static HttpManager HttpManager;
 
@@ -91,6 +95,9 @@ namespace UncomplicatedCustomRoles
 
             WarheadHandler.Starting += Handler.OnWarheadLever;
 
+            LabApiEventHandler = new();
+            CustomHandlersManager.RegisterEventsHandler(LabApiEventHandler);
+
             Task.Run(delegate
             {
                 if (HttpManager.LatestVersion.CompareTo(Version) > 0)
@@ -110,7 +117,7 @@ namespace UncomplicatedCustomRoles
             // Patch with Harmony
             _harmony = new($"com.ucs.ucr_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
-            PlayerInfoPatch.TryPatchCedMod();
+            //PlayerInfoPatch.TryPatchCedMod();
 
             RespawnTimer.Enable();
 
@@ -122,6 +129,9 @@ namespace UncomplicatedCustomRoles
             RespawnTimer.Disable();
 
             _harmony.UnpatchAll();
+
+            CustomHandlersManager.UnregisterEventsHandler(LabApiEventHandler);
+            LabApiEventHandler = null;
 
             ServerHandler.RespawningTeam -= Handler.OnRespawningWave;
             ServerHandler.RoundEnded -= Handler.OnRoundEnded;

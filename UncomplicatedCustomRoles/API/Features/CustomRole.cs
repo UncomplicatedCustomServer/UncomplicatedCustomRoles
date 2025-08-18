@@ -9,6 +9,7 @@
  */
 
 using Exiled.API.Enums;
+using Exiled.API.Extensions;
 using PlayerRoles;
 using System;
 using System.Collections.Concurrent;
@@ -19,6 +20,7 @@ using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Compatibility;
+using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 using UnityEngine.Windows;

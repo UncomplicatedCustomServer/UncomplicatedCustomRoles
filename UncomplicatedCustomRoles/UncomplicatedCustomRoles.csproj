@@ -77,6 +77,7 @@
     <Compile Include="API\Features\CustomModules\TutorialRagdoll.cs" />
     <Compile Include="API\Features\CustomRole.cs" />
     <Compile Include="API\Features\CustomRoleEventHandler.cs" />
+    <Compile Include="API\Features\DisguiseTeam.cs" />
     <Compile Include="API\Features\EventCustomRole.cs" />
     <Compile Include="API\Features\Escape.cs" />
     <Compile Include="API\Features\InfiniteEffect.cs" />
@@ -116,6 +117,7 @@
     <Compile Include="API\Enums\CustomFlags.cs" />
     <Compile Include="API\Enums\SpawnType.cs" />
     <Compile Include="Events\EventHandler.cs" />
+    <Compile Include="Events\LabApiEventHandler.cs" />
     <Compile Include="Extensions\CompatibilityExtension.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
     <Compile Include="Extensions\ListExtension.cs" />
@@ -140,7 +142,6 @@
     <Compile Include="Patches\DisabledEventPatch.cs" />
     <Compile Include="Patches\PermissionPrefix.cs" />
     <Compile Include="Patches\PlayerEventPrefix.cs" />
-    <Compile Include="Patches\PlayerInfoPatch.cs" />
     <Compile Include="Patches\Scp3114StranglePrefix.cs" />
     <Compile Include="Patches\ServerNamePatch.cs" />
     <Compile Include="Patches\SetRolePatch.cs" />
