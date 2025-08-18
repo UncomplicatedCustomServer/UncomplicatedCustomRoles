@@ -15,7 +15,7 @@ namespace UncomplicatedCustomRoles.Extensions
 {
     public static class StringExtension
     {
-        public static readonly char[] _intChars = new[]
+        public static readonly HashSet<char> _intChars = new()
         {
             '0',
             '1',

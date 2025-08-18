@@ -15,12 +15,12 @@ using MEC;
 using PlayerRoles;
 using PlayerRoles.PlayableScps;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Struct;
-using UncomplicatedCustomRoles.Commands;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 
@@ -32,7 +32,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets every <see cref="SummonedCustomRole"/>
         /// </summary>
-        public static List<SummonedCustomRole> List { get; } = new();
+        public static ConcurrentDictionary<string, SummonedCustomRole> List { get; } = new();
 
         /// <summary>
         /// The unique identifier for this instance of <see cref="SummonedCustomRole"/>
@@ -162,7 +162,7 @@ namespace UncomplicatedCustomRoles.API.Features
             EvaluateRoleBase();
 
             EventHandler = new(this);
-            List.Add(this);
+            List[Id] = this;
         }
 
         /// <summary>
@@ -195,7 +195,7 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             LogManager.Silent($"Destroying instance {Id} of CR {Role.Id} of PL {Player}");
             Remove();
-            List.Remove(this);
+            List.TryRemove(Id, out _);
         }
 
         /// <summary>
@@ -410,28 +410,28 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         /// <param name="role"></param>
         /// <returns></returns>
-        public static List<SummonedCustomRole> Get(ICustomRole role) => List.Where(scr => scr.Role == role).ToList();
+        public static List<SummonedCustomRole> Get(ICustomRole role) => List.Values.Where(scr => scr.Role == role).ToList();
 
         /// <summary>
         /// Gets a <see cref="SummonedCustomRole"/> instance by the <see cref="Exiled.API.Features.Player"/>
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public static SummonedCustomRole Get(Player player) => List.Where(scr => scr.Player.Id == player.Id).FirstOrDefault();
+        public static SummonedCustomRole Get(Player player) => List.Values.Where(scr => scr.Player.Id == player.Id).FirstOrDefault();
 
         /// <summary>
         /// Gets a <see cref="SummonedCustomRole"/> instance by the <see cref="ReferenceHub"/>
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public static SummonedCustomRole Get(ReferenceHub player) => List.Where(scr => scr.Player.Id == player.PlayerId).FirstOrDefault();
+        public static SummonedCustomRole Get(ReferenceHub player) => List.Values.Where(scr => scr.Player.Id == player.PlayerId).FirstOrDefault();
 
         /// <summary>
         /// Gets a <see cref="SummonedCustomRole"/> instance by the Id
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static SummonedCustomRole Get(string id) => List.Where(scr => scr.Id == id).FirstOrDefault();
+        public static SummonedCustomRole Get(string id) => List.Values.Where(scr => scr.Id == id).FirstOrDefault();
 
         /// <summary>
         /// Try to get a <see cref="SummonedCustomRole"/> by the <see cref="Exiled.API.Features.Player"/>
@@ -462,14 +462,14 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         /// <param name="role"></param>
         /// <returns></returns>
-        public static int Count(ICustomRole role) => List.Where(scr => scr.Role == role).Count();
+        public static int Count(ICustomRole role) => List.Values.Where(scr => scr.Role == role).Count();
 
         /// <summary>
         /// Gets the number of <see cref="SummonedCustomRole"/> with the same Id
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static int Count(int id) => List.Where(scr => scr.Role.Id == id).Count();
+        public static int Count(int id) => List.Values.Where(scr => scr.Role.Id == id).Count();
 
         /// <summary>
         /// Summon a new instance of <see cref="SummonedCustomRole"/> by spawning a player
@@ -569,7 +569,7 @@ namespace UncomplicatedCustomRoles.API.Features
 
         public static void RemoveSpecificRole(int id)
         {
-            foreach (SummonedCustomRole role in List.Where(scr => scr.Role.Id == id))
+            foreach (SummonedCustomRole role in List.Values.Where(scr => scr.Role.Id == id))
             {
                 role.Destroy();
                 role.Player.ClearBroadcasts();
@@ -582,8 +582,8 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         internal static void InfiniteEffectActor()
         {
-            foreach (SummonedCustomRole Role in List)
-                if (Role.InfiniteEffects.Count() > 0)
+            foreach (SummonedCustomRole Role in List.Values)
+                if (Role.InfiniteEffects.Any())
                     foreach (IEffect Effect in Role.InfiniteEffects)
                         if (!Role.Player.ActiveEffects.Contains(Role.Player.GetEffect(Effect.EffectType)))
                             Role.Player.EnableEffect(Effect.EffectType, Effect.Intensity, float.MaxValue);

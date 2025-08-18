@@ -19,13 +19,13 @@ namespace UncomplicatedCustomRoles.Commands
 
         public bool Executor(List<string> args, ICommandSender sender, out string response)
         {
-            bool detailed = args.Count > 0 && args[0] is "details";
+            bool detailed = args.Any() && args[0] is "details";
             response = "Spawn percentages for each base Role:";
 
             foreach (RoleTypeId role in Enum.GetValues(typeof(RoleTypeId)))
             {
                 IEnumerable<ICustomRole> roles = CustomRole.List.Where(r => r.SpawnSettings is not null && r.SpawnSettings.CanReplaceRoles.Contains(role));
-                if (roles.Count() > 0)
+                if (roles.Any())
                 {
                     float total = roles.Sum(r => r.SpawnSettings.SpawnChance);
                     response += $"\n\n{(total >= 100 ? $"<color=#ff0000>❗</color>" : "<color=#00ff00>✔️</color>")} <color={role.GetColor().ToHex()}><b>{role.GetFullName()}</b></color> ({roles.Count()})";

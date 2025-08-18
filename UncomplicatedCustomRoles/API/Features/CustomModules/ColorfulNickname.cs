@@ -8,10 +8,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Exiled.API.Features;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
@@ -26,7 +23,6 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
 
         public override void OnAdded()
         {
-            Log.Info($"STARTED CM CFNICKNAME - COLOR: {Color}");
             if (Color == string.Empty)
                 return;
 

@@ -9,12 +9,10 @@
  */
 
 using Exiled.API.Enums;
-using Exiled.API.Features;
 using MEC;
 using PlayerRoles;
 using System.Collections.Generic;
 using System.Linq;
-using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 
 #nullable enable
@@ -61,7 +59,7 @@ namespace UncomplicatedCustomRoles.API.Features
 
                 foreach (Bounds escapeZone in global::Escape.EscapeZones)
                 {
-                    IEnumerable<SummonedCustomRole> escapingRoles = SummonedCustomRole.List.Where(role => role.Player.IsScp && escapeZone.Contains(role.Player.Position) && role.Role.CanEscape);
+                    IEnumerable<SummonedCustomRole> escapingRoles = SummonedCustomRole.List.Values.Where(role => role.Player.IsScp && escapeZone.Contains(role.Player.Position) && role.Role.CanEscape);
 
                     foreach (SummonedCustomRole role in escapingRoles)
                         Plugin.Instance.Handler.OnEscaping(new(role.Player.ReferenceHub, RoleTypeId.ChaosConscript, EscapeScenario.CustomEscape));

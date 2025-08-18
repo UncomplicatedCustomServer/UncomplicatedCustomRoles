@@ -89,7 +89,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <param name="eventArgs"></param>
         public static void InvokeAllSafely<T>(T eventArgs) where T : IExiledEvent
         {
-            foreach (SummonedCustomRole summonedCustomRole in SummonedCustomRole.List)
+            foreach (SummonedCustomRole summonedCustomRole in SummonedCustomRole.List.Values)
                 summonedCustomRole.EventHandler.InvokeSafely(eventArgs);
         }
     }

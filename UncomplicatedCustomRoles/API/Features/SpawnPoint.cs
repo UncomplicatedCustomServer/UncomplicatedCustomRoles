@@ -90,6 +90,6 @@ namespace UncomplicatedCustomRoles.API.Features
             return spawnPoint != null;
         }
 
-        public static bool Exists(string name) => List.Where(sp => sp.Name == name).Count() > 0;
+        public static bool Exists(string name) => List.Where(sp => sp.Name == name).Any();
     }
 }

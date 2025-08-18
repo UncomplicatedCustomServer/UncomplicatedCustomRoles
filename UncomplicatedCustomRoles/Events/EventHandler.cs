@@ -29,16 +29,17 @@ using UncomplicatedCustomRoles.API.Features.CustomModules;
 using System.Linq;
 using Exiled.API.Extensions;
 using UnityEngine;
+using System.Collections.Concurrent;
 
 namespace UncomplicatedCustomRoles.Events
 {
     internal class EventHandler
     {
-        private static List<int> RagdollAppearanceQueue { get; } = new();
+        private static HashSet<int> RagdollAppearanceQueue { get; } = new();
 
-        private static List<int> FirstRoundPlayers { get; } = new();
+        private static HashSet<int> FirstRoundPlayers { get; } = new();
 
-        private static Dictionary<int, Tuple<CustomScpAnnouncer, DateTimeOffset>> TerminationQueue { get; } = new();
+        private static ConcurrentDictionary<int, Tuple<CustomScpAnnouncer, DateTimeOffset>> TerminationQueue { get; } = new();
 
         private static bool Started { get; set; } = false;
 
@@ -64,10 +65,10 @@ namespace UncomplicatedCustomRoles.Events
             FirstRoundPlayers.Add(ev.Player.Id);
 
             // Sync role appearance
-            foreach (SummonedCustomRole role in SummonedCustomRole.List.Where(role => role.Appearance != RoleTypeId.None))
+            foreach (SummonedCustomRole role in SummonedCustomRole.List.Values.Where(role => role.Appearance != RoleTypeId.None))
                 role.Player.ChangeAppearance(role.Appearance, new Player[] { ev.Player });
 
-            foreach (SummonedCustomRole role in SummonedCustomRole.List.Where(role => role.Scale != Vector3.one))
+            foreach (SummonedCustomRole role in SummonedCustomRole.List.Values.Where(role => role.Scale != Vector3.one))
                 role.Player.Scale = role.Scale;
         }
 
@@ -142,7 +143,7 @@ namespace UncomplicatedCustomRoles.Events
                     RagdollAppearanceQueue.Add(ev.Player.Id);
 
                 if (customRole.TryGetModule(out CustomScpAnnouncer announcer) && ev.Player.ReferenceHub.GetTeam() is not Team.SCPs)
-                    TerminationQueue.Add(ev.Player.Id, new(announcer, DateTimeOffset.Now));
+                    TerminationQueue[ev.Player.Id] = new(announcer, DateTimeOffset.Now);
             }
         }
 
@@ -151,7 +152,7 @@ namespace UncomplicatedCustomRoles.Events
             if (TerminationQueue.TryGetValue(ev.Player.Id, out Tuple<CustomScpAnnouncer, DateTimeOffset> data) && (DateTimeOffset.Now - data.Item2).Milliseconds < 1300)
                 SpawnManager.HandleRecontainmentAnnoucement(ev.DamageHandler, data.Item1);
 
-            TerminationQueue.TryRemove(ev.Player.Id);
+            TerminationQueue.TryRemove(ev.Player.Id, out _);
 
             SpawnManager.ClearCustomTypes(ev.Player);
         }

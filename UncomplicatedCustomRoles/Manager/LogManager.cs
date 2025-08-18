@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 
@@ -23,7 +24,7 @@ namespace UncomplicatedCustomRoles.Manager
     internal class LogManager
     {
         // We should store the data here
-        public static readonly List<LogEntry> History = new();
+        public static readonly HashSet<LogEntry> History = new();
 
         public static bool MessageSent { get; internal set; } = false;
 
@@ -71,18 +72,18 @@ namespace UncomplicatedCustomRoles.Manager
             if (History.Count < 1)
                 return HttpStatusCode.Forbidden;
 
-            string stringContent = string.Empty;
+            StringBuilder builder = new();
 
             foreach (LogEntry Element in History)
-                stringContent += $"{Element}\n";
+                builder.Append($"{Element}\n");
 
             // Now let's add the separator
-            stringContent += "\n======== BEGIN CUSTOM ROLES ========\n";
+            builder.Append("\n======== BEGIN CUSTOM ROLES ========\n");
 
             foreach (ICustomRole Role in CustomRole.CustomRoles.Values)
-                stringContent += $"{Loader.Serializer.Serialize(Role)}\n\n---\n\n";
+                builder.Append($"{Loader.Serializer.Serialize(Role)}\n\n---\n\n");
 
-            HttpStatusCode Response = Plugin.HttpManager.ShareLogs(stringContent, out content);
+            HttpStatusCode Response = Plugin.HttpManager.ShareLogs(builder.ToString(), out content);
 
             if (Response is HttpStatusCode.OK)
                 MessageSent = true;

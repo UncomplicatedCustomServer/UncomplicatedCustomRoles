@@ -94,7 +94,7 @@ namespace UncomplicatedCustomRoles.Manager
                 }
 
                 // This will allow us to avoid the loop of another OnSpawning
-                Spawn.Spawning.TryAdd(player.Id);
+                Spawn.Spawning.Add(player.Id);
 
                 Vector3 BasicPosition = player.Position;
 
@@ -166,8 +166,8 @@ namespace UncomplicatedCustomRoles.Manager
 
                 Player.ResetInventory(Role.Inventory);
 
-                LogManager.Silent($"Can we give any CustomItem? {Role.CustomItemsInventory.Count()}");
-                if (Role.CustomItemsInventory.Count() > 0)
+                LogManager.Silent($"Can we give any CustomItem? {Role.CustomItemsInventory.Count}");
+                if (Role.CustomItemsInventory.Any())
                     foreach (uint itemId in Role.CustomItemsInventory)
                         if (!Player.IsInventoryFull)
                             try
@@ -192,7 +192,7 @@ namespace UncomplicatedCustomRoles.Manager
 
                 Player.ClearAmmo();
 
-                if (Role.Ammo is not null && Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
+                if (Role.Ammo is not null && Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Any())
                     foreach (KeyValuePair<AmmoType, ushort> Ammo in Role.Ammo)
                     {
                         if (Ammo.Value > Player.GetAmmoLimit(Ammo.Key))
@@ -213,7 +213,7 @@ namespace UncomplicatedCustomRoles.Manager
                     Player.Scale = Role.Scale;
 
                 List<IEffect> PermanentEffects = new();
-                if (Role.Effects.Count() > 0 && Role.Effects != null)
+                if (Role.Effects.Any() && Role.Effects != null)
                 {
                     foreach (IEffect effect in Role.Effects)
                     {
@@ -441,7 +441,7 @@ namespace UncomplicatedCustomRoles.Manager
             }
 
             if (RolePercentage.ContainsKey(NewRole))
-                if (UnityEngine.Random.Range(0, 100) < RolePercentage[NewRole].Count())
+                if (UnityEngine.Random.Range(0, 100) < RolePercentage[NewRole].Count)
                     return CustomRole.CustomRoles[RolePercentage[NewRole].RandomItem().Id];
 
             return null;

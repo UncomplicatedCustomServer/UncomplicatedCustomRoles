@@ -11,6 +11,7 @@
 using Exiled.API.Enums;
 using PlayerRoles;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -30,12 +31,12 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// A more easy-to-use dictionary to store every registered <see cref="ICustomRole"/>
         /// </summary>
-        internal static Dictionary<int, ICustomRole> CustomRoles { get; set; } = new();
+        internal static ConcurrentDictionary<int, ICustomRole> CustomRoles { get; set; } = new();
 
         /// <summary>
         /// Get a list of every <see cref="ICustomRole"/> registered.
         /// </summary>
-        public static List<ICustomRole> List => CustomRoles.Values.ToList();
+        public static ConcurrentBag<ICustomRole> List => (ConcurrentBag<ICustomRole>)CustomRoles.Values;
 
         /// <summary>
         /// Gets a list of every not loaded custom role.
@@ -287,7 +288,7 @@ namespace UncomplicatedCustomRoles.API.Features
         public static void Unregister(ICustomRole customRole)
         {
             if (CustomRoles.ContainsKey(customRole.Id))
-                CustomRoles.Remove(customRole.Id);
+                CustomRoles.TryRemove(customRole.Id, out _);
         }
 
         internal static bool Validate(ICustomRole role, out string error)
@@ -303,17 +304,17 @@ namespace UncomplicatedCustomRoles.API.Features
                 return false;
             }
 
-            if (role.SpawnSettings.Spawn is SpawnType.ZoneSpawn && role.SpawnSettings.SpawnZones.Count() < 1)
+            if (role.SpawnSettings.Spawn is SpawnType.ZoneSpawn && !role.SpawnSettings.SpawnZones.Any())
             {
                 error = "If the SpawnType is ZoneSpawn the list SpawnZones shouldn't be empty";
                 return false;
             }
-            else if (role.SpawnSettings.Spawn is SpawnType.RoomsSpawn && role.SpawnSettings.SpawnRooms.Count() < 1)
+            else if (role.SpawnSettings.Spawn is SpawnType.RoomsSpawn && !role.SpawnSettings.SpawnRooms.Any())
             {
                 error = "If the SpawnType is RoomsSpawn the list SpawnRooms shouldn't be empty";
                 return false;
             }
-            else if (role.SpawnSettings.Spawn is SpawnType.SpawnPointSpawn && (role.SpawnSettings.SpawnPoints is null || role.SpawnSettings.SpawnPoints.Count == 0))
+            else if (role.SpawnSettings.Spawn is SpawnType.SpawnPointSpawn && (role.SpawnSettings.SpawnPoints is null || role.SpawnSettings.SpawnPoints.Any()))
             {
                 error = "If the SpawnType is SpawnPointSpawn the list SpawnPoints shouldn't be empty";
                 return false;
@@ -329,7 +330,7 @@ namespace UncomplicatedCustomRoles.API.Features
 
             if (!CustomRoles.ContainsKey(customRole.Id))
             {
-                CustomRoles.Add(customRole.Id, customRole);
+                CustomRoles[customRole.Id] = customRole;
 
                 return LoadStatusType.Success;
             }

@@ -9,6 +9,7 @@
  */
 
 using System;
+using System.Reflection;
 using Exiled.API.Features;
 using Exiled.API.Features.Roles;
 using Exiled.API.Interfaces;
@@ -22,42 +23,20 @@ namespace UncomplicatedCustomRoles.Integrations
 {
     internal class RespawnTimer
     {
-        // Get the IPlugin<IConfig> of the RespawnTimer plugin 
         public static readonly IPlugin<IConfig> RespawnTimerPlugin = Exiled.Loader.Loader.GetPlugin("RespawnTimer");
 
-        // Check if the respawn timer plugin is with us
-        public static readonly bool Allowed = RespawnTimerPlugin is not null;
+        public static readonly Type TimerView = RespawnTimerPlugin?.Assembly.GetType("RespawnTimer.API.Features.TimerView");
+
+        public static readonly MethodInfo AddReplaceHelper = TimerView?.GetMethod("AddReplaceHelper");
+
+        public static readonly MethodInfo RemoveReplaceHelper = TimerView?.GetMethod("RemoveReplaceHelper");
 
         const string RespawnTimerTextKey = "CUSTOM_ROLE";
 
-        internal static bool GetReplaceHelper(out Type TimerView)
-        {
-            if (!Allowed)
-            {
-                TimerView = null;
-                return false;
-            }
-
-            TimerView = RespawnTimerPlugin.Assembly.GetType("RespawnTimer.API.Features.TimerView");
-            if (TimerView is null)
-            {
-                LogManager.Debug("Compatibility loader for RespawnTimer failed: no class 'RespawnTimer.API.Features.TimerView' present!");
-                return false;
-            }
-
-            return true;
-        }
-
         public static void Enable()
         {
-            if (!GetReplaceHelper(out Type TimerView))
-                return;
-
-            if (TimerView.GetMethod("AddReplaceHelper") is null)
-                return;
-
 #pragma warning disable CS8974 // Conversione del gruppo di metodi in un tipo non delegato
-            TimerView.GetMethod("AddReplaceHelper").Invoke(null, new object[]
+            AddReplaceHelper?.Invoke(null, new object[]
             {
                 RespawnTimerTextKey,
                 GetPublicRoleName
@@ -69,14 +48,7 @@ namespace UncomplicatedCustomRoles.Integrations
 
         public static void Disable()
         {
-            // that mean Enable do not find the RespawnTimer plugin
-            if (!GetReplaceHelper(out Type TimerView))
-                return;
-
-            if (TimerView.GetMethod("RemoveReplaceHelper") is null)
-                return;
-
-            TimerView.GetMethod("RemoveReplaceHelper").Invoke(null, new object[]
+            RemoveReplaceHelper?.Invoke(null, new object[]
             {
                 RespawnTimerTextKey
             });
