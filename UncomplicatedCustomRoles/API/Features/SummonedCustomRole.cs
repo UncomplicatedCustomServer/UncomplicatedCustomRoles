@@ -33,10 +33,6 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public static List<SummonedCustomRole> List { get; } = new();
 
-        // Fast lookups to reduce LINQ usage on hot paths
-        private static readonly Dictionary<int, SummonedCustomRole> _byPlayerId = new();
-        private static readonly Dictionary<int, int> _countByRoleId = new();
-
         /// <summary>
         /// The unique identifier for this instance of <see cref="SummonedCustomRole"/>
         /// </summary>
@@ -167,11 +163,6 @@ namespace UncomplicatedCustomRoles.API.Features
 
             EventHandler = new(this);
             List.Add(this);
-            _byPlayerId[player.PlayerId] = this;
-            if (_countByRoleId.TryGetValue(role.Id, out int count))
-                _countByRoleId[role.Id] = count + 1;
-            else
-                _countByRoleId[role.Id] = 1;
 
             if (Role is EventCustomRole eventCustomRole)
                 eventCustomRole.OnSpawned(this);
@@ -208,13 +199,6 @@ namespace UncomplicatedCustomRoles.API.Features
             LogManager.Silent($"Destroying instance {Id} of CR {Role.Id} of PL {Player}");
             Remove();
             List.Remove(this);
-            _byPlayerId.Remove(Player.PlayerId);
-            if (_countByRoleId.TryGetValue(Role.Id, out int count) && count > 0)
-            {
-                count--;
-                if (count == 0) _countByRoleId.Remove(Role.Id);
-                else _countByRoleId[Role.Id] = count;
-            }
         }
 
         /// <summary>
@@ -441,22 +425,14 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public static SummonedCustomRole Get(Player player)
-        {
-            if (player is null) return null;
-            return _byPlayerId.TryGetValue(player.PlayerId, out var scr) ? scr : List.Where(scr2 => scr2.Player.PlayerId == player.PlayerId).FirstOrDefault();
-        }
+        public static SummonedCustomRole Get(Player player) => List.Where(scr => scr.Player.PlayerId == player.PlayerId).FirstOrDefault();
 
         /// <summary>
         /// Gets a <see cref="SummonedCustomRole"/> instance by the <see cref="ReferenceHub"/>
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public static SummonedCustomRole Get(ReferenceHub player)
-        {
-            if (player is null) return null;
-            return _byPlayerId.TryGetValue(player.PlayerId, out var scr) ? scr : List.Where(scr2 => scr2.Player.PlayerId == player.PlayerId).FirstOrDefault();
-        }
+        public static SummonedCustomRole Get(ReferenceHub player) => List.Where(scr => scr.Player.PlayerId == player.PlayerId).FirstOrDefault();
 
         /// <summary>
         /// Gets a <see cref="SummonedCustomRole"/> instance by the Id
@@ -494,18 +470,14 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         /// <param name="role"></param>
         /// <returns></returns>
-        public static int Count(ICustomRole role)
-        {
-            if (role is null) return 0;
-            return _countByRoleId.TryGetValue(role.Id, out int count) ? count : List.Where(scr => scr.Role == role).Count();
-        }
+        public static int Count(ICustomRole role) => List.Where(scr => scr.Role == role).Count();
 
         /// <summary>
         /// Gets the number of <see cref="SummonedCustomRole"/> with the same Id
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static int Count(int id) => _countByRoleId.TryGetValue(id, out int count) ? count : List.Where(scr => scr.Role.Id == id).Count();
+        public static int Count(int id) => List.Where(scr => scr.Role.Id == id).Count();
 
         /// <summary>
         /// Summon a new instance of <see cref="SummonedCustomRole"/> by spawning a player

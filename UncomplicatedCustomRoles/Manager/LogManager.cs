@@ -63,25 +63,9 @@ namespace UncomplicatedCustomRoles.Manager
             Logger.Error(message);
         }
 
-        public static void Silent(string message)
-        {
-            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "Silent", message));
-            
-            if (!DebugEnabled)
-                return;
+        public static void Silent(string message) => History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "Silent", message));
 
-            Logger.Raw($"[SILENT DEBUG] [{Plugin.Instance.Name}] {message}", ConsoleColor.DarkYellow);
-        }
-
-        public static void System(string message) 
-        {
-            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "System", message));
-            
-            if (!DebugEnabled)
-                return;
-
-            Logger.Raw($"[SYSTEM] [{Plugin.Instance.Name}] {message}", ConsoleColor.Blue);
-        }
+        public static void System(string message) => History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "System", message));
 
         internal static HttpStatusCode SendReport(out HttpContent content)
         {

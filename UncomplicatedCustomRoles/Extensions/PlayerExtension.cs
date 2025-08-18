@@ -29,7 +29,7 @@ namespace UncomplicatedCustomRoles.Extensions
         /// Check if a <see cref="Player"/> is currently a <see cref="ICustomRole"/>.
         /// </summary>
         /// <param name="player"></param>
-        /// <returns><see langword="true"/> if the player is a custom role.</returns>
+        /// <returns><see cref="true"/> if the player is a custom role.</returns>
         public static bool HasCustomRole(this Player player)
         {
             return SummonedCustomRole.TryGet(player, out _);
@@ -43,7 +43,7 @@ namespace UncomplicatedCustomRoles.Extensions
         public static void SetCustomRoleSync(this Player player, ICustomRole role)
         {
             SpawnManager.ClearCustomTypes(player);
-            SpawnManager.SummonCustomSubclass(player, role.Id);
+            SpawnManager.SummonCustomSubclass(player, role.Id, true);
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace UncomplicatedCustomRoles.Extensions
         public static void SetCustomRoleSync(this Player player, int role)
         {
             SpawnManager.ClearCustomTypes(player);
-            SpawnManager.SummonCustomSubclass(player, role);
+            SpawnManager.SummonCustomSubclass(player, role, true);
         }
 
         /// <summary>
@@ -96,7 +96,6 @@ namespace UncomplicatedCustomRoles.Extensions
         /// Try to get the current <see cref="SummonedCustomRole"/> of a <see cref="Player"/> if it has one.
         /// </summary>
         /// <param name="player"></param>
-        /// <param name="summonedInstance"></param>
         /// <returns>true if the player is currently <see cref="SummonedCustomRole"/></returns>
         public static bool TryGetSummonedInstance(this Player player, out SummonedCustomRole summonedInstance)
         {
@@ -108,7 +107,6 @@ namespace UncomplicatedCustomRoles.Extensions
         /// Try to get the current <see cref="SummonedCustomRole"/> of a <see cref="ReferenceHub"/> if it has one.
         /// </summary>
         /// <param name="player"></param>
-        /// <param name="summonedInstance"></param>
         /// <returns>true if the player is currently <see cref="SummonedCustomRole"/></returns>
         public static bool TryGetSummonedInstance(this ReferenceHub player, out SummonedCustomRole summonedInstance)
         {
@@ -120,14 +118,14 @@ namespace UncomplicatedCustomRoles.Extensions
         /// Get the current <see cref="SummonedCustomRole"/> of a <see cref="Player"/> if it has one.
         /// </summary>
         /// <param name="player"></param>
-        /// <returns>The current <see cref="SummonedCustomRole"/> if the player has one, otherwise <see langword="null"/></returns>
+        /// <returns>The current <see cref="SummonedCustomRole"/> if the player has one, otherwise <see cref="null"/></returns>
         public static SummonedCustomRole GetSummonedInstance(this Player player) => SummonedCustomRole.Get(player);
 
         /// <summary>
         /// Get the current <see cref="SummonedCustomRole"/> of a <see cref="ReferenceHub"/> if it has one.
         /// </summary>
         /// <param name="player"></param>
-        /// <returns>The current <see cref="SummonedCustomRole"/> if the player has one, otherwise <see langword="null"/></returns>
+        /// <returns></returns>
         public static SummonedCustomRole GetSummonedInstance(this ReferenceHub player) => SummonedCustomRole.Get(player);
 
         /// <summary>
@@ -140,16 +138,16 @@ namespace UncomplicatedCustomRoles.Extensions
         {
             if (SummonedCustomRole.TryGet(player, out SummonedCustomRole result))
             {
-                RoleTypeId role = result.Role.Role;
+                RoleTypeId Role = result.Role.Role;
                 result.Destroy();
 
                 if (doResetRole)
                 {
-                    Vector3 originalPosition = player.Position;
+                    Vector3 OriginalPosition = player.Position;
 
-                    player.SetRole(role, RoleChangeReason.Destroyed, RoleSpawnFlags.AssignInventory);
+                    player.SetRole(Role, RoleChangeReason.Destroyed, RoleSpawnFlags.AssignInventory);
 
-                    player.Position = originalPosition;
+                    player.Position = OriginalPosition;
                 }
 
                 return true;
@@ -167,16 +165,15 @@ namespace UncomplicatedCustomRoles.Extensions
         {
             if (!NicknameSync.ValidateCustomInfo(value, out string error))
             {
-                var accepted = string.Join(", ", SpawnManager.colorMap.Values.Select(h => $"<color={h}>{h}</color>"));
-                LogManager.Error($"CustomInfo color tags is not correct. Setting CustomInfo to empty. Accepted: {accepted}\nError: {error}");
+                LogManager.Error($"CustomInfo color tags is not correct. Setting CustomInfo to empty.\nError: {error}");
                 value = string.Empty;
             }
-            string nick = player.DisplayName.StripColorTags().Replace("<color=#855439>*</color>", "").Trim();
+            string nick = player.DisplayName.Replace("<color=#855439>*</color>", "");
             player.InfoArea &= ~PlayerInfoArea.Nickname;
             player.InfoArea = string.IsNullOrEmpty(value)
                 ? player.InfoArea & ~PlayerInfoArea.CustomInfo
                 : player.InfoArea | PlayerInfoArea.CustomInfo;
-            player.CustomInfo = string.IsNullOrEmpty(value) ? nick : $"{ProcessCustomInfo(value)}\n{nick}";
+            player.CustomInfo = $"{ProcessCustomInfo(value)}\n{nick}";
         }
         
         /// <summary>
@@ -189,24 +186,16 @@ namespace UncomplicatedCustomRoles.Extensions
             player.InfoArea &= ~PlayerInfoArea.Nickname;
         
             string customInfo = PlaceholderManager.ApplyPlaceholders(role.CustomInfo, player, role);
-            string roleName = role.Name.StripColorTags(); // Strip tags from role name text
-            string nick = player.DisplayName.StripColorTags().Replace("<color=#855439>*</color>", "").Trim();
+            string roleName = role.Name;
+            string nick = player.DisplayName.Replace("<color=#855439>*</color>", "");
             
-            bool customInfoValid = NicknameSync.ValidateCustomInfo(customInfo, out string ciError);
-            if (!customInfoValid)
+            if (!NicknameSync.ValidateCustomInfo(customInfo, out string error))
             {
-                var accepted = string.Join(", ", SpawnManager.colorMap.Values.Select(h => $"<color={h}>{h}</color>"));
-                LogManager.Error($"CustomInfo color tags is not correct. Accepted: {accepted}\nRole: {role}.\nError: {ciError}");
-                // If custominfo is wrong, show default info (nothing custom)
-                player.InfoArea &= ~PlayerInfoArea.CustomInfo;
-                player.InfoArea |= PlayerInfoArea.Role | PlayerInfoArea.Nickname;
-                return;
+                LogManager.Error($"CustomInfo color tags is not correct. Setting CustomInfo to empty.\nRole: {role}.\nError: {error}");
+                customInfo = string.Empty;
             }
             
-            // If role name contains any color tag but custom info has none, revert to default
-            bool customInfoHasColor = customInfo?.IndexOf("<color=", StringComparison.OrdinalIgnoreCase) >= 0;
-            bool roleNameHasColor = role.Name.IndexOf("<color=", StringComparison.OrdinalIgnoreCase) >= 0;
-            if (!customInfoHasColor && roleNameHasColor)
+            if (!customInfo.Contains("<color=#") && roleName.Contains("<color=#"))
             {
                 LogManager.Error("Role name color requires custom info color. Setting RoleName to default. Role: " + role);
                 player.InfoArea &= ~PlayerInfoArea.CustomInfo;
@@ -218,20 +207,19 @@ namespace UncomplicatedCustomRoles.Extensions
             if (string.IsNullOrEmpty(customInfo))
             {
                 LogManager.Silent("Applying only role name (NICK-ROLE)");
-                if (!NicknameSync.ValidateCustomInfo(role.Name, out string errorRole))
+                if (!NicknameSync.ValidateCustomInfo(roleName, out string errorRole))
                 {
-                    var accepted = string.Join(", ", SpawnManager.colorMap.Values.Select(h => $"<color={h}>{h}</color>"));
-                    LogManager.Error($"RoleName color tags is not correct. Showing default PlayerInfo. Accepted: {accepted}\nRole: {role}.\nError: {errorRole}");
+                    LogManager.Error($"RoleName color tags is not correct. Showing default PlayerInfo.\nRole: {role}.\nError: {errorRole}");
                     player.InfoArea &= ~PlayerInfoArea.CustomInfo;
                     player.InfoArea |= PlayerInfoArea.Role | PlayerInfoArea.Nickname;
                     return;
                 }
-                player.CustomInfo = $"{nick}\n{role.Name}"; // keep original roleName formatting if valid
+                player.CustomInfo = $"{nick}\n{roleName}";
             }
             else
             {
                 LogManager.Silent("Applying role name and custom info (CI-NICK-ROLE)");
-                player.CustomInfo = $"{ProcessCustomInfo(customInfo)}\n{nick}\n{roleName}"; // roleName stripped of color tags per requirement
+                player.CustomInfo = $"{ProcessCustomInfo(customInfo)}\n{nick}\n{roleName}";
             }
         }
 
@@ -263,7 +251,7 @@ namespace UncomplicatedCustomRoles.Extensions
         // REF https://gitlab.com/exmod-team/EXILED/-/blob/master/EXILED/Exiled.API/Features/Player.cs?ref_type=heads#L2584
         internal static void ResetCategoryLimit(this Player player, ItemCategory category)
         {
-            int index = InventoryLimits.StandardCategoryLimits.Where(x => x.Value >= 0).OrderBy(x => x.Key).ToList().FindIndex(x => x.Key == category);
+            int index = InventorySystem.Configs.InventoryLimits.StandardCategoryLimits.Where(x => x.Value >= 0).OrderBy(x => x.Key).ToList().FindIndex(x => x.Key == category);
 
             if (index is -1) 
                 return;

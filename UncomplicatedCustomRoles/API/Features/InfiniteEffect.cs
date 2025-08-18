@@ -11,6 +11,7 @@
 using MEC;
 using PlayerRoles;
 using System.Collections.Generic;
+using System.Linq;
 using UncomplicatedCustomRoles.Events;
 using UnityEngine;
 
@@ -56,28 +57,12 @@ namespace UncomplicatedCustomRoles.API.Features
             {
                 SummonedCustomRole.InfiniteEffectActor();
 
-                var zones = global::Escape.EscapeZones;
-                if (zones != null && zones.Count > 0)
+                foreach (Bounds escapeZone in global::Escape.EscapeZones)
                 {
-                    foreach (var role in SummonedCustomRole.List)
-                    {
-                        if (!role.Player.IsSCP || !role.Role.CanEscape)
-                            continue;
+                    IEnumerable<SummonedCustomRole> escapingRoles = SummonedCustomRole.List.Where(role => role.Player.IsSCP && escapeZone.Contains(role.Player.Position) && role.Role.CanEscape);
 
-                        Vector3 pos = role.Player.Position;
-                        Bounds? found = null;
-                        foreach (Bounds escapeZone in zones)
-                        {
-                            if (escapeZone.Contains(pos))
-                            {
-                                found = escapeZone;
-                                break;
-                            }
-                        }
-
-                        if (found.HasValue)
-                            EventHandler.OnEscaping(new(role.Player.ReferenceHub, role.Player.Role, RoleTypeId.ChaosConscript, global::Escape.EscapeScenarioType.Custom, found.Value));
-                    }
+                    foreach (SummonedCustomRole role in escapingRoles)
+                        EventHandler.OnEscaping(new(role.Player.ReferenceHub, role.Player.Role, RoleTypeId.ChaosConscript, global::Escape.EscapeScenarioType.Custom, escapeZone));
                 }
 
                 yield return Timing.WaitForSeconds(2.5f);

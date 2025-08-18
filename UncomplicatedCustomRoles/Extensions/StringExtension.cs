@@ -9,19 +9,32 @@
  */
 
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace UncomplicatedCustomRoles.Extensions
 {
     public static class StringExtension
     {
+        public static readonly char[] _intChars = new[]
+        {
+            '0',
+            '1',
+            '2',
+            '3',
+            '4',
+            '5',
+            '6',
+            '7',
+            '8',
+            '9'
+        };
+
         public static string ToInt(this string str, string separator = "")
         {
             List<char> result = new();
 
             foreach (char ch in str)
-                // Faster than LINQ Contains on every iteration
-                if (ch >= '0' && ch <= '9')
+                if (_intChars.Contains(ch))
                     result.Add(ch);
 
             return string.Join(separator, result);
@@ -29,25 +42,18 @@ namespace UncomplicatedCustomRoles.Extensions
 
         public static string BulkReplace(this string str, Dictionary<string, object> replace, string matrix = null)
         {
-            // Avoid LINQ allocations each call; check null inline
-            foreach (var kvp in replace)
-            {
-                if (kvp.Value is null)
-                    continue;
-
-                var key = matrix is null ? kvp.Key : matrix.Replace("<val>", kvp.Key);
-                str = str.Replace(key, kvp.Value.ToString());
-            }
+            foreach (KeyValuePair<string, object> kvp in replace.Where(kvp => kvp.Value is not null))
+                str = str.Replace(matrix is null ? kvp.Key : matrix.Replace("<val>", kvp.Key), kvp.Value?.ToString());
 
             return str;
         }
 
         public static string GenerateWithBuffer(this string str, int bufferSize)
         {
-            int diff = bufferSize - str.Length;
-            if (diff <= 0)
-                return str;
-            return str + new string(' ', diff);
+            for (int a = str.Length; a < bufferSize; a++)
+                str += " ";
+
+            return str;
         }
 
         public static string RemoveBracketsOnEndOfName(this string name)
@@ -58,20 +64,6 @@ namespace UncomplicatedCustomRoles.Extensions
                 name = name.Remove(bracketStart, name.Length - bracketStart);
 
             return name;
-        }
-
-        /// <summary>
-        /// Removes Unity rich text color tags, leaving inner text intact.
-        /// Handles <color=#RRGGBB>, <color=#RRGGBBAA>, and other <color=...> forms.
-        /// </summary>
-        public static string StripColorTags(this string input)
-        {
-            if (string.IsNullOrEmpty(input))
-                return input;
-            // Remove opening <color=...> tags
-            string withoutOpen = Regex.Replace(input, "<color=[^>]+>", string.Empty, RegexOptions.IgnoreCase);
-            // Remove closing </color> tags
-            return Regex.Replace(withoutOpen, "</color>", string.Empty, RegexOptions.IgnoreCase);
         }
     }
 }
