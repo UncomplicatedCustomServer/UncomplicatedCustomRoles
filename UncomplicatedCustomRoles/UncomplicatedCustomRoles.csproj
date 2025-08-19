@@ -60,6 +60,7 @@
     <Compile Include="API\Features\Behaviour\HealthBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\HumeShieldBehaviour.cs" />
     <Compile Include="API\Features\CustomModules\ColorfulNickname.cs" />
+    <Compile Include="API\Features\CustomModules\ColorfulRaName.cs" />
     <Compile Include="API\Features\CustomModules\CustomModule.cs" />
     <Compile Include="API\Features\CustomModules\CustomPermissions.cs" />
     <Compile Include="API\Features\CustomModules\CustomScpAnnouncer.cs" />

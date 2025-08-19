@@ -9,13 +9,9 @@
  */
 
 using Exiled.Events.EventArgs.Interfaces;
-using Exiled.Loader;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using Exiled.Events.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
 
@@ -28,13 +24,14 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets the <see cref="SummonedCustomRole"/> instance related to this <see cref="CustomRoleEventHandler"/>
         /// </summary>
-        [JsonIgnore] // I love every plugin dev
-        [YamlDotNet.Serialization.YamlIgnore] // They don't deserve that :/
         public SummonedCustomRole SummonedInstance { get; }
 
+        /// <summary>
+        /// Gets the <see cref="ICustomRole>"/> of this <see cref="CustomRoleEventHandler"/>
+        /// </summary>
         public ICustomRole Role => SummonedInstance.Role;
 
-        public Dictionary<Type, Tuple<object, MethodInfo>> Listeners { get; } = new();
+        private Dictionary<Type, Tuple<object, MethodInfo>> _listeners { get; } = new();
 
         internal CustomRoleEventHandler(SummonedCustomRole summonedInstance)
         {
@@ -57,7 +54,7 @@ namespace UncomplicatedCustomRoles.API.Features
                         bool isOverride = derivedMethod != null && derivedMethod.DeclaringType != baseType;
 
                         if (isOverride && derivedMethod.GetParameters().Length > 0)
-                            Listeners.Add(derivedMethod.GetParameters()[0].ParameterType, new(customRoleEventsRole, derivedMethod));
+                            _listeners.Add(derivedMethod.GetParameters()[0].ParameterType, new(customRoleEventsRole, derivedMethod));
                     }
                 }
             }
@@ -73,11 +70,11 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <param name="eventArgs"></param>
         public void InvokeSafely(IExiledEvent eventArgs)
         {
-            if (eventArgs is IPlayerEvent playerEventArgs && playerEventArgs.Player is not null && playerEventArgs.Player.Id == SummonedInstance.Player.Id && Role is EventCustomRole && Listeners.ContainsKey(eventArgs.GetType()))
+            if (eventArgs is IPlayerEvent playerEventArgs && playerEventArgs.Player is not null && playerEventArgs.Player.Id == SummonedInstance.Player.Id && Role is EventCustomRole && _listeners.ContainsKey(eventArgs.GetType()))
             {
-                MethodInfo method = Listeners[eventArgs.GetType()].Item2;
+                MethodInfo method = _listeners[eventArgs.GetType()].Item2;
                 object[] args = new[] { eventArgs };
-                method?.Invoke(Listeners[eventArgs.GetType()].Item1, args);
+                method?.Invoke(_listeners[eventArgs.GetType()].Item1, args);
                 eventArgs = args[0] as IPlayerEvent;
             }
         }
