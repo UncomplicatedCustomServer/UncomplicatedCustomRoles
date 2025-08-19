@@ -114,7 +114,6 @@ namespace UncomplicatedCustomRoles
             SpawnPointApiCommunicator.Init();
 
             // Patch with Harmony
-            Harmony.DEBUG = true;
             _harmony = new($"com.ucs.ucr_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
             //PlayerInfoPatch.TryPatchCedMod();
