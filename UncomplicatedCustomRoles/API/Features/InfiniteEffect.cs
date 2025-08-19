@@ -59,7 +59,7 @@ namespace UncomplicatedCustomRoles.API.Features
 
                 foreach (Bounds escapeZone in global::Escape.EscapeZones)
                 {
-                    IEnumerable<SummonedCustomRole> escapingRoles = SummonedCustomRole.List.Where(role => role.Player.IsSCP && escapeZone.Contains(role.Player.Position) && role.Role.CanEscape);
+                    IEnumerable<SummonedCustomRole> escapingRoles = SummonedCustomRole.List.Values.Where(role => role.Player.IsSCP && escapeZone.Contains(role.Player.Position) && role.Role.CanEscape);
 
                     foreach (SummonedCustomRole role in escapingRoles)
                         EventHandler.OnEscaping(new(role.Player.ReferenceHub, role.Player.Role, RoleTypeId.ChaosConscript, global::Escape.EscapeScenarioType.Custom, escapeZone));

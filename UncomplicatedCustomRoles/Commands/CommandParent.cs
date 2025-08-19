@@ -50,7 +50,7 @@ namespace UncomplicatedCustomRoles.Commands
 
         protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            if (arguments.Count() == 0)
+            if (!arguments.Any())
             {
                 // Help page
                 response = $"\n>> UncomplicatedCustomRoles v{Plugin.Instance.Version}{(VersionManager.VersionInfo?.CustomName is not null ? $" '{VersionManager.VersionInfo.CustomName}'" : string.Empty)} <<\nby {Plugin.Instance.Author}\n\nAvailable commands:";
@@ -71,7 +71,7 @@ namespace UncomplicatedCustomRoles.Commands
                     Arguments.Add(Argument);
                 }
 
-                IUCRCommand Command = RegisteredCommands.Where(command => command.Name == arguments.At(0)).FirstOrDefault();
+                IUCRCommand Command = RegisteredCommands.FirstOrDefault(command => command.Name == arguments.At(0));
 
                 if (Command is not null)
                     if (sender.CheckPermission(PlayerPermissions.LongTermBanning)) // Fix for the absence of EXILED.Permissions

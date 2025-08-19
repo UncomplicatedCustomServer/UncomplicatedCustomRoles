@@ -42,7 +42,7 @@ namespace UncomplicatedCustomRoles.API.Features
         public Vector3 RoomRotation => new(RoomRotationBase.First, RoomRotationBase.Second, RoomRotationBase.Third);
 
         [JsonIgnore]
-        public Room Room => RoomId != "" ? Room.List.Where(room => room.GameObject.name == RoomId).FirstOrDefault() : null;
+        public Room Room => RoomId != "" ? Room.List.FirstOrDefault(room => room.GameObject.name == RoomId) : null;
 
         [JsonIgnore]
         public bool HasRoom => Room is not null;
@@ -82,7 +82,7 @@ namespace UncomplicatedCustomRoles.API.Features
 
         public override string ToString() => $"SpawnPoint '{Name}' at {(Room != null ? Room.Name : "RoomWasNotFound")} ({Position} @ {RoomRotation}) [{HasRoom}]";
 
-        public static SpawnPoint Get(string name) => List.Where(sp => sp.Name == name).FirstOrDefault();
+        public static SpawnPoint Get(string name) => List.FirstOrDefault(sp => sp.Name == name);
 
         public static bool TryGet(string name, out SpawnPoint spawnPoint)
         {
@@ -90,6 +90,6 @@ namespace UncomplicatedCustomRoles.API.Features
             return spawnPoint != null;
         }
 
-        public static bool Exists(string name) => List.Where(sp => sp.Name == name).Count() > 0;
+        public static bool Exists(string name) => List.Any(sp => sp.Name == name);
     }
 }

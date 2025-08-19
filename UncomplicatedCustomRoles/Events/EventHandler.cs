@@ -14,6 +14,7 @@ using MEC;
 using PlayerRoles;
 using UncomplicatedCustomRoles.Extensions;
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using UncomplicatedCustomRoles.API.Features;
 using CustomPlayerEffects;
@@ -34,10 +35,9 @@ namespace UncomplicatedCustomRoles.Events
 {
     internal class EventHandler
     {
-        private static List<int> RagdollAppearanceQueue { get; } = new();
+        private static HashSet<int> RagdollAppearanceQueue { get; } = new();
 
-        private static Dictionary<int, Tuple<CustomScpAnnouncer, DateTimeOffset>> TerminationQueue { get; } = new();
-
+        private static ConcurrentDictionary<int, Tuple<CustomScpAnnouncer, DateTimeOffset>> TerminationQueue { get; } = new();
         public static void OnWaitingForPlayers()
         {
             Plugin.Instance.OnFinishedLoadingPlugins();
@@ -54,10 +54,10 @@ namespace UncomplicatedCustomRoles.Events
         public static void OnJoined(PlayerJoinedEventArgs ev)
         {
             // Sync role appearance
-            foreach (SummonedCustomRole role in SummonedCustomRole.List.Where(role => role.Appearance != RoleTypeId.None))
+            foreach (SummonedCustomRole role in SummonedCustomRole.List.Values.Where(role => role.Appearance != RoleTypeId.None))
                 role.Player.ChangeAppearance(role.Appearance, new Player[] { ev.Player });
 
-            foreach (SummonedCustomRole role in SummonedCustomRole.List.Where(role => role.Scale != Vector3.one))
+            foreach (SummonedCustomRole role in SummonedCustomRole.List.Values.Where(role => role.Scale != Vector3.one))
                 role.Player.Scale = role.Scale;
         }
         
@@ -136,7 +136,7 @@ namespace UncomplicatedCustomRoles.Events
                     RagdollAppearanceQueue.Add(ev.Player.PlayerId);
 
                 if (customRole.TryGetModule(out CustomScpAnnouncer announcer) && ev.Player.ReferenceHub.GetTeam() is not Team.SCPs)
-                    TerminationQueue.Add(ev.Player.PlayerId, new(announcer, DateTimeOffset.Now));
+                    TerminationQueue[ev.Player.PlayerId] = new(announcer, DateTimeOffset.Now);
             }
         }
 
@@ -145,7 +145,7 @@ namespace UncomplicatedCustomRoles.Events
             if (TerminationQueue.TryGetValue(ev.Player.PlayerId, out Tuple<CustomScpAnnouncer, DateTimeOffset> data) && (DateTimeOffset.Now - data.Item2).Milliseconds < 1300)
                 SpawnManager.HandleRecontainmentAnnoucement(ev.DamageHandler, data.Item1);
 
-            TerminationQueue.TryRemove(ev.Player.PlayerId);
+            TerminationQueue.TryRemove(ev.Player.PlayerId, out _);
 
             SpawnManager.ClearCustomTypes(ev.Player);
         }
@@ -389,7 +389,7 @@ namespace UncomplicatedCustomRoles.Events
 
         public static void OnRequestedRaPlayerInfo(PlayerRequestedRaPlayerInfoEventArgs ev)
         {
-            ev.InfoBuilder.Append(SummonedCustomRole.TryParseRemoteAdmin(ev.Target.ReferenceHub));
+            SummonedCustomRole.TryParseRemoteAdmin(ev.Target.ReferenceHub, ev.InfoBuilder);
         }
         
         public static void OnRaPlayerListAddingPlayer(PlayerRaPlayerListAddingPlayerEventArgs ev)
