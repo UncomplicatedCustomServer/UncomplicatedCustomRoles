@@ -219,14 +219,14 @@ namespace UncomplicatedCustomRoles.API.Features
         public override string ToString() => $"{Name} ({Id})";
 
         /// <summary>
-        /// Invoked when the custom role is spawned
+        /// Invoked when the Custom Role is spawned
         /// </summary>
         /// <param name="role"></param>
         public virtual void OnSpawned(SummonedCustomRole role)
         { }
         
         /// <summary>
-        /// Invoked when the custom role is spawned
+        /// Invoked when the Custom Role is spawned
         /// </summary>
         /// <param name="role"></param>
         public virtual void OnRemoved(SummonedCustomRole role)
