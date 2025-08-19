@@ -8,6 +8,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Collections.Concurrent;
 using CommandSystem;
 using LabApi.Features.Wrappers;
 using System.Collections.Generic;
@@ -19,7 +20,6 @@ using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Commands
 {
-#pragma warning disable CS0618 // Obsolete
     public class Reload : IUCRCommand
     {
         public string Name { get; } = "reload";
@@ -36,8 +36,8 @@ namespace UncomplicatedCustomRoles.Commands
                 return false;
             }
 
-            Dictionary<int, ICustomRole> oldRoles = CustomRole.CustomRoles.Clone();
-
+            ConcurrentDictionary<int, ICustomRole> oldRoles = CustomRole.CustomRoles.Clone();
+            
             CustomRole.CustomRoles = new();
             CustomRole.NotLoadedRoles.Clear();
             CustomRole.OutdatedRoles.Clear();

@@ -9,6 +9,7 @@
  */
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace UncomplicatedCustomRoles.Extensions
@@ -61,6 +62,17 @@ namespace UncomplicatedCustomRoles.Extensions
             return Data;
         }
 
+        
+        public static Dictionary<string, object> ConvertKeyToString<TKey, TValue>(this Dictionary<TKey, TValue> dictionary)
+        {
+            Dictionary<string, object> result = new();
+
+            foreach (KeyValuePair<TKey, TValue> kvp in dictionary)
+                result.Add(kvp.Key.ToString(), kvp.Value);
+
+            return result;
+        }
+        
         public static Dictionary<string, string> ConvertToString<TKey, TValue>(this Dictionary<TKey, TValue> dictionary)
         {
             Dictionary<string, string> result = new();
@@ -77,6 +89,16 @@ namespace UncomplicatedCustomRoles.Extensions
 
             foreach (KeyValuePair<TKey, TValue> kvp in dictionary)
                 newDictionary.Add(kvp.Key, kvp.Value);
+
+            return newDictionary;
+        }
+        
+        public static ConcurrentDictionary<TKey, TValue> Clone<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> dictionary)
+        {
+            ConcurrentDictionary<TKey, TValue> newDictionary = new();
+
+            foreach (KeyValuePair<TKey, TValue> kvp in dictionary)
+                newDictionary[kvp.Key] =  kvp.Value;
 
             return newDictionary;
         }

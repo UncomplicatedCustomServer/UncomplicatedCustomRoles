@@ -91,7 +91,7 @@ namespace UncomplicatedCustomRoles.Manager
                 }
 
                 // This will allow us to avoid the loop of another OnSpawning
-                Spawn.Spawning.TryAdd(player.PlayerId);
+                Spawn.Spawning.Add(player.PlayerId);
 
                 Vector3 BasicPosition = player.Position;
 
@@ -163,8 +163,9 @@ namespace UncomplicatedCustomRoles.Manager
 
                 Player.ResetInventory(Role.Inventory);
 
-                LogManager.Silent($"Can we give any CustomItem? {Role.CustomItemsInventory.Count()}");
-                if (Role.CustomItemsInventory.Count() > 0)
+                LogManager.Silent($"Can we give any CustomItem? {Role.CustomItemsInventory.Count}");
+                
+                if (Role.CustomItemsInventory.Any())
                     foreach (uint itemId in Role.CustomItemsInventory)
                         if (!Player.IsInventoryFull)
                             try
@@ -183,7 +184,7 @@ namespace UncomplicatedCustomRoles.Manager
 
                 Player.ClearAmmo();
 
-                if (Role.Ammo is not null && Role.Ammo.GetType() == typeof(Dictionary<ItemType, ushort>) && Role.Ammo.Count() > 0)
+                if (Role.Ammo is not null && Role.Ammo.GetType() == typeof(Dictionary<ItemType, ushort>) && Role.Ammo.Any())
                     foreach (KeyValuePair<ItemType, ushort> Ammo in Role.Ammo)
                     {
                         if (Ammo.Value > Player.GetAmmoLimit(Ammo.Key))
@@ -192,14 +193,7 @@ namespace UncomplicatedCustomRoles.Manager
                         Player.AddAmmo(Ammo.Key, Ammo.Value);
                     }
 
-                Player.ReferenceHub.nicknameSync.Network_playerInfoToShow |= PlayerInfoArea.Nickname;
-
                 PlayerInfoArea InfoArea = Player.ReferenceHub.nicknameSync.Network_playerInfoToShow;
-
-                if (Role.OverrideRoleName)
-                    Player.ApplyCustomInfoAndRoleName(PlaceholderManager.ApplyPlaceholders(Role.CustomInfo, Player, Role), Role.Name);
-                else
-                    Player.ApplyClearCustomInfo(PlaceholderManager.ApplyPlaceholders(Role.CustomInfo, Player, Role));
 
                 // Apply every required stats
                 Role.Health?.Apply(Player);
@@ -208,10 +202,10 @@ namespace UncomplicatedCustomRoles.Manager
                 Role.Stamina?.Apply(Player);
 
                 if (Role.Scale != Vector3.zero && Role.Scale != Vector3.one)
-                    Player.SetScale(Role.Scale);
+                    Player.Scale = Role.Scale;
 
                 List<IEffect> PermanentEffects = new();
-                if (Role.Effects.Count() > 0 && Role.Effects != null)
+                if (Role.Effects.Any() && Role.Effects != null)
                 {
                     foreach (IEffect effect in Role.Effects)
                     {
@@ -260,7 +254,7 @@ namespace UncomplicatedCustomRoles.Manager
                     else
                         Player.DisplayName = Nick;
 
-                    if (Plugin.Instance.Config.OverrideRpNames) 
+                    if (Plugin.Instance.Config.OverrideRpNames)
                         Timing.CallDelayed(3f, () => // Override RPNames shit (sowwy andrew)
                         {
                             if (Role.Nickname.Contains(","))
@@ -271,6 +265,11 @@ namespace UncomplicatedCustomRoles.Manager
 
                     ChangedNick = true;
                 }
+                
+                if (Role.OverrideRoleName)
+                    Player.ApplyCustomInfoAndRoleName(Role);
+                else
+                    Player.ApplyClearCustomInfo(PlaceholderManager.ApplyPlaceholders(Role.CustomInfo, Player, Role));
 
                 // We need the role appereance also here!
                 if (Role.RoleAppearance != Role.Role)
@@ -413,7 +412,7 @@ namespace UncomplicatedCustomRoles.Manager
             };
 
             foreach (ICustomRole Role in CustomRole.CustomRoles.Values.Where(cr => cr.SpawnSettings is not null))
-                if (!Role.IgnoreSpawnSystem && Player.List.Count(pl => !pl.IsHost) >= Role.SpawnSettings.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
+                if (!Role.IgnoreSpawnSystem && Player.ReadyList.Count(pl => !pl.IsHost) >= Role.SpawnSettings.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
                 {
                     if (Role.SpawnSettings.RequiredPermission is not null && Role.SpawnSettings.RequiredPermission.Length > 0 && !(player as ICommandSender).CheckPermission(Role.SpawnSettings.RequiredPermission))
                     {
@@ -433,7 +432,7 @@ namespace UncomplicatedCustomRoles.Manager
             }
 
             if (RolePercentage.ContainsKey(NewRole))
-                if (UnityEngine.Random.Range(0, 100) < RolePercentage[NewRole].Count())
+                if (UnityEngine.Random.Range(0, 100) < RolePercentage[NewRole].Count)
                     return CustomRole.CustomRoles[RolePercentage[NewRole].RandomItem().Id];
 
             return null;
@@ -464,7 +463,7 @@ namespace UncomplicatedCustomRoles.Manager
         private static IEnumerable<Player> LoadAppearanceAffectedPlayers(Player target)
         {
             List<Player> result = new();
-            foreach (Player player in Player.List.Where(p => p.PlayerId != target.PlayerId))
+            foreach (Player player in Player.ReadyList.Where(p => p.PlayerId != target.PlayerId))
                 if (player.TryGetSummonedInstance(out SummonedCustomRole role) && !role.HasModule<NotAffectedByAppearance>())
                     result.Add(player);
                 else if (!player.TryGetSummonedInstance(out _))

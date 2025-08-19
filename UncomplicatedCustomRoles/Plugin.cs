@@ -15,9 +15,9 @@ using Handler = UncomplicatedCustomRoles.Events.EventHandler;
 using PlayerHandler = LabApi.Events.Handlers.PlayerEvents;
 using Scp049Handler = LabApi.Events.Handlers.Scp049Events;
 using Scp096Handler = LabApi.Events.Handlers.Scp096Events;
+using Scp079Handler  = LabApi.Events.Handlers.Scp079Events;
 using ServerHandler = LabApi.Events.Handlers.ServerEvents;
 using WarheadHandler = LabApi.Events.Handlers.WarheadEvents;
-// MISSING using Scp330Handler = Exiled.Events.Handlers.Scp330;
 using UncomplicatedCustomRoles.API.Features;
 using HarmonyLib;
 using UncomplicatedCustomRoles.Manager.NET;
@@ -36,19 +36,17 @@ namespace UncomplicatedCustomRoles
 
         public override string Description => "Customize your SCP:SL server with Custom Roles!";
 
-        public override string Author => "FoxWorn3365, Dr.Agenda";
+        public override string Author => "FoxWorn3365, Dr.Agenda, MedveMarci";
 
-        public override Version Version { get; } = new(8, 0, 0, 2);
+        public override Version Version { get; } = new(9, 0, 0, 0);
 
-        public override Version RequiredApiVersion => new(1, 0, 2);
+        public override Version RequiredApiVersion => new(1, 1, 1);
 
         public override LoadPriority Priority => LoadPriority.Highest;
 
-        public Assembly Assembly => Assembly.GetExecutingAssembly();
+        public static Assembly Assembly => Assembly.GetExecutingAssembly();
 
         internal static Plugin Instance;
-
-        internal Handler Handler;
 
         internal static HttpManager HttpManager;
 
@@ -62,7 +60,6 @@ namespace UncomplicatedCustomRoles
             LogManager.History.Clear();
             API.Features.Escape.Bucket.Clear();
 
-            Handler = new();
             HttpManager = new("ucr");
 
             CustomRole.CustomRoles.Clear();
@@ -84,11 +81,16 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Hurting += Handler.OnHurting;
             PlayerHandler.Hurt += Handler.OnHurt;
             PlayerHandler.PickingUpItem += Handler.OnPickingUp;
-            PlayerHandler.Joined += Handler.OnVerified;
+            PlayerHandler.RequestedRaPlayerInfo += Handler.OnRequestedRaPlayerInfo;
+            PlayerHandler.RaPlayerListAddingPlayer += Handler.OnRaPlayerListAddingPlayer;
+            PlayerHandler.Joined += Handler.OnJoined;
+            PlayerHandler.DamagingWindow += Handler.OnDamagingWindow;
 
             Scp049Handler.ResurrectingBody += Handler.OnFinishingRecall;
 
             Scp096Handler.AddingTarget += Handler.OnAddingTarget;
+            
+            Scp079Handler.Recontaining += Handler.OnScp079Recontainment;
 
             PlayerHandler.InteractingScp330 += Handler.OnInteractingScp330;
 
@@ -117,8 +119,6 @@ namespace UncomplicatedCustomRoles
             _harmony.PatchAll();
 
             PlayerEventPrefix.Patch(_harmony);
-
-            PlayerInfoPatch.TryPatchCedMod();
         }
 
         public override void Disable()
@@ -145,19 +145,22 @@ namespace UncomplicatedCustomRoles
             PlayerHandler.Hurting -= Handler.OnHurting;
             PlayerHandler.Hurt -= Handler.OnHurt;
             PlayerHandler.PickingUpItem -= Handler.OnPickingUp;
-            PlayerHandler.Joined -= Handler.OnVerified;
+            PlayerHandler.RequestedRaPlayerInfo -= Handler.OnRequestedRaPlayerInfo;
+            PlayerHandler.RaPlayerListAddingPlayer -= Handler.OnRaPlayerListAddingPlayer;
+            PlayerHandler.Joined -= Handler.OnJoined;
+            PlayerHandler.DamagingWindow -= Handler.OnDamagingWindow;
 
             Scp049Handler.ResurrectingBody -= Handler.OnFinishingRecall;
 
             Scp096Handler.AddingTarget -= Handler.OnAddingTarget;
 
+            Scp079Handler.Recontaining -= Handler.OnScp079Recontainment;
+            
             PlayerHandler.InteractingScp330 -= Handler.OnInteractingScp330;
 
             WarheadHandler.Starting -= Handler.OnWarheadLever;
 
             HttpManager.UnregisterEvents();
-
-            Handler = null;
 
             Instance = null;
         }
@@ -178,14 +181,6 @@ namespace UncomplicatedCustomRoles
                 LogManager.Info($"Thanks for using UncomplicatedCustomRoles v{Version.ToString(3)} by {Author}!", ConsoleColor.Blue);
                 LogManager.Info("To receive support and to stay up-to-date, join our official Discord server: https://discord.gg/5StRGu8EJV", ConsoleColor.DarkYellow);
             }
-        }
-
-        /// <summary>
-        /// Invoked before EXILED starts to unload every plugin
-        /// </summary>
-        public void OnStartingUnloadingPlugins()
-        {
-            ScriptedEvents.UnregisterCustomActions();
         }
     }
 }

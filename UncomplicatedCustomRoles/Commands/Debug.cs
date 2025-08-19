@@ -41,7 +41,7 @@ namespace UncomplicatedCustomRoles.Commands
             }
 
             object obj = null;
-            Type target = args[0] is "static" ? Plugin.Instance.Assembly.GetType(args[1]) : null;
+            Type target = args[0] is "static" ? Plugin.Assembly.GetType(args[1]) : null;
 
             if (target is null && args[0] is "static")
             {

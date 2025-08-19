@@ -72,7 +72,7 @@ namespace UncomplicatedCustomRoles.API.Features
 
         internal static void InvokeAll(IPlayerEvent ev)
         {
-            foreach (SummonedCustomRole summonedCustomRole in SummonedCustomRole.List)
+            foreach (SummonedCustomRole summonedCustomRole in SummonedCustomRole.List.Values)
                 summonedCustomRole.EventHandler?.InvokeSafely(ev);
         }
     }

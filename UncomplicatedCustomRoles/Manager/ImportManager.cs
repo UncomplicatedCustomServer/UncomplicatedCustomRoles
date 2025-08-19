@@ -25,10 +25,7 @@ namespace UncomplicatedCustomRoles.Manager
     {
         public static readonly List<LabApi.Loader.Features.Plugins.Plugin> ActivePlugins = new();
 
-        public static readonly List<Assembly> AvailableAssemblies = new()
-        {
-            Plugin.Instance.Assembly
-        };
+        public static readonly List<Assembly> AvailableAssemblies = new();
 
         public const float WaitingTime = 5f;
 
@@ -47,7 +44,7 @@ namespace UncomplicatedCustomRoles.Manager
         {
             ActivePlugins.Clear();
             AvailableAssemblies.Clear();
-            AvailableAssemblies.Add(Plugin.Instance.Assembly);
+            AvailableAssemblies.Add(Plugin.Assembly);
         }
 
         private static void Actor()
@@ -55,7 +52,7 @@ namespace UncomplicatedCustomRoles.Manager
             LogManager.Debug($"Checking for CustomRole registered in other plugins to import...");
 
             _alreadyLoaded = true;
-
+            AvailableAssemblies.Add(Plugin.Assembly);
             foreach (KeyValuePair<LabApi.Loader.Features.Plugins.Plugin, Assembly> plugin in PluginLoader.Plugins.Where(plugin => plugin.Key.Name != Plugin.Instance.Name))
             {
                 AvailableAssemblies.Add(plugin.Value);

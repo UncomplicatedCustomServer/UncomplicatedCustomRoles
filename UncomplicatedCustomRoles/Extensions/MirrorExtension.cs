@@ -177,7 +177,7 @@ namespace UncomplicatedCustomRoles.Extensions
         /// <param name="type">Model type.</param>
         /// <param name="skipJump">Whether to skip the little jump that works around an invisibility issue.</param>
         /// <param name="unitId">The UnitNameId to use for the player's new role, if the player's new role uses unit names. (is NTF).</param>
-        public static void ChangeAppearance(this Player player, RoleTypeId type, bool skipJump = false, byte unitId = 0) => ChangeAppearance(player, type, Player.List.Where(x => x != player), skipJump, unitId);
+        public static void ChangeAppearance(this Player player, RoleTypeId type, bool skipJump = false, byte unitId = 0) => ChangeAppearance(player, type, Player.ReadyList.Where(x => x != player), skipJump, unitId);
 
         /// <summary>
         /// Change <see cref="Player"/> character model for appearance.
@@ -350,7 +350,7 @@ namespace UncomplicatedCustomRoles.Extensions
                 netId = identity.netId,
             };
 
-            foreach (Player ply in Player.List)
+            foreach (Player ply in Player.ReadyList)
             {
                 ply.Connection.Send(objectDestroyMessage, 0);
                 SendSpawnMessageMethodInfo?.Invoke(null, new object[] { identity, ply.Connection });
@@ -370,7 +370,7 @@ namespace UncomplicatedCustomRoles.Extensions
                 netId = identity.netId,
             };
 
-            foreach (Player ply in Player.List)
+            foreach (Player ply in Player.ReadyList)
             {
                 ply.Connection.Send(objectDestroyMessage, 0);
                 SendSpawnMessageMethodInfo?.Invoke(null, new object[] { identity, ply.Connection });
@@ -493,7 +493,7 @@ namespace UncomplicatedCustomRoles.Extensions
                 netId = identity.netId,
             };
 
-            foreach (Player player in Player.List)
+            foreach (Player player in Player.ReadyList)
             {
                 player.Connection.Send(objectDestroyMessage, 0);
                 SendSpawnMessageMethodInfo.Invoke(null, new object[] { identity, player.Connection });

@@ -8,9 +8,11 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Collections.Concurrent;
 using PlayerRoles;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.API.Interfaces;
@@ -20,19 +22,18 @@ using UnityEngine;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
-#pragma warning disable CS0618 // Il tipo o il membro è obsoleto
 #nullable enable
     public class CustomRole : ICustomRole
     {
         /// <summary>
         /// A more easy-to-use dictionary to store every registered <see cref="ICustomRole"/>
         /// </summary>
-        internal static Dictionary<int, ICustomRole> CustomRoles { get; set; } = new();
+        internal static ConcurrentDictionary<int, ICustomRole> CustomRoles { get; set; } = new();
 
         /// <summary>
         /// Get a list of every <see cref="ICustomRole"/> registered.
         /// </summary>
-        public static List<ICustomRole> List => CustomRoles.Values.ToList();
+        public static ConcurrentBag<ICustomRole> List => (ConcurrentBag<ICustomRole>)CustomRoles.Values;
 
         /// <summary>
         /// Gets a list of every not loaded custom role.
@@ -237,7 +238,7 @@ namespace UncomplicatedCustomRoles.API.Features
         public virtual void OnSpawned(SummonedCustomRole role)
         { }
 
-        public override string ToString() => $"{Name} ({Id})";
+        public override string ToString() => $"{Regex.Replace(Name, "<color=.*?>(.*?)</color>", "$1")} ({Id})";
 
 #nullable disable
         /// <summary>
@@ -283,8 +284,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <param name="customRole"></param>
         public static void Unregister(ICustomRole customRole)
         {
-            if (CustomRoles.ContainsKey(customRole.Id))
-                CustomRoles.Remove(customRole.Id);
+            CustomRoles.TryRemove(customRole.Id, out _);
         }
 
         internal static bool Validate(ICustomRole role, out string error)
@@ -300,17 +300,17 @@ namespace UncomplicatedCustomRoles.API.Features
                 return false;
             }
 
-            if (role.SpawnSettings.Spawn is SpawnType.ZoneSpawn && role.SpawnSettings.SpawnZones.Count() < 1)
+            if (role.SpawnSettings.Spawn is SpawnType.ZoneSpawn && !role.SpawnSettings.SpawnZones.Any())
             {
                 error = "If the SpawnType is ZoneSpawn the list SpawnZones shouldn't be empty";
                 return false;
             }
-            else if (role.SpawnSettings.Spawn is SpawnType.RoomsSpawn && role.SpawnSettings.SpawnRooms.Count() < 1)
+            else if (role.SpawnSettings.Spawn is SpawnType.RoomsSpawn && !role.SpawnSettings.SpawnRooms.Any())
             {
                 error = "If the SpawnType is RoomsSpawn the list SpawnRooms shouldn't be empty";
                 return false;
             }
-            else if (role.SpawnSettings.Spawn is SpawnType.SpawnPointSpawn && (role.SpawnSettings.SpawnPoints is null || role.SpawnSettings.SpawnPoints.Count == 0))
+            else if (role.SpawnSettings.Spawn is SpawnType.SpawnPointSpawn && (role.SpawnSettings.SpawnPoints is null || !role.SpawnSettings.SpawnPoints.Any()))
             {
                 error = "If the SpawnType is SpawnPointSpawn the list SpawnPoints shouldn't be empty";
                 return false;
@@ -324,10 +324,8 @@ namespace UncomplicatedCustomRoles.API.Features
             if (!Validate(customRole, out string _))
                 return LoadStatusType.ValidatorError;
 
-            if (!CustomRoles.ContainsKey(customRole.Id))
+            if (CustomRoles.TryAdd(customRole.Id, customRole))
             {
-                CustomRoles.Add(customRole.Id, customRole);
-
                 return LoadStatusType.Success;
             }
 

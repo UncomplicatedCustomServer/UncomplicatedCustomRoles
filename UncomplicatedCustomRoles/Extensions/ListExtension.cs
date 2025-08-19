@@ -31,14 +31,14 @@ namespace UncomplicatedCustomRoles.Extensions
             if (list is null)
                 return "null value";
 
-            string Data = $"[{list.GetType().FullName}] List<{list.GetType().GetGenericArguments()[0].FullName}> ({list.Count}) [\n";
+            string data = $"[{list.GetType().FullName}] List<{list.GetType().GetGenericArguments()[0].FullName}> ({list.Count}) [\n";
 
             foreach (T element in list)
-                Data += $"{element},\n";
+                data += $"{element},\n";
 
-            Data += "];";
+            data += "];";
 
-            return Data;
+            return data;
         }
 
         public static T RandomValue<T>(this IEnumerable<T> list) => list.Count() < 1 ? default : list.ElementAt(UnityEngine.Random.Range(0, list.Count()));
