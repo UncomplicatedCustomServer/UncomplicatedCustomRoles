@@ -12,6 +12,7 @@ using Exiled.API.Features;
 using MEC;
 using PlayerRoles;
 using System;
+using System.Text;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
@@ -149,8 +150,7 @@ namespace UncomplicatedCustomRoles.Extensions
         /// <param name="value"></param>
         public static void ApplyClearCustomInfo(this Player player, string value)
         {
-            player.ReferenceHub.nicknameSync.Network_playerInfoToShow = string.IsNullOrEmpty(value) ? player.ReferenceHub.nicknameSync.Network_playerInfoToShow & ~PlayerInfoArea.CustomInfo : player.ReferenceHub.nicknameSync.Network_playerInfoToShow |= PlayerInfoArea.CustomInfo;
-            player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = ProcessCustomInfo(value);
+            player.CustomInfo = ProcessCustomInfo(value);
         }
 
         /// <summary>
@@ -161,25 +161,22 @@ namespace UncomplicatedCustomRoles.Extensions
         /// <param name="role"></param>
         public static void ApplyCustomInfoAndRoleName(this Player player, string customInfo, string role)
         {
-            player.ReferenceHub.nicknameSync.Network_playerInfoToShow |= PlayerInfoArea.CustomInfo;
-            player.ReferenceHub.nicknameSync.Network_playerInfoToShow &= ~PlayerInfoArea.Role; // Hide role
-            player.ReferenceHub.nicknameSync.Network_playerInfoToShow &= ~PlayerInfoArea.Nickname; // Hide nickname
+            player.InfoArea |= PlayerInfoArea.Nickname;
+            player.InfoArea &= ~PlayerInfoArea.Role; // Hide role
+            player.InfoArea &= ~PlayerInfoArea.Nickname; // Hide nickname*/
 
-            if (role.Contains("</"))
-                LogManager.Error($"Failed to apply CustomInfo with Role name at PlayerExtension::ApplyCustomInfoAndRoleName(%Player, string, string): role name can't contains any end tag like </color>, </b>, </size> etc...!\nCustomInfo won't be applied to player {player.Nickname} ({player.Id}) -- Found: {role}");
+            string nick = player.DisplayNickname.Replace("<color=#855439>*</color>", "");
 
-            if (customInfo.StartsWith("<"))
-                LogManager.Error($"Failed to apply CustomInfo with Role name at PlayerExtension::ApplyCustomInfoAndRoleName(%Player, string, string): role custom_info can't contains any tag like </olor>, <b>, <size> etc...!\nCustomInfo won't be applied to player {player.Nickname} ({player.Id}) -- Found: {customInfo}");
 
             if (customInfo is null || customInfo.Length < 1)
             {
                 LogManager.Silent("Applying only role name (order: NICK-ROLE)");
-                player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = $"{player.DisplayNickname}\n{role}";
+                player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = $"{nick}\n{role}";
             }
             else
             {
                 LogManager.Silent("Applying role name and custom info (CI-NICK-ROLE)");
-                player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = $"{ProcessCustomInfo(customInfo)}\n{player.DisplayNickname}\n{role}";
+                player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = $"{ProcessCustomInfo(customInfo)}\n{nick}\n{role}";
             }
         }
 

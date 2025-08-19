@@ -27,6 +27,9 @@ namespace UncomplicatedCustomRoles.Patches
 
             if (arg is IPlayerEvent ev && ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole))
             {
+                // Invoke for EventCustomRole(s)
+                CustomRoleEventHandler.InvokeAllSafely(ev);
+
                 string name = arg.GetType().Name.Replace("EventArgs", string.Empty);
 
                 foreach (CustomModule module in customRole.CustomModules)

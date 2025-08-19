@@ -12,14 +12,12 @@ using Exiled.API.Interfaces;
 using Exiled.Loader;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using UncomplicatedCustomRoles.API.Attributes;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
-using UncomplicatedCustomRoles.Compatibility;
 using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.Manager
@@ -28,10 +26,7 @@ namespace UncomplicatedCustomRoles.Manager
     {
         public static readonly List<IPlugin<IConfig>> ActivePlugins = new();
 
-        public static readonly List<Assembly> AvailableAssemblies = new()
-        {
-            Plugin.Instance.Assembly
-        };
+        public static readonly List<Assembly> AvailableAssemblies = new();
 
         public const float WaitingTime = 5f;
 
@@ -52,6 +47,7 @@ namespace UncomplicatedCustomRoles.Manager
             LogManager.Debug($"Checking for CustomRole registered in other plugins to import...");
 
             _alreadyLoaded = true;
+            AvailableAssemblies.Add(Plugin.Instance.Assembly);
 
             foreach (IPlugin<IConfig> plugin in Loader.Plugins.Where(plugin => plugin.Name != Plugin.Instance.Name))
             {

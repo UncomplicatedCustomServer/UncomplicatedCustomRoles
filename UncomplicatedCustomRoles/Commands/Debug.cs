@@ -88,9 +88,8 @@ namespace UncomplicatedCustomRoles.Commands
             }
 
             target ??= obj.GetType();
-            string value;
 
-            if (HandleProperty(obj, target, args[2], out value))
+            if (HandleProperty(obj, target, args[2], out string value))
                 response = $"Required value is:\n{value}";
             else if (HandleField(obj, target, args[2], out value))
                 response = $"Required value is:\n{value}";

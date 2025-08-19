@@ -94,7 +94,7 @@ namespace UncomplicatedCustomRoles.Manager
                 }
 
                 // This will allow us to avoid the loop of another OnSpawning
-                Spawn.Spawning.TryAdd(player.Id);
+                Spawn.Spawning.Add(player.Id);
 
                 Vector3 BasicPosition = player.Position;
 
@@ -166,8 +166,8 @@ namespace UncomplicatedCustomRoles.Manager
 
                 Player.ResetInventory(Role.Inventory);
 
-                LogManager.Silent($"Can we give any CustomItem? {Role.CustomItemsInventory.Count()}");
-                if (Role.CustomItemsInventory.Count() > 0)
+                LogManager.Silent($"Can we give any CustomItem? {Role.CustomItemsInventory.Count}");
+                if (Role.CustomItemsInventory.Any())
                     foreach (uint itemId in Role.CustomItemsInventory)
                         if (!Player.IsInventoryFull)
                             try
@@ -192,7 +192,7 @@ namespace UncomplicatedCustomRoles.Manager
 
                 Player.ClearAmmo();
 
-                if (Role.Ammo is not null && Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Count() > 0)
+                if (Role.Ammo is not null && Role.Ammo.GetType() == typeof(Dictionary<AmmoType, ushort>) && Role.Ammo.Any())
                     foreach (KeyValuePair<AmmoType, ushort> Ammo in Role.Ammo)
                     {
                         if (Ammo.Value > Player.GetAmmoLimit(Ammo.Key))
@@ -201,14 +201,7 @@ namespace UncomplicatedCustomRoles.Manager
                         Player.AddAmmo(Ammo.Key, Ammo.Value);
                     }
 
-                Player.ReferenceHub.nicknameSync.Network_playerInfoToShow |= PlayerInfoArea.Nickname;
-
                 PlayerInfoArea InfoArea = Player.ReferenceHub.nicknameSync.Network_playerInfoToShow;
-
-                if (Role.OverrideRoleName)
-                    Player.ApplyCustomInfoAndRoleName(PlaceholderManager.ApplyPlaceholders(Role.CustomInfo, Player, Role), Role.Name);
-                else
-                    Player.ApplyClearCustomInfo(PlaceholderManager.ApplyPlaceholders(Role.CustomInfo, Player, Role));
 
                 // Apply every required stats
                 Role.Health?.Apply(Player);
@@ -220,7 +213,7 @@ namespace UncomplicatedCustomRoles.Manager
                     Player.Scale = Role.Scale;
 
                 List<IEffect> PermanentEffects = new();
-                if (Role.Effects.Count() > 0 && Role.Effects != null)
+                if (Role.Effects.Any() && Role.Effects != null)
                 {
                     foreach (IEffect effect in Role.Effects)
                     {
@@ -270,7 +263,7 @@ namespace UncomplicatedCustomRoles.Manager
                     else
                         Player.DisplayNickname = Nick;
 
-                    if (Plugin.Instance.Config.OverrideRpNames) 
+                    if (Plugin.Instance.Config.OverrideRpNames)
                         Timing.CallDelayed(3f, () => // Override RPNames shit (sowwy andrew)
                         {
                             if (Role.Nickname.Contains(","))
@@ -281,6 +274,11 @@ namespace UncomplicatedCustomRoles.Manager
 
                     ChangedNick = true;
                 }
+
+                if (Role.OverrideRoleName)
+                    Player.ApplyCustomInfoAndRoleName(PlaceholderManager.ApplyPlaceholders(Role.CustomInfo, Player, Role), Role.Name);
+                else
+                    Player.ApplyClearCustomInfo(PlaceholderManager.ApplyPlaceholders(Role.CustomInfo, Player, Role));
 
                 // We need the role appereance also here!
                 if (Role.RoleAppearance != Role.Role)
@@ -388,7 +386,7 @@ namespace UncomplicatedCustomRoles.Manager
         }
 
 #nullable enable
-#pragma warning disable CS8602 // <Element> can be null at this point! (added a check!)
+#pragma warning disable CS8602 // Possibile deferenziamento di un valore Null
         public static ICustomRole? DoEvaluateSpawnForPlayer(Player player, RoleTypeId? role = null)
         {
             role ??= player.Role?.Type;
@@ -443,7 +441,7 @@ namespace UncomplicatedCustomRoles.Manager
             }
 
             if (RolePercentage.ContainsKey(NewRole))
-                if (UnityEngine.Random.Range(0, 100) < RolePercentage[NewRole].Count())
+                if (UnityEngine.Random.Range(0, 100) < RolePercentage[NewRole].Count)
                     return CustomRole.CustomRoles[RolePercentage[NewRole].RandomItem().Id];
 
             return null;

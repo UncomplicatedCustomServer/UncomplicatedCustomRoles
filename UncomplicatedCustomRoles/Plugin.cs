@@ -23,8 +23,9 @@ using WarheadHandler = Exiled.Events.Handlers.Warhead;
 using UncomplicatedCustomRoles.API.Features;
 using HarmonyLib;
 using UncomplicatedCustomRoles.Manager.NET;
-using UncomplicatedCustomRoles.Patches;
 using System.Threading.Tasks;
+using UncomplicatedCustomRoles.Events;
+using LabApi.Events.CustomHandlers;
 
 namespace UncomplicatedCustomRoles
 {
@@ -36,7 +37,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(7, 0, 0);
+        public override Version Version { get; } = new(9, 0, 0);
 
         public override Version RequiredExiledVersion { get; } = new(9, 1, 0);
 
@@ -45,6 +46,8 @@ namespace UncomplicatedCustomRoles
         internal static Plugin Instance;
 
         internal Handler Handler;
+
+        internal LabApiEventHandler LabApiEventHandler;
 
         internal static HttpManager HttpManager;
 
@@ -91,6 +94,9 @@ namespace UncomplicatedCustomRoles
 
             WarheadHandler.Starting += Handler.OnWarheadLever;
 
+            LabApiEventHandler = new();
+            CustomHandlersManager.RegisterEventsHandler(LabApiEventHandler);
+
             Task.Run(delegate
             {
                 if (HttpManager.LatestVersion.CompareTo(Version) > 0)
@@ -110,10 +116,7 @@ namespace UncomplicatedCustomRoles
             // Patch with Harmony
             _harmony = new($"com.ucs.ucr_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
-            PlayerInfoPatch.TryPatchCedMod();
-
-            // Register custom event handlers for custom roles
-            CustomRoleEventHandler.RegisterEvents();
+            //PlayerInfoPatch.TryPatchCedMod();
 
             RespawnTimer.Enable();
 
@@ -124,9 +127,10 @@ namespace UncomplicatedCustomRoles
         {
             RespawnTimer.Disable();
 
-            CustomRoleEventHandler.UnregisterEvents();
-
             _harmony.UnpatchAll();
+
+            CustomHandlersManager.UnregisterEventsHandler(LabApiEventHandler);
+            LabApiEventHandler = null;
 
             ServerHandler.RespawningTeam -= Handler.OnRespawningWave;
             ServerHandler.RoundEnded -= Handler.OnRoundEnded;

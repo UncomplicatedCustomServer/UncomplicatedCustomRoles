@@ -26,17 +26,20 @@ using Exiled.Events.EventArgs.Warhead;
 using PlayerRoles.Ragdolls;
 using Exiled.Events.EventArgs.Scp096;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
+using System.Linq;
+using Exiled.API.Extensions;
 using UnityEngine;
+using System.Collections.Concurrent;
 
 namespace UncomplicatedCustomRoles.Events
 {
     internal class EventHandler
     {
-        private static List<int> RagdollAppearanceQueue { get; } = new();
+        private static HashSet<int> RagdollAppearanceQueue { get; } = new();
 
-        private static List<int> FirstRoundPlayers { get; } = new();
+        private static HashSet<int> FirstRoundPlayers { get; } = new();
 
-        private static Dictionary<int, Tuple<CustomScpAnnouncer, DateTimeOffset>> TerminationQueue { get; } = new();
+        private static ConcurrentDictionary<int, Tuple<CustomScpAnnouncer, DateTimeOffset>> TerminationQueue { get; } = new();
 
         private static bool Started { get; set; } = false;
 
@@ -57,7 +60,17 @@ namespace UncomplicatedCustomRoles.Events
             InfiniteEffect.Start();
         }
 
-        public void OnVerified(VerifiedEventArgs ev) => FirstRoundPlayers.Add(ev.Player.Id);
+        public void OnVerified(VerifiedEventArgs ev)
+        {
+            FirstRoundPlayers.Add(ev.Player.Id);
+
+            // Sync role appearance
+            foreach (SummonedCustomRole role in SummonedCustomRole.List.Values.Where(role => role.Appearance != RoleTypeId.None))
+                role.Player.ChangeAppearance(role.Appearance, new Player[] { ev.Player });
+
+            foreach (SummonedCustomRole role in SummonedCustomRole.List.Values.Where(role => role.Scale != Vector3.one))
+                role.Player.Scale = role.Scale;
+        }
 
         public void OnInteractingScp330(InteractingScp330EventArgs ev)
         {
@@ -130,7 +143,7 @@ namespace UncomplicatedCustomRoles.Events
                     RagdollAppearanceQueue.Add(ev.Player.Id);
 
                 if (customRole.TryGetModule(out CustomScpAnnouncer announcer) && ev.Player.ReferenceHub.GetTeam() is not Team.SCPs)
-                    TerminationQueue.Add(ev.Player.Id, new(announcer, DateTimeOffset.Now));
+                    TerminationQueue[ev.Player.Id] = new(announcer, DateTimeOffset.Now);
             }
         }
 
@@ -139,7 +152,7 @@ namespace UncomplicatedCustomRoles.Events
             if (TerminationQueue.TryGetValue(ev.Player.Id, out Tuple<CustomScpAnnouncer, DateTimeOffset> data) && (DateTimeOffset.Now - data.Item2).Milliseconds < 1300)
                 SpawnManager.HandleRecontainmentAnnoucement(ev.DamageHandler, data.Item1);
 
-            TerminationQueue.TryRemove(ev.Player.Id);
+            TerminationQueue.TryRemove(ev.Player.Id, out _);
 
             SpawnManager.ClearCustomTypes(ev.Player);
         }
@@ -189,7 +202,6 @@ namespace UncomplicatedCustomRoles.Events
             if (ev.Player.HasCustomRole())
                 return;
 
-
             if (Plugin.Instance.Config.IgnoreNpcs && ev.Player.IsNPC)
                 return;
 
@@ -238,7 +250,9 @@ namespace UncomplicatedCustomRoles.Events
 
                     Hurting.DamageHandler.Damage *= attackerCustomRole.Role.DamageMultiplier;
                 }
-                else if (Hurting.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole))
+                
+                // Divided because they can be both CR
+                if (Hurting.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole))
                 {
                     if (playerCustomRole.Role.IsFriendOf is not null && playerCustomRole.Role.IsFriendOf.Contains(Hurting.Attacker.ReferenceHub.GetTeam()))
                     {
@@ -247,7 +261,7 @@ namespace UncomplicatedCustomRoles.Events
                         return;
                     }
 
-                    if (attackerCustomRole?.HasModule<PacifismUntilDamage>() ?? false)
+                    if (playerCustomRole?.HasModule<PacifismUntilDamage>() ?? false)
                         Hurting.IsAllowed = false;
                 }
             }

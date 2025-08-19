@@ -10,6 +10,7 @@
 
 using CommandSystem;
 using Exiled.API.Features;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.API.Features;
@@ -19,7 +20,6 @@ using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Commands
 {
-#pragma warning disable CS0618 // Obsolete
     public class Reload : IUCRCommand
     {
         public string Name { get; } = "reload";
@@ -36,7 +36,7 @@ namespace UncomplicatedCustomRoles.Commands
                 return false;
             }
 
-            Dictionary<int, ICustomRole> oldRoles = CustomRole.CustomRoles.Clone();
+            ConcurrentDictionary<int, ICustomRole> oldRoles = CustomRole.CustomRoles.Clone();
 
             CustomRole.CustomRoles = new();
             CustomRole.NotLoadedRoles.Clear();
