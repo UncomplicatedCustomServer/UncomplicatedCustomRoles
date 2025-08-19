@@ -32,12 +32,12 @@ namespace UncomplicatedCustomRoles.Manager
 
         private static Type[]? _modules = null;
 
-        public static Dictionary<string, Dictionary<string, string>?>? Decode(List<object> flags)
+        public static Dictionary<string, Dictionary<string, object>?>? Decode(List<object> flags)
         {
             if (flags is null)
                 return null;
 
-            Dictionary<string, Dictionary<string, string>?> result = new();
+            Dictionary<string, Dictionary<string, object>?> result = new();
 
             foreach (object flag in flags)
             {
@@ -45,7 +45,7 @@ namespace UncomplicatedCustomRoles.Manager
                 {
                     foreach (KeyValuePair<object, object> res in str)
                         if (res.Value is Dictionary<object, object> dict)
-                            result[res.Key.ToString()] = dict.ConvertToString();
+                            result[res.Key.ToString()] = dict.ConvertKeyToString();
                 }
                 else
                     result[flag.ToString()] = null;

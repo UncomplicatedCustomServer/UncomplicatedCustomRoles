@@ -14,32 +14,15 @@
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x64\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>embedded</DebugType>
     <PlatformTarget>x64</PlatformTarget>
     <LangVersion>11</LangVersion>
     <ErrorReport>prompt</ErrorReport>
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
@@ -59,6 +42,8 @@
     <Compile Include="API\Features\Behaviour\AhpBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\HealthBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\HumeShieldBehaviour.cs" />
+    <Compile Include="API\Features\CustomModules\ColorfulNickname.cs" />
+    <Compile Include="API\Features\CustomModules\ColorfulRaName.cs" />
     <Compile Include="API\Features\CustomModules\CustomModule.cs" />
     <Compile Include="API\Features\CustomModules\CustomPermissions.cs" />
     <Compile Include="API\Features\CustomModules\CustomScpAnnouncer.cs" />
@@ -66,6 +51,7 @@
     <Compile Include="API\Features\CustomModules\DoNotTriggerTeslaGates.cs" />
     <Compile Include="API\Features\CustomModules\DropItemOnDeath.cs" />
     <Compile Include="API\Features\CustomModules\DropNothingOnDeath.cs" />
+    <Compile Include="API\Features\CustomModules\FullCandyBag.cs" />
     <Compile Include="API\Features\CustomModules\ItemBan.cs" />
     <Compile Include="API\Features\CustomModules\LifeStealer.cs" />
     <Compile Include="API\Features\CustomModules\NotAffectedByAppearance.cs" />
@@ -75,6 +61,7 @@
     <Compile Include="API\Features\CustomModules\TutorialRagdoll.cs" />
     <Compile Include="API\Features\CustomRole.cs" />
     <Compile Include="API\Features\CustomRoleEventHandler.cs" />
+    <Compile Include="API\Features\DisguiseTeam.cs" />
     <Compile Include="API\Features\EventCustomRole.cs" />
     <Compile Include="API\Features\Escape.cs" />
     <Compile Include="API\Features\InfiniteEffect.cs" />
@@ -125,6 +112,7 @@
     <Compile Include="Extensions\RoleExtension.cs" />
     <Compile Include="Extensions\StringExtension.cs" />
     <Compile Include="Extensions\Vector3Extension.cs" />
+    <Compile Include="Integrations\RespawnTimer.cs" />
     <Compile Include="Integrations\ScriptedEvents.cs" />
     <Compile Include="API\Interfaces\IUCRCommand.cs" />
     <Compile Include="Integrations\UCI.cs" />
@@ -143,7 +131,6 @@
     <Compile Include="Patches\Announcer.cs" />
     <Compile Include="Patches\MakingNoise.cs" />
     <Compile Include="Patches\PlayerEventPrefix.cs" />
-    <Compile Include="Patches\PlayerInfoPatch.cs" />
     <Compile Include="Patches\Scp3114StranglePrefix.cs" />
     <Compile Include="Patches\ServerNamePatch.cs" />
     <Compile Include="Patches\SetRolePatch.cs" />
@@ -161,26 +148,26 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\..\..\..\Desktop\EXILED_REF\References141\Assembly-CSharp-firstpass.dll</HintPath>
+      <HintPath>$(sl_references)\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-Publicized">
-      <HintPath>..\..\..\..\Desktop\EXILED_REF\References141\Assembly-CSharp-Publicized.dll</HintPath>
+      <HintPath>$(sl_references)\Assembly-CSharp-Publicized.dll</HintPath>
     </Reference>
     <Reference Include="CommandSystem.Core">
-      <HintPath>..\..\..\..\Desktop\EXILED_REF\References141\CommandSystem.Core.dll</HintPath>
+      <HintPath>$(sl_references)\CommandSystem.Core.dll</HintPath>
     </Reference>
     <Reference Include="Mirror-Publicized">
-      <HintPath>..\..\..\..\Desktop\EXILED_REF\References141\Mirror-Publicized.dll</HintPath>
+      <HintPath>$(sl_references)\Mirror-Publicized.dll</HintPath>
     </Reference>
     <Reference Include="Pooling">
-      <HintPath>..\..\..\..\Desktop\EXILED_REF\References141\Pooling.dll</HintPath>
+      <HintPath>$(sl_references)\Pooling.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\..\Desktop\EXILED_REF\References141\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(sl_references)\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>..\..\..\..\Desktop\EXILED_REF\References141\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>$(sl_references)\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -191,7 +178,7 @@
       <Version>13.0.3</Version>
     </PackageReference>
     <PackageReference Include="Northwood.LabAPI">
-      <Version>1.0.2</Version>
+      <Version>1.1.1</Version>
     </PackageReference>
     <PackageReference Include="System.ComponentModel">
       <Version>4.3.0</Version>
@@ -211,4 +198,7 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="AfterBuild">
+    <Exec Command="xcopy &quot;$(TargetPath)&quot; &quot;%appdata%\SCP Secret Laboratory\LabAPI\plugins\global&quot; /y"/>
+  </Target>
 </Project>

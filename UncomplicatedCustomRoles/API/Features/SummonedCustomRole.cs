@@ -14,14 +14,17 @@ using MEC;
 using PlayerRoles;
 using PlayerRoles.PlayableScps;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Commands;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
+using UnityEngine;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
@@ -31,7 +34,12 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Gets every <see cref="SummonedCustomRole"/>
         /// </summary>
-        public static List<SummonedCustomRole> List { get; } = new();
+        public static ConcurrentDictionary<string, SummonedCustomRole> List { get; } = new();
+        
+        // Cache to reduce LINQ usage
+        private static readonly ConcurrentDictionary<int, SummonedCustomRole> _cachedListByPlayerId = new();
+
+        private static readonly ConcurrentDictionary<int, int> _cachedCountByRoleId = new();
 
         /// <summary>
         /// The unique identifier for this instance of <see cref="SummonedCustomRole"/>
@@ -39,7 +47,7 @@ namespace UncomplicatedCustomRoles.API.Features
         public string Id { get; }
 
         /// <summary>
-        /// Gets the <see cref="Exiled.API.Features.Player"/>
+        /// Gets the <see cref="LabApi.Features.Wrappers.Player"/>
         /// </summary>
         public Player Player { get; }
 
@@ -110,11 +118,6 @@ namespace UncomplicatedCustomRoles.API.Features
         public bool IsValid => _internalValid && Player.IsAlive;
 
         /// <summary>
-        /// Gets whether the current <see cref="Player"/> is a UCS Employee
-        /// </summary>
-        public bool IsEmployee => Plugin.HttpManager.OrgPlayerRole.ContainsKey(Player.UserId);
-
-        /// <summary>
         /// Gets the time in UNIX timestamp (seconds) when the <see cref="Player"/> received the last damage
         /// </summary>
         public long LastDamageTime { get; internal set; }
@@ -132,6 +135,11 @@ namespace UncomplicatedCustomRoles.API.Features
 
         private List<CustomModule> _customModules { get; }
 
+        internal RoleTypeId Appearance => Role.RoleAppearance != Role.Role ? Role.RoleAppearance : RoleTypeId.None;
+
+        internal Vector3 Scale => Role.Scale != Vector3.one && Role.Scale != Vector3.zero ? Role.Scale : Vector3.one; 
+
+        
         /// <summary>
         /// The duration of a tick
         /// </summary>
@@ -154,11 +162,20 @@ namespace UncomplicatedCustomRoles.API.Features
 
             _customModules = CustomModule.Load(Role.CustomFlags ?? new(), this);
 
-            EvaluateRoleBase();
+            if (Role.Team is not null && Role.Team != Role.Role.GetTeam())
+            {
+                DisguiseTeam.List[Player.PlayerId] = (Team)Role.Team;
+                EvaluateRoleBase();
+            }
 
             EventHandler = new(this);
-            List.Add(this);
-
+            List[Id] = this;
+            _cachedListByPlayerId[player.PlayerId] = this;
+            if (_cachedCountByRoleId.TryGetValue(role.Id, out int count))
+                _cachedCountByRoleId[role.Id] = count + 1;
+            else
+                _cachedCountByRoleId[role.Id] = 1;
+            
             if (Role is EventCustomRole eventCustomRole)
                 eventCustomRole.OnSpawned(this);
         }
@@ -168,10 +185,12 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         private void EvaluateRoleBase()
         {
-            if (Role.Role.GetTeam() != Role.Team && Role.Role.GetTeam() is not Team.SCPs && Role.Team is Team.SCPs)
+            if (Role.Team is Team.SCPs)
                 _roleBase = Player.RoleBase as FpcStandardScp;
-            else if (Role.Role.GetTeam() != Role.Team && Role.Role.GetTeam() is Team.SCPs && Role.Team is not Team.SCPs)
+            else
                 _roleBase = Player.RoleBase as HumanRole;
+
+            DisguiseTeam.RoleBaseList[Player.PlayerId] = _roleBase;
         }
 
         /// <summary>
@@ -193,7 +212,16 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             LogManager.Silent($"Destroying instance {Id} of CR {Role.Id} of PL {Player}");
             Remove();
-            List.Remove(this);
+            List.TryRemove(Id, out _);
+            _cachedListByPlayerId.TryRemove(Player.PlayerId, out _);
+            if (_cachedCountByRoleId.TryGetValue(Role.Id, out int count) && count > 0)
+            {
+                count--;
+                if (count == 0) 
+                    _cachedCountByRoleId.TryRemove(Role.Id, out _);
+                else 
+                    _cachedCountByRoleId[Role.Id] = count;
+            }
         }
 
         /// <summary>
@@ -223,7 +251,12 @@ namespace UncomplicatedCustomRoles.API.Features
                 Player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = string.Empty;
 
                 LogManager.Debug("Scale reset to 1, 1, 1");
-                Player.SetScale(new(1, 1, 1));
+                Player.Scale = new(1, 1, 1);
+                
+                Player.IsDisarmed = false;
+                
+                DisguiseTeam.List.TryRemove(Player.PlayerId, out _);
+                DisguiseTeam.RoleBaseList.TryRemove(Player.PlayerId, out _);
                  
                 // Reset ammo limit
                 if (Role.Ammo is Dictionary<ItemType, ushort> ammoList && ammoList.Count > 0)
@@ -240,6 +273,13 @@ namespace UncomplicatedCustomRoles.API.Features
 
                 if (IsDefaultCoroutineRole && GenericCoroutine.IsRunning)
                     Timing.KillCoroutines(GenericCoroutine);
+                
+                // Remove effects
+                Player.DisableAllEffects();
+                InfiniteEffects.Clear();
+                
+                if (Role is EventCustomRole eventCustomRole)
+                    eventCustomRole.OnRemoved(this);
             }
             catch (Exception e)
             {
@@ -263,51 +303,6 @@ namespace UncomplicatedCustomRoles.API.Features
 
                 yield return Timing.WaitForSeconds(TickDuration);
             }
-        }
-
-        /// <summary>
-        /// Parse the current <see cref="SummonedCustomRole"/> instance as a RemoteAdmin text part
-        /// </summary>
-        /// <returns></returns>
-        internal string ParseRemoteAdmin() => $"\n\n<size=26><color=#f55505>UncomplicatedCustomRoles</color></size>\nCustom Role: ({Role.Id}) <color={Role.Role.GetColor().ToHex()}>{Role.Name}</color>{LoadRoleFlags()}\n{LoadBadge()}";
-
-        private string LoadRoleFlags()
-        {
-            List<string> output = new();
-
-            if (_customModules.Count > 0)
-                output.Add("<color=#a343f7>[CUSTOM MODULES]</color>");
-
-            if (Role.Role.GetTeam() != (Role?.Team ?? Role.Role.GetTeam()))
-                output.Add("<color=#eb441e>[TEAM OVERRIDE]</color>");
-
-            if (output.Count > 0)
-            {
-                output.Insert(0, "                                ");
-            }
-
-            return string.Join(" ", output);
-        }
-
-        private string LoadBadge()
-        {
-            string output = "Badge: ";
-
-            if (Role.BadgeColor != string.Empty && Role.BadgeName != string.Empty)
-                if (SpawnManager.colorMap.ContainsKey(Role.BadgeColor))
-                    output += $"<color={SpawnManager.colorMap[Role.BadgeColor]}>{Role.BadgeName}</color>";
-                else
-                    output += $"{Role.BadgeName.Replace("@hidden", "")}";
-            else
-                output += "None";
-
-            if (Plugin.HttpManager.Credits.TryGetValue(Player.UserId, out Triplet<string, string, bool> tag))
-                if (IsEmployee)
-                    output += $"\n<color=#168eba>[UCR EMPLOYEE]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>";
-                else
-                    output += $"\n<color=#168eba>[UCR CONTRIBUTOR]</color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>";
-
-            return output;
         }
 
         /// <summary>
@@ -369,7 +364,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Add a new <see cref="CustomModule"/> to the current <see cref="SummonedCustomRole"/> instance
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        public void AddModule(Type type, Dictionary<string, string>? args = null)
+        public void AddModule(Type type, Dictionary<string, object>? args = null)
         {
             if (CustomModule.FastAdd(type, this, args) is CustomModule module)
                 _customModules.Add(module);
@@ -404,31 +399,49 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         /// <param name="role"></param>
         /// <returns></returns>
-        public static List<SummonedCustomRole> Get(ICustomRole role) => List.Where(scr => scr.Role == role).ToList();
-
+        public static List<SummonedCustomRole> Get(ICustomRole role) => List.Values.Where(scr => scr.Role == role).ToList();
+        
         /// <summary>
-        /// Gets a <see cref="SummonedCustomRole"/> instance by the <see cref="Exiled.API.Features.Player"/>
+        /// Gets a <see cref="SummonedCustomRole"/> instance by the <see cref="LabApi.Features.Wrappers.Player"/>
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public static SummonedCustomRole Get(Player player) => List.Where(scr => scr.Player.PlayerId == player.PlayerId).FirstOrDefault();
+        public static SummonedCustomRole Get(Player player)
+        {
+            if (player is null)
+                return null;
+
+            if (_cachedListByPlayerId.TryGetValue(player.PlayerId, out SummonedCustomRole role))
+                return role;
+
+            return null;
+        }
 
         /// <summary>
         /// Gets a <see cref="SummonedCustomRole"/> instance by the <see cref="ReferenceHub"/>
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public static SummonedCustomRole Get(ReferenceHub player) => List.Where(scr => scr.Player.PlayerId == player.PlayerId).FirstOrDefault();
+        public static SummonedCustomRole Get(ReferenceHub player)
+        {
+            if (player is null) 
+                return null;
+
+            if (_cachedListByPlayerId.TryGetValue(player.PlayerId, out SummonedCustomRole role))
+                return role;
+
+            return null;
+        }
 
         /// <summary>
         /// Gets a <see cref="SummonedCustomRole"/> instance by the Id
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static SummonedCustomRole Get(string id) => List.Where(scr => scr.Id == id).FirstOrDefault();
+        public static SummonedCustomRole Get(string id) => List.Values.FirstOrDefault(scr => scr.Id == id);
 
         /// <summary>
-        /// Try to get a <see cref="SummonedCustomRole"/> by the <see cref="Exiled.API.Features.Player"/>
+        /// Try to get a <see cref="SummonedCustomRole"/> by the <see cref="LabApi.Features.Wrappers.Player"/>
         /// </summary>
         /// <param name="player"></param>
         /// <param name="role"></param>
@@ -447,8 +460,10 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <returns></returns>
         public static bool TryGet(ReferenceHub player, out SummonedCustomRole role)
         {
-            role = Get(player);
-            return role != null;
+            if (player is null)
+                throw new ArgumentNullException(nameof(player));
+
+            return _cachedListByPlayerId.TryGetValue(player.PlayerId, out role);
         }
 
         /// <summary>
@@ -456,14 +471,14 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         /// <param name="role"></param>
         /// <returns></returns>
-        public static int Count(ICustomRole role) => List.Where(scr => scr.Role == role).Count();
+        public static int Count(ICustomRole role) => _cachedCountByRoleId.TryGetValue(role.Id, out var count) ? count : 0;
 
         /// <summary>
         /// Gets the number of <see cref="SummonedCustomRole"/> with the same Id
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static int Count(int id) => List.Where(scr => scr.Role.Id == id).Count();
+        public static int Count(int id) => _cachedCountByRoleId.TryGetValue(id, out var count) ? count : 0;
 
         /// <summary>
         /// Summon a new instance of <see cref="SummonedCustomRole"/> by spawning a player
@@ -554,16 +569,25 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public static string TryParseRemoteAdmin(ReferenceHub player)
+        
+        public static void TryParseRemoteAdmin(ReferenceHub player, StringBuilder builder) //REF
         {
+            if (Plugin.HttpManager.Credits.TryGetValue(player.authManager.UserId, out Triplet<string, string, bool> tag))
+                if (Plugin.HttpManager.OrgPlayerRole.ContainsKey(player.authManager.UserId))
+                    builder.AppendLine($"\nUCS Status: <color=#0b55b0><b>[UCS EMPLOYEE]</b></color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>");
+                else
+                    builder.AppendLine($"\nUCS Status: <color=#c9ad2c><b>[UCS CONTRIBUTOR]</b></color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>");
+
             if (TryGet(player, out SummonedCustomRole role))
-                return role.ParseRemoteAdmin();
-            return "\nCustom Role: None";
+            {
+                builder.AppendLine($"\n<size=26><color=#1780e3><b>UncomplicatedCustomRoles</b> v{Plugin.Instance.Version}</color></size>");
+                builder.AppendLine(Info.BuildInfo(role.Role));
+            }
         }
 
         public static void RemoveSpecificRole(int id)
         {
-            foreach (SummonedCustomRole role in List.Where(scr => scr.Role.Id == id))
+            foreach (SummonedCustomRole role in List.Values.Where(scr => scr.Role.Id == id))
             {
                 role.Destroy();
                 role.Player.SendBroadcast("You Custom Role has been <color=red>removed</color> as it has been removed from the list!", 6);
@@ -575,8 +599,8 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         internal static void InfiniteEffectActor()
         {
-            foreach (SummonedCustomRole Role in List)
-                if (Role.InfiniteEffects.Count() > 0)
+            foreach (SummonedCustomRole Role in List.Values)
+                if (Role.InfiniteEffects.Any())
                     foreach (IEffect Effect in Role.InfiniteEffects)
                         Role.Player.ReferenceHub.playerEffectsController.ChangeState(Effect.EffectType, Effect.Intensity, float.MaxValue, false);
         }

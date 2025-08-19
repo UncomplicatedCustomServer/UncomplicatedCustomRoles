@@ -25,8 +25,6 @@ namespace UncomplicatedCustomRoles.Integrations
 
         public static Type SummonedCustomItem = Assembly?.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem");
 
-        public static Type ICustomItem = Assembly?.GetType("UncomplicatedCustomItems.Interfaces.ICustomItem");
-
         public static MethodInfo HasCustomItemMethod = Utilities?.GetMethod("IsCustomItem", BindingFlags.Public | BindingFlags.Static);
 
         public static MethodInfo GetCustomItemMethod = Utilities?.GetMethod("GetCustomItem", BindingFlags.Public | BindingFlags.Static);
@@ -44,10 +42,9 @@ namespace UncomplicatedCustomRoles.Integrations
 
             try
             {
-                if ((bool)HasCustomItemMethod.Invoke(null, new object[] { id }))
+                if ((bool?)HasCustomItemMethod?.Invoke(null, new object[] { id }) ?? false)
                 {
-                    customItem = GetCustomItemMethod.Invoke(null, new object[] { id });
-
+                    customItem = GetCustomItemMethod?.Invoke(null, new object[] { id });
                     return customItem is not null;
                 }
 
@@ -70,7 +67,7 @@ namespace UncomplicatedCustomRoles.Integrations
             try
             {
                 if (HasCustomItem(id, out object customItem) && customItem is not null)
-                    SummonedCustomItem.GetConstructor(new Type[] { ICustomItem, typeof(Player) }).Invoke(new object[] { customItem, player });
+                    SummonedCustomItem?.GetConstructor(new Type[] { Assembly.GetType("UncomplicatedCustomItems.API.Interfaces.ICustomItem"), typeof(Player) })?.Invoke(new[] { customItem, player });
             }
             catch (Exception e)
             {

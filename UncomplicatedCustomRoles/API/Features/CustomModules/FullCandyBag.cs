@@ -1,24 +1,32 @@
 ﻿/*
  * This file is a part of the UncomplicatedCustomRoles project.
- * 
+ *
  * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
- * 
+ *
  * This file is licensed under the GNU Affero General Public License v3.0.
  * You should have received a copy of the AGPL license along with this file.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+using InventorySystem.Items.Usables.Scp330;
 using System.Collections.Generic;
+using InventorySystem.Items;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
-    public class LifeStealer : CustomModule
+    public class FullCandyBag : CustomModule
     {
         public override List<string> RequiredArgs => new()
         {
-            "percentage"
+            "candies"
         };
 
-        public int Percentage => StringArgs.TryGetValue("percentage", out string perc) && int.TryParse(perc, out int numPerc) ? numPerc : 0; // NOTE: Percentage MUST be an int so like 75 is 75% (0.75)
+        internal List<CandyKindID> Kinds => Args.TryGetValue("candies", out object kinds) ? kinds as List<CandyKindID> : new();
+
+        public override void OnAdded()
+        {
+            foreach (CandyKindID kind in Kinds)
+                CustomRole.Player.GiveCandy(kind, ItemAddReason.AdminCommand);
+        }
     }
 }
