@@ -1,5 +1,16 @@
-﻿using Footprinting;
+﻿/*
+ * This file is a part of the UncomplicatedCustomRoles project.
+ *
+ * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
+ *
+ * This file is licensed under the GNU Affero General Public License v3.0.
+ * You should have received a copy of the AGPL license along with this file.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using Footprinting;
 using PlayerRoles;
+using System;
 using System.Collections.Concurrent;
 using UncomplicatedCustomRoles.Manager;
 
@@ -11,19 +22,9 @@ namespace UncomplicatedCustomRoles.API.Features
 
         public static readonly ConcurrentDictionary<int, PlayerRoleBase> RoleBaseList = new();
 
-        public static bool IsEnemy(/*Footprint attacker, ReferenceHub ply*/ object attacker, object ply)
+        public static bool IsEnemy(Footprint attacker, ReferenceHub ply)
         {
-            if (attacker is not null)
-                LogManager.Info($"[RL] {attacker.GetType().FullName} [1]");
-
-
-            if (ply is not null)
-                LogManager.Info($"[RL] {attacker.GetType().FullName} [1]");
-
-            LogManager.Info("WORK");
-
-            return false;
-            /*try
+            try
             {
                 Team attackerTeam = attacker.Role.GetTeam();
                 Team playerTeam = ply.GetTeam();
@@ -36,7 +37,7 @@ namespace UncomplicatedCustomRoles.API.Features
             {
                 LogManager.Error(ex.ToString());
                 return false;
-            }*/
+            }
         }
 
         public static bool @Handler1(Footprint attacker)
