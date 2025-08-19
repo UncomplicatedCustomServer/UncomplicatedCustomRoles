@@ -295,7 +295,7 @@ namespace UncomplicatedCustomRoles.Patches
     }*/
 
     // We directly modify the IsEnemy method in order to handle everything
-    [HarmonyPatch(typeof(AttackerDamageHandler), nameof(AttackerDamageHandler.ProcessDamage))]
+    /*[HarmonyPatch(typeof(AttackerDamageHandler), nameof(AttackerDamageHandler.ProcessDamage))]
     internal class AttackerDamagePatch
     {
         private static readonly FieldInfo _footprintRole = Field(typeof(Footprint), nameof(Footprint.Role));
@@ -325,7 +325,7 @@ namespace UncomplicatedCustomRoles.Patches
 
             return newInstructions;
         }
-    }
+    }*/
 
     // Most important patch
     [HarmonyPatch(typeof(HumanRole), nameof(HumanRole.Team), MethodType.Getter)]

@@ -1,6 +1,8 @@
 ﻿using Footprinting;
 using PlayerRoles;
+using System;
 using System.Collections.Concurrent;
+using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
@@ -10,15 +12,31 @@ namespace UncomplicatedCustomRoles.API.Features
 
         public static readonly ConcurrentDictionary<int, PlayerRoleBase> RoleBaseList = new();
 
-        public static bool IsEnemy(object attacker, object ply)
+        public static bool IsEnemy(/*Footprint attacker, ReferenceHub ply*/object attacker, object ply)
         {
-            return true;
-            /*Team attackerTeam = attacker.Role.GetTeam();
-            Team playerTeam = ply.GetTeam();
+            if (attacker is not null)
+                LogManager.Info($"[RL] {attacker.GetType().FullName} [1]");
 
-            List.TryGetValue(attacker.PlayerId, out attackerTeam);
+            if (ply is not null)
+                LogManager.Info($"[RL] {attacker.GetType().FullName} [1]");
 
-            return attackerTeam != playerTeam;*/
+            LogManager.Info("WORK");
+
+            return false;
+            /*try
+            {
+                Team attackerTeam = attacker.Role.GetTeam();
+                Team playerTeam = ply.GetTeam();
+
+                if (List.TryGetValue(attacker.PlayerId, out Team _att))
+                    attackerTeam = _att;
+
+                return attackerTeam != playerTeam;
+            } catch (Exception ex)
+            {
+                LogManager.Error(ex.ToString());
+                return false;
+            }*/
         }
 
         public static bool @Handler1(Footprint attacker)
