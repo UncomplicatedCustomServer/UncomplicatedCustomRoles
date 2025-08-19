@@ -24,7 +24,7 @@ namespace UncomplicatedCustomRoles.Events
 
         public static void OnRaPlayerListAddingPlayer(PlayerRaPlayerListAddingPlayerEventArgs ev)
         {
-            if (SummonedCustomRole.TryGet(ev.Player.ReferenceHub, out SummonedCustomRole customRole))
+            if (SummonedCustomRole.TryGet(ev.Target.ReferenceHub, out SummonedCustomRole customRole))
                 if (customRole.TryGetModule(out ColorfulRaName colorfulRaName))
                     ev.Body = ev.Body.Replace("{RA_ClassColor}", $"#{colorfulRaName.Color.TrimStart('#')}");
         }

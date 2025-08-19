@@ -31,7 +31,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public ICustomRole Role => SummonedInstance.Role;
 
-        private Dictionary<Type, Tuple<object, MethodInfo>> _listeners { get; } = new();
+        private readonly Dictionary<Type, Tuple<object, MethodInfo>> _listeners = new();
 
         internal CustomRoleEventHandler(SummonedCustomRole summonedInstance)
         {

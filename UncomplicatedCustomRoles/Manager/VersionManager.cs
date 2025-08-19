@@ -29,69 +29,76 @@ namespace UncomplicatedCustomRoles.Manager
 #nullable enable
         public static async void Init()
         {
-            Tuple<HttpStatusCode, string?> data = await Plugin.HttpManager.VersionInfo();
-
-            if (data.Item1 is not HttpStatusCode.OK || data.Item2 is null)
+            try
             {
-                LogManager.Warn($"Failed to gain the current version info from our central servers: API endpoint says {data.Item1}");
-                return;
-            }
+                Tuple<HttpStatusCode, string?> data = await Plugin.HttpManager.VersionInfo();
 
-            VersionInfo = JsonConvert.DeserializeObject<VersionInfo>(data.Item2);
-
-            if (VersionInfo is null)
-            {
-                LogManager.Silent($"Failed to convert API endpoint answer to VersionInfo.\nContent: {data.Item2}");
-                return;
-            }
-
-            if (VersionInfo.PreRelease)
-            {
-                LogManager.Info($"\nNOTICE!\nYou are currently using the version v{Plugin.Instance.Version.ToString(4)}, who's a PRE-RELEASE or an EXPERIMENTAL RELESE of UncomplicatedCustomRoles!\nLatest stable release: {Plugin.HttpManager.LatestVersion}\nNOTE: This is NOT a stable version, so there can be bugs and malfunctions, for this reason we do not recommend use in production.");
-                if (VersionInfo.ForceDebug && !Log.DebugEnabled.Contains(Plugin.Instance.Assembly))
+                if (data.Item1 is not HttpStatusCode.OK || data.Item2 is null)
                 {
-                    LogManager.Info("Debug logs have been activated!");
-                    Plugin.Instance.Config.Debug = true;
-                    Log.DebugEnabled.Add(Plugin.Instance.Assembly);
+                    LogManager.Warn($"Failed to gain the current version info from our central servers: API endpoint says {data.Item1}");
+                    return;
                 }
-            }
-            else
-            {
-                LogManager.Info($"You are using UncomplicatedCustomRoles v{VersionInfo.Name}{(VersionInfo.CustomName is not null ? $" '{VersionInfo.CustomName}'" : string.Empty)}!");
-            }
 
-            // Check integrity
-            string hash = HashFile(Plugin.Instance.Assembly.GetPath());
-            if (hash != VersionInfo.Hash)
-            {
-                HashNotMatchMessageSender(hash);
-                await Task.Run(async delegate
+                VersionInfo = JsonConvert.DeserializeObject<VersionInfo>(data.Item2);
+
+                if (VersionInfo is null)
                 {
-                    while (true)
+                    LogManager.Silent($"Failed to convert API endpoint answer to VersionInfo.\nContent: {data.Item2}");
+                    return;
+                }
+
+                if (VersionInfo.PreRelease)
+                {
+                    LogManager.Info($"\nNOTICE!\nYou are currently using the version v{Plugin.Instance.Version}, who's a PRE-RELEASE or an EXPERIMENTAL RELESE of UncomplicatedCustomRoles!\nLatest stable release: {Plugin.HttpManager.LatestVersion}\nNOTE: This is NOT a stable version, so there can be bugs and malfunctions, for this reason we do not recommend use in production.");
+                    if (VersionInfo.ForceDebug && !Log.DebugEnabled.Contains(Plugin.Instance.Assembly))
                     {
-                        await Task.Delay(900000);
-                        HashNotMatchMessageSender(hash);
+                        LogManager.Info("Debug logs have been activated!");
+                        Plugin.Instance.Config.Debug = true;
+                        Log.DebugEnabled.Add(Plugin.Instance.Assembly);
                     }
-                });
-            }
-            else
-                CorrectHash = true;    
+                }
+                else
+                {
+                    LogManager.Info($"You are using UncomplicatedCustomRoles v{VersionInfo.Name}{(VersionInfo.CustomName is not null ? $" '{VersionInfo.CustomName}'" : string.Empty)}!");
+                }
 
-            if (VersionInfo.Message is not null)
-                LogManager.Info(VersionInfo.Message);
-
-            if (VersionInfo.Recall && VersionInfo.RecallTarget is not null && VersionInfo.RecallImportant is not null && VersionInfo.RecallReason is not null)
-            {
-                RecallMessageSender();
-                if ((bool)VersionInfo.RecallImportant)
+                // Check integrity
+                string hash = HashFile(Plugin.Instance.Assembly.GetPath());
+                if (hash != VersionInfo.Hash)
+                {
+                    HashNotMatchMessageSender(hash);
                     await Task.Run(async delegate
                     {
                         while (true)
                         {
-                            await Task.Delay(5000);
-                            RecallMessageSender();
+                            await Task.Delay(900000);
+                            HashNotMatchMessageSender(hash);
                         }
                     });
+                }
+                else
+                    CorrectHash = true;
+
+                if (VersionInfo.Message is not null)
+                    LogManager.Info(VersionInfo.Message);
+
+                if (VersionInfo.Recall && VersionInfo.RecallTarget is not null && VersionInfo.RecallImportant is not null && VersionInfo.RecallReason is not null)
+                {
+                    RecallMessageSender();
+                    if ((bool)VersionInfo.RecallImportant)
+                        await Task.Run(async delegate
+                        {
+                            while (true)
+                            {
+                                await Task.Delay(5000);
+                                RecallMessageSender();
+                            }
+                        });
+                }
+            } 
+            catch (Exception e)
+            {
+                LogManager.Error(e.ToString());
             }
         }
 

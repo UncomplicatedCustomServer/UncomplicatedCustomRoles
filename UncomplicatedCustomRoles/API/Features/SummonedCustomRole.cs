@@ -25,7 +25,6 @@ using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Commands;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
-using Utf8Json.Formatters;
 
 namespace UncomplicatedCustomRoles.API.Features
 {
@@ -175,6 +174,9 @@ namespace UncomplicatedCustomRoles.API.Features
                 _cachedCountByRoleId[role.Id] = count + 1;
             else
                 _cachedCountByRoleId[role.Id] = 1;
+
+            if (Role is EventCustomRole eventCustomRole)
+                eventCustomRole.OnSpawned(this);
         }
 
         /// <summary>
@@ -228,6 +230,9 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             try
             {
+                if (Role is EventCustomRole eventCustomRole)
+                    eventCustomRole.OnRemoved(this);
+
                 foreach (CustomModule module in _customModules.ToArray())
                 {
                     module.OnRemoved();

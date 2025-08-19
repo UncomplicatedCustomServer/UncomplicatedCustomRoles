@@ -213,10 +213,17 @@ namespace UncomplicatedCustomRoles.API.Features
         public virtual bool IgnoreSpawnSystem { get; set; } = false;
 
         /// <summary>
-        /// Invoked when the custom role is spawned
+        /// Invoked when the Custom Role is spawned
         /// </summary>
         /// <param name="role"></param>
         public virtual void OnSpawned(SummonedCustomRole role)
+        { }
+
+        /// <summary>
+        /// Invoked when the Custom Role is removed
+        /// </summary>
+        /// <param name="role"></param>
+        public virtual void OnRemoved(SummonedCustomRole role)
         { }
 
         /// <summary>
