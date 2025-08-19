@@ -316,7 +316,7 @@ namespace UncomplicatedCustomRoles.API.Features
                 error = "If the SpawnType is RoomsSpawn the list SpawnRooms shouldn't be empty";
                 return false;
             }
-            else if (role.SpawnSettings.Spawn is SpawnType.SpawnPointSpawn && (role.SpawnSettings.SpawnPoints is null || role.SpawnSettings.SpawnPoints.Any()))
+            else if (role.SpawnSettings.Spawn is SpawnType.SpawnPointSpawn && (role.SpawnSettings.SpawnPoints is null || !role.SpawnSettings.SpawnPoints.Any()))
             {
                 error = "If the SpawnType is SpawnPointSpawn the list SpawnPoints shouldn't be empty";
                 return false;

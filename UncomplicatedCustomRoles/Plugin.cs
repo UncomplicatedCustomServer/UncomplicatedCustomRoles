@@ -23,7 +23,6 @@ using WarheadHandler = Exiled.Events.Handlers.Warhead;
 using UncomplicatedCustomRoles.API.Features;
 using HarmonyLib;
 using UncomplicatedCustomRoles.Manager.NET;
-using UncomplicatedCustomRoles.Patches;
 using System.Threading.Tasks;
 using UncomplicatedCustomRoles.Events;
 using LabApi.Events.CustomHandlers;
@@ -38,7 +37,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda";
 
-        public override Version Version { get; } = new(7, 0, 1);
+        public override Version Version { get; } = new(9, 0, 0);
 
         public override Version RequiredExiledVersion { get; } = new(9, 1, 0);
 
