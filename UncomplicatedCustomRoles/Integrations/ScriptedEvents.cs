@@ -24,49 +24,19 @@ namespace UncomplicatedCustomRoles.Integrations
     internal class ScriptedEvents
     {
         /// <summary>
-        /// Gets the <see cref="System.Reflection.Assembly"/> of ScriptedEvents
-        /// </summary>
-        internal static Assembly Assembly = PluginLoader.Plugins.FirstOrDefault(p => p.Key.Name is "ScriptedEvents").Value;
-
-        /// <summary>
-        /// Gets the <see cref="Type"/> of the API class
-        /// </summary>
-        internal static Type Class = Assembly?.GetType("ScriptedEvents.API.Features.ApiHelper");
-
-        /// <summary>
         /// Gets the main class of Scripted Events
         /// </summary>
-        internal static object MainClass = Assembly?.GetType("ScriptedEvents.MainPlugin")?.GetProperty("Singleton").GetValue(null, null);
+        internal static object MainPlugin = DynamicInvoke.GetMethod("ScriptedEvents", "ScriptedEvents.MainPlugin.Singleton_get");
 
         /// <summary>
         /// Gets the current version of ScriptedEvents
         /// </summary>
-        internal static Version Version = (Version)(Assembly?.GetType("ScriptedEvents.MainPlugin")?.GetProperty("Version")?.GetValue(MainClass, null) ?? new Version(0, 0, 0));
-
-        /// <summary>
-        /// Gets the RegisterCustomAction method
-        /// </summary>
-        internal static MethodInfo AddMethod = Class?.GetMethod("RegisterCustomAction");
-
-        /// <summary>
-        /// Gets the UnregisterCustomAction method
-        /// </summary>
-        internal static MethodInfo RemoveMethod = Class?.GetMethod("UnregisterCustomAction");
-
-        /// <summary>
-        /// Gets the GetPlayers method
-        /// </summary>
-        internal static MethodInfo GetPlayerMethod = Class?.GetMethod("GetPlayers");
-
-        /// <summary>
-        /// Gets whether the integration can be invoked
-        /// </summary>
-        internal static bool CanInvoke => AddMethod is not null && RemoveMethod is not null && IsRightVersion;
-
+        internal static Version Version = (Version)(DynamicInvoke.GetMethod("ScriptedEvents", "ScriptedEvents.MainPlugin.Version_get")?.Invoke(MainPlugin, new object[] {}) ?? new Version(0, 0, 0));
         /// <summary>
         /// Gets whether the version is correct or not
         /// </summary>
-        internal static bool IsRightVersion { get; private set; } = true;
+        internal static bool IsRightVersion { get; private set; } = Version.CompareTo(new(3, 1, 6)) > 0;
+        
 
         /// <summary>
         /// Gets a list of every CustomAction registered by UCR
@@ -82,18 +52,14 @@ namespace UncomplicatedCustomRoles.Integrations
         /// <param name="action"></param>
         public static void RegisterCustomAction(string name, Func<Tuple<string[], object>, Tuple<bool, string, object[]>> action)
         {
-            if (CanInvoke)
+            try
             {
-                try
-                {
-                    AddMethod.Invoke(null, new object[] { name, action });
-                    CustomActions.Add(name);
-                    LogManager.Debug($"Successfully registered the ScriptedEvents CustomAction for UCR with the name '{name}'");
-                }
-                catch (Exception e)
-                {
-                    LogManager.Error($"{e.Source} - {e.GetType().FullName} error: {e.Message}");
-                }
+                DynamicInvoke.GetMethod("ScriptedEvents", "ScriptedEvents.API.Features.ApiHelper.RegisterCustomAction")?.Invoke(null, new object[] { name, action });                CustomActions.Add(name);
+                LogManager.Debug($"Successfully registered the ScriptedEvents CustomAction for UCR with the name '{name}'");
+            }
+            catch (Exception e)
+            {
+                LogManager.Error($"{e.Source} - {e.GetType().FullName} error: {e.Message}");
             }
         }
 
@@ -105,9 +71,11 @@ namespace UncomplicatedCustomRoles.Integrations
             if (_alreadyLoaded)
                 return;
 
-            if (CanInvoke && Version.CompareTo(new(3, 1, 6)) < 0)
+            if (!IsRightVersion)
             {
-                IsRightVersion = false;
+                if (Version == new Version(0, 0, 0))
+                    return;
+                
                 LogManager.Warn("The ScriptedEvents integration of UCR can't be enabled as your version of ScriptedEvents is OUTDATED!\nRequired: >= 3.1.6 - Found: " + Version);
                 return;
             }
@@ -174,10 +142,9 @@ namespace UncomplicatedCustomRoles.Integrations
         /// </summary>
         public static void UnregisterCustomActions()
         {
-            if (CanInvoke)
-                foreach (string Name in CustomActions)
-                    RemoveMethod.Invoke(null, new object[] { Name });
-
+            foreach (string Name in CustomActions)
+                DynamicInvoke.GetMethod("ScriptedEvents", "ScriptedEvents.API.Features.ApiHelper.UnregisterCustomAction")?.Invoke(null, new object[] { Name });
+            
             CustomActions.Clear();
         }
 
@@ -188,9 +155,7 @@ namespace UncomplicatedCustomRoles.Integrations
         /// <param name="script"></param>
         /// <param name="max"></param>
         /// <returns></returns>
-        internal static Player GetPlayer(string input, object script) => ((Player[])GetPlayerMethod.Invoke(null, new[] { input, script, 1 })).FirstOrDefault();
-
-        /// <summary>
+        internal static Player GetPlayer(string input, object script) => ((Player[])DynamicInvoke.GetMethod("ScriptedEvents", "ScriptedEvents.API.Features.ApiHelper.GetPlayers")?.Invoke(null, new[] { input, script, 1 })).FirstOrDefault();        /// <summary>
         /// Try to get a Player from the given input, supposing the player is the first argument
         /// </summary>
         /// <param name="input"></param>

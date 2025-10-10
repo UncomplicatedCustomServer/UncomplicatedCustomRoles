@@ -68,7 +68,7 @@ namespace UncomplicatedCustomRoles.Manager
 
         public static void System(string message) => History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "System", message));
 
-        internal static HttpStatusCode SendReport(out HttpContent content)
+        internal static HttpStatusCode SendReport(out string content)
         {
             content = null;
 

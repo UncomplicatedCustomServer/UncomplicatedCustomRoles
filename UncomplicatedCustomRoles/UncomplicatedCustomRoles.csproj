@@ -42,6 +42,8 @@
     <Compile Include="API\Features\Behaviour\AhpBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\HealthBehaviour.cs" />
     <Compile Include="API\Features\Behaviour\HumeShieldBehaviour.cs" />
+    <Compile Include="API\Features\Controllers\EscapeController.cs" />
+    <Compile Include="API\Features\Controllers\SchematicController.cs" />
     <Compile Include="API\Features\CustomModules\ColorfulNickname.cs" />
     <Compile Include="API\Features\CustomModules\ColorfulRaName.cs" />
     <Compile Include="API\Features\CustomModules\CustomModule.cs" />
@@ -56,6 +58,7 @@
     <Compile Include="API\Features\CustomModules\LifeStealer.cs" />
     <Compile Include="API\Features\CustomModules\NotAffectedByAppearance.cs" />
     <Compile Include="API\Features\CustomModules\PacifismUntilDamage.cs" />
+    <Compile Include="API\Features\CustomModules\Schematic.cs" />
     <Compile Include="API\Features\CustomModules\SilentAnnouncer.cs" />
     <Compile Include="API\Features\CustomModules\SilentWalker.cs" />
     <Compile Include="API\Features\CustomModules\TutorialRagdoll.cs" />
@@ -112,6 +115,7 @@
     <Compile Include="Extensions\RoleExtension.cs" />
     <Compile Include="Extensions\StringExtension.cs" />
     <Compile Include="Extensions\Vector3Extension.cs" />
+    <Compile Include="Integrations\DynamicInvoke.cs" />
     <Compile Include="Integrations\RespawnTimer.cs" />
     <Compile Include="Integrations\ScriptedEvents.cs" />
     <Compile Include="API\Interfaces\IUCRCommand.cs" />
@@ -178,7 +182,7 @@
       <Version>13.0.3</Version>
     </PackageReference>
     <PackageReference Include="Northwood.LabAPI">
-      <Version>1.1.1</Version>
+      <Version>1.1.3</Version>
     </PackageReference>
     <PackageReference Include="System.ComponentModel">
       <Version>4.3.0</Version>
@@ -196,7 +200,6 @@
       <Version>4.3.2</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Exec Command="xcopy &quot;$(TargetPath)&quot; &quot;%appdata%\SCP Secret Laboratory\LabAPI\plugins\global&quot; /y"/>

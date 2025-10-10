@@ -46,12 +46,12 @@ namespace UncomplicatedCustomRoles.Commands
 
             Task.Run(() =>
             {
-                HttpStatusCode Response = LogManager.SendReport(out HttpContent Content);
+                HttpStatusCode Response = LogManager.SendReport(out string content);
                 try
                 {
                     if (Response is HttpStatusCode.OK)
                     {
-                        Dictionary<string, string> Data = JsonConvert.DeserializeObject<Dictionary<string, string>>(Plugin.HttpManager.RetriveString(Content));
+                        Dictionary<string, string> Data = JsonConvert.DeserializeObject<Dictionary<string, string>>(content);
                         Logger.Info($"[ShareTheLog] Successfully shared the UCR logs with the developers!\nSend this Id to the developers: {Data["id"]}\n\nTook {DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start}ms");
                     } 
                     else

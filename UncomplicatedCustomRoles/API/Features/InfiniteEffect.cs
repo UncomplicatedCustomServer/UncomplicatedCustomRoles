@@ -9,11 +9,7 @@
  */
 
 using MEC;
-using PlayerRoles;
 using System.Collections.Generic;
-using System.Linq;
-using UncomplicatedCustomRoles.Events;
-using UnityEngine;
 
 #nullable enable
 namespace UncomplicatedCustomRoles.API.Features
@@ -56,14 +52,6 @@ namespace UncomplicatedCustomRoles.API.Features
             while (EffectAssociationAllowed)
             {
                 SummonedCustomRole.InfiniteEffectActor();
-
-                foreach (Bounds escapeZone in global::Escape.EscapeZones)
-                {
-                    IEnumerable<SummonedCustomRole> escapingRoles = SummonedCustomRole.List.Values.Where(role => role.Player.IsSCP && escapeZone.Contains(role.Player.Position) && role.Role.CanEscape);
-
-                    foreach (SummonedCustomRole role in escapingRoles)
-                        EventHandler.OnEscaping(new(role.Player.ReferenceHub, role.Player.Role, RoleTypeId.ChaosConscript, global::Escape.EscapeScenarioType.Custom, escapeZone));
-                }
 
                 yield return Timing.WaitForSeconds(2.5f);
             }

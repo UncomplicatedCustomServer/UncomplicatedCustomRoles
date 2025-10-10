@@ -28,7 +28,6 @@ using static HarmonyLib.AccessTools;
 
 namespace UncomplicatedCustomRoles.Patches
 {
-#pragma warning disable IDE0051
 
     [HarmonyPatch(typeof(Player), nameof(Player.Team), MethodType.Getter)]
     internal class TeamPatch

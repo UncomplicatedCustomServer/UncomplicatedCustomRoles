@@ -18,6 +18,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UncomplicatedCustomRoles.API.Features.Controllers;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Struct;
@@ -168,6 +169,8 @@ namespace UncomplicatedCustomRoles.API.Features
                 EvaluateRoleBase();
             }
 
+            UnityEngine.Object.Destroy(Player.GameObject.GetComponent<EscapeController>());
+            
             EventHandler = new(this);
             List[Id] = this;
             _cachedListByPlayerId[player.PlayerId] = this;

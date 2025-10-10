@@ -8,10 +8,6 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using LabApi.Events.Arguments.PlayerEvents;
-using LabApi.Features;
-using LabApi.Features.Wrappers;
-using LabApi.Loader;
 using MEC;
 using Newtonsoft.Json;
 using System;
@@ -19,11 +15,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
+using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Events.Handlers;
+using LabApi.Features;
+using LabApi.Features.Wrappers;
+using LabApi.Loader;
 using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Extensions;
-using PlayerHandler = LabApi.Events.Handlers.PlayerEvents;
 
 namespace UncomplicatedCustomRoles.Manager.NET
 {
@@ -98,78 +97,26 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         internal void RegisterEvents()
         {
-            PlayerHandler.Joined += OnVerified;
+            PlayerEvents.Joined += OnVerified;
         }
 
         internal void UnregisterEvents()
         {
-            PlayerHandler.Joined -= OnVerified;
+            PlayerEvents.Joined -= OnVerified;
         }
 
         public void OnVerified(PlayerJoinedEventArgs ev) => ApplyCreditTag(ev.Player);
 
         private bool CheckForDependency() => PluginLoader.Dependencies.Any(assembly => assembly.GetName().Name == "Newtonsoft.Json");
 
-        public HttpResponseMessage HttpGetRequest(string url)
+        public string AddServerOwner(string discordId)
         {
-            try
-            {
-                Task<HttpResponseMessage> Response = Task.Run(() => HttpClient.GetAsync(url));
-
-                Response.Wait();
-
-                return Response.Result;
-            } 
-            catch(Exception)
-            {
-                return null;
-            }
-        }
-
-        public HttpResponseMessage HttpPutRequest(string url, string content)
-        {
-            try
-            {
-                Task<HttpResponseMessage> Response = Task.Run(() => HttpClient.PutAsync(url, new StringContent(content, Encoding.UTF8, "text/plain")));
-
-                Response.Wait();
-
-                return Response.Result;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-
-        public string RetriveString(HttpResponseMessage response)
-        {
-            if (response is null)
-                return string.Empty;
-
-            return RetriveString(response.Content);
-        }
-
-        public string RetriveString(HttpContent response)
-        {
-            if (response is null)
-                return string.Empty;
-
-            Task<string> String = Task.Run(response.ReadAsStringAsync);
-
-            String.Wait();
-
-            return String.Result;
-        }
-
-        public HttpStatusCode AddServerOwner(string discordId)
-        {
-            return HttpGetRequest($"{Endpoint}/owners/add?discordid={discordId}")?.StatusCode ?? HttpStatusCode.InternalServerError;
+            return HttpQuery.Get($"{Endpoint}/owners/add?discordid={discordId}");
         }
 
         public void LoadLatestVersion()
         {
-            string Version = RetriveString(HttpGetRequest($"{Endpoint}/{Prefix}/version?vts=5"));
+            string Version = HttpQuery.Get($"{Endpoint}/{Prefix}/version?vts=5");
 
             if (Version is not null && Version != string.Empty && Version.Contains("."))
                 _latestVersion = new(Version);
@@ -182,7 +129,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
             Credits = new();
             try
             {
-                Dictionary<string, Dictionary<string, string>> Data = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(RetriveString(HttpGetRequest("https://api.ucserver.it/credits.json")));
+                Dictionary<string, Dictionary<string, string>> Data = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(HttpQuery.Get("https://api.ucserver.it/credits.json"));
 
                 if (Data is null)
                 {
@@ -255,22 +202,16 @@ namespace UncomplicatedCustomRoles.Manager.NET
             return true;
         }
 
-        internal HttpStatusCode ShareLogs(string data, out HttpContent httpContent)
+        internal HttpStatusCode ShareLogs(string data, out string content)
         {
-            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={LabApiProperties.CurrentVersion}&using_labapi=true&plugin_version={Plugin.Instance.Version.ToString(4)}&hash={VersionManager.HashFile(Plugin.Instance.FilePath)}", data);
-            httpContent = Status.Content;
-            return Status.StatusCode;
+            content = HttpQuery.Post($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={LabApiProperties.CurrentVersion}&using_labapi=true&plugin_version={Plugin.Instance.Version.ToString(4)}&hash={VersionManager.HashFile(Plugin.Instance.FilePath)}", data, "text/plain");
+            return content.GetStatusCode(out _);
         }
 
 #nullable enable
-        internal async Task<Tuple<HttpStatusCode, string?>> VersionInfo()
+        internal string VersionInfo()
         {
-            HttpResponseMessage message = await HttpClient.GetAsync($"{Endpoint.Replace("/v2", "")}/vinfo/info?v={Plugin.Instance.Version.ToString(4)}&labapi=true");
-
-            if (message.StatusCode != HttpStatusCode.OK)
-                return new(message.StatusCode, null);
-
-            return new(message.StatusCode, await message.Content.ReadAsStringAsync());
+            return HttpQuery.Get($"{Endpoint.Replace("/v2", "")}/vinfo/info?v={Plugin.Instance.Version.ToString(4)}&labapi=true");
         }
     }
 }

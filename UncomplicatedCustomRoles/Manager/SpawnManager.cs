@@ -27,6 +27,7 @@ using UncomplicatedCustomRoles.Integrations;
 using LabApi.Features.Wrappers;
 using MapGeneration;
 using CommandSystem;
+using UncomplicatedCustomRoles.API.Features.Controllers;
 
 // Mormora, la gente mormora
 // falla tacere praticando l'allegria
@@ -280,8 +281,11 @@ namespace UncomplicatedCustomRoles.Manager
 
                 LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})!");
 
-                new SummonedCustomRole(Player, Role, Badge, PermanentEffects, InfoArea, ChangedNick);
+                SummonedCustomRole roleInstance = new(Player, Role, Badge, PermanentEffects, InfoArea, ChangedNick); // IMPORTANT!
 
+                EscapeController escapeController = Player.GameObject.AddComponent<EscapeController>();
+                escapeController.Init(roleInstance);
+                
                 if (Spawn.Spawning.Contains(Player.PlayerId))
                     Spawn.Spawning.Remove(Player.PlayerId);
 
@@ -299,7 +303,7 @@ namespace UncomplicatedCustomRoles.Manager
         public static KeyValuePair<bool, object>? ParseEscapeRole(Dictionary<string, string> roleAfterEscape, Player player)
         {
             Dictionary<Team, KeyValuePair<bool, object>?> AsCuffedByInternalTeam = new();
-            // Dictionary<uint, KeyValuePair<bool, object>> AsCuffedByCustomTeam = new(); we will add the support to UCT and UIU-RS
+            Dictionary<uint, KeyValuePair<bool, object>?> AsCuffedByCustomTeam = new(); //we will add the support to UCT and UIU-RS
             // cuffed by InternalTeam FoundationForces
             //   0     1       2             3           = 4
             Dictionary<int, KeyValuePair<bool, object>?> AsCuffedByCustomRole = new();
@@ -334,6 +338,8 @@ namespace UncomplicatedCustomRoles.Manager
 
                     if ((Elements[2] is "InternalTeam" || Elements[2] is "IT") && Enum.TryParse(Elements[3], out Team team))
                         AsCuffedByInternalTeam.TryAdd(team, Data);
+                    else if ((Elements[2] is "CustomTeam" || Elements[2] is "CT") && uint.TryParse(Elements[3], out uint customTeam))
+                        AsCuffedByCustomTeam.TryAdd(customTeam, Data);
                     else if ((Elements[2] is "CustomRole" || Elements[2] is "CR") && int.TryParse(Elements[3], out int id) && CustomRole.CustomRoles.ContainsKey(id))
                         AsCuffedByCustomRole.TryAdd(id, Data);
                     else
