@@ -1,8 +1,17 @@
-﻿using System;
+﻿/*
+ * This file is a part of the UncomplicatedCustomRoles project.
+ * 
+ * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
+ * 
+ * This file is licensed under the GNU Affero General Public License v3.0.
+ * You should have received a copy of the AGPL license along with this file.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+ 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using LabApi.Loader;
 using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Integrations
@@ -15,14 +24,22 @@ namespace UncomplicatedCustomRoles.Integrations
 
         private static readonly Dictionary<string, Assembly> _assemblies = new();
 
-        public static MethodInfo GetMethod(string plugin, string address)
+        /// <summary>
+        /// Get the <see cref="MethodInfo"/> of a method or property from a specified plugin.<br></br>
+        /// '_get' and '_set' will load the getter and setter of a property respectively.
+        /// </summary>
+        /// <param name="plugin"></param>
+        /// <param name="address"></param>
+        /// <param name="isLabapi"></param>
+        /// <returns></returns>
+        public static MethodInfo GetMethod(string plugin, string address, bool isLabapi = false, int methodCounter = -1)
         {
             if (_methods.TryGetValue(address, out MethodInfo method))
                 return method;
 
             if (!_assemblies.TryGetValue(plugin, out Assembly assembly))
             {
-                assembly = PluginLoader.Plugins.FirstOrDefault(plugins => string.Equals(plugins.Key.Name, plugin, StringComparison.OrdinalIgnoreCase)).Value;
+                assembly = GetLabAPIAssembly(plugin);
                 _assemblies.Add(plugin, assembly);
             }
 
@@ -72,7 +89,16 @@ namespace UncomplicatedCustomRoles.Integrations
             } 
             else // Normal method
             {
-                MethodInfo resultMethod = type.GetMethods().FirstOrDefault(m => m.Name == argument);
+
+                IEnumerable<MethodInfo> resultMethods = type.GetMethods().Where(m => m.Name == argument);
+                MethodInfo resultMethod;
+
+                if (resultMethods.Count() > 1)
+                    resultMethod = methodCounter < 0 ? resultMethods.First() : resultMethods.FirstOrDefault(m => m.GetParameters().Length == methodCounter);
+                else if (resultMethods.Count() == 1)
+                    resultMethod = resultMethods.First();
+                else
+                    resultMethod = null;
 
                 if (resultMethod is null)
                 {
@@ -82,6 +108,24 @@ namespace UncomplicatedCustomRoles.Integrations
 
                 _methods.Add(address, resultMethod);
                 return resultMethod;
+            }
+        }
+
+        private static Assembly GetLabAPIAssembly(string pluginName)
+        {
+            try
+            {
+                KeyValuePair<LabApi.Loader.Features.Plugins.Plugin, Assembly>? plugin = LabApi.Loader.PluginLoader.Plugins.FirstOrDefault(p => p.Key.Name == pluginName);
+
+                if (plugin is not null)
+                    return plugin.Value.Value;
+
+                return null;
+            }
+            catch (Exception e)
+            {
+                LogManager.Error(e.ToString());
+                return null;
             }
         }
     }

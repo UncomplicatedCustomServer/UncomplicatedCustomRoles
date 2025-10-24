@@ -62,6 +62,7 @@
     <Compile Include="API\Features\CustomModules\SilentAnnouncer.cs" />
     <Compile Include="API\Features\CustomModules\SilentWalker.cs" />
     <Compile Include="API\Features\CustomModules\TutorialRagdoll.cs" />
+    <Compile Include="API\Features\CustomModules\Wardrobe.cs" />
     <Compile Include="API\Features\CustomRole.cs" />
     <Compile Include="API\Features\CustomRoleEventHandler.cs" />
     <Compile Include="API\Features\DisguiseTeam.cs" />
@@ -119,7 +120,9 @@
     <Compile Include="Integrations\RespawnTimer.cs" />
     <Compile Include="Integrations\ScriptedEvents.cs" />
     <Compile Include="API\Interfaces\IUCRCommand.cs" />
+    <Compile Include="Integrations\SLWardobe.cs" />
     <Compile Include="Integrations\UCI.cs" />
+    <Compile Include="Integrations\UCT.cs" />
     <Compile Include="Manager\FileConfigs.cs" />
     <Compile Include="API\Features\Effect.cs" />
     <Compile Include="Manager\NET\HttpManager.cs" />
@@ -162,6 +165,9 @@
     </Reference>
     <Reference Include="Mirror-Publicized">
       <HintPath>$(sl_references)\Mirror-Publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="NorthwoodLib">
+      <HintPath>$(sl_references)\NorthwoodLib.dll</HintPath>
     </Reference>
     <Reference Include="Pooling">
       <HintPath>$(sl_references)\Pooling.dll</HintPath>

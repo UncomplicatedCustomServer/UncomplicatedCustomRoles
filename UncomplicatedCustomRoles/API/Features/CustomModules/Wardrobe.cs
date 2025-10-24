@@ -9,11 +9,11 @@
  */
 
 using System.Collections.Generic;
-using UncomplicatedCustomRoles.API.Features.Controllers;
+using UncomplicatedCustomRoles.Integrations;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
-    internal class Schematic : CustomModule
+    internal class Wardrobe : CustomModule
     {
         public override List<string> RequiredArgs => new()
         {
@@ -30,16 +30,18 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
                 return;
             }
 
-            SchematicController controller = CustomRole.Player.GameObject.AddComponent<SchematicController>();
-            controller.Init(TargetName);
+            if (SLWardobe.PluginInstance is null)
+                ThrowError("Plugin 'SLWardrobe' not found!\nMake sure it's installed and enabled to use that flag!");
+
+            SLWardobe.ApplySuit(CustomRole.Player, TargetName);
         }
 
         public override void OnRemoved()
         {
             if (TargetName is null)
                 return;
-
-            UnityEngine.Object.Destroy(CustomRole.Player.GameObject.GetComponent<SchematicController>());
+            
+            SLWardobe.RemoveSuit(CustomRole.Player);
         }
     }
 }

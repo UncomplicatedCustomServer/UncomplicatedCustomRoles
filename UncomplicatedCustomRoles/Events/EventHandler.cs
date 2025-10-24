@@ -167,7 +167,6 @@ namespace UncomplicatedCustomRoles.Events
         public static void OnRoundEnded(RoundEndedEventArgs _)
         {
             InfiniteEffect.Terminate();
-            LogManager.MessageSent = false;
         }
 
         public static void OnChangingRole(PlayerChangingRoleEventArgs ev)

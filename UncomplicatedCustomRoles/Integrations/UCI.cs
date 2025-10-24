@@ -17,7 +17,7 @@ using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Integrations
 {
-    internal class UCI
+    internal static class UCI
     {
         public static Assembly Assembly = PluginLoader.Plugins.FirstOrDefault(p => p.Key.Name is "UncomplicatedCustomItems").Value;
 

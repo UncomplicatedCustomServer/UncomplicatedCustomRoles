@@ -46,7 +46,7 @@ namespace UncomplicatedCustomRoles.Commands
 
             Task.Run(() =>
             {
-                HttpStatusCode Response = LogManager.SendReport(out string content);
+                HttpStatusCode Response = LogManager.SendReport(out string content, arguments.Count > 0);
                 try
                 {
                     if (Response is HttpStatusCode.OK)

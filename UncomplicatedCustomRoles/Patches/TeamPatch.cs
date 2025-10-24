@@ -371,12 +371,6 @@ namespace UncomplicatedCustomRoles.Patches
         }
     }
 
-    [HarmonyPatch(typeof(PlayerRoleManager), nameof(PlayerRoleManager.CurrentRole), MethodType.Getter)]
-    internal class RoleCurrentPatch
-    {
-        static bool Prefix(PlayerRoleManager __instance, ref PlayerRoleBase __result) => !DisguiseTeam.RoleBaseList.TryGetValue(__instance.Hub.PlayerId, out __result);
-    }
-
     internal class TeamPachUtils
     {
         public static ReferenceHub WrapReferenceHub(PlayerRoleBase instance)

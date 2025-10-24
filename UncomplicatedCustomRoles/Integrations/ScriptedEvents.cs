@@ -21,7 +21,7 @@ using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Integrations
 {
-    internal class ScriptedEvents
+    internal static class ScriptedEvents
     {
         /// <summary>
         /// Gets the main class of Scripted Events

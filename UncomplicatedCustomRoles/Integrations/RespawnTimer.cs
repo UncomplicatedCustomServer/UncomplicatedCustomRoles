@@ -23,7 +23,7 @@ using UncomplicatedCustomRoles.Manager;
 namespace UncomplicatedCustomRoles.Integrations
 {
 #pragma warning disable CS8974 // Conversione del gruppo di metodi in un tipo non delegato
-    internal class RespawnTimer
+    internal static class RespawnTimer
     {
         const string RespawnTimerTextKey = "CUSTOM_ROLE";
 

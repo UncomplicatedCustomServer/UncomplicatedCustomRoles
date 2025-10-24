@@ -1,4 +1,15 @@
-﻿using UncomplicatedCustomRoles.Integrations;
+﻿/*
+ * This file is a part of the UncomplicatedCustomRoles project.
+ *
+ * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
+ *
+ * This file is licensed under the GNU Affero General Public License v3.0.
+ * You should have received a copy of the AGPL license along with this file.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using System.Reflection;
+using UncomplicatedCustomRoles.Integrations;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 
@@ -11,12 +22,21 @@ namespace UncomplicatedCustomRoles.API.Features.Controllers
         public void Init(string schematicName)
         {
             // Generate the schematic
-            object schematic = DynamicInvoke.GetMethod("MapEditorReborn", "MapEditorReborn.API.Features.ObjectSpawner.SpawnSchematic").Invoke(null, new object[] { schematicName, Vector3.zero });
-            schematic ??= DynamicInvoke.GetMethod("ProjectMER", "ProjectMER.Features.ObjectSpawner.SpawnSchematic").Invoke(null, new object[] { schematicName, Vector3.zero });
+            MethodInfo method = DynamicInvoke.GetMethod("MapEditorReborn", "MapEditorReborn.API.Features.ObjectSpawner.SpawnSchematic", methodCounter:2);
+            method ??= DynamicInvoke.GetMethod("ProjectMER", "ProjectMER.Features.ObjectSpawner.SpawnSchematic", true, 2);
 
-            if (schematic is null)
+            object schematic = method?.Invoke(null, new object[] { schematicName, Vector3.zero });
+
+            if (method is null)
             {
-                LogManager.Error($"[MER Extension] Failed to import MER or ProjectMER schematic {schematicName}!\nSchematic OR method not found!");
+                LogManager.Error($"[MER Extension] Failed to import MER or ProjectMER schematic {schematicName}!\nMethod not found!");
+                Destroy(this);
+                return;
+            }
+
+            if (method is null)
+            {
+                LogManager.Error($"[MER Extension] Failed to import MER or ProjectMER schematic {schematicName}!\nSchematic not found!");
                 Destroy(this);
                 return;
             }
@@ -31,7 +51,7 @@ namespace UncomplicatedCustomRoles.API.Features.Controllers
             _schematic = monoSchematic;
         }
 
-        private void Update()
+        private void LateUpdate()
         {
             if (_schematic is null)
                 return;
