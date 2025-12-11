@@ -18,7 +18,6 @@ using System.Linq;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
-using Handler = UncomplicatedCustomRoles.Events.EventHandler;
 
 namespace UncomplicatedCustomRoles.Commands
 {
@@ -91,7 +90,7 @@ namespace UncomplicatedCustomRoles.Commands
                 else
                 {
                     LogManager.Debug("Spawning player async");
-                    Timing.RunCoroutine(Handler.DoSpawnPlayer(player, id));
+                    Timing.RunCoroutine(SpawnManager.AsyncPlayerSpawner(player, id));
                 }
 
                 return $"Successfully spawned player {player.Nickname} ({player.PlayerId}) as CustomRole {id}";

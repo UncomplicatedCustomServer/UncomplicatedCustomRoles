@@ -30,12 +30,6 @@ namespace UncomplicatedCustomRoles.Commands
 
         public bool Executor(List<string> arguments, ICommandSender sender, out string response)
         {
-            if (!Round.IsRoundInProgress)
-            {
-                response = "Sorry but you can't use this command if the round is not started!";
-                return false;
-            }
-
             ConcurrentDictionary<int, ICustomRole> oldRoles = CustomRole.CustomRoles.Clone();
             
             CustomRole.CustomRoles = new();

@@ -8,11 +8,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System;
-using System.Linq;
-using System.Reflection;
 using LabApi.Features.Wrappers;
-using LabApi.Loader;
 using PlayerRoles;
 using PlayerRoles.Spectating;
 using UncomplicatedCustomRoles.API.Features;
@@ -23,6 +19,7 @@ using UncomplicatedCustomRoles.Manager;
 namespace UncomplicatedCustomRoles.Integrations
 {
 #pragma warning disable CS8974 // Conversione del gruppo di metodi in un tipo non delegato
+
     internal static class RespawnTimer
     {
         const string RespawnTimerTextKey = "CUSTOM_ROLE";
@@ -52,7 +49,8 @@ namespace UncomplicatedCustomRoles.Integrations
 
         public static string GetPublicRoleName(Player player)
         {
-            if (player.RoleBase is not SpectatorRole spectator) return Plugin.Instance.Config.RespawnTimerContentEmpty;
+            if (player.RoleBase is not SpectatorRole spectator) 
+                return Plugin.Instance.Config.RespawnTimerContentEmpty;
 
             Player spectated = Player.Get(spectator.SyncedSpectatedNetId);
 

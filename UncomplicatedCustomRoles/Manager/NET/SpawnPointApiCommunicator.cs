@@ -8,16 +8,14 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using LabApi.Features.Wrappers;
-using LabApi.Loader.Features.Paths;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
+using LabApi.Features.Wrappers;
+using LabApi.Loader.Features.Paths;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
@@ -80,7 +78,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
             }
             catch (Exception e)
             {
-                    LogManager.Error($"Error while acting SpawnPointApiCommunicator::PushSpawnPoints(): {e.GetType().FullName} - {e.Message}\n{e.Source} -- {e.InnerException}\n{e.StackTrace}");
+                LogManager.Error(e.ToString());
             }
         }
 
@@ -105,10 +103,10 @@ namespace UncomplicatedCustomRoles.Manager.NET
                 else if (answer is "UNKNOWN_LOGIC" or "")
                     LogManager.Warn($"Failed to update your SpawnPoints on the UCS cloud: it seems to be broken!\nContact us as fast as possible!\nServer says: {answer}");
                 else
-                if (Plugin.Instance.Config.EnableBasicLogs)
-                    LogManager.Info($"Your list of SpawnPoints on UCS cloud has been updated!\nServer says: {answer}");
-                else
-                    LogManager.Silent($"Your list of SpawnPoints on UCS cloud has been updated!\nServer says: {answer}");
+                    if (Plugin.Instance.Config.EnableBasicLogs)
+                        LogManager.Info($"Your list of SpawnPoints on UCS cloud has been updated!\nServer says: {answer}");
+                    else
+                        LogManager.Silent($"Your list of SpawnPoints on UCS cloud has been updated!\nServer says: {answer}");
             }
             catch (Exception e)
             {
@@ -128,12 +126,15 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// <param name="newPort"></param>
         /// <returns></returns>
         public static string PushMigrationRequest(int newPort) => HttpQuery.Get($"{Endpoint}/migrate?port={Server.Port}&to={newPort}");
+
         /// <summary>
         /// Send a downloadUrl request to our central request and share the answer
         /// </summary>
         /// <returns></returns>
         public static string AskDownloadUrl() => HttpQuery.Get($"{Endpoint}/download?port={Server.Port}");
+
         public static string AskIp() => HttpQuery.Get($"{Endpoint}/ip");
+
         /// <summary>
         /// Check every <see cref="ICustomRole"/> in order to find if any of them are with an invalid (non-existing) SpawnPoint
         /// </summary>

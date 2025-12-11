@@ -90,6 +90,9 @@ namespace UncomplicatedCustomRoles.API.Features
             return spawnPoint != null;
         }
 
-        public static bool Exists(string name) => List.Any(sp => sp.Name == name);
+        public static bool Exists(string name)
+        {
+            return List.Any(sp => sp.Name == name);
+        }
     }
 }

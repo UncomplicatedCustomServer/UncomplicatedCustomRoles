@@ -18,6 +18,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using PlayerRoles.FirstPersonControl;
+using Respawning.Objectives;
 using UncomplicatedCustomRoles.API.Features.Controllers;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.API.Interfaces;
@@ -128,7 +130,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public IReadOnlyCollection<CustomModule> CustomModules => _customModules;
 
-        private PlayerRoleBase _roleBase { get; set; } = null;
+        private FpcStandardRoleBase _roleBase { get; set; } = null;
 
         private bool _internalValid { get; set; }
 
@@ -167,6 +169,7 @@ namespace UncomplicatedCustomRoles.API.Features
             {
                 DisguiseTeam.List[Player.PlayerId] = (Team)Role.Team;
                 EvaluateRoleBase();
+                LogManager.Debug($"EVALUATED ROLEBASE {_roleBase.GetType().FullName} with team {_roleBase?.Team}");
             }
 
             UnityEngine.Object.Destroy(Player.GameObject.GetComponent<EscapeController>());
@@ -188,10 +191,46 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         private void EvaluateRoleBase()
         {
-            if (Role.Team is Team.SCPs)
-                _roleBase = Player.RoleBase as FpcStandardScp;
-            else
-                _roleBase = Player.RoleBase as HumanRole;
+            try
+            {
+                FpcStandardRoleBase originalRole = Player.RoleBase as FpcStandardRoleBase;
+
+                if (Role.Team is null)
+                    return;
+
+                if (Role.Team is Team.SCPs) 
+                    _roleBase = new FpcStandardScp
+                    {
+                        _roleTypeId = Role.Role,
+                        _maxHealth = Role.Health.Maximum,
+                        _cameraTransform = originalRole._cameraTransform,
+                        _lastPos = originalRole._lastPos,
+                        _hubTransform = originalRole._hubTransform,
+                        FpcModule = originalRole.FpcModule,
+                        VisibilityController = originalRole.VisibilityController,
+                    };
+                else
+                    _roleBase = new HumanRole
+                    {
+                        _roleId = Role.Role,
+                        _team = Role.Team ?? Role.Role.GetTeam(),
+                        _roleColor = Role.Role.GetRoleColor(),
+                        _cameraTransform = originalRole._cameraTransform,
+                        _lastPos = originalRole._lastPos,
+                        _hubTransform = originalRole._hubTransform,
+                        FpcModule = originalRole.FpcModule,
+                        VisibilityController = originalRole.VisibilityController,
+                        VoiceModule = originalRole.VoiceModule,
+                        VariantsModule = originalRole.VariantsModule,
+                        
+                    };
+
+                Timing.CallDelayed(5f, () => DisguiseTeam.RoleBaseList.Add(Player.PlayerId, _roleBase));
+            }
+            catch (Exception e)
+            {
+                LogManager.Error($"Failed to evaluate RoleBase for SummonedCustomRole::EvaluateRoleBase() - {e}");
+            }
 
             DisguiseTeam.RoleBaseList[Player.PlayerId] = _roleBase;
         }
@@ -259,7 +298,7 @@ namespace UncomplicatedCustomRoles.API.Features
                 Player.IsDisarmed = false;
                 
                 DisguiseTeam.List.TryRemove(Player.PlayerId, out _);
-                DisguiseTeam.RoleBaseList.TryRemove(Player.PlayerId, out _);
+                DisguiseTeam.RoleBaseList.TryRemove(Player.PlayerId);
                  
                 // Reset ammo limit
                 if (Role.Ammo is Dictionary<ItemType, ushort> ammoList && ammoList.Count > 0)

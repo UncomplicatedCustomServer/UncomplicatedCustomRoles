@@ -12,6 +12,7 @@ using Footprinting;
 using PlayerRoles;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.API.Features
@@ -20,7 +21,7 @@ namespace UncomplicatedCustomRoles.API.Features
     {
         public static readonly ConcurrentDictionary<int, Team> List = new();
 
-        public static readonly ConcurrentDictionary<int, PlayerRoleBase> RoleBaseList = new();
+        public static readonly Dictionary<int, PlayerRoleBase> RoleBaseList = new();
 
         public static bool IsEnemy(Footprint attacker, ReferenceHub ply)
         {

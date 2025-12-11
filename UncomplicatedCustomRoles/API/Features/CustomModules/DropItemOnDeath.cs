@@ -27,7 +27,11 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         public override void OnRemoved()
         {
             if (Item is ItemType item)
-                Timing.CallDelayed(0.5f, () => Pickup.Create(item, CustomRole.Player.Position));
+                Timing.CallDelayed(0.5f, () =>
+                {
+                    var pickup = Pickup.Create(item, CustomRole.Player.Position);
+                    pickup?.Spawn();
+                });
         }
     }
 }

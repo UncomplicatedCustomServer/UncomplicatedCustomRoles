@@ -8,13 +8,12 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
  
+using MEC;
 using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Net;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
-using MEC;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager.NET;
 
@@ -41,6 +40,7 @@ namespace UncomplicatedCustomRoles.Manager
                 }
 
                 VersionInfo = JsonConvert.DeserializeObject<VersionInfo>(data);
+
 
                 if (VersionInfo is null)
                 {
@@ -79,7 +79,7 @@ namespace UncomplicatedCustomRoles.Manager
                 {
                     RecallMessageSender();
                     if ((bool)VersionInfo.RecallImportant)
-                        Timing.CallContinuously(5000, RecallMessageSender);
+                        Timing.CallContinuously(500000, RecallMessageSender);
                 }
             } 
             catch (Exception e)

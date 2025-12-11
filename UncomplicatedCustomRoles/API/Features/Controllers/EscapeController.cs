@@ -27,7 +27,7 @@ namespace UncomplicatedCustomRoles.API.Features.Controllers
         {
             foreach (Bounds escapeZone in global::Escape.EscapeZones)
                 if (escapeZone.Contains(_role.Player.Position))
-                    EventHandler.OnEscaping(new(_role.Player.ReferenceHub, _role.Player.Role, RoleTypeId.ChaosConscript, global::Escape.EscapeScenarioType.Custom, escapeZone));
+                    PlayerEventHandler.Instance.OnEscaping(new(_role.Player.ReferenceHub, _role.Player.Role, RoleTypeId.ChaosConscript, global::Escape.EscapeScenarioType.Custom, escapeZone));
         }
 
         private void OnDestroy()

@@ -42,6 +42,9 @@ namespace UncomplicatedCustomRoles
         [Description("Whether you want your spawnpoints to be hosted inside our central server or locally in the configs folder")]
         public bool LocalSpawnPoints { get; set; } = false;
 
+        [Description("Auto load the Custom Role ID from the file, bypassing YAML")]
+        public bool UseIdFixer { get; set; } = false;
+        
         [Description("The content that will be replaced instead of {CUSTOM_ROLE} on your RespawnTimer display config if the current spectated player is a custom role. %customrole% is the role name")]
         public string RespawnTimerContent { get; set; } = "Player has custom role %customrole%";
 
