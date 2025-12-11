@@ -67,6 +67,13 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
             DamageTypes = null;
         }
         
+        // -----------------------------------------------------------------------
+        // <copyright file="DamageTypeExtensions.cs" company="ExMod Team">
+        // Copyright (c) ExMod Team. All rights reserved.
+        // Licensed under the CC BY-SA 3.0 license.
+        // </copyright>
+        // -----------------------------------------------------------------------
+        
         private static readonly Dictionary<ItemType, DamageType> ItemConversion = new()
         {
             { ItemType.GunCrossvec, DamageType.Crossvec },
