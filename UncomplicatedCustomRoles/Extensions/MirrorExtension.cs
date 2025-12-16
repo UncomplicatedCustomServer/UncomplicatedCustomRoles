@@ -252,6 +252,8 @@ namespace UncomplicatedCustomRoles.Extensions
                 player.Position += Vector3.up * 0.25f;
         }
 
+        // todo: Later check this
+        /*
         /// <summary>
         /// Send CASSIE announcement that only <see cref="Player"/> can hear.
         /// </summary>
@@ -299,7 +301,7 @@ namespace UncomplicatedCustomRoles.Extensions
                     SendFakeTargetRpc(player, controller.netIdentity, typeof(RespawnEffectsController), nameof(RespawnEffectsController.RpcCassieAnnouncement), message, makeHold, makeNoise, isSubtitles);
                 }
             }
-        }
+        }*/
 
         /// <summary>
         /// Moves object for the player.

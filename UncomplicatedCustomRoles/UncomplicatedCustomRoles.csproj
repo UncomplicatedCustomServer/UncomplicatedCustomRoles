@@ -186,11 +186,11 @@
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>$(sl_references)\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
+    <Reference Include="LabApi">
+      <HintPath>$(sl_references)\LabApi.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-      <PackageReference Include="Northwood.LabAPI">
-          <Version>1.1.4</Version>
-      </PackageReference>
       <PackageReference Include="Lib.Harmony">
           <Version>2.2.2</Version>
       </PackageReference>
@@ -202,6 +202,9 @@
       </PackageReference>
       <PackageReference Include="System.Net.Http">
           <Version>4.3.4</Version>
+      </PackageReference>
+      <PackageReference Include="YamlDotNet">
+        <Version>11.0.1</Version>
       </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

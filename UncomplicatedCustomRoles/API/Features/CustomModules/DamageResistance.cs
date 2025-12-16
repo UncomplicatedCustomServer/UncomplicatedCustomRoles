@@ -32,19 +32,19 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
             "Hurting"
         };
 
-        internal Dictionary<DamageType, uint> DamageTypes = null;
+        private Dictionary<DamageType, uint> _damageTypes;
 
         public override void OnAdded()
         {
-            DamageTypes = TryGetValue("damages", new Dictionary<DamageType, uint>()) as Dictionary<DamageType, uint>;
+            _damageTypes = TryGetValue("damages", new Dictionary<DamageType, uint>()) as Dictionary<DamageType, uint>;
 
-            if (DamageTypes is null)
+            if (_damageTypes is null)
                 ThrowError($"DamageResistance CustomFlag/CustomModule expected a Dictionary<DamageType, uint> in 'damages', got a {TryGetValue("damages", null)?.GetType().FullName}");
         }
 
         public override bool OnEvent(string name, IPlayerEvent ev)
         {
-            if (DamageTypes is null)
+            if (_damageTypes is null)
                 return true;
 
             if (ev is not PlayerHurtingEventArgs hurting)
@@ -54,7 +54,7 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
                 return true;
             
             DamageType damageType = GetDamageType(hurting.DamageHandler);
-            if (DamageTypes.TryGetValue(damageType, out uint reduction))
+            if (_damageTypes.TryGetValue(damageType, out uint reduction))
             {
                 standardDamageHandler.Damage *= (100f - reduction) / 100f;
             }
@@ -64,7 +64,7 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
 
         public override void OnRemoved()
         {
-            DamageTypes = null;
+            _damageTypes = null;
         }
         
         // -----------------------------------------------------------------------
@@ -128,8 +128,8 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         };
         
         private static readonly Dictionary<byte, DamageType> TranslationIdConversion = TranslationConversion.ToDictionary(x => x.Key.Id, x => x.Value);
-        
-        public static DamageType GetDamageType(DamageHandlerBase damageHandlerBase)
+
+        private static DamageType GetDamageType(DamageHandlerBase damageHandlerBase)
         {
             switch (damageHandlerBase)
             {

@@ -9,7 +9,6 @@
  */
 
 using CustomPlayerEffects;
-using PlayerRoles.Ragdolls;
 using PlayerRoles;
 using System;
 using System.Collections.Generic;

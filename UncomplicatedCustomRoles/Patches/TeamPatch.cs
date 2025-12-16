@@ -15,13 +15,6 @@ using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Patches
 {
-
-    /*[HarmonyPatch(typeof(Player), nameof(Player.Team), MethodType.Getter)]
-    internal class TeamPatch
-    {
-        static bool Prefix(Player __instance, ref Team __result) => !DisguiseTeam.List.TryGetValue(__instance.PlayerId, out __result);
-    }*/
-
     [HarmonyPatch(typeof(PlayerRoleManager), nameof(PlayerRoleManager.CurrentRole), MethodType.Getter)]
     internal class PlayerRoleManagerPatch
     {
@@ -43,34 +36,4 @@ namespace UncomplicatedCustomRoles.Patches
             return true;
         }
     }
-
-    /*[HarmonyPatch(typeof(HumanRole), nameof(HumanRole.Team), MethodType.Getter)]
-    internal class HumanRolePatch
-    {
-        private static bool Prefix(PlayerRoleBase __instance, ref Team __result)
-        {
-            if (__instance.TryGetOwner(out ReferenceHub owner) && DisguiseTeam.List.TryGetValue(owner.PlayerId, out Team team))
-            {
-                __result = team;
-                return false;
-            }
-
-            return true;
-        }
-    }
-
-    [HarmonyPatch(typeof(FpcStandardScp), nameof(FpcStandardScp.Team), MethodType.Getter)]
-    internal class FpcStandardScpPatch
-    {
-        private static bool Prefix(PlayerRoleBase __instance, ref Team __result)
-        {
-            if (__instance.TryGetOwner(out ReferenceHub owner) && DisguiseTeam.List.TryGetValue(owner.PlayerId, out Team team))
-            {
-                __result = team;
-                return false;
-            }
-
-            return true;
-        }
-    }*/
 }

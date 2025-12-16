@@ -197,19 +197,35 @@ namespace UncomplicatedCustomRoles.API.Features
 
                 if (Role.Team is null)
                     return;
-
-                if (Role.Team is Team.SCPs) 
+                
+                if (originalRole is null)
+                {
+                    LogManager.Error("Failed to evaluate RoleBase for SummonedCustomRole::EvaluateRoleBase() - originalRole is null");
+                    return;
+                }
+                
+                if (Role.Team is Team.SCPs)
+                    // ReSharper disable once Unity.IncorrectMonoBehaviourInstantiation
                     _roleBase = new FpcStandardScp
                     {
-                        _roleTypeId = Role.Role,
+                        _roleTypeId = RoleTypeId.Scp0492,
                         _maxHealth = Role.Health.Maximum,
                         _cameraTransform = originalRole._cameraTransform,
                         _lastPos = originalRole._lastPos,
                         _hubTransform = originalRole._hubTransform,
+                        _lastOwner = Player.ReferenceHub,
+                        UniqueLifeIdentifier = ++originalRole.UniqueLifeIdentifier,
                         FpcModule = originalRole.FpcModule,
+                        SpectatorModule = originalRole.SpectatorModule,
+                        Ragdoll = originalRole.Ragdoll,
+                        RoleAvatar = originalRole.RoleAvatar,
                         VisibilityController = originalRole.VisibilityController,
+                        VoiceModule = originalRole.VoiceModule,
+                        VariantsModule = originalRole.VariantsModule,
+                        Pooled = false
                     };
                 else
+                    // ReSharper disable once Unity.IncorrectMonoBehaviourInstantiation
                     _roleBase = new HumanRole
                     {
                         _roleId = Role.Role,
@@ -218,11 +234,15 @@ namespace UncomplicatedCustomRoles.API.Features
                         _cameraTransform = originalRole._cameraTransform,
                         _lastPos = originalRole._lastPos,
                         _hubTransform = originalRole._hubTransform,
+                        _lastOwner = Player.ReferenceHub,
                         FpcModule = originalRole.FpcModule,
                         VisibilityController = originalRole.VisibilityController,
                         VoiceModule = originalRole.VoiceModule,
                         VariantsModule = originalRole.VariantsModule,
-                        
+                        UniqueLifeIdentifier = ++originalRole.UniqueLifeIdentifier,
+                        Ragdoll = originalRole.Ragdoll,
+                        RoleAvatar = originalRole.RoleAvatar,
+                        Pooled = false
                     };
 
                 Timing.CallDelayed(5f, () => DisguiseTeam.RoleBaseList.Add(Player.PlayerId, _roleBase));

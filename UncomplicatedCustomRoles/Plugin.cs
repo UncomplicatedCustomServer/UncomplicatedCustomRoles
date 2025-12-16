@@ -86,7 +86,7 @@ namespace UncomplicatedCustomRoles
             SpawnPointApiCommunicator.Init();
 
             // Patch with Harmony
-            _harmony = new($"com.ucs.ucr_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+            _harmony = new($"com.ucs.ucr_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
 
             PlayerEventPrefix.Patch(_harmony);

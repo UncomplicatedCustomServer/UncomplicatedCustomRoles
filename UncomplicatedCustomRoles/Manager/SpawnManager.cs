@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using System;
+using Cassie;
 using UncomplicatedCustomRoles.Extensions;
 using MEC;
 using UncomplicatedCustomRoles.API.Features;
@@ -485,7 +486,7 @@ namespace UncomplicatedCustomRoles.Manager
         internal static void HandleRecontainmentAnnoucement(DamageHandlerBase baseHandler, CustomScpAnnouncer customScpAnnouncer)
         {
             float num = AlphaWarheadController.Detonated ? 3.5f : 1f;
-            NineTailedFoxAnnouncer.singleton.ServerOnlyAddGlitchyPhrase($"{ScpToCassie(customScpAnnouncer.RoleName)} {baseHandler.CassieDeathAnnouncement.Announcement}", UnityEngine.Random.Range(0.1f, 0.14f) * num, UnityEngine.Random.Range(0.07f, 0.08f) * num);
+            CassieGlitchifier.Glitchify($"{ScpToCassie(customScpAnnouncer.RoleName)} {baseHandler.CassieDeathAnnouncement.Announcement}", UnityEngine.Random.Range(0.1f, 0.14f) * num, UnityEngine.Random.Range(0.07f, 0.08f) * num);
             List<SubtitlePart> list = new()
             {
                 new(SubtitleType.SCP, new string[] { customScpAnnouncer.RoleName.Replace("SCP", string.Empty).Replace("scp", string.Empty).Replace("Scp", string.Empty).Replace("SCP-", string.Empty).Replace("scp-", string.Empty).Replace("Scp-", string.Empty) }),
