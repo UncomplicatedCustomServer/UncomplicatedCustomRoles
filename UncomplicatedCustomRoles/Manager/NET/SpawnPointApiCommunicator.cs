@@ -91,7 +91,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
         {
             if (Local)
             {
-                File.WriteAllText(FilePath, JsonConvert.SerializeObject(SpawnPoint.List));
+                File.WriteAllText(FilePath, JsonConvert.SerializeObject(SpawnPoint.List.Where(s => s.Sync)));
                 return;
             }
 

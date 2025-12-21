@@ -41,5 +41,7 @@ namespace UncomplicatedCustomRoles.API.Struct
         }
 
         public override string ToString() => $"({First}, {Second}, {Third}, {Fourth})";
+        
+        public static Quadruple<float, float, float, float> FromQuaternion(UnityEngine.Quaternion quaternion) => new(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
     }
 }

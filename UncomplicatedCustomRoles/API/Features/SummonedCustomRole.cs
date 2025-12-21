@@ -208,21 +208,18 @@ namespace UncomplicatedCustomRoles.API.Features
                     // ReSharper disable once Unity.IncorrectMonoBehaviourInstantiation
                     _roleBase = new FpcStandardScp
                     {
-                        _roleTypeId = RoleTypeId.Scp0492,
+                        _roleTypeId = Role.Role,
                         _maxHealth = Role.Health.Maximum,
                         _cameraTransform = originalRole._cameraTransform,
                         _lastPos = originalRole._lastPos,
                         _hubTransform = originalRole._hubTransform,
-                        _lastOwner = Player.ReferenceHub,
-                        UniqueLifeIdentifier = ++originalRole.UniqueLifeIdentifier,
                         FpcModule = originalRole.FpcModule,
-                        SpectatorModule = originalRole.SpectatorModule,
-                        Ragdoll = originalRole.Ragdoll,
-                        RoleAvatar = originalRole.RoleAvatar,
                         VisibilityController = originalRole.VisibilityController,
                         VoiceModule = originalRole.VoiceModule,
-                        VariantsModule = originalRole.VariantsModule,
-                        Pooled = false
+                        _lastOwner = Player.ReferenceHub,
+                        Ragdoll = originalRole.Ragdoll,
+                        RoleAvatar = originalRole.RoleAvatar,
+                        SpectatorModule = originalRole.SpectatorModule
                     };
                 else
                     // ReSharper disable once Unity.IncorrectMonoBehaviourInstantiation
@@ -234,19 +231,20 @@ namespace UncomplicatedCustomRoles.API.Features
                         _cameraTransform = originalRole._cameraTransform,
                         _lastPos = originalRole._lastPos,
                         _hubTransform = originalRole._hubTransform,
-                        _lastOwner = Player.ReferenceHub,
                         FpcModule = originalRole.FpcModule,
                         VisibilityController = originalRole.VisibilityController,
                         VoiceModule = originalRole.VoiceModule,
                         VariantsModule = originalRole.VariantsModule,
-                        UniqueLifeIdentifier = ++originalRole.UniqueLifeIdentifier,
+                        _lastOwner = Player.ReferenceHub,
                         Ragdoll = originalRole.Ragdoll,
                         RoleAvatar = originalRole.RoleAvatar,
-                        Pooled = false
+                        SpectatorModule = originalRole.SpectatorModule
                     };
-
-                Timing.CallDelayed(5f, () => DisguiseTeam.RoleBaseList.Add(Player.PlayerId, _roleBase));
-            }
+                
+                Timing.CallDelayed(3.25f, delegate {
+                    _roleBase.Pooled = false;
+                    DisguiseTeam.RoleBaseList.Add(Player.PlayerId, _roleBase);
+                });            }
             catch (Exception e)
             {
                 LogManager.Error($"Failed to evaluate RoleBase for SummonedCustomRole::EvaluateRoleBase() - {e}");

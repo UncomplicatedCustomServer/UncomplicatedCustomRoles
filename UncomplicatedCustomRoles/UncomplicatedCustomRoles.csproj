@@ -92,6 +92,7 @@
     <Compile Include="Commands\Percentages.cs" />
     <Compile Include="Commands\Role.cs" />
     <Compile Include="Commands\Reload.cs" />
+    <Compile Include="Commands\RR.cs" />
     <Compile Include="Commands\Spawn.cs" />
     <Compile Include="Commands\SpawnPoint.cs" />
     <Compile Include="Commands\Update.cs" />

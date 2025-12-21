@@ -45,5 +45,7 @@ namespace UncomplicatedCustomRoles.API.Struct
         }
 
         public override string ToString() => $"({First}, {Second}, {Third})";
+        
+        public static Triplet<float, float, float> FromVector3(UnityEngine.Vector3 vector) => new(vector.x, vector.y, vector.z);
     }
 }
