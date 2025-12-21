@@ -45,6 +45,8 @@ namespace UncomplicatedCustomRoles.Events
             PlayerEvents.Hurt += OnHurt;
             PlayerEvents.PickingUpItem += OnPickingUp;
             PlayerEvents.Joined += OnJoined;
+            PlayerEvents.DamagingWindow += OnDamagingWindow;
+            PlayerEvents.UnlockingWarheadButton += OnUnlockingWarheadButton;
 
             Instance = this;
         }
@@ -65,6 +67,8 @@ namespace UncomplicatedCustomRoles.Events
             PlayerEvents.Hurt -= OnHurt;
             PlayerEvents.PickingUpItem -= OnPickingUp;
             PlayerEvents.Joined -= OnJoined;
+            PlayerEvents.DamagingWindow -= OnDamagingWindow;
+            PlayerEvents.UnlockingWarheadButton -= OnUnlockingWarheadButton;
         }
 
         public void OnJoined(PlayerJoinedEventArgs ev)
@@ -103,13 +107,13 @@ namespace UncomplicatedCustomRoles.Events
                 ev.IsAllowed = false;
         }
 
-        public void OnWarheadLever(PlayerInteractingWarheadLeverEventArgs ev)
+        public void OnUnlockingWarheadButton(PlayerUnlockingWarheadButtonEventArgs ev)
         {
             if (ev.Player.ReferenceHub.GetTeam() == Team.SCPs)
                 ev.IsAllowed = false;
         }
 
-        public static void OnDamagingWindow(PlayerDamagingWindowEventArgs ev)
+        public void OnDamagingWindow(PlayerDamagingWindowEventArgs ev)
         {
             if (ev.Player.Team == Team.SCPs && ev.Window.name == UnityEngine.Object.FindAnyObjectByType<Scp079Recontainer>()?._activatorGlass.name)
                 ev.IsAllowed = false;

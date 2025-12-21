@@ -153,7 +153,7 @@ namespace UncomplicatedCustomRoles.API.Features
             player.Rotation = Rotation;
         }
 
-        public override string ToString() => $"SpawnPoint '{Name}' at {(Room != null ? Room.Name : "RoomWasNotFound")} ({Position} @ {RoomRotation}) [{HasRoom}]";
+        public override string ToString() => $"SpawnPoint '{Name}' at {(Room != null ? Room.GameObject.name : "RoomWasNotFound")} ({Position} @ {RoomRotation}) [{HasRoom}]";
 
         /// <summary>
         /// Creates a new <see cref="SpawnPoint"/> instance that is not synchronized with the network.
