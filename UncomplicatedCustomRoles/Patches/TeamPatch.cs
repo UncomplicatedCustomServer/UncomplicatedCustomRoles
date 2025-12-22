@@ -19,9 +19,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
+using InventorySystem.Disarming;
+using InventorySystem.Items;
+using InventorySystem.Searching;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Manager;
-
 using static HarmonyLib.AccessTools;
 
 namespace UncomplicatedCustomRoles.Patches
@@ -115,6 +117,18 @@ namespace UncomplicatedCustomRoles.Patches
             newInstructions.RemoveAt(index);
 
             return newInstructions;
+        }
+    }
+
+    [HarmonyPatch(typeof(PickupSearchCompletor), nameof(PickupSearchCompletor.ValidateAny))]
+    public class PickupSearchCompletorPatch
+    {
+        static bool Prefix(PickupSearchCompletor __instance, ref bool __result)
+        {
+            if (!DisguiseTeam.List.TryGetValue(__instance.Hub.PlayerId, out Team team) || team != Team.SCPs ||
+                __instance.Hub.roleManager.CurrentRole.Team == Team.SCPs) return true;
+            __result = !__instance.TargetPickup.Info.Locked && !__instance.Hub.inventory.IsDisarmed() && !__instance.Hub.interCoordinator.AnyBlocker(BlockedInteraction.GrabItems);
+            return false;
         }
     }
 }
