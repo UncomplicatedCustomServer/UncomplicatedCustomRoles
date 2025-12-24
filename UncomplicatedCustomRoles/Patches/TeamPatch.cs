@@ -126,8 +126,9 @@ namespace UncomplicatedCustomRoles.Patches
         static bool Prefix(PickupSearchCompletor __instance, ref bool __result)
         {
             if (!DisguiseTeam.List.TryGetValue(__instance.Hub.PlayerId, out Team team) || team != Team.SCPs ||
-                __instance.Hub.roleManager.CurrentRole.Team == Team.SCPs) return true;
-            __result = !__instance.TargetPickup.Info.Locked && !__instance.Hub.inventory.IsDisarmed() && !__instance.Hub.interCoordinator.AnyBlocker(BlockedInteraction.GrabItems);
+                __instance.Hub.roleManager.CurrentRole.RoleTypeId.GetTeam() == Team.SCPs) return true;
+            __result = !__instance.TargetPickup.Info.Locked && !__instance.Hub.inventory.IsDisarmed() &&
+                       !__instance.Hub.interCoordinator.AnyBlocker(BlockedInteraction.GrabItems);
             return false;
         }
     }
