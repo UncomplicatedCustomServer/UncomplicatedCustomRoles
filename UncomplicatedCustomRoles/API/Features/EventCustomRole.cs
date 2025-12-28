@@ -13,6 +13,7 @@ using LabApi.Events.Arguments.ServerEvents;
 using PlayerRoles;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using LabApi.Events.Arguments.ObjectiveEvents;
 using LabApi.Events.Arguments.Scp127Events;
 using LabApi.Events.Arguments.Scp3114Events;
@@ -216,7 +217,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// </summary>
         public virtual bool IgnoreSpawnSystem { get; set; } = false;
 
-        public override string ToString() => $"{Name} ({Id})";
+        public override string ToString() => $"{Regex.Replace(Name, "<color=.*?>(.*?)</color>", "$1")} ({Id})";
 
         /// <summary>
         /// Invoked when the Custom Role is spawned

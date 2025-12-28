@@ -8,12 +8,13 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
  
+using MEC;
 using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Net;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
+using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager.NET;
 
 namespace UncomplicatedCustomRoles.Manager
@@ -25,23 +26,25 @@ namespace UncomplicatedCustomRoles.Manager
         public static bool CorrectHash { get; private set; } = false;
 
 #nullable enable
-        public static async void Init()
+        public static void Init()
         {
             try
             {
-                Tuple<HttpStatusCode, string?> data = await Plugin.HttpManager.VersionInfo();
+                string data = Plugin.HttpManager.VersionInfo();
+                HttpStatusCode code = data.GetStatusCode(out string msg);
 
-                if (data.Item1 is not HttpStatusCode.OK || data.Item2 is null)
+                if (code is not HttpStatusCode.OK || msg is null)
                 {
-                    LogManager.Warn($"Failed to gain the current version info from our central servers: API endpoint says {data.Item1}");
+                    LogManager.Warn($"Failed to gain the current version info from our central servers: API endpoint says {msg}");
                     return;
                 }
 
-                VersionInfo = JsonConvert.DeserializeObject<VersionInfo>(data.Item2);
+                VersionInfo = JsonConvert.DeserializeObject<VersionInfo>(data);
+
 
                 if (VersionInfo is null)
                 {
-                    LogManager.Silent($"Failed to convert API endpoint answer to VersionInfo.\nContent: {data.Item2}");
+                    LogManager.Silent($"Failed to convert API endpoint answer to VersionInfo.\nContent: {msg}");
                     return;
                 }
 
@@ -64,14 +67,7 @@ namespace UncomplicatedCustomRoles.Manager
                 if (hash != VersionInfo.Hash)
                 {
                     HashNotMatchMessageSender(hash);
-                    await Task.Run(async delegate
-                    {
-                        while (true)
-                        {
-                            await Task.Delay(900000);
-                            HashNotMatchMessageSender(hash);
-                        }
-                    });
+                    //Timing.CallContinuously(200000, () => HashNotMatchMessageSender(hash));
                 }
                 else
                     CorrectHash = true;
@@ -83,14 +79,7 @@ namespace UncomplicatedCustomRoles.Manager
                 {
                     RecallMessageSender();
                     if ((bool)VersionInfo.RecallImportant)
-                        await Task.Run(async delegate
-                        {
-                            while (true)
-                            {
-                                await Task.Delay(5000);
-                                RecallMessageSender();
-                            }
-                        });
+                        Timing.CallContinuously(500000, RecallMessageSender);
                 }
             } 
             catch (Exception e)

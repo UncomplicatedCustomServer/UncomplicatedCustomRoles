@@ -8,15 +8,10 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using PlayerRoles;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-
-namespace UncomplicatedCustomRoles.API.Features
+namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
-    public class DisguiseTeam
+    internal class KeepInventoryOnEscape : CustomModule
     {
-        public static readonly ConcurrentDictionary<int, Team> List = new();
-        public static readonly Dictionary<int, PlayerRoleBase> RoleBaseList = new();
+        public bool DropItems => (bool)TryGetValue("drop", true); // Not mandatory
     }
 }

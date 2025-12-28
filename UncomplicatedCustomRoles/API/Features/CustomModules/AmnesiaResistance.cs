@@ -8,15 +8,8 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using PlayerRoles;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-
-namespace UncomplicatedCustomRoles.API.Features
+namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
-    public class DisguiseTeam
-    {
-        public static readonly ConcurrentDictionary<int, Team> List = new();
-        public static readonly Dictionary<int, PlayerRoleBase> RoleBaseList = new();
-    }
+    internal class AmnesiaResistance : CustomModule
+    { }
 }

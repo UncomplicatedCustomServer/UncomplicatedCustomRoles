@@ -8,16 +8,14 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using LabApi.Features.Wrappers;
-using LabApi.Loader.Features.Paths;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
+using LabApi.Features.Wrappers;
+using LabApi.Loader.Features.Paths;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
@@ -74,18 +72,14 @@ namespace UncomplicatedCustomRoles.Manager.NET
                 return;
             }
 
-            HttpResponseMessage Response = Plugin.HttpManager.HttpGetRequest($"{Endpoint}/list?port={Server.Port}");
-            if (Response.StatusCode is HttpStatusCode.NotFound)
-                LogManager.System("Failed to load SpawnPoints from UCS cloud: not found! - Generated (ig)");
-            else
-                try
-                {
-                    TryLoadSpawnPoints(Plugin.HttpManager.RetriveString(Response));
-                }
-                catch (Exception e)
-                {
-                    LogManager.Error($"Error while acting SpawnPointApiCommunicator::PushSpawnPoints(): {e.GetType().FullName} - {e.Message}\n{e.Source} -- {e.InnerException}\n{e.StackTrace}");
-                }
+            try
+            {
+                TryLoadSpawnPoints(HttpQuery.Get($"{Endpoint}/list?port={Server.Port}"));
+            }
+            catch (Exception e)
+            {
+                LogManager.Error(e.ToString());
+            }
         }
 
         /// <summary>
@@ -97,27 +91,26 @@ namespace UncomplicatedCustomRoles.Manager.NET
         {
             if (Local)
             {
-                File.WriteAllText(FilePath, JsonConvert.SerializeObject(SpawnPoint.List));
+                File.WriteAllText(FilePath, JsonConvert.SerializeObject(SpawnPoint.List.Where(s => s.Sync)));
                 return;
             }
 
             try
             {
-                HttpResponseMessage Response = Plugin.HttpManager.HttpPutRequest($"{Endpoint}/update?port={Server.Port}", JsonConvert.SerializeObject(SpawnPoint.List));
-                string Answer = Plugin.HttpManager.RetriveString(Response);
-                if (Response.StatusCode is HttpStatusCode.OK)
+                string answer = HttpQuery.Post($"{Endpoint}/update?port={Server.Port}", JsonConvert.SerializeObject(SpawnPoint.List), "application/json");
+                if (answer is "FILE_TOO_BIG_OR_SMALL" or "LIMIT_EXCEEDED" || answer.StartsWith("QTA_TOO_MUCH_"))
+                    LogManager.Warn($"UCS cloud has declined the request: you have reached the maximum number of SpawnPoints: the current limit is: {MaxSpawnPoints} SpawnPoints per Server port and 10 total Server port!\nPlease contact us through our Discord! -- Server says: {answer}");
+                else if (answer is "UNKNOWN_LOGIC" or "")
+                    LogManager.Warn($"Failed to update your SpawnPoints on the UCS cloud: it seems to be broken!\nContact us as fast as possible!\nServer says: {answer}");
+                else
                     if (Plugin.Instance.Config.EnableBasicLogs)
-                        LogManager.Info($"Your list of SpawnPoints on UCS cloud has been updated!\nServer says: {Answer}");
+                        LogManager.Info($"Your list of SpawnPoints on UCS cloud has been updated!\nServer says: {answer}");
                     else
-                        LogManager.Silent($"Your list of SpawnPoints on UCS cloud has been updated!\nServer says: {Answer}");
-                else if (Response.StatusCode is HttpStatusCode.NotAcceptable)
-                    LogManager.Warn($"UCS cloud has declined the request: you have reached the maximum number of SpawnPoints: the current limit is: {MaxSpawnPoints} SpawnPoints per Server port and 10 total Server port!\nPlease contact us through our Discord! -- Server says: {Answer}");
-                else if (Response.StatusCode is HttpStatusCode.InternalServerError)
-                    LogManager.Warn($"Failed to update your SpawnPoints on the UCS cloud: it seems to be broken!\nContact us as fast as possible!\nServer says: {Answer}");
+                        LogManager.Silent($"Your list of SpawnPoints on UCS cloud has been updated!\nServer says: {answer}");
             }
             catch (Exception e)
             {
-                LogManager.Error($"Error while acting SpawnPointApiCommunicator::PushSpawnPoints(): {e.GetType().FullName} - {e.Message}\n{e.Source} -- {e.InnerException}\n{e.StackTrace}");
+                LogManager.Error(e.ToString());
             }
         }
 
@@ -132,15 +125,15 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// </summary>
         /// <param name="newPort"></param>
         /// <returns></returns>
-        public static HttpResponseMessage PushMigrationRequest(int newPort) => Plugin.HttpManager.HttpGetRequest($"{Endpoint}/migrate?port={Server.Port}&to={newPort}");
+        public static string PushMigrationRequest(int newPort) => HttpQuery.Get($"{Endpoint}/migrate?port={Server.Port}&to={newPort}");
 
         /// <summary>
         /// Send a downloadUrl request to our central request and share the answer
         /// </summary>
         /// <returns></returns>
-        public static string AskDownloadUrl() => Plugin.HttpManager.RetriveString(Plugin.HttpManager.HttpGetRequest($"{Endpoint}/download?port={Server.Port}"));
+        public static string AskDownloadUrl() => HttpQuery.Get($"{Endpoint}/download?port={Server.Port}");
 
-        public static string AskIp() => Plugin.HttpManager.RetriveString(Plugin.HttpManager.HttpGetRequest($"{Endpoint}/ip"));
+        public static string AskIp() => HttpQuery.Get($"{Endpoint}/ip");
 
         /// <summary>
         /// Check every <see cref="ICustomRole"/> in order to find if any of them are with an invalid (non-existing) SpawnPoint

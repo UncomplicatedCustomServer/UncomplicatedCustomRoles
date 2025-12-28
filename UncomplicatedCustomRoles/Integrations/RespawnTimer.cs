@@ -8,11 +8,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System;
-using System.Linq;
-using System.Reflection;
 using LabApi.Features.Wrappers;
-using LabApi.Loader;
 using PlayerRoles;
 using PlayerRoles.Spectating;
 using UncomplicatedCustomRoles.API.Features;
@@ -22,64 +18,39 @@ using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Integrations
 {
-    internal class RespawnTimer
+#pragma warning disable CS8974 // Conversione del gruppo di metodi in un tipo non delegato
+
+    internal static class RespawnTimer
     {
-        public static readonly Assembly RespawnTimerPlugin = PluginLoader.Plugins.FirstOrDefault(p => p.Key.Name is "RespawnTimer").Value;
-
-        public static readonly Type TimerView = RespawnTimerPlugin?.GetType("RespawnTimer.API.Features.TimerView");
-
-        public static readonly MethodInfo AddReplaceHelper = TimerView?.GetMethod("AddReplaceHelper");
-
-        public static readonly MethodInfo RemoveReplaceHelper = TimerView?.GetMethod("RemoveReplaceHelper");
-
         const string RespawnTimerTextKey = "CUSTOM_ROLE";
 
         public static void Enable()
         {
-#pragma warning disable CS8974 // Conversione del gruppo di metodi in un tipo non delegato
-            AddReplaceHelper?.Invoke(null, new object[]
+            DynamicInvoke.GetMethod("RespawnTimer", "RespawnTimer.API.Placeholder.Register")?.Invoke(null, new object[]
             {
                 RespawnTimerTextKey,
                 GetPublicRoleName
             });
-#pragma warning restore CS8974 // Conversione del gruppo di metodi in un tipo non delegato
 
             LogManager.Debug("Compatibility loader for RespawnTimer: success");
         }
 
-        public static void Disable()
-        {
-            RemoveReplaceHelper?.Invoke(null, new object[]
-            {
-                RespawnTimerTextKey
-            });
-        }
-
         public static string GetPublicCustomRoleName(ICustomRole role, Player watcherPlayer)
         {
-            if (!Plugin.Instance.Config.HiddenRolesId.TryGetValue(role.Id, out var information))
+            if (!Plugin.Instance.Config.HiddenRolesId.TryGetValue(role.Id, out HiddenRoleInformation information))
                 return role.Name;
 
-            if (information.OnlyVisibleOnOverwatch)
-            {
-                if (watcherPlayer.Role == RoleTypeId.Overwatch)
-                {
-                    return Plugin.Instance.Config.RespawnTimerContent.Replace("%customrole%", role.Name);
-                }
-            }
-            else
-            {
-                if (watcherPlayer.RemoteAdminAccess)
-                {
-                    return Plugin.Instance.Config.RespawnTimerContent.Replace("%customrole%", role.Name);
-                }
-            }
+
+            if ((information.OnlyVisibleOnOverwatch && watcherPlayer.Role == RoleTypeId.Overwatch) || watcherPlayer.RemoteAdminAccess)
+                return Plugin.Instance.Config.RespawnTimerContent.Replace("%customrole%", role.Name);
+
             return information.RoleNameWhenHidden;
         }
 
         public static string GetPublicRoleName(Player player)
         {
-            if (player.RoleBase is not SpectatorRole spectator) return Plugin.Instance.Config.RespawnTimerContentEmpty;
+            if (player.RoleBase is not SpectatorRole spectator) 
+                return Plugin.Instance.Config.RespawnTimerContentEmpty;
 
             Player spectated = Player.Get(spectator.SyncedSpectatedNetId);
 

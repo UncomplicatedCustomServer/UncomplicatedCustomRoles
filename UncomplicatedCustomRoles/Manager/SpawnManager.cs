@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using System;
+using Cassie;
 using UncomplicatedCustomRoles.Extensions;
 using MEC;
 using UncomplicatedCustomRoles.API.Features;
@@ -27,6 +28,9 @@ using UncomplicatedCustomRoles.Integrations;
 using LabApi.Features.Wrappers;
 using MapGeneration;
 using CommandSystem;
+using InventorySystem;
+using UncomplicatedCustomRoles.API.Features.Controllers;
+using UncomplicatedCustomRoles.Events;
 
 // Mormora, la gente mormora
 // falla tacere praticando l'allegria
@@ -35,7 +39,7 @@ namespace UncomplicatedCustomRoles.Manager
 {
     internal class SpawnManager
     {
-        public static IReadOnlyDictionary<string, string> colorMap = new Dictionary<string, string>()
+        public static readonly IReadOnlyDictionary<string, string> colorMap = new Dictionary<string, string>()
         {
             { "pink", "#FF96DE" },
             { "red", "#C50000" },
@@ -65,6 +69,12 @@ namespace UncomplicatedCustomRoles.Manager
         {
             if (SummonedCustomRole.TryGet(player, out SummonedCustomRole role))
                 role.Destroy();
+        }
+        
+        public static IEnumerator<float> AsyncPlayerSpawner(Player player, int id, bool doBypassRoleOverwrite = true)
+        {
+            yield return Timing.WaitForSeconds(0.1f);
+            SummonCustomSubclass(player, id, doBypassRoleOverwrite);
         }
 
         public static void SummonCustomSubclass(Player player, int id, bool doBypassRoleOverwrite = true)
@@ -193,6 +203,37 @@ namespace UncomplicatedCustomRoles.Manager
                         Player.AddAmmo(Ammo.Key, Ammo.Value);
                     }
 
+                // Reset the inventory if we need to add the old one
+                if (PlayerEventHandler.RespawnInventoryQueue.TryGetValue(Player.PlayerId, out Tuple<List<ItemType>, Dictionary<ItemType, ushort>, bool> oldInventory))
+                {
+                    Player.ClearInventory();
+                    Player.ClearAmmo();
+
+                    foreach (ItemType item in oldInventory.Item1)
+                        if (!oldInventory.Item3)
+                            Player.AddItem(item);
+                        else
+                        {
+                            var pickup = Pickup.Create(item, Player.Position);
+                            if (pickup is null)
+                                continue;
+                            pickup.Spawn();
+                        }
+
+                    foreach (KeyValuePair<ItemType, ushort> item in oldInventory.Item2)
+                        if (!oldInventory.Item3)
+                            Player.Inventory.ServerAddAmmo(item.Key, item.Value);
+                        else
+                        {
+                            var pickup = Pickup.Create(item.Key, Player.Position);
+                            if (pickup is null)
+                                continue;
+                            pickup.Spawn();
+                        }
+
+                    PlayerEventHandler.RespawnInventoryQueue.TryRemove(Player.PlayerId, out _);
+                }
+                
                 PlayerInfoArea InfoArea = Player.ReferenceHub.nicknameSync.Network_playerInfoToShow;
 
                 // Apply every required stats
@@ -280,8 +321,11 @@ namespace UncomplicatedCustomRoles.Manager
 
                 LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})!");
 
-                new SummonedCustomRole(Player, Role, Badge, PermanentEffects, InfoArea, ChangedNick);
+                SummonedCustomRole roleInstance = new(Player, Role, Badge, PermanentEffects, InfoArea, ChangedNick); // IMPORTANT!
 
+                EscapeController escapeController = Player.GameObject.AddComponent<EscapeController>();
+                escapeController.Init(roleInstance);
+                
                 if (Spawn.Spawning.Contains(Player.PlayerId))
                     Spawn.Spawning.Remove(Player.PlayerId);
 
@@ -299,7 +343,7 @@ namespace UncomplicatedCustomRoles.Manager
         public static KeyValuePair<bool, object>? ParseEscapeRole(Dictionary<string, string> roleAfterEscape, Player player)
         {
             Dictionary<Team, KeyValuePair<bool, object>?> AsCuffedByInternalTeam = new();
-            // Dictionary<uint, KeyValuePair<bool, object>> AsCuffedByCustomTeam = new(); we will add the support to UCT and UIU-RS
+            Dictionary<uint, KeyValuePair<bool, object>?> AsCuffedByCustomTeam = new(); //we will add the support to UCT and UIU-RS
             // cuffed by InternalTeam FoundationForces
             //   0     1       2             3           = 4
             Dictionary<int, KeyValuePair<bool, object>?> AsCuffedByCustomRole = new();
@@ -334,6 +378,8 @@ namespace UncomplicatedCustomRoles.Manager
 
                     if ((Elements[2] is "InternalTeam" || Elements[2] is "IT") && Enum.TryParse(Elements[3], out Team team))
                         AsCuffedByInternalTeam.TryAdd(team, Data);
+                    else if ((Elements[2] is "CustomTeam" || Elements[2] is "CT") && uint.TryParse(Elements[3], out uint customTeam))
+                        AsCuffedByCustomTeam.TryAdd(customTeam, Data);
                     else if ((Elements[2] is "CustomRole" || Elements[2] is "CR") && int.TryParse(Elements[3], out int id) && CustomRole.CustomRoles.ContainsKey(id))
                         AsCuffedByCustomRole.TryAdd(id, Data);
                     else
@@ -377,7 +423,6 @@ namespace UncomplicatedCustomRoles.Manager
         }
 
 #nullable enable
-#pragma warning disable CS8602 // <Element> can be null at this point! (added a check!)
         public static ICustomRole? DoEvaluateSpawnForPlayer(Player player, RoleTypeId? role = null)
         {
             role ??= player.Role;
@@ -412,7 +457,7 @@ namespace UncomplicatedCustomRoles.Manager
             };
 
             foreach (ICustomRole Role in CustomRole.CustomRoles.Values.Where(cr => cr.SpawnSettings is not null))
-                if (!Role.IgnoreSpawnSystem && Player.ReadyList.Count(pl => !pl.IsHost) >= Role.SpawnSettings.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
+                if (!Role.IgnoreSpawnSystem && Player.ReadyList.Count(pl => !pl.IsHost) >= Role.SpawnSettings?.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
                 {
                     if (Role.SpawnSettings.RequiredPermission is not null && Role.SpawnSettings.RequiredPermission.Length > 0 && !(player as ICommandSender).CheckPermission(Role.SpawnSettings.RequiredPermission))
                     {
@@ -441,7 +486,7 @@ namespace UncomplicatedCustomRoles.Manager
         internal static void HandleRecontainmentAnnoucement(DamageHandlerBase baseHandler, CustomScpAnnouncer customScpAnnouncer)
         {
             float num = AlphaWarheadController.Detonated ? 3.5f : 1f;
-            NineTailedFoxAnnouncer.singleton.ServerOnlyAddGlitchyPhrase($"{ScpToCassie(customScpAnnouncer.RoleName)} {baseHandler.CassieDeathAnnouncement.Announcement}", UnityEngine.Random.Range(0.1f, 0.14f) * num, UnityEngine.Random.Range(0.07f, 0.08f) * num);
+            CassieGlitchifier.Glitchify($"{ScpToCassie(customScpAnnouncer.RoleName)} {baseHandler.CassieDeathAnnouncement.Announcement}", UnityEngine.Random.Range(0.1f, 0.14f) * num, UnityEngine.Random.Range(0.07f, 0.08f) * num);
             List<SubtitlePart> list = new()
             {
                 new(SubtitleType.SCP, new string[] { customScpAnnouncer.RoleName.Replace("SCP", string.Empty).Replace("scp", string.Empty).Replace("Scp", string.Empty).Replace("SCP-", string.Empty).Replace("scp-", string.Empty).Replace("Scp-", string.Empty) }),

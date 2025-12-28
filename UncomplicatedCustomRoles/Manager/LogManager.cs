@@ -9,13 +9,15 @@
  */
 
 using Discord;
-using LabApi.Features.Console;
-using LabApi.Loader.Features.Yaml;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
-using System.Net.Http;
 using System.Text;
+using LabApi.Features.Console;
+using LabApi.Loader.Features.Paths;
+using LabApi.Loader.Features.Yaml;
+using NorthwoodLib.Pools;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 
@@ -26,21 +28,13 @@ namespace UncomplicatedCustomRoles.Manager
         // We should store the data here
         public static readonly HashSet<LogEntry> History = new();
 
-        public static bool MessageSent { get; internal set; } = false;
-
-        public static bool DebugEnabled => Plugin.Instance.Config.Debug;
-
         public static void Debug(string message)
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Debug.ToString(), message));
-
-            if (!DebugEnabled)
-                return;
-
             Logger.Debug(message);
         }
 
-        public static void SmInfo(string message, string label = "INFO")
+        public static void SmInfo(string message, string label = "Info")
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), label, message));
             Logger.Raw($"[{label}] [{Plugin.Instance.Name}] {message}", ConsoleColor.Gray);
@@ -68,17 +62,14 @@ namespace UncomplicatedCustomRoles.Manager
 
         public static void System(string message) => History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "System", message));
 
-        internal static HttpStatusCode SendReport(out HttpContent content)
+        internal static HttpStatusCode SendReport(out string content, bool online = true)
         {
             content = null;
-
-            if (MessageSent)
-                return HttpStatusCode.Forbidden;
 
             if (History.Count < 1)
                 return HttpStatusCode.Forbidden;
 
-            StringBuilder builder = new();
+            StringBuilder builder = StringBuilderPool.Shared.Rent();
 
             foreach (LogEntry Element in History)
                 builder.Append($"{Element}\n");
@@ -89,13 +80,13 @@ namespace UncomplicatedCustomRoles.Manager
             foreach (ICustomRole Role in CustomRole.CustomRoles.Values)
                 builder.Append($"{YamlConfigParser.Serializer.Serialize(Role)}\n\n---\n\n");
 
-            HttpStatusCode Response = Plugin.HttpManager.ShareLogs(builder.ToString(), out content);
+            HttpStatusCode response = HttpStatusCode.OK;
+            if (online)
+                response = Plugin.HttpManager.ShareLogs(StringBuilderPool.Shared.ToStringReturn(builder), out content);
+            else
+                File.WriteAllText(Path.Combine(PathManager.Configs.FullName, $"UCR-Report-{DateTimeOffset.Now.ToUnixTimeSeconds()}.txt"), StringBuilderPool.Shared.ToStringReturn(builder));
 
-
-            if (Response is HttpStatusCode.OK)
-                MessageSent = true;
-
-            return Response;
+            return response;
         }
     }
 }

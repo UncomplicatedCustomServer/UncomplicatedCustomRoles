@@ -17,6 +17,7 @@ using System.Net;
 using System.Threading.Tasks;
 using UncomplicatedCustomRoles.Manager;
 using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.Commands
 {
@@ -153,8 +154,8 @@ namespace UncomplicatedCustomRoles.Commands
                         }
                         else if (arguments.Count == 3)
                         {
-                            HttpStatusCode Status = SpawnPointApiCommunicator.PushMigrationRequest(int.Parse(arguments[1])).StatusCode;
-
+                            HttpStatusCode Status = SpawnPointApiCommunicator.PushMigrationRequest(int.Parse(arguments[1])).GetStatusCode(out _);
+                            
                             if (Status is HttpStatusCode.OK)
                             {
                                 response = $"Migration completed!\nRefreshing the local database...";
