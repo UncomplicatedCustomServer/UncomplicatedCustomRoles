@@ -27,10 +27,13 @@ namespace UncomplicatedCustomRoles.Manager
     {
         // We should store the data here
         public static readonly HashSet<LogEntry> History = new();
+        private static bool DebugEnabled => Plugin.Instance.Config.Debug;
 
         public static void Debug(string message)
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Debug.ToString(), message));
+            if (!DebugEnabled)
+                return;
             Logger.Debug(message);
         }
 

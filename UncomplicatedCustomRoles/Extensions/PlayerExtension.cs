@@ -156,71 +156,34 @@ namespace UncomplicatedCustomRoles.Extensions
             return false;
         }
 
-        /// <summary>
-        /// Changes the CustomInfo of a <see cref="Player"/>
-        /// </summary>
-        /// <param name="player"></param>
-        /// <param name="value"></param>
-        public static void ApplyClearCustomInfo(this Player player, string value)
+        public static void RefreshInfoArea(this Player player, ICustomRole role)
         {
-            if (!NicknameSync.ValidateCustomInfo(value, out string error))
-            {
-                LogManager.Error($"CustomInfo color tags is not correct. Setting CustomInfo to empty.\nError: {error}");
-                value = string.Empty;
-            }
-            string nick = player.DisplayName.Replace("<color=#855439>*</color>", "");
-            player.InfoArea &= ~PlayerInfoArea.Nickname;
-            player.InfoArea = string.IsNullOrEmpty(value)
-                ? player.InfoArea & ~PlayerInfoArea.CustomInfo
-                : player.InfoArea | PlayerInfoArea.CustomInfo;
-            player.CustomInfo = $"{ProcessCustomInfo(value)}\n{nick}";
-        }
-        
-        /// <summary>
-        /// Changes the CustomInfo of a <see cref="Player"/> and overrides the player Role
-        /// </summary>
-        public static void ApplyCustomInfoAndRoleName(this Player player, ICustomRole role)
-        {
+            string customInfo = ProcessCustomInfo(PlaceholderManager.ApplyPlaceholders(role.CustomInfo, player, role));
+            string roleName = role.Name;
+            string nickName = player.DisplayName.Replace("<color=#855439>*</color>", "");
+            bool customInfoExists = !string.IsNullOrEmpty(customInfo);
+            bool roleNameExists = role.OverrideRoleName;
+            
             player.InfoArea |= PlayerInfoArea.CustomInfo;
             player.InfoArea &= ~PlayerInfoArea.Role;
             player.InfoArea &= ~PlayerInfoArea.Nickname;
-        
-            string customInfo = PlaceholderManager.ApplyPlaceholders(role.CustomInfo, player, role);
-            string roleName = role.Name;
-            string nick = player.DisplayName.Replace("<color=#855439>*</color>", "");
             
-            if (!NicknameSync.ValidateCustomInfo(customInfo, out string error))
+            if (!NicknameSync.ValidateCustomInfo(customInfo, out string customInfoError) && customInfoExists)
             {
-                LogManager.Error($"CustomInfo color tags is not correct. Setting CustomInfo to empty.\nRole: {role}.\nError: {error}");
-                customInfo = string.Empty;
+                LogManager.Error($"CustomInfo is not correct. Setting CustomInfo to empty.\nCustomInfo: {customInfo}\nError: {customInfoError}");
+                customInfoExists = false;
             }
             
-            if (!customInfo.Contains("<color=#") && roleName.Contains("<color=#"))
+            if (!NicknameSync.ValidateCustomInfo(roleName, out string roleNameError) && roleNameExists)
             {
-                LogManager.Error("Role name color requires custom info color. Setting RoleName to default. Role: " + role);
-                player.InfoArea &= ~PlayerInfoArea.CustomInfo;
-                player.InfoArea |= PlayerInfoArea.Role | PlayerInfoArea.Nickname;
-                ApplyClearCustomInfo(player, customInfo);
-                return;
+                LogManager.Error($"RoleName is not correct. Setting CustomInfo to empty.\nRoleName: {roleName}\nError: {roleNameError}");
+                roleNameExists = false;
             }
-        
-            if (string.IsNullOrEmpty(customInfo))
-            {
-                LogManager.Silent("Applying only role name (NICK-ROLE)");
-                if (!NicknameSync.ValidateCustomInfo(roleName, out string errorRole))
-                {
-                    LogManager.Error($"RoleName color tags is not correct. Showing default PlayerInfo.\nRole: {role}.\nError: {errorRole}");
-                    player.InfoArea &= ~PlayerInfoArea.CustomInfo;
-                    player.InfoArea |= PlayerInfoArea.Role | PlayerInfoArea.Nickname;
-                    return;
-                }
-                player.CustomInfo = $"{nick}\n{roleName}";
-            }
-            else
-            {
-                LogManager.Silent("Applying role name and custom info (CI-NICK-ROLE)");
-                player.CustomInfo = $"{ProcessCustomInfo(customInfo)}\n{nick}\n{roleName}";
-            }
+            
+            player.CustomInfo = "<color=#FFFFFF></color>%custominfo%%nickname%%rolename%";
+            player.CustomInfo = player.CustomInfo.Replace("%custominfo%", customInfoExists ? $"{customInfo}\n" : "");
+            player.CustomInfo = player.CustomInfo.Replace("%nickname%", $"{nickName}\n");
+            player.CustomInfo = player.CustomInfo.Replace("%rolename%", roleNameExists ? $"{roleName}" : role.Role.GetFullName());
         }
 
         /// <summary>

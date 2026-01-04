@@ -47,6 +47,8 @@ namespace UncomplicatedCustomRoles.Events
             PlayerEvents.Joined += OnJoined;
             PlayerEvents.DamagingWindow += OnDamagingWindow;
             PlayerEvents.UnlockingWarheadButton += OnUnlockingWarheadButton;
+            PlayerEvents.RequestedRaPlayerInfo += OnPlayerRequestedRaPlayerInfo;
+            PlayerEvents.RaPlayerListAddingPlayer += OnPlayerRaPlayerListAddingPlayer;
 
             Instance = this;
         }
@@ -69,6 +71,8 @@ namespace UncomplicatedCustomRoles.Events
             PlayerEvents.Joined -= OnJoined;
             PlayerEvents.DamagingWindow -= OnDamagingWindow;
             PlayerEvents.UnlockingWarheadButton -= OnUnlockingWarheadButton;
+            PlayerEvents.RequestedRaPlayerInfo -= OnPlayerRequestedRaPlayerInfo;
+            PlayerEvents.RaPlayerListAddingPlayer -= OnPlayerRaPlayerListAddingPlayer;
         }
 
         public void OnJoined(PlayerJoinedEventArgs ev)
@@ -343,6 +347,18 @@ namespace UncomplicatedCustomRoles.Events
         {
             if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
                 ev.IsAllowed = ItemBan.ValidatePickup(summonedInstance, ev.Pickup);
+        }
+        
+        public void OnPlayerRequestedRaPlayerInfo(PlayerRequestedRaPlayerInfoEventArgs ev)
+        {
+            SummonedCustomRole.TryParseRemoteAdmin(ev.Target.ReferenceHub, ev.InfoBuilder);
+        }
+
+        public void OnPlayerRaPlayerListAddingPlayer(PlayerRaPlayerListAddingPlayerEventArgs ev)
+        {
+            if (SummonedCustomRole.TryGet(ev.Target.ReferenceHub, out SummonedCustomRole customRole))
+                if (customRole.TryGetModule(out ColorfulRaName colorfulRaName))
+                    ev.Body = ev.Body.Replace("{RA_ClassColor}", $"#{colorfulRaName.Color.TrimStart('#')}");
         }
     }
 }

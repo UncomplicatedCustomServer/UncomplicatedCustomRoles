@@ -307,11 +307,8 @@ namespace UncomplicatedCustomRoles.Manager
                     ChangedNick = true;
                 }
                 
-                if (Role.OverrideRoleName)
-                    Player.ApplyCustomInfoAndRoleName(Role);
-                else
-                    Player.ApplyClearCustomInfo(PlaceholderManager.ApplyPlaceholders(Role.CustomInfo, Player, Role));
-
+                Player.RefreshInfoArea(Role);
+                
                 // We need the role appereance also here!
                 if (Role.RoleAppearance != Role.Role)
                 {
