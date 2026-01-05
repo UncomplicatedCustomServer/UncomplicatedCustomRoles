@@ -138,7 +138,7 @@ namespace UncomplicatedCustomRoles.Events
         public void OnDeath(PlayerDeathEventArgs ev)
         {
             if (TerminationQueue.TryGetValue(ev.Player.PlayerId, out Tuple<CustomScpAnnouncer, DateTimeOffset> data) && (DateTimeOffset.Now - data.Item2).Milliseconds < 1300)
-                SpawnManager.HandleRecontainmentAnnoucement(ev.DamageHandler, data.Item1);
+                SpawnManager.AnnounceScpTermination(ev.Player.ReferenceHub, ev.DamageHandler);
 
             TerminationQueue.TryRemove(ev.Player.PlayerId, out _);
 

@@ -27,6 +27,7 @@ using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Commands;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
+using UncomplicatedCustomRoles.Patches;
 using UnityEngine;
 
 namespace UncomplicatedCustomRoles.API.Features
@@ -307,8 +308,9 @@ namespace UncomplicatedCustomRoles.API.Features
                 }
 
                 Player.ReferenceHub.nicknameSync.Network_playerInfoToShow = PlayerInfoArea;
-                //Player.IsUsingStamina = true;
                 Player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = string.Empty;
+                
+                Announcer.SavedCustomAnnouncements.TryRemove(Player.PlayerId);
 
                 LogManager.Debug("Scale reset to 1, 1, 1");
                 Player.Scale = new(1, 1, 1);
