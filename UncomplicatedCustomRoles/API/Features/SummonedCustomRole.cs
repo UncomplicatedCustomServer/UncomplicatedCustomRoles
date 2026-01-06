@@ -635,7 +635,7 @@ namespace UncomplicatedCustomRoles.API.Features
         public static void TryParseRemoteAdmin(ReferenceHub player, StringBuilder builder) //REF
         {
             if (Plugin.HttpManager.Credits.TryGetValue(player.authManager.UserId, out Triplet<string, string, bool> tag))
-                if (Plugin.HttpManager.OrgPlayerRole.ContainsKey(player.authManager.UserId))
+                if (Plugin.HttpManager.IsJobRole.Contains(player.authManager.UserId))
                     builder.AppendLine($"\nUCS Status: <color=#0b55b0><b>[UCS EMPLOYEE]</b></color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>");
                 else
                     builder.AppendLine($"\nUCS Status: <color=#c9ad2c><b>[UCS CONTRIBUTOR]</b></color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>");

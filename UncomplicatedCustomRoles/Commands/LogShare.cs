@@ -12,9 +12,8 @@ using CommandSystem;
 using System;
 using System.Net;
 using UncomplicatedCustomRoles.Manager;
-using System.Net.Http;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.Text.Json;
 using System.Threading.Tasks;
 using LabApi.Features.Console;
 
@@ -51,7 +50,7 @@ namespace UncomplicatedCustomRoles.Commands
                 {
                     if (Response is HttpStatusCode.OK)
                     {
-                        Dictionary<string, string> Data = JsonConvert.DeserializeObject<Dictionary<string, string>>(content);
+                        Dictionary<string, string> Data = JsonSerializer.Deserialize<Dictionary<string, string>>(content);
                         Logger.Info($"[ShareTheLog] Successfully shared the UCR logs with the developers!\nSend this Id to the developers: {Data["id"]}\n\nTook {DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start}ms");
                     } 
                     else

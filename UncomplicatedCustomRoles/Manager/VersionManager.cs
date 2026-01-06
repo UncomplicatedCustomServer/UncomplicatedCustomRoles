@@ -9,7 +9,7 @@
  */
  
 using MEC;
-using Newtonsoft.Json;
+using System.Text.Json;
 using System;
 using System.IO;
 using System.Net;
@@ -32,19 +32,16 @@ namespace UncomplicatedCustomRoles.Manager
             {
                 string data = Plugin.HttpManager.VersionInfo();
                 HttpStatusCode code = data.GetStatusCode(out string msg);
-
-                if (code is not HttpStatusCode.OK || msg is null)
+                if (code is not HttpStatusCode.OK)
                 {
-                    LogManager.Warn($"Failed to gain the current version info from our central servers: API endpoint says {msg}");
+                    LogManager.Warn($"Failed to gain the current version info from our central servers: API endpoint says {msg ?? "Message is null"}");
                     return;
                 }
 
-                VersionInfo = JsonConvert.DeserializeObject<VersionInfo>(data);
-
-
+                VersionInfo = JsonSerializer.Deserialize<VersionInfo>(data);
                 if (VersionInfo is null)
                 {
-                    LogManager.Silent($"Failed to convert API endpoint answer to VersionInfo.\nContent: {msg}");
+                    LogManager.Silent($"Failed to convert API endpoint answer to VersionInfo.\nContent: {msg ?? "Message is null"}");
                     return;
                 }
 
@@ -62,13 +59,10 @@ namespace UncomplicatedCustomRoles.Manager
                     LogManager.Info($"You are using UncomplicatedCustomRoles v{VersionInfo.Name}{(VersionInfo.CustomName is not null ? $" '{VersionInfo.CustomName}'" : string.Empty)}!");
                 }
 
-                // Check integrity
                 string hash = HashFile(Plugin.Instance.FilePath);
                 if (hash != VersionInfo.Hash)
-                {
                     HashNotMatchMessageSender(hash);
-                    //Timing.CallContinuously(200000, () => HashNotMatchMessageSender(hash));
-                }
+                
                 else
                     CorrectHash = true;
 

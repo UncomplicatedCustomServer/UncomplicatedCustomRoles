@@ -9,7 +9,6 @@
  */
 
 using LabApi.Loader.Features.Yaml;
-using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -156,18 +155,40 @@ namespace UncomplicatedCustomRoles.Compatibility
             error = null;
             Dictionary<string, object> data = YamlConfigParser.Deserializer.Deserialize<Dictionary<string, object>>(content);
 
-            SnakeCaseNamingStrategy namingStrategy = new();
-
             foreach (PropertyInfo property in typeof(CustomRole).GetProperties().Where(p => p.CanWrite && p is not null && p.GetType() is not null))
             {
-                if (!data.ContainsKey(namingStrategy.GetPropertyName(property.Name, false)))
-                    error = $"Given CustomRole doesn't contain the required property '{namingStrategy.GetPropertyName(property.Name, false)}' ({namingStrategy.GetPropertyName(property.PropertyType.Name, false)})";
+                string snakeCaseName = ToSnakeCase(property.Name);
+                if (!data.ContainsKey(snakeCaseName))
+                    error = $"Given CustomRole doesn't contain the required property '{snakeCaseName}' ({ToSnakeCase(property.PropertyType.Name)})";
 
                 if (error is not null)
                     break;
             }
 
             return error is null;
+        }
+
+        private static string ToSnakeCase(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return name;
+
+            var result = new System.Text.StringBuilder();
+            for (int i = 0; i < name.Length; i++)
+            {
+                char c = name[i];
+                if (char.IsUpper(c))
+                {
+                    if (i > 0)
+                        result.Append('_');
+                    result.Append(char.ToLowerInvariant(c));
+                }
+                else
+                {
+                    result.Append(c);
+                }
+            }
+            return result.ToString();
         }
     }
 }

@@ -194,8 +194,8 @@
       <PackageReference Include="Lib.Harmony">
           <Version>2.2.2</Version>
       </PackageReference>
-      <PackageReference Include="Newtonsoft.Json">
-          <Version>13.0.3</Version>
+      <PackageReference Include="System.Text.Json">
+          <Version>10.0.1</Version>
       </PackageReference>
       <PackageReference Include="System.ComponentModel">
           <Version>4.3.0</Version>
