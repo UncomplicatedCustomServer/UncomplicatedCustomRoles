@@ -48,6 +48,7 @@
     <Compile Include="API\Features\CustomModules\AmnesiaResistance.cs" />
     <Compile Include="API\Features\CustomModules\ColorfulNickname.cs" />
     <Compile Include="API\Features\CustomModules\ColorfulRaName.cs" />
+    <Compile Include="API\Features\CustomModules\CustomInfoOrder.cs" />
     <Compile Include="API\Features\CustomModules\CustomModule.cs" />
     <Compile Include="API\Features\CustomModules\CustomPermissions.cs" />
     <Compile Include="API\Features\CustomModules\CustomScpAnnouncer.cs" />

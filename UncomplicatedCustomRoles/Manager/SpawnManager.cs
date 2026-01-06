@@ -308,14 +308,15 @@ namespace UncomplicatedCustomRoles.Manager
                     ChangedNick = true;
                 }
                 
-                Player.RefreshInfoArea(Role);
                 
-                // We need the role appereance also here!
-                if (Role.RoleAppearance != Role.Role)
+                LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
+                Timing.CallDelayed(0.75f, () =>
                 {
-                    LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
-                    Timing.CallDelayed(0.75f, () => Player.ChangeAppearance(Role.RoleAppearance, LoadAppearanceAffectedPlayers(Player), true));
-                }
+                    if (Role.RoleAppearance != Role.Role)
+                        Player.ChangeAppearance(Role.RoleAppearance, LoadAppearanceAffectedPlayers(Player), true);
+                        
+                    Player.RefreshInfoArea();
+                });
 
                 LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})!");
 

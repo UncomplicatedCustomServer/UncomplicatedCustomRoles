@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.API.Features;
+using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
@@ -156,8 +157,14 @@ namespace UncomplicatedCustomRoles.Extensions
             return false;
         }
 
-        public static void RefreshInfoArea(this Player player, ICustomRole role)
+        public static void RefreshInfoArea(this Player player)
         {
+            ICustomRole role = player.TryGetSummonedInstance(out var summonedCustomRole) ? summonedCustomRole.Role : null;
+            if (role is null)
+            {
+                LogManager.Warn($"Tried to refresh InfoArea for player {player.Nickname} but they don't have a custom role.");
+                return;
+            }
             string customInfo = ProcessCustomInfo(PlaceholderManager.ApplyPlaceholders(role.CustomInfo, player, role));
             string roleName = role.Name;
             string nickName = player.DisplayName.Replace("<color=#855439>*</color>", "");
@@ -181,9 +188,28 @@ namespace UncomplicatedCustomRoles.Extensions
             }
             
             player.CustomInfo = "<color=#FFFFFF></color>%custominfo%%nickname%%rolename%";
+            
+            if (summonedCustomRole.TryGetModule(out CustomInfoOrder customInfoOrderModule))
+                player.CustomInfo = $"<color=#FFFFFF></color>{customInfoOrderModule.Order}";
+
+            if (summonedCustomRole.TryGetModule(out ColorfulNickname colorfulNickname))
+            {
+                if (string.IsNullOrEmpty(colorfulNickname.Color))
+                    return;
+                string nick = player.DisplayName.Replace("<color=#855439>*</color>", "");
+                string color = colorfulNickname.Color.StartsWith("#") ? colorfulNickname.Color : $"#{colorfulNickname.Color}";
+                if (!Misc.AcceptedColours.Contains(color.Replace("#", "")))
+                {
+                    LogManager.Warn($"The color {color} is not acceptable by the game in ColorfulNicknames! Please use a valid hex color code.");
+                    return;
+                }
+                nickName = $"<color={color}>{nick}</color>";
+            }
+            
+            
             player.CustomInfo = player.CustomInfo.Replace("%custominfo%", customInfoExists ? $"{customInfo}\n" : "");
             player.CustomInfo = player.CustomInfo.Replace("%nickname%", $"{nickName}\n");
-            player.CustomInfo = player.CustomInfo.Replace("%rolename%", roleNameExists ? $"{roleName}" : role.Role.GetFullName());
+            player.CustomInfo = player.CustomInfo.Replace("%rolename%", roleNameExists ? $"{roleName}\n" : role.Role.GetFullName()+"\n");
         }
 
         /// <summary>

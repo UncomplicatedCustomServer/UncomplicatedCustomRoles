@@ -20,7 +20,6 @@ using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
 using LabApi.Features;
 using LabApi.Features.Wrappers;
-using LabApi.Loader;
 using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Extensions;
 
@@ -150,14 +149,15 @@ namespace UncomplicatedCustomRoles.Manager.NET
             }
             catch (Exception e)
             {
-                LogManager.Error($"Failed to act HttpManager::LoadCreditTags() - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
+                LogManager.Error("An error occurred while loading the credit tags from the UCS Central Server!");
+                LogManager.Debug($"Failed to act HttpManager::LoadCreditTags() - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
             }
         }
 
         public Triplet<string, string, bool> GetCreditTag(Player player)
         {
-            if (Credits.ContainsKey(player.UserId))
-                return Credits[player.UserId];
+            if (Credits.TryGetValue(player.UserId, out var tag))
+                return tag;
 
             return new(null, null, false);
         }

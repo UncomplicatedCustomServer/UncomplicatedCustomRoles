@@ -31,7 +31,7 @@ namespace UncomplicatedCustomRoles.Manager
 
         public static void Debug(string message)
         {
-            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Debug.ToString(), message));
+            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), nameof(LogLevel.Debug), message));
             if (!DebugEnabled)
                 return;
             Logger.Debug(message);
@@ -45,19 +45,19 @@ namespace UncomplicatedCustomRoles.Manager
 
         public static void Info(string message, ConsoleColor color = ConsoleColor.Cyan)
         {
-            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Info.ToString(), message));
+            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), nameof(LogLevel.Info), message));
             Logger.Raw($"[INFO] [{Plugin.Instance.Name}] {message}", color);
         }
 
         public static void Warn(string message, string error = "CS0000")
         {
-            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Warn.ToString(), message, error));
+            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), nameof(LogLevel.Warn), message, error));
             Logger.Warn(message);
         }
 
         public static void Error(string message, string error = "CS0000")
         {
-            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Warn.ToString(), message, error));
+            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), nameof(LogLevel.Warn), message, error));
             Logger.Error(message);
         }
 
