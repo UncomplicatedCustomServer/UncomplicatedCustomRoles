@@ -1,7 +1,7 @@
-﻿using LabApi.Events.Arguments.PlayerEvents;
+﻿using CustomPlayerEffects;
+using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Arguments.Scp049Events;
 using LabApi.Events.Arguments.Scp096Events;
-using LabApi.Events.Arguments.Scp939Events;
 using LabApi.Events.Handlers;
 using PlayerRoles;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
@@ -25,8 +25,8 @@ namespace UncomplicatedCustomRoles.Events
             // SCP-330
             PlayerEvents.InteractingScp330 += OnInteractingScp330;
 
-            // SCP-939
-            Scp939Events.CreatingAmnesticCloud += OnScp939CreatingAmnesticCloud;
+            // SCP-939 Amnesia
+            PlayerEvents.UpdatingEffect += OnUpdatingEffect;
         }
 
         internal override void OnUnregistered()
@@ -41,7 +41,7 @@ namespace UncomplicatedCustomRoles.Events
             PlayerEvents.InteractingScp330 -= OnInteractingScp330;
 
             // SCP-939
-            Scp939Events.CreatingAmnesticCloud -= OnScp939CreatingAmnesticCloud;
+            PlayerEvents.UpdatingEffect -= OnUpdatingEffect;
         }
 
         public void OnAddingTarget(Scp096AddingTargetEventArgs ev)
@@ -87,9 +87,10 @@ namespace UncomplicatedCustomRoles.Events
             }
         }
 
-        public void OnScp939CreatingAmnesticCloud(Scp939CreatingAmnesticCloudEventArgs ev)
+        public void OnUpdatingEffect(PlayerEffectUpdatingEventArgs ev)
         {
-            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole role) && role.HasModule<AmnesiaResistance>())
+            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole role) && role.HasModule<AmnesiaResistance>() &&
+                ev.Effect is AmnesiaVision or AmnesiaItems)
                 ev.IsAllowed = false;
         }
     }
