@@ -10,6 +10,7 @@
 
 using Achievements.Handlers;
 using HarmonyLib;
+using Interactables.Interobjects.DoorUtils;
 using InventorySystem.Items.ThrowableProjectiles;
 using PlayerRoles;
 using PlayerRoles.PlayableScps.Scp079.Rewards;
@@ -31,6 +32,12 @@ namespace UncomplicatedCustomRoles.Patches
     [HarmonyPatch(typeof(PlayerRoleManager), nameof(PlayerRoleManager.CurrentRole), MethodType.Getter)]
     internal class PlayerRoleManagerPatch
     {
+        private static readonly HashSet<string> _blockedMethods = new()
+        {
+            $"{typeof(DoorPermissionsPolicy)}::{nameof(DoorPermissionsPolicy.CheckPermissions)}",
+            $"{typeof(DoorPermissionsPolicyExtensions)}::{nameof(DoorPermissionsPolicyExtensions.GetCombinedPermissions)}"
+        };
+
         static bool Prefix(PlayerRoleManager __instance, ref PlayerRoleBase __result)
         {
             if (__instance.Hub?.netId is 0)
@@ -40,6 +47,16 @@ namespace UncomplicatedCustomRoles.Patches
             {
                 if (role is null)
                     LogManager.Error($"[UCR] Disguised role for player {__instance.Hub.PlayerId} is null!");
+
+                StackTrace trace = new();
+
+                for (int i = 0; i < trace.FrameCount; i++)
+                {
+                    StackFrame frame = trace.GetFrame(i);
+
+                    if (_blockedMethods.Contains($"{frame.GetMethod().DeclaringType.FullName}::{frame.GetMethod().Name}"))
+                        return true;
+                }
 
                 __result = role;
 
