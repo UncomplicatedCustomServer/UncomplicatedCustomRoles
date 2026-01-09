@@ -39,8 +39,7 @@ namespace UncomplicatedCustomRoles.Patches
 
                 if (!role.TryGetModule(out CustomScpAnnouncer announcer)) return true;
                 SpawnManager.AnnounceScpTermination(scp, hit);
-                if (!Announcer.SavedCustomAnnouncements.ContainsKey(scp.PlayerId))
-                    Announcer.SavedCustomAnnouncements.Add(scp.PlayerId, announcer.RoleName);
+                Announcer.SavedCustomAnnouncements[scp.PlayerId] = announcer.RoleName;
                 return false;
             }
 

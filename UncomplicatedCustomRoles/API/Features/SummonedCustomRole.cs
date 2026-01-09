@@ -309,8 +309,6 @@ namespace UncomplicatedCustomRoles.API.Features
 
                 Player.ReferenceHub.nicknameSync.Network_playerInfoToShow = PlayerInfoArea;
                 Player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = string.Empty;
-                
-                Announcer.SavedCustomAnnouncements.TryRemove(Player.PlayerId);
 
                 LogManager.Debug("Scale reset to 1, 1, 1");
                 Player.Scale = new(1, 1, 1);
