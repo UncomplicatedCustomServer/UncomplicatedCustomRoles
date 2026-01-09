@@ -5,6 +5,7 @@ using LabApi.Features.Wrappers;
 using PlayerRoles;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Manager;
+using UncomplicatedCustomRoles.Patches;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -16,6 +17,7 @@ namespace UncomplicatedCustomRoles.Events
             ServerEvents.RoundStarted += OnRoundStarted;
             ServerEvents.RoundEnded += OnRoundEnded;
             ServerEvents.WaitingForPlayers += OnWaitingForPlayers;
+            ServerEvents.RoundRestarted += OnRoundRestarted;
 
             // Warhead
             WarheadEvents.Starting += OnWarheadStarting;
@@ -27,6 +29,7 @@ namespace UncomplicatedCustomRoles.Events
             ServerEvents.RoundStarted -= OnRoundStarted;
             ServerEvents.RoundEnded -= OnRoundEnded;
             ServerEvents.WaitingForPlayers -= OnWaitingForPlayers;
+            ServerEvents.RoundRestarted -= OnRoundRestarted;
 
             // Warhead
             WarheadEvents.Starting -= OnWarheadStarting;
@@ -48,10 +51,16 @@ namespace UncomplicatedCustomRoles.Events
             InfiniteEffect.EffectAssociationAllowed = true;
             InfiniteEffect.Start();
         }
+        
         public void OnRoundEnded(RoundEndedEventArgs _)
         {
             Started = false;
             InfiniteEffect.Terminate();
+        }
+
+        public void OnRoundRestarted()
+        {
+            Announcer.SavedCustomAnnouncements.Clear();
         }
 
         public void OnWaveRespawning(WaveRespawningEventArgs ev)
