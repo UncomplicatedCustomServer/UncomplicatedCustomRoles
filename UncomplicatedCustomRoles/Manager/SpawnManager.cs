@@ -308,12 +308,13 @@ namespace UncomplicatedCustomRoles.Manager
                     ChangedNick = true;
                 }
                 
-                
-                LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
                 Timing.CallDelayed(0.75f, () =>
                 {
                     if (Role.RoleAppearance != Role.Role)
+                    {
+                        LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
                         Player.ChangeAppearance(Role.RoleAppearance, LoadAppearanceAffectedPlayers(Player), true);
+                    }
                         
                     Player.RefreshInfoArea();
                 });

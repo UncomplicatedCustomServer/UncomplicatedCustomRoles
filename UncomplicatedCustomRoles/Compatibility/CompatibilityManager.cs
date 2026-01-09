@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using NorthwoodLib.Pools;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
@@ -173,7 +174,7 @@ namespace UncomplicatedCustomRoles.Compatibility
             if (string.IsNullOrEmpty(name))
                 return name;
 
-            var result = new System.Text.StringBuilder();
+            var result = StringBuilderPool.Shared.Rent();
             for (int i = 0; i < name.Length; i++)
             {
                 char c = name[i];
@@ -188,7 +189,7 @@ namespace UncomplicatedCustomRoles.Compatibility
                     result.Append(c);
                 }
             }
-            return result.ToString();
+            return StringBuilderPool.Shared.ToStringReturn(result);
         }
     }
 }

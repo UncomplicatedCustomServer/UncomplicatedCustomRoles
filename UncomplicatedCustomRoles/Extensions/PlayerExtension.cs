@@ -157,6 +157,10 @@ namespace UncomplicatedCustomRoles.Extensions
             return false;
         }
 
+        /// <summary>
+        /// Refresh the CustomInfo of a <see cref="Player"/> that has a <see cref="ICustomRole"/>.
+        /// </summary>
+        /// <param name="player"></param>
         public static void RefreshInfoArea(this Player player)
         {
             ICustomRole role = player.TryGetSummonedInstance(out var summonedCustomRole) ? summonedCustomRole.Role : null;
@@ -240,7 +244,7 @@ namespace UncomplicatedCustomRoles.Extensions
         // REF https://gitlab.com/exmod-team/EXILED/-/blob/master/EXILED/Exiled.API/Features/Player.cs?ref_type=heads#L2584
         internal static void ResetCategoryLimit(this Player player, ItemCategory category)
         {
-            int index = InventorySystem.Configs.InventoryLimits.StandardCategoryLimits.Where(x => x.Value >= 0).OrderBy(x => x.Key).ToList().FindIndex(x => x.Key == category);
+            int index = InventoryLimits.StandardCategoryLimits.Where(x => x.Value >= 0).OrderBy(x => x.Key).ToList().FindIndex(x => x.Key == category);
 
             if (index is -1) 
                 return;

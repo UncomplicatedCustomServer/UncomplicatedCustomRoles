@@ -24,9 +24,6 @@ namespace UncomplicatedCustomRoles.Events
 
             // SCP-330
             PlayerEvents.InteractingScp330 += OnInteractingScp330;
-
-            // SCP-939 Amnesia
-            PlayerEvents.UpdatingEffect += OnUpdatingEffect;
         }
 
         internal override void OnUnregistered()
@@ -39,9 +36,6 @@ namespace UncomplicatedCustomRoles.Events
 
             // SCP-330
             PlayerEvents.InteractingScp330 -= OnInteractingScp330;
-
-            // SCP-939
-            PlayerEvents.UpdatingEffect -= OnUpdatingEffect;
         }
 
         public void OnAddingTarget(Scp096AddingTargetEventArgs ev)
@@ -85,13 +79,6 @@ namespace UncomplicatedCustomRoles.Events
 
                 LogManager.Debug($"Player {ev.Player} took {role.Scp330Count} candies!");
             }
-        }
-
-        public void OnUpdatingEffect(PlayerEffectUpdatingEventArgs ev)
-        {
-            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole role) && role.HasModule<AmnesiaResistance>() &&
-                ev.Effect is AmnesiaVision or AmnesiaItems)
-                ev.IsAllowed = false;
         }
     }
 }

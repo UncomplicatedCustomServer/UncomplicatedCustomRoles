@@ -96,13 +96,17 @@ namespace UncomplicatedCustomRoles.Events
                 return;
             
             if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole role))
-                if (ev.Effect is SeveredHands && role.Role.MaxScp330Candies >= role.Scp330Count)
+                switch (ev.Effect)
                 {
-                    LogManager.Debug($"Tried to add the {ev.Effect.name} but was not allowed due to {role.Scp330Count} <= {role.Role.MaxScp330Candies}");
-                    ev.IsAllowed = false;
+                    case SeveredHands when role.Role.MaxScp330Candies >= role.Scp330Count:
+                        LogManager.Debug($"Tried to add the {ev.Effect.name} but was not allowed due to {role.Scp330Count} <= {role.Role.MaxScp330Candies}");
+                        ev.IsAllowed = false;
+                        break;
+                    case CardiacArrest when role.Role.IsFriendOf is not null && role.Role.IsFriendOf.Contains(Team.SCPs):
+                    case AmnesiaVision or AmnesiaItems:
+                        ev.IsAllowed = false;
+                        break;
                 }
-                else if (ev.Effect is CardiacArrest && role.Role.IsFriendOf is not null && role.Role.IsFriendOf.Contains(Team.SCPs))
-                    ev.IsAllowed = false;
         }
 
         public void OnGenerator(PlayerActivatingGeneratorEventArgs ev)
