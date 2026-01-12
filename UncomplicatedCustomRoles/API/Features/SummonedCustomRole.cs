@@ -394,10 +394,12 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <returns></returns>
         public T[] GetModules<T>() where T : CustomModule
         {
-            T[] result = new T[] { };
-            foreach (CustomModule module in _customModules.Where(cm => cm.GetType() == typeof(T)))
-                result.AddItem(module);
-            return result;
+            if (_customModules.Count == 0)
+                return Array.Empty<T>();
+
+            return _customModules
+                .OfType<T>()
+                .ToArray();
         }
 
         /// <summary>
