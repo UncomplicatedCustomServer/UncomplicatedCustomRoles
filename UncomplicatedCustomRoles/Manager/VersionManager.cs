@@ -78,7 +78,8 @@ namespace UncomplicatedCustomRoles.Manager
             } 
             catch (Exception e)
             {
-                LogManager.Error(e.ToString());
+                LogManager.Error("An error occurred while trying to fetch the version info from our central servers.");
+                LogManager.Debug(e.ToString());
             }
         }
 

@@ -40,7 +40,7 @@ namespace UncomplicatedCustomRoles.Patches
             if (__instance.Hub is not null && DisguiseTeam.RoleBaseList.TryGetValue(__instance.Hub.PlayerId, out PlayerRoleBase role))
             {
                 if (role is null)
-                    LogManager.Error($"[UCR] Disguised role for player {__instance.Hub.PlayerId} is null!");
+                    LogManager.Error($"Disguised role for player {__instance.Hub.PlayerId} is null!");
 
                 __result = role;
 

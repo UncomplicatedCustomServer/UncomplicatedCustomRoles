@@ -5,7 +5,7 @@ using LabApi.Features.Wrappers;
 using PlayerRoles;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Manager;
-using UncomplicatedCustomRoles.Patches;
+using Announcer = UncomplicatedCustomRoles.Patches.Announcer;
 
 namespace UncomplicatedCustomRoles.Events
 {

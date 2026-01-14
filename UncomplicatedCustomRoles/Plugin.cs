@@ -21,6 +21,7 @@ using LabApi.Loader.Features.Plugins;
 using LabApi.Loader.Features.Plugins.Enums;
 using LabApi.Features.Wrappers;
 using System.Reflection;
+using LabApi.Features;
 using UncomplicatedCustomRoles.Events;
 
 namespace UncomplicatedCustomRoles
@@ -33,9 +34,9 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda, MedveMarci";
 
-        public override Version Version { get; } = new(9, 2, 0, 0);
+        public override Version Version { get; } = new(9, 3, 0, 0);
 
-        public override Version RequiredApiVersion => new(1, 1, 4);
+        public override Version RequiredApiVersion => new(LabApiProperties.CompiledVersion);
 
         public override LoadPriority Priority => LoadPriority.High;
 
