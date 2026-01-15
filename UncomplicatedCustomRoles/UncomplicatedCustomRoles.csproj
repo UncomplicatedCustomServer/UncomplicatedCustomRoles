@@ -22,7 +22,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <LangVersion>11</LangVersion>
     <ErrorReport>prompt</ErrorReport>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
@@ -34,7 +34,7 @@
     <LangVersion>11</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DebugSymbols>true</DebugSymbols>
+    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="API\Attributes\PluginCustomRole.cs" />
@@ -48,6 +48,7 @@
     <Compile Include="API\Features\CustomModules\AmnesiaResistance.cs" />
     <Compile Include="API\Features\CustomModules\ColorfulNickname.cs" />
     <Compile Include="API\Features\CustomModules\ColorfulRaName.cs" />
+    <Compile Include="API\Features\CustomModules\CustomInfoOrder.cs" />
     <Compile Include="API\Features\CustomModules\CustomModule.cs" />
     <Compile Include="API\Features\CustomModules\CustomPermissions.cs" />
     <Compile Include="API\Features\CustomModules\CustomScpAnnouncer.cs" />
@@ -194,8 +195,8 @@
       <PackageReference Include="Lib.Harmony">
           <Version>2.2.2</Version>
       </PackageReference>
-      <PackageReference Include="Newtonsoft.Json">
-          <Version>13.0.3</Version>
+      <PackageReference Include="System.Text.Json">
+          <Version>10.0.1</Version>
       </PackageReference>
       <PackageReference Include="System.ComponentModel">
           <Version>4.3.0</Version>

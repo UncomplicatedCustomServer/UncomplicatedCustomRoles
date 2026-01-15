@@ -12,7 +12,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Extensions
 {
@@ -71,15 +72,24 @@ namespace UncomplicatedCustomRoles.Extensions
         
         public static HttpStatusCode GetStatusCode(this string str, out string message)
         {
-            JObject obj = JObject.Parse(str);
+            LogManager.Debug($"Parsing JSON for status code: {str}");
+            JsonDocument doc = JsonDocument.Parse(str);
+            JsonElement root = doc.RootElement;
 
             message = null;
-            if (obj.TryGetValue("message", out JToken token))
-                message = token.ToString();
-
-            if (obj.TryGetValue("status", out JToken status) && Enum.TryParse(status.ToString(), out HttpStatusCode statusCode))
+            if (root.TryGetProperty("message", out JsonElement messageElement))
+            {
+                message = messageElement.GetString();
+                LogManager.Debug($"Extracted message: {message}");
+            }
+            
+            if (root.TryGetProperty("status", out JsonElement status) && Enum.TryParse(status.ToString(), out HttpStatusCode statusCode))
+            {
+                LogManager.Debug($"Extracted status code: {statusCode}");
                 return statusCode;
+            }
 
+            LogManager.Debug("Status code not found, returning HttpStatusCode.Unused");
             return HttpStatusCode.Unused;
         }
     }

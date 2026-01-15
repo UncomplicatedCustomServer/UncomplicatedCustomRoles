@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.API.Features;
+using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
@@ -157,70 +158,62 @@ namespace UncomplicatedCustomRoles.Extensions
         }
 
         /// <summary>
-        /// Changes the CustomInfo of a <see cref="Player"/>
+        /// Refresh the CustomInfo of a <see cref="Player"/> that has a <see cref="ICustomRole"/>.
         /// </summary>
         /// <param name="player"></param>
-        /// <param name="value"></param>
-        public static void ApplyClearCustomInfo(this Player player, string value)
+        public static void RefreshInfoArea(this Player player)
         {
-            if (!NicknameSync.ValidateCustomInfo(value, out string error))
+            ICustomRole role = player.TryGetSummonedInstance(out var summonedCustomRole) ? summonedCustomRole.Role : null;
+            if (role is null)
             {
-                LogManager.Error($"CustomInfo color tags is not correct. Setting CustomInfo to empty.\nError: {error}");
-                value = string.Empty;
+                LogManager.Warn($"Tried to refresh InfoArea for player {player.Nickname} but they don't have a custom role.");
+                return;
             }
-            string nick = player.DisplayName.Replace("<color=#855439>*</color>", "");
-            player.InfoArea &= ~PlayerInfoArea.Nickname;
-            player.InfoArea = string.IsNullOrEmpty(value)
-                ? player.InfoArea & ~PlayerInfoArea.CustomInfo
-                : player.InfoArea | PlayerInfoArea.CustomInfo;
-            player.CustomInfo = $"{ProcessCustomInfo(value)}\n{nick}";
-        }
-        
-        /// <summary>
-        /// Changes the CustomInfo of a <see cref="Player"/> and overrides the player Role
-        /// </summary>
-        public static void ApplyCustomInfoAndRoleName(this Player player, ICustomRole role)
-        {
+            string customInfo = ProcessCustomInfo(PlaceholderManager.ApplyPlaceholders(role.CustomInfo, player, role));
+            string roleName = role.Name;
+            string nickName = player.DisplayName.Replace("<color=#855439>*</color>", "");
+            bool customInfoExists = !string.IsNullOrEmpty(customInfo);
+            bool roleNameExists = role.OverrideRoleName;
+            
             player.InfoArea |= PlayerInfoArea.CustomInfo;
             player.InfoArea &= ~PlayerInfoArea.Role;
             player.InfoArea &= ~PlayerInfoArea.Nickname;
-        
-            string customInfo = PlaceholderManager.ApplyPlaceholders(role.CustomInfo, player, role);
-            string roleName = role.Name;
-            string nick = player.DisplayName.Replace("<color=#855439>*</color>", "");
             
-            if (!NicknameSync.ValidateCustomInfo(customInfo, out string error))
+            if (!NicknameSync.ValidateCustomInfo(customInfo, out string customInfoError) && customInfoExists)
             {
-                LogManager.Error($"CustomInfo color tags is not correct. Setting CustomInfo to empty.\nRole: {role}.\nError: {error}");
-                customInfo = string.Empty;
+                LogManager.Error($"CustomInfo is not correct. Setting CustomInfo to empty.\nCustomInfo: {customInfo}\nError: {customInfoError}");
+                customInfoExists = false;
             }
             
-            if (!customInfo.Contains("<color=#") && roleName.Contains("<color=#"))
+            if (!NicknameSync.ValidateCustomInfo(roleName, out string roleNameError) && roleNameExists)
             {
-                LogManager.Error("Role name color requires custom info color. Setting RoleName to default. Role: " + role);
-                player.InfoArea &= ~PlayerInfoArea.CustomInfo;
-                player.InfoArea |= PlayerInfoArea.Role | PlayerInfoArea.Nickname;
-                ApplyClearCustomInfo(player, customInfo);
-                return;
+                LogManager.Error($"RoleName is not correct. Setting CustomInfo to empty.\nRoleName: {roleName}\nError: {roleNameError}");
+                roleNameExists = false;
             }
-        
-            if (string.IsNullOrEmpty(customInfo))
+            
+            player.CustomInfo = "<color=#FFFFFF></color>%custominfo%%nickname%%rolename%";
+            
+            if (summonedCustomRole.TryGetModule(out CustomInfoOrder customInfoOrderModule))
+                player.CustomInfo = $"<color=#FFFFFF></color>{customInfoOrderModule.Order}";
+
+            if (summonedCustomRole.TryGetModule(out ColorfulNickname colorfulNickname))
             {
-                LogManager.Silent("Applying only role name (NICK-ROLE)");
-                if (!NicknameSync.ValidateCustomInfo(roleName, out string errorRole))
+                if (string.IsNullOrEmpty(colorfulNickname.Color))
+                    return;
+                string nick = player.DisplayName.Replace("<color=#855439>*</color>", "");
+                string color = colorfulNickname.Color.StartsWith("#") ? colorfulNickname.Color : $"#{colorfulNickname.Color}";
+                if (!Misc.AcceptedColours.Contains(color.Replace("#", "")))
                 {
-                    LogManager.Error($"RoleName color tags is not correct. Showing default PlayerInfo.\nRole: {role}.\nError: {errorRole}");
-                    player.InfoArea &= ~PlayerInfoArea.CustomInfo;
-                    player.InfoArea |= PlayerInfoArea.Role | PlayerInfoArea.Nickname;
+                    LogManager.Warn($"The color {color} is not acceptable by the game in ColorfulNicknames! Please use a valid hex color code.");
                     return;
                 }
-                player.CustomInfo = $"{nick}\n{roleName}";
+                nickName = $"<color={color}>{nick}</color>";
             }
-            else
-            {
-                LogManager.Silent("Applying role name and custom info (CI-NICK-ROLE)");
-                player.CustomInfo = $"{ProcessCustomInfo(customInfo)}\n{nick}\n{roleName}";
-            }
+            
+            
+            player.CustomInfo = player.CustomInfo.Replace("%custominfo%", customInfoExists ? $"{customInfo}\n" : "");
+            player.CustomInfo = player.CustomInfo.Replace("%nickname%", $"{nickName}\n");
+            player.CustomInfo = player.CustomInfo.Replace("%rolename%", roleNameExists ? $"{roleName}\n" : role.Role.GetFullName()+"\n");
         }
 
         /// <summary>
@@ -251,7 +244,7 @@ namespace UncomplicatedCustomRoles.Extensions
         // REF https://gitlab.com/exmod-team/EXILED/-/blob/master/EXILED/Exiled.API/Features/Player.cs?ref_type=heads#L2584
         internal static void ResetCategoryLimit(this Player player, ItemCategory category)
         {
-            int index = InventorySystem.Configs.InventoryLimits.StandardCategoryLimits.Where(x => x.Value >= 0).OrderBy(x => x.Key).ToList().FindIndex(x => x.Key == category);
+            int index = InventoryLimits.StandardCategoryLimits.Where(x => x.Value >= 0).OrderBy(x => x.Key).ToList().FindIndex(x => x.Key == category);
 
             if (index is -1) 
                 return;

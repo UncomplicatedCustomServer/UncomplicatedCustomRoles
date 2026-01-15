@@ -21,6 +21,7 @@ using LabApi.Loader.Features.Plugins;
 using LabApi.Loader.Features.Plugins.Enums;
 using LabApi.Features.Wrappers;
 using System.Reflection;
+using LabApi.Features;
 using UncomplicatedCustomRoles.Events;
 
 namespace UncomplicatedCustomRoles
@@ -33,9 +34,9 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda, MedveMarci";
 
-        public override Version Version { get; } = new(9, 2, 0, 0);
+        public override Version Version { get; } = new(9, 3, 0, 0);
 
-        public override Version RequiredApiVersion => new(1, 1, 4);
+        public override Version RequiredApiVersion => new(LabApiProperties.CompiledVersion);
 
         public override LoadPriority Priority => LoadPriority.High;
 
@@ -45,7 +46,7 @@ namespace UncomplicatedCustomRoles
 
         internal static HttpManager HttpManager;
 
-        internal Harmony _harmony;
+        private Harmony _harmony;
 
         public override void Enable()
         {
@@ -118,11 +119,9 @@ namespace UncomplicatedCustomRoles
             // Run the import managet
             ImportManager.Init();
 
-            if (Config.EnableBasicLogs)
-            {
-                LogManager.Info($"Thanks for using UncomplicatedCustomRoles v{Version.ToString(3)} by {Author}!", ConsoleColor.Blue);
-                LogManager.Info("To receive support and to stay up-to-date, join our official Discord server: https://discord.gg/5StRGu8EJV", ConsoleColor.DarkYellow);
-            }
+            if (Config is not { EnableBasicLogs: true }) return;
+            LogManager.Info($"Thanks for using UncomplicatedCustomRoles v{Version.ToString(3)} by {Author}!", ConsoleColor.Blue);
+            LogManager.Info("To receive support and to stay up-to-date, join our official Discord server: https://discord.gg/5StRGu8EJV", ConsoleColor.DarkYellow);
         }
     }
 }

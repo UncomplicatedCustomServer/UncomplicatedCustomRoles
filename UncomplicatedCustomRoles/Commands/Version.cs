@@ -36,7 +36,7 @@ namespace UncomplicatedCustomRoles.Commands
             if (!VersionManager.CorrectHash)
                 response += "\n\n<size=20><b><color=red>⚠ WARNING!</color></b></size>\n<size=18>You are using a <b>NON-OFFICIAL</b> version of the plugin!\nThis version might contain <b>viruses</b> and it's <b>NOT</b> ours!</size>";
 
-            if (!VersionManager.VersionInfo.Recall)
+            if (VersionManager.VersionInfo.Recall)
                 response += $"\n\n<size=20><b><color=red>⚠ WARNING!</color></b></size>\n<size=18>This version has been <b>RECALLED</b> due to the following reason:\n<size=16>{VersionManager.VersionInfo.RecallReason}</size>\nYou are <b>HIGHLY SUGGESTED</b> to update the plugin to the last stable target: {VersionManager.VersionInfo.RecallTarget} {(VersionManager.VersionInfo.RecallImportant ?? true ? $"\n<color=red>You HAVE TO update it, otherwise bad things will happen!</color>" : string.Empty)}</size>";
 
             return true;

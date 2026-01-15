@@ -27,6 +27,7 @@ using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Commands;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
+using UncomplicatedCustomRoles.Patches;
 using UnityEngine;
 
 namespace UncomplicatedCustomRoles.API.Features
@@ -307,7 +308,6 @@ namespace UncomplicatedCustomRoles.API.Features
                 }
 
                 Player.ReferenceHub.nicknameSync.Network_playerInfoToShow = PlayerInfoArea;
-                //Player.IsUsingStamina = true;
                 Player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = string.Empty;
 
                 LogManager.Debug("Scale reset to 1, 1, 1");
@@ -394,10 +394,12 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <returns></returns>
         public T[] GetModules<T>() where T : CustomModule
         {
-            T[] result = new T[] { };
-            foreach (CustomModule module in _customModules.Where(cm => cm.GetType() == typeof(T)))
-                result.AddItem(module);
-            return result;
+            if (_customModules.Count == 0)
+                return Array.Empty<T>();
+
+            return _customModules
+                .OfType<T>()
+                .ToArray();
         }
 
         /// <summary>
@@ -633,7 +635,7 @@ namespace UncomplicatedCustomRoles.API.Features
         public static void TryParseRemoteAdmin(ReferenceHub player, StringBuilder builder) //REF
         {
             if (Plugin.HttpManager.Credits.TryGetValue(player.authManager.UserId, out Triplet<string, string, bool> tag))
-                if (Plugin.HttpManager.OrgPlayerRole.ContainsKey(player.authManager.UserId))
+                if (Plugin.HttpManager.IsJobRole.Contains(player.authManager.UserId))
                     builder.AppendLine($"\nUCS Status: <color=#0b55b0><b>[UCS EMPLOYEE]</b></color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>");
                 else
                     builder.AppendLine($"\nUCS Status: <color=#c9ad2c><b>[UCS CONTRIBUTOR]</b></color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>");

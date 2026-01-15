@@ -9,7 +9,7 @@
  */
 
 using MEC;
-using Newtonsoft.Json;
+using System.Text.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +20,6 @@ using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
 using LabApi.Features;
 using LabApi.Features.Wrappers;
-using LabApi.Loader;
 using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Extensions;
 
@@ -63,7 +62,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// <summary>
         /// Gets the role of the given player (as steamid@64) inside UCR
         /// </summary>
-        public Dictionary<string, string> OrgPlayerRole { get; } = new();
+        public List<string> IsJobRole { get; } = new();
 
         /// <summary>
         /// Gets the latest <see cref="Version"/> of the plugin, loaded by the UCS cloud
@@ -86,9 +85,6 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// <param name="prefix"></param>
         public HttpManager(string prefix)
         {
-            if (!CheckForDependency())
-                Timing.CallContinuously(20f, () => LogManager.Error("You don't have the dependency Newtonsoft.Json installed!\nPlease install it AS SOON AS POSSIBLE!\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV"));
-
             Prefix = prefix;
             RegisterEvents();
             HttpClient = new();
@@ -106,8 +102,6 @@ namespace UncomplicatedCustomRoles.Manager.NET
         }
 
         public void OnVerified(PlayerJoinedEventArgs ev) => ApplyCreditTag(ev.Player);
-
-        private bool CheckForDependency() => PluginLoader.Dependencies.Any(assembly => assembly.GetName().Name == "Newtonsoft.Json");
 
         public string AddServerOwner(string discordId)
         {
@@ -128,8 +122,8 @@ namespace UncomplicatedCustomRoles.Manager.NET
         {
             Credits = new();
             try
-            {
-                Dictionary<string, Dictionary<string, string>> Data = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(HttpQuery.Get("https://api.ucserver.it/credits.json"));
+            {   
+                Dictionary<string, Dictionary<string, JsonElement>> Data = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, JsonElement>>>(HttpQuery.Get($"https://api.ucserver.it/credits.json"));
 
                 if (Data is null)
                 {
@@ -137,23 +131,33 @@ namespace UncomplicatedCustomRoles.Manager.NET
                     return;
                 }
 
-                foreach (KeyValuePair<string, Dictionary<string, string>> kvp in Data.Where(kvp => kvp.Value is not null && kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") && kvp.Value.ContainsKey("override")))
+                foreach (KeyValuePair<string, Dictionary<string, JsonElement>> kvp in Data.Where(kvp => kvp.Value is not null && kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") && kvp.Value.ContainsKey("override") && kvp.Value.ContainsKey("job") ))
                 {
-                    Credits.Add(kvp.Key, new(kvp.Value["role"], kvp.Value["color"], bool.Parse(kvp.Value["override"])));
-                    if (kvp.Value.TryGetValue("job", out string isJob) && isJob is "true")
-                        OrgPlayerRole.Add(kvp.Key, isJob);
+                    string role = kvp.Value["role"].GetString();
+                    string color = kvp.Value["color"].GetString();
+                    bool overrideStr = kvp.Value["override"].ValueKind switch
+                    {
+                        JsonValueKind.String => bool.Parse(kvp.Value["override"].GetString() ?? string.Empty),
+                        JsonValueKind.True => true,
+                        _ => false
+                    };
+                    bool isJob = kvp.Value["job"].ValueKind == JsonValueKind.True;
+                    Credits.Add(kvp.Key, new(role, color, overrideStr));
+                    if (isJob)
+                        IsJobRole.Add(kvp.Key);
                 }
             }
             catch (Exception e)
             {
-                LogManager.Error($"Failed to act HttpManager::LoadCreditTags() - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
+                LogManager.Error("An error occurred while loading the credit tags from the UCS Central Server!");
+                LogManager.Debug($"Failed to act HttpManager::LoadCreditTags() - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
             }
         }
 
         public Triplet<string, string, bool> GetCreditTag(Player player)
         {
-            if (Credits.ContainsKey(player.UserId))
-                return Credits[player.UserId];
+            if (Credits.TryGetValue(player.UserId, out var tag))
+                return tag;
 
             return new(null, null, false);
         }

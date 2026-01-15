@@ -8,7 +8,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace UncomplicatedCustomRoles.Manager.NET
 {
@@ -16,42 +16,43 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
     internal class VersionInfo
     {
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; }
 
-        [JsonProperty("source")]
+        [JsonPropertyName("source")]
         public string Source { get; }
 
-        [JsonProperty("source_link")]
+        [JsonPropertyName("source_link")]
         public string? SourceLink { get; }
 
-        [JsonProperty("custom_name")]
+        [JsonPropertyName("custom_name")]
         public string? CustomName { get; }
 
-        [JsonProperty("pre_release")]
+        [JsonPropertyName("pre_release")]
         public bool PreRelease { get; }
 
-        [JsonProperty("force_debug")]
+        [JsonPropertyName("force_debug")]
         public bool ForceDebug { get; }
 
-        [JsonProperty("message")]
+        [JsonPropertyName("message")]
         public string Message { get; }
 
-        [JsonProperty("recall")]
+        [JsonPropertyName("recall")]
         public bool Recall { get; }
 
-        [JsonProperty("recall_target")]
+        [JsonPropertyName("recall_target")]
         public string? RecallTarget { get; }
 
-        [JsonProperty("recall_reason")]
+        [JsonPropertyName("recall_reason")]
         public string? RecallReason { get; }
 
-        [JsonProperty("recall_important")]
+        [JsonPropertyName("recall_important")]
         public bool? RecallImportant { get; }
 
-        [JsonProperty("hash")]
+        [JsonPropertyName("hash")]
         public string Hash { get; }
 
+        [JsonConstructor]
         public VersionInfo(string name, string source, string? sourceLink, string? customName, bool preRelease, bool forceDebug, string message, bool recall, string? recallTarget, string? recallReason, bool? recallImportant, string hash)
         {
             Name = name;

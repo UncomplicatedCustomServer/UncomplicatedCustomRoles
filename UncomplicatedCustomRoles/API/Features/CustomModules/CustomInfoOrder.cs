@@ -12,13 +12,13 @@ using System.Collections.Generic;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
-    public class ColorfulNickname : CustomModule
+    public class CustomInfoOrder : CustomModule
     {
         public override List<string> RequiredArgs => new()
         {
-            "color"
+            "order"
         };
 
-        internal string Color => TryGetStringValue("color", string.Empty);
+        internal string Order => TryGetStringValue("order", "%custominfo%%nickname%%rolename%");
     }
 }

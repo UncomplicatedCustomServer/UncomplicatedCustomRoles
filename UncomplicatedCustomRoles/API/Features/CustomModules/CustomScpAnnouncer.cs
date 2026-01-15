@@ -19,6 +19,6 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
             "name"
         };
 
-        internal string RoleName => TryGetStringValue("name", "SCP 404");
+        internal string RoleName => TryGetStringValue("name", "SCP-404");
     }
 }

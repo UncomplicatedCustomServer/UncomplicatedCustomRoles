@@ -8,7 +8,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace UncomplicatedCustomRoles.API.Struct
 {

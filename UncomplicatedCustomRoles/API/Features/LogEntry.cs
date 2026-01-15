@@ -9,7 +9,7 @@
  */
 
 using Discord;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using System;
 
 namespace UncomplicatedCustomRoles.API.Features

@@ -47,6 +47,8 @@ namespace UncomplicatedCustomRoles.Events
             PlayerEvents.Joined += OnJoined;
             PlayerEvents.DamagingWindow += OnDamagingWindow;
             PlayerEvents.UnlockingWarheadButton += OnUnlockingWarheadButton;
+            PlayerEvents.RequestedRaPlayerInfo += OnPlayerRequestedRaPlayerInfo;
+            PlayerEvents.RaPlayerListAddingPlayer += OnPlayerRaPlayerListAddingPlayer;
 
             Instance = this;
         }
@@ -69,6 +71,8 @@ namespace UncomplicatedCustomRoles.Events
             PlayerEvents.Joined -= OnJoined;
             PlayerEvents.DamagingWindow -= OnDamagingWindow;
             PlayerEvents.UnlockingWarheadButton -= OnUnlockingWarheadButton;
+            PlayerEvents.RequestedRaPlayerInfo -= OnPlayerRequestedRaPlayerInfo;
+            PlayerEvents.RaPlayerListAddingPlayer -= OnPlayerRaPlayerListAddingPlayer;
         }
 
         public void OnJoined(PlayerJoinedEventArgs ev)
@@ -92,13 +96,17 @@ namespace UncomplicatedCustomRoles.Events
                 return;
             
             if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole role))
-                if (ev.Effect is SeveredHands && role.Role.MaxScp330Candies >= role.Scp330Count)
+                switch (ev.Effect)
                 {
-                    LogManager.Debug($"Tried to add the {ev.Effect.name} but was not allowed due to {role.Scp330Count} <= {role.Role.MaxScp330Candies}");
-                    ev.IsAllowed = false;
+                    case SeveredHands when role.Role.MaxScp330Candies >= role.Scp330Count:
+                        LogManager.Debug($"Tried to add the {ev.Effect.name} but was not allowed due to {role.Scp330Count} <= {role.Role.MaxScp330Candies}");
+                        ev.IsAllowed = false;
+                        break;
+                    case CardiacArrest when role.Role.IsFriendOf is not null && role.Role.IsFriendOf.Contains(Team.SCPs):
+                    case AmnesiaVision or AmnesiaItems:
+                        ev.IsAllowed = false;
+                        break;
                 }
-                else if (ev.Effect is CardiacArrest && role.Role.IsFriendOf is not null && role.Role.IsFriendOf.Contains(Team.SCPs))
-                    ev.IsAllowed = false;
         }
 
         public void OnGenerator(PlayerActivatingGeneratorEventArgs ev)
@@ -128,13 +136,17 @@ namespace UncomplicatedCustomRoles.Events
 
                 if (customRole.TryGetModule(out CustomScpAnnouncer announcer) && ev.Player.ReferenceHub.GetTeam() is not Team.SCPs)
                     TerminationQueue[ev.Player.PlayerId] = new(announcer, DateTimeOffset.Now);
+
+                if (customRole.HasModule<DropNothingOnDeath>())
+                    ev.Player.ClearInventory();
+                
             }
         }
 
         public void OnDeath(PlayerDeathEventArgs ev)
         {
             if (TerminationQueue.TryGetValue(ev.Player.PlayerId, out Tuple<CustomScpAnnouncer, DateTimeOffset> data) && (DateTimeOffset.Now - data.Item2).Milliseconds < 1300)
-                SpawnManager.HandleRecontainmentAnnoucement(ev.DamageHandler, data.Item1);
+                SpawnManager.AnnounceScpTermination(ev.Player.ReferenceHub, ev.DamageHandler);
 
             TerminationQueue.TryRemove(ev.Player.PlayerId, out _);
 
@@ -343,6 +355,18 @@ namespace UncomplicatedCustomRoles.Events
         {
             if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
                 ev.IsAllowed = ItemBan.ValidatePickup(summonedInstance, ev.Pickup);
+        }
+        
+        public void OnPlayerRequestedRaPlayerInfo(PlayerRequestedRaPlayerInfoEventArgs ev)
+        {
+            SummonedCustomRole.TryParseRemoteAdmin(ev.Target.ReferenceHub, ev.InfoBuilder);
+        }
+
+        public void OnPlayerRaPlayerListAddingPlayer(PlayerRaPlayerListAddingPlayerEventArgs ev)
+        {
+            if (SummonedCustomRole.TryGet(ev.Target.ReferenceHub, out SummonedCustomRole customRole))
+                if (customRole.TryGetModule(out ColorfulRaName colorfulRaName))
+                    ev.Body = ev.Body.Replace("{RA_ClassColor}", $"#{colorfulRaName.Color.TrimStart('#')}");
         }
     }
 }
