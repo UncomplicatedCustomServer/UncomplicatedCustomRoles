@@ -34,7 +34,7 @@ namespace UncomplicatedCustomRoles.Patches
     {
         static bool Prefix(PlayerRoleManager __instance, ref PlayerRoleBase __result)
         {
-            if (__instance.Hub?.netId is 0)
+            if (__instance.Hub == null || __instance.Hub.netId == 0)
                 return true;
 
             if (__instance.Hub is not null && DisguiseTeam.RoleBaseList.TryGetValue(__instance.Hub.PlayerId, out PlayerRoleBase role))
@@ -76,6 +76,9 @@ namespace UncomplicatedCustomRoles.Patches
 
         static bool Prefix(ReferenceHub hub, ref RoleTypeId __result)
         {
+            if (hub == null)
+                return true;
+            
             if (!DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team team))
                 return true;
 
