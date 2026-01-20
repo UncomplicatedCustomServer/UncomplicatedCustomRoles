@@ -3,6 +3,7 @@ using LabApi.Events.Arguments.WarheadEvents;
 using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
 using PlayerRoles;
+using PlayerRoles.RoleAssign;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Manager;
 using Announcer = UncomplicatedCustomRoles.Patches.Announcer;
@@ -14,7 +15,7 @@ namespace UncomplicatedCustomRoles.Events
         internal override void OnRegistered()
         {
             ServerEvents.WaveRespawning += OnWaveRespawning;
-            ServerEvents.RoundStarted += OnRoundStarted;
+            RoleAssigner.OnPlayersSpawned += OnPlayersSpawned;
             ServerEvents.RoundEnded += OnRoundEnded;
             ServerEvents.WaitingForPlayers += OnWaitingForPlayers;
             ServerEvents.RoundRestarted += OnRoundRestarted;
@@ -26,7 +27,7 @@ namespace UncomplicatedCustomRoles.Events
         internal override void OnUnregistered()
         {
             ServerEvents.WaveRespawning -= OnWaveRespawning;
-            ServerEvents.RoundStarted -= OnRoundStarted;
+            RoleAssigner.OnPlayersSpawned -= OnPlayersSpawned;
             ServerEvents.RoundEnded -= OnRoundEnded;
             ServerEvents.WaitingForPlayers -= OnWaitingForPlayers;
             ServerEvents.RoundRestarted -= OnRoundRestarted;
@@ -41,7 +42,7 @@ namespace UncomplicatedCustomRoles.Events
             Plugin.Instance.OnFinishedLoadingPlugins();
         }
 
-        public void OnRoundStarted()
+        public void OnPlayersSpawned()
         {
             Started = true;
             FirstRoundPlayers.Clear();
