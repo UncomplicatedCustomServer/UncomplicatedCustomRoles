@@ -9,6 +9,7 @@
  */
 
 using LabApi.Features.Wrappers;
+using Respawning.NamingRules;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Extensions;
 using UnityEngine;
@@ -24,7 +25,7 @@ namespace UncomplicatedCustomRoles.Manager
                 { "rand", Random.Range(0, 10) },
                 { "dnumber", Random.Range(1000, 10000) },
                 { "unitid", player.UnitId },
-                { "unitname", string.Empty },
+                { "unitname", NamingRulesManager.TryGetNamingRule(player.Team, out UnitNamingRule namingRule) ? namingRule.LastGeneratedName : string.Empty },
                 { "rolename", player.Role.GetFullName() },
                 { "customrolename", role.Name },
                 { "customroleid", role.Id },
