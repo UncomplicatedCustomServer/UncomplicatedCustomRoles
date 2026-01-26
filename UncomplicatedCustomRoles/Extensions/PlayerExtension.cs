@@ -178,6 +178,7 @@ namespace UncomplicatedCustomRoles.Extensions
             player.InfoArea |= PlayerInfoArea.CustomInfo;
             player.InfoArea &= ~PlayerInfoArea.Role;
             player.InfoArea &= ~PlayerInfoArea.Nickname;
+            player.InfoArea &= ~PlayerInfoArea.UnitName;
             
             if (!NicknameSync.ValidateCustomInfo(customInfo, out string customInfoError) && customInfoExists)
             {
@@ -210,10 +211,12 @@ namespace UncomplicatedCustomRoles.Extensions
                 nickName = $"<color={color}>{nick}</color>";
             }
             
-            
-            player.CustomInfo = player.CustomInfo.Replace("%custominfo%", customInfoExists ? $"{customInfo}\n" : "");
-            player.CustomInfo = player.CustomInfo.Replace("%nickname%", $"{nickName}\n");
-            player.CustomInfo = player.CustomInfo.Replace("%rolename%", roleNameExists ? $"{roleName}\n" : role.Role.GetFullName()+"\n");
+            player.CustomInfo = player.CustomInfo.Replace("%%", "%\n%").BulkReplace(new()
+            {
+                { "custominfo",  customInfoExists ? $"{customInfo}" : "" },
+                { "nickname", nickName },
+                { "rolename", roleNameExists ? $"{roleName}" : role.Role.GetFullName() },
+            }, "%<val>%");
         }
 
         /// <summary>
