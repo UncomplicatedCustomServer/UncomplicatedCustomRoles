@@ -103,7 +103,7 @@ namespace UncomplicatedCustomRoles.Events
                         ev.IsAllowed = false;
                         break;
                     case CardiacArrest when role.Role.IsFriendOf is not null && role.Role.IsFriendOf.Contains(Team.SCPs):
-                    case AmnesiaVision or AmnesiaItems:
+                    case AmnesiaVision or AmnesiaItems when role.HasModule<AmnesiaResistance>():
                         ev.IsAllowed = false;
                         break;
                 }
