@@ -12,6 +12,7 @@ using CommandSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LabApi.Features.Permissions;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
 using UncomplicatedCustomRoles.Extensions;
@@ -74,7 +75,7 @@ namespace UncomplicatedCustomRoles.Commands
                 IUCRCommand Command = RegisteredCommands.FirstOrDefault(command => command.Name == arguments.At(0));
 
                 if (Command is not null)
-                    if (sender.CheckPermission(PlayerPermissions.LongTermBanning)) // Fix for the absence of EXILED.Permissions
+                    if (sender.HasPermissions(Command.RequiredPermission))
                         return Command.Executor(Arguments, sender, out response);
                     else
                     {

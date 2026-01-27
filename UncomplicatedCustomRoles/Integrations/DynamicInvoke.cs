@@ -32,14 +32,14 @@ namespace UncomplicatedCustomRoles.Integrations
         /// <param name="address"></param>
         /// <param name="isLabapi"></param>
         /// <returns></returns>
-        public static MethodInfo GetMethod(string plugin, string address, bool isLabapi = false, int methodCounter = -1)
+        public static MethodInfo GetMethod(string plugin, string address, bool isLabapi = false, int methodCounter = -1, string[] requiredParamNames = null)
         {
             if (_methods.TryGetValue(address, out MethodInfo method))
                 return method;
 
             if (!_assemblies.TryGetValue(plugin, out Assembly assembly))
             {
-                assembly = GetLabAPIAssembly(plugin);
+                assembly = isLabapi ? GetLabAPIAssembly(plugin) : GetExiledAssembly(plugin);
                 _assemblies.Add(plugin, assembly);
             }
 
@@ -89,16 +89,30 @@ namespace UncomplicatedCustomRoles.Integrations
             } 
             else // Normal method
             {
-
                 IEnumerable<MethodInfo> resultMethods = type.GetMethods().Where(m => m.Name == argument);
                 MethodInfo resultMethod;
+                
+                if (methodCounter != -1 || (requiredParamNames is not null && requiredParamNames.Length > 0))
+                {
+                    IEnumerable<MethodInfo> filtered = resultMethods;
 
-                if (resultMethods.Count() > 1)
-                    resultMethod = methodCounter < 0 ? resultMethods.First() : resultMethods.FirstOrDefault(m => m.GetParameters().Length == methodCounter);
-                else if (resultMethods.Count() == 1)
-                    resultMethod = resultMethods.First();
-                else
-                    resultMethod = null;
+                    if (methodCounter != -1)
+                        filtered = filtered.Where(m => m.GetParameters().Length == methodCounter);
+
+                    if (requiredParamNames is not null && requiredParamNames.Length > 0)
+                    {
+                        filtered = filtered.Where(m =>
+                        {
+                            var paramNames = m.GetParameters().Select(p => p.Name).ToArray();
+                            return requiredParamNames.All(rpn => paramNames.Contains(rpn, StringComparer.OrdinalIgnoreCase));
+                        });
+                    }
+
+                    resultMethod = filtered.FirstOrDefault();
+                } else
+                {
+                    resultMethod = resultMethods.FirstOrDefault();
+                }
 
                 if (resultMethod is null)
                 {
@@ -121,6 +135,20 @@ namespace UncomplicatedCustomRoles.Integrations
                     return plugin.Value.Value;
 
                 return null;
+            }
+            catch (Exception e)
+            {
+                LogManager.Error(e.ToString());
+                return null;
+            }
+        }
+        
+        private static Assembly GetExiledAssembly(string pluginName)
+        {
+            try
+            {
+                Assembly assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(p => p.FullName.Contains(pluginName));
+                return assembly;
             }
             catch (Exception e)
             {

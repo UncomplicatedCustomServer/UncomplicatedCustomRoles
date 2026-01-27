@@ -8,7 +8,6 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using HarmonyLib;
 using LabApi.Features.Wrappers;
 using MEC;
 using PlayerRoles;
@@ -27,7 +26,6 @@ using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Commands;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
-using UncomplicatedCustomRoles.Patches;
 using UnityEngine;
 
 namespace UncomplicatedCustomRoles.API.Features
@@ -245,7 +243,9 @@ namespace UncomplicatedCustomRoles.API.Features
                 Timing.CallDelayed(3.25f, delegate {
                     _roleBase.Pooled = false;
                     DisguiseTeam.RoleBaseList.Add(Player.PlayerId, _roleBase);
-                });            }
+                });
+                
+            }
             catch (Exception e)
             {
                 LogManager.Error($"Failed to evaluate RoleBase for SummonedCustomRole::EvaluateRoleBase() - {e}");

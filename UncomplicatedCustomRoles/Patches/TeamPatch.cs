@@ -34,7 +34,7 @@ namespace UncomplicatedCustomRoles.Patches
     {
         static bool Prefix(PlayerRoleManager __instance, ref PlayerRoleBase __result)
         {
-            if (__instance.Hub?.netId is 0)
+            if (__instance.Hub == null || __instance.Hub.netId == 0)
                 return true;
 
             if (__instance.Hub is not null && DisguiseTeam.RoleBaseList.TryGetValue(__instance.Hub.PlayerId, out PlayerRoleBase role))
@@ -76,6 +76,9 @@ namespace UncomplicatedCustomRoles.Patches
 
         static bool Prefix(ReferenceHub hub, ref RoleTypeId __result)
         {
+            if (hub == null)
+                return true;
+            
             if (!DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team team))
                 return true;
 
@@ -134,58 +137,63 @@ namespace UncomplicatedCustomRoles.Patches
         }
     }
     
-    [HarmonyPatch(typeof(DoorPermissionsPolicy))]
+    [HarmonyPatch]
     public class DoorPermissionsPolicyPatch
     {
         static MethodBase TargetMethod()
         {
-            return Method(typeof(DoorPermissionsPolicy), nameof(DoorPermissionsPolicy.CheckPermissions), new Type[] { typeof(ReferenceHub), typeof(IDoorPermissionRequester), typeof(PermissionUsed).MakeByRefType() });
+            return Method(typeof(DoorPermissionsPolicy), "CheckPermissions", new[] { typeof(ReferenceHub), typeof(IDoorPermissionRequester), typeof(PermissionUsed).MakeByRefType() });
         }
-        
-        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-        {
-            List<CodeInstruction> newInstructions = new(instructions);
-            for (int i = 0; i < newInstructions.Count; i++)
-            {
-                if (newInstructions[i].opcode == OpCodes.Callvirt && 
-                    newInstructions[i].operand is MethodInfo method && 
-                    method == PropertyGetter(typeof(PlayerRoleManager), nameof(PlayerRoleManager.CurrentRole)))
-                {
-                    newInstructions.Insert(i, new CodeInstruction(OpCodes.Ldarg_1));
-                    i++;
-                    newInstructions.Insert(i, new CodeInstruction(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetRoleId), new Type[] { typeof(ReferenceHub) })));
-                    i++;
-                    newInstructions[i] = new CodeInstruction(OpCodes.Callvirt, Method(typeof(PlayerRoleManager), nameof(PlayerRoleManager.GetRoleBase), new Type[] { typeof(RoleTypeId) }));
-                    break;
-                }
-            }
 
-            return newInstructions;
+        static bool Prefix(DoorPermissionsPolicy __instance, ReferenceHub hub, IDoorPermissionRequester requester, out PermissionUsed callback, ref bool __result)
+        {
+            callback = null;
+            if (__instance.RequiredPermissions == DoorPermissionFlags.None || hub.serverRoles.BypassMode)
+            {
+                __result = true;
+                return false;
+            }
+            if (hub.roleManager.CurrentRole is IDoorPermissionProvider currentRole &&
+                (!DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team team) || team != Team.SCPs))
+            {
+                __result = __instance.CheckPermissions(currentRole, requester, out callback);
+                return false;
+            }
+            ItemBase curInstance = hub.inventory.CurInstance;
+            __result = curInstance != null && curInstance is IDoorPermissionProvider provider && __instance.CheckPermissions(provider, requester, out callback);
+            return false;
         }
     }
     
     [HarmonyPatch(typeof(DoorPermissionsPolicyExtensions), nameof(DoorPermissionsPolicyExtensions.GetCombinedPermissions))]
     public class DoorPermissionsPolicyExtensionsPatch
     {
-        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        static bool Prefix(ReferenceHub hub, IDoorPermissionRequester requester, ref DoorPermissionFlags __result)
         {
-            List<CodeInstruction> newInstructions = new(instructions);
-            for (int i = 0; i < newInstructions.Count; i++)
+            if (hub == null)
             {
-                if (newInstructions[i].opcode == OpCodes.Callvirt && 
-                    newInstructions[i].operand is MethodInfo method && 
-                    method == PropertyGetter(typeof(PlayerRoleManager), nameof(PlayerRoleManager.CurrentRole)))
-                {
-                    newInstructions.Insert(i, new CodeInstruction(OpCodes.Ldarg_0));
-                    i++;
-                    newInstructions.Insert(i, new CodeInstruction(OpCodes.Call, Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetRoleId), new[] { typeof(ReferenceHub) })));
-                    i++;
-                    newInstructions[i] = new CodeInstruction(OpCodes.Callvirt, Method(typeof(PlayerRoleManager), nameof(PlayerRoleManager.GetRoleBase), new[] { typeof(RoleTypeId) }));
-                    break;
-                }
+                __result = DoorPermissionFlags.None;
+                return false;
             }
 
-            return newInstructions;
+            if (hub.serverRoles.BypassMode)
+            {
+                __result = DoorPermissionFlags.All;
+                return false;
+            }
+
+            DoorPermissionFlags combinedPermissions = DoorPermissionFlags.None;
+
+            if (hub.roleManager.CurrentRole is IDoorPermissionProvider currentRole &&
+                (!DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team team) || team != Team.SCPs))
+                combinedPermissions |= currentRole.GetPermissions(requester);
+
+            ItemBase curInstance = hub.inventory.CurInstance;
+            if (curInstance != null && curInstance is IDoorPermissionProvider permissionProvider)
+                combinedPermissions |= permissionProvider.GetPermissions(requester);
+
+            __result = combinedPermissions;
+            return false;
         }
     }
 }
