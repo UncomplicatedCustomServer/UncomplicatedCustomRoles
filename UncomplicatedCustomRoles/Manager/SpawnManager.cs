@@ -30,6 +30,7 @@ using CommandSystem;
 using Footprinting;
 using InventorySystem;
 using LabApi.Events.Arguments.ServerEvents;
+using LabApi.Features.Permissions;
 using UncomplicatedCustomRoles.API.Features.Controllers;
 using UncomplicatedCustomRoles.Events;
 
@@ -457,12 +458,50 @@ namespace UncomplicatedCustomRoles.Manager
             };
 
             foreach (ICustomRole Role in CustomRole.CustomRoles.Values.Where(cr => cr.SpawnSettings is not null))
-                if (!Role.IgnoreSpawnSystem && Player.ReadyList.Count(pl => !pl.IsHost) >= Role.SpawnSettings?.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
+                if (!Role.IgnoreSpawnSystem && Player.ReadyList.Count() >= Role.SpawnSettings?.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
                 {
-                    if (Role.SpawnSettings.RequiredPermission is not null && Role.SpawnSettings.RequiredPermission.Length > 0 && !(player as ICommandSender).CheckPermission(Role.SpawnSettings.RequiredPermission))
+                    if (Role.SpawnSettings.RequiredPermission is not null)
                     {
-                        LogManager.Silent($"[NOTICE] Ignoring the role {Role.Id} [{Role.Name}] while creating the list for the player {player.Nickname} due to: cannot [permissions].");
-                        continue;
+                        static bool CheckPermission(Player player, string permission)
+                        {
+                            if (Enum.TryParse(permission, out PlayerPermissions playerPermissions))
+                                return player.HasPermission(playerPermissions);
+
+                            return player.HasAnyPermission(permission);
+                        }
+
+                        IEnumerable<string> ExtractPermissions(object obj)
+                        {
+                            switch (obj)
+                            {
+                                case string s when !string.IsNullOrWhiteSpace(s):
+                                    return new[] { s };
+                                case System.Collections.IEnumerable enumerable:
+                                {
+                                    var list = new List<string>();
+                                    foreach (var item in enumerable)
+                                    {
+                                        if (item is null) continue;
+                                        var s = item.ToString();
+                                        if (!string.IsNullOrWhiteSpace(s)) list.Add(s);
+                                    }
+                                    return list;
+                                }
+                                default:
+                                    return Array.Empty<string>();
+                            }
+                        }
+
+                        var permsList = ExtractPermissions(Role.SpawnSettings.RequiredPermission).ToList();
+                        if (permsList.Any())
+                        {
+                            bool hasAll = permsList.All(p => CheckPermission(player, p));
+                            if (!hasAll)
+                            {
+                                LogManager.Debug($"Player {player.PlayerId} doesn't have the required permission(s) to spawn as role {Role.Name} ({Role.Id}), skipping... Player Permissions: {string.Join(", ", player.GetPermissions())}, Required permission(s): {string.Join(", ", permsList)}");
+                                continue;
+                            }
+                        }
                     }
 
                     foreach (RoleTypeId RoleType in Role.SpawnSettings.CanReplaceRoles)
@@ -521,3 +560,5 @@ namespace UncomplicatedCustomRoles.Manager
         }
     }  
 }
+
+

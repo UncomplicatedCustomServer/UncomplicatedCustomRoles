@@ -77,6 +77,6 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
         /// <summary>
         /// Gets or sets the required PlayerPermission to spawn as the given <see cref="ICustomRole"/>
         /// </summary>
-        public PlayerPermissions[]? RequiredPermission { get; set; } = new PlayerPermissions[] { };
+        public object RequiredPermission { get; set; } = new();
     }
 }

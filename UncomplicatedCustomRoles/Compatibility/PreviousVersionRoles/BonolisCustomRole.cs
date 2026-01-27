@@ -151,7 +151,7 @@ namespace UncomplicatedCustomRoles.Compatibility.PreviousVersionRoles
                     SpawnRooms = SpawnSettings.SpawnRooms.ConvertRoomTypes(),
                     SpawnRoles = SpawnSettings.SpawnRoles,
                     SpawnPoints = SpawnSettings.SpawnPoints,
-                    RequiredPermission = new PlayerPermissions[] { }
+                    RequiredPermission = new object()
                 },
                 CustomFlags = CustomFlags,
                 IgnoreSpawnSystem = IgnoreSpawnSystem
