@@ -33,7 +33,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <summary>
         /// Get a list of every <see cref="ICustomRole"/> registered.
         /// </summary>
-        public static ConcurrentBag<ICustomRole> List => (ConcurrentBag<ICustomRole>)CustomRoles.Values;
+        public static ICollection<ICustomRole> List => CustomRoles.Values;
 
         /// <summary>
         /// Gets a list of every not loaded custom role.
