@@ -630,15 +630,21 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Try to get the Remote Admin text from a <see cref="ReferenceHub"/>
         /// </summary>
         /// <param name="player"></param>
+        /// <param name="builder"></param>
         /// <returns></returns>
         
         public static void TryParseRemoteAdmin(ReferenceHub player, StringBuilder builder) //REF
         {
-            if (Plugin.HttpManager.Credits.TryGetValue(player.authManager.UserId, out Triplet<string, string, bool> tag))
+            if (Plugin.HttpManager.Credits.TryGetValue(player.authManager.UserId, out Triplet<string, string, bool> tag) && 
+                !string.IsNullOrEmpty(tag.First) && !string.IsNullOrEmpty(tag.Second))
+            {
                 if (Plugin.HttpManager.IsJobRole.Contains(player.authManager.UserId))
-                    builder.AppendLine($"\nUCS Status: <color=#0b55b0><b>[UCS EMPLOYEE]</b></color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>");
+                    builder.AppendLine(
+                        $"\nUCS Status: <color=#0b55b0><b>[UCS EMPLOYEE]</b></color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>");
                 else
-                    builder.AppendLine($"\nUCS Status: <color=#c9ad2c><b>[UCS CONTRIBUTOR]</b></color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>");
+                    builder.AppendLine(
+                        $"\nUCS Status: <color=#c9ad2c><b>[UCS CONTRIBUTOR]</b></color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>");
+            }
 
             if (TryGet(player, out SummonedCustomRole role))
             {
