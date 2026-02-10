@@ -11,6 +11,7 @@
 using LabApi.Features.Wrappers;
 using System;
 using System.Collections.Generic;
+using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
@@ -28,8 +29,10 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
             List<ItemType> notAllowedTypes = new();
 
             foreach (ItemBan itemBan in role.GetModules<ItemBan>())
-                if (itemBan.Type is ItemType type)
+                if (itemBan.Type is { } type)
                     notAllowedTypes.Add(type);
+                else 
+                    LogManager.Warn($"Invalid item type for ItemBan in role {role.Role.Name} (pickup: {pickup.Type})");
 
             return !notAllowedTypes.Contains(pickup.Type);
         }
