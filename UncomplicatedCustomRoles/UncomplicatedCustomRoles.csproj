@@ -145,6 +145,7 @@
     <Compile Include="Manager\VersionManager.cs" />
     <Compile Include="Manager\YamlFlagsHandler.cs" />
     <Compile Include="Patches\Announcer.cs" />
+    <Compile Include="Patches\ChangeCustomPlayerInfoPatch.cs" />
     <Compile Include="Patches\MakingNoise.cs" />
     <Compile Include="Patches\PlayerEventPrefix.cs" />
     <Compile Include="Patches\Scp3114StranglePrefix.cs" />

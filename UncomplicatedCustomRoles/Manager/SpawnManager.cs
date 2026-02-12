@@ -321,7 +321,7 @@ namespace UncomplicatedCustomRoles.Manager
                         Player.ChangeAppearance(Role.RoleAppearance, LoadAppearanceAffectedPlayers(Player), true);
                     }
                         
-                    Player.RefreshInfoArea();
+                    Player.RefreshInfoArea(Role.CustomInfo);
                 });
 
                 LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})!");

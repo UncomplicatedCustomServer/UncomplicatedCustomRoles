@@ -49,6 +49,7 @@ namespace UncomplicatedCustomRoles.Events
             PlayerEvents.UnlockingWarheadButton += OnUnlockingWarheadButton;
             PlayerEvents.RequestedRaPlayerInfo += OnPlayerRequestedRaPlayerInfo;
             PlayerEvents.RaPlayerListAddingPlayer += OnPlayerRaPlayerListAddingPlayer;
+            PlayerEvents.ChangedNickname += OnChangedNickname;
 
             Instance = this;
         }
@@ -73,6 +74,7 @@ namespace UncomplicatedCustomRoles.Events
             PlayerEvents.UnlockingWarheadButton -= OnUnlockingWarheadButton;
             PlayerEvents.RequestedRaPlayerInfo -= OnPlayerRequestedRaPlayerInfo;
             PlayerEvents.RaPlayerListAddingPlayer -= OnPlayerRaPlayerListAddingPlayer;
+            PlayerEvents.ChangedNickname -= OnChangedNickname;
         }
 
         public void OnJoined(PlayerJoinedEventArgs ev)
@@ -367,6 +369,12 @@ namespace UncomplicatedCustomRoles.Events
             if (SummonedCustomRole.TryGet(ev.Target.ReferenceHub, out SummonedCustomRole customRole))
                 if (customRole.TryGetModule(out ColorfulRaName colorfulRaName))
                     ev.Body = ev.Body.Replace("{RA_ClassColor}", $"#{colorfulRaName.Color.TrimStart('#')}");
+        }
+
+        public void OnChangedNickname(PlayerChangedNicknameEventArgs ev)
+        {
+            if (SummonedCustomRole.TryGet(ev.Player.ReferenceHub, out SummonedCustomRole customRole))
+                ev.Player.RefreshInfoArea(customRole.Role.CustomInfo);
         }
     }
 }

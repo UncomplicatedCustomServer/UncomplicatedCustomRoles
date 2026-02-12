@@ -161,7 +161,8 @@ namespace UncomplicatedCustomRoles.Extensions
         /// Refresh the CustomInfo of a <see cref="Player"/> that has a <see cref="ICustomRole"/>.
         /// </summary>
         /// <param name="player"></param>
-        public static void RefreshInfoArea(this Player player)
+        /// <param name="customInfo"></param>
+        public static void RefreshInfoArea(this Player player, string customInfo)
         {
             ICustomRole role = player.TryGetSummonedInstance(out var summonedCustomRole) ? summonedCustomRole.Role : null;
             if (role is null)
@@ -169,10 +170,10 @@ namespace UncomplicatedCustomRoles.Extensions
                 LogManager.Warn($"Tried to refresh InfoArea for player {player.Nickname} but they don't have a custom role.");
                 return;
             }
-            string customInfo = ProcessCustomInfo(PlaceholderManager.ApplyPlaceholders(role.CustomInfo, player, role));
+            string formattedCustomInfo = ProcessCustomInfo(PlaceholderManager.ApplyPlaceholders(customInfo, player, role));
             string roleName = role.Name;
             string nickName = player.DisplayName.Replace("<color=#855439>*</color>", "");
-            bool customInfoExists = !string.IsNullOrEmpty(customInfo);
+            bool customInfoExists = !string.IsNullOrEmpty(formattedCustomInfo);
             bool roleNameExists = role.OverrideRoleName;
             
             player.InfoArea |= PlayerInfoArea.CustomInfo;
@@ -180,9 +181,9 @@ namespace UncomplicatedCustomRoles.Extensions
             player.InfoArea &= ~PlayerInfoArea.Nickname;
             player.InfoArea &= ~PlayerInfoArea.UnitName;
             
-            if (!NicknameSync.ValidateCustomInfo(customInfo, out string customInfoError) && customInfoExists)
+            if (!NicknameSync.ValidateCustomInfo(formattedCustomInfo, out string customInfoError) && customInfoExists)
             {
-                LogManager.Error($"CustomInfo is not correct. Setting CustomInfo to empty.\nCustomInfo: {customInfo}\nError: {customInfoError}");
+                LogManager.Error($"CustomInfo is not correct. Setting CustomInfo to empty.\nCustomInfo: {formattedCustomInfo}\nError: {customInfoError}");
                 customInfoExists = false;
             }
             
@@ -196,6 +197,9 @@ namespace UncomplicatedCustomRoles.Extensions
             
             if (summonedCustomRole.TryGetModule(out CustomInfoOrder customInfoOrderModule))
                 player.CustomInfo = $"<color=#FFFFFF></color>{customInfoOrderModule.Order}";
+            
+            if (!customInfoExists)
+                player.CustomInfo = player.CustomInfo.Replace("%custominfo%", "");
 
             if (summonedCustomRole.TryGetModule(out ColorfulNickname colorfulNickname))
             {
@@ -213,7 +217,7 @@ namespace UncomplicatedCustomRoles.Extensions
             
             player.CustomInfo = player.CustomInfo.Replace("%%", "%\n%").BulkReplace(new()
             {
-                { "custominfo",  customInfoExists ? $"{customInfo}" : "" },
+                { "custominfo",  customInfoExists ? $"{formattedCustomInfo}" : "" },
                 { "nickname", nickName },
                 { "rolename", roleNameExists ? $"{roleName}" : role.Role.GetFullName() },
             }, "%<val>%");
