@@ -23,6 +23,7 @@ using System.Reflection.Emit;
 using InventorySystem.Disarming;
 using InventorySystem.Items;
 using InventorySystem.Searching;
+using PlayerStatsSystem;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Manager;
 using static HarmonyLib.AccessTools;
@@ -71,7 +72,9 @@ namespace UncomplicatedCustomRoles.Patches
             $"{typeof(GeneralKillsHandler)}::{nameof(GeneralKillsHandler.HandleAttackerKill)}",
             $"{typeof(TerminationRewards)}::{nameof(TerminationRewards.EvaluateGainReason)}",
             $"{typeof(MimicryRecorder)}::{nameof(MimicryRecorder.WasKilledByTeammate)}",
-            $"{typeof(ExplosionGrenade)}::{nameof(ExplosionGrenade.Explode)}"
+            $"{typeof(ExplosionGrenade)}::{nameof(ExplosionGrenade.Explode)}",
+            $"{typeof(FlashbangGrenade)}::{nameof(FlashbangGrenade.ServerFuseEnd)}",
+            $"{typeof(AttackerDamageHandler)}::{nameof(AttackerDamageHandler.ProcessDamage)}"
         };
 
         static bool Prefix(ReferenceHub hub, ref RoleTypeId __result)
@@ -87,10 +90,17 @@ namespace UncomplicatedCustomRoles.Patches
             for (int i = 0; i < trace.FrameCount; i++)
             {
                 StackFrame frame = trace.GetFrame(i);
+                /*if (frame.GetMethod().Name.Contains("FpcServerPositionDistributor") || frame.GetMethod().Name.Contains("GetVisibleRole") ||
+                    frame.GetMethod().DeclaringType.FullName.Contains("RemoteAdmin"))
+                    break;
 
+                if (frame.GetMethod().DeclaringType.FullName.Contains("UncomplicatedCustomRoles") || frame.GetMethod().Name.Contains("GetRoleId_Patch1"))
+                {}
+                else
+                    LogManager.Debug($"[{i}] - {frame.GetMethod().DeclaringType.FullName}::{frame.GetMethod().Name} - {frame.GetFileName()} - {frame.GetFileLineNumber()}");
+                */
                 if (allowedMethods.Contains($"{frame.GetMethod().DeclaringType.FullName}::{frame.GetMethod().Name}"))
                 {
-                    //LogManager.Info($"[{i}] - {frame.GetMethod().DeclaringType.FullName}::{frame.GetMethod().Name} - {frame.GetFileName()} - {frame.GetFileLineNumber()}");
                     __result = _roleTeam[team];
                     return false;
                 }
