@@ -184,14 +184,18 @@ namespace UncomplicatedCustomRoles.Manager
                             {
                                 if (UCI.HasCustomItem(itemId, out _))
                                 {
-                                    LogManager.Debug($"Going to give CustomItem (UCR) {itemId} to {Player.PlayerId}");
+                                    LogManager.Debug($"Going to give UCI CustomItem {itemId} to {Player.PlayerId}");
                                     UCI.GiveCustomItem(itemId, Player);
+                                }
+                                else
+                                {
+                                    LogManager.Debug($"Going to give EXILED CustomItem {itemId} to {Player.PlayerId}");
+                                    ECI.GiveCustomItem(itemId, Player);
                                 }
                             }
                             catch (Exception ex)
                             {
-                                LogManager.Debug($"Error while giving a custom item.\nError: {ex.Message}");
-                                LogManager.Error(ex.ToString());
+                                LogManager.Error($"Failed to give the custom item {itemId} to player {Player.PlayerId} ({Player.Nickname})! Exception: {ex}");
                             }
 
                 Player.ClearAmmo();
