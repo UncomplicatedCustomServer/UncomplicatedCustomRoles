@@ -141,7 +141,8 @@ namespace UncomplicatedCustomRoles.Compatibility.PreviousVersionRoles
                     Amount = Health.HumeShield,
                     Maximum = Health.HumeShield,
                     RegenerationAmount = Health.HumeShieldRegenerationAmount,
-                    RegenerationDelay = Health.HumeShieldRegenerationDelay
+                    RegenerationDelay = Health.HumeShieldRegenerationDelay,
+                    RegenerationSpeed = 0f
                 },
                 Effects = Effects,
                 Stamina = Stamina,

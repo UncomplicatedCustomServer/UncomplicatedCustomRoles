@@ -351,14 +351,14 @@ namespace UncomplicatedCustomRoles.API.Features
         }
 
         /// <summary>
-        /// If the role is <see cref="IsDfaultCoroutineRole"/> this coroutine will handle every functions that requires one
+        /// If the role is <see cref="IsDefaultCoroutineRole"/> this coroutine will handle every functions that requires one
         /// </summary>
         /// <returns></returns>
         private IEnumerator<float> RoleTickCoroutine()
         {
             while (_internalValid && Player.IsAlive && IsDefaultCoroutineRole)
             {
-                if (EvaluateCustomActions() && Player.HumeShield < Role.HumeShield.Amount && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.RegenerationDelay && !_isRegeneratingHume)
+                if (Player.HumeShield < Role.HumeShield.Maximum && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.RegenerationDelay && !_isRegeneratingHume)
                     Timing.RunCoroutine(HumeShieldCoroutine());
 
                 yield return Timing.WaitForSeconds(TickDuration);
@@ -372,10 +372,10 @@ namespace UncomplicatedCustomRoles.API.Features
         public IEnumerator<float> HumeShieldCoroutine()
         {
             _isRegeneratingHume = true;
-            while (_internalValid && Player.IsAlive && Player.HumeShield < Role.HumeShield.Amount && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.RegenerationDelay)
+            while (_internalValid && Player.IsAlive && Player.HumeShield < Role.HumeShield.Maximum && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.RegenerationDelay)
             {
                 Player.HumeShield += Role.HumeShield.RegenerationAmount;
-                yield return Timing.WaitForSeconds(1f);
+                yield return Role.HumeShield.RegenerationSpeed == 0 ? Timing.WaitForOneFrame : Timing.WaitForSeconds(Role.HumeShield.RegenerationSpeed);
             }
             _isRegeneratingHume = false;
         }
