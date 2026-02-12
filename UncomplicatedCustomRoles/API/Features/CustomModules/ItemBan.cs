@@ -8,10 +8,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using LabApi.Features.Wrappers;
-using System;
 using System.Collections.Generic;
-using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
@@ -22,19 +19,15 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
             "item_type"
         };
 
-        public ItemType? Type => StringArgs.TryGetValue("item_type", out string itemType) && Enum.TryParse(itemType, out ItemType type) ? type : null;
-
-        public static bool ValidatePickup(SummonedCustomRole role, Pickup pickup)
+        internal List<string> Items
         {
-            List<ItemType> notAllowedTypes = new();
+            get
+            {
+                if (!Args.TryGetValue("item_type", out object items) || items == null)
+                    return new List<string>();
 
-            foreach (ItemBan itemBan in role.GetModules<ItemBan>())
-                if (itemBan.Type is { } type)
-                    notAllowedTypes.Add(type);
-                else 
-                    LogManager.Warn($"Invalid item type for ItemBan in role {role.Role.Name} (pickup: {pickup.Type})");
-
-            return !notAllowedTypes.Contains(pickup.Type);
+                return ConvertToList(items);
+            }
         }
     }
 }

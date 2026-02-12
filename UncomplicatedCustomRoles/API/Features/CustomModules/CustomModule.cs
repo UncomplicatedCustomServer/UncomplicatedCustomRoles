@@ -186,5 +186,29 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
                 return null;
             }
         }
+        
+        internal static List<string> ConvertToList(object items)
+        {
+            switch (items)
+            {
+                case null:
+                    return new List<string>();
+                case string:
+                    return  new List<string> { items.ToString() };
+                case List<string> listStr:
+                    return listStr;
+                case IEnumerable<string> enumStr:
+                    return enumStr.ToList();
+                case System.Collections.IEnumerable nonGenericEnum:
+                {
+                    var result = new List<string>();
+                    foreach (var o in nonGenericEnum)
+                        result.Add(o?.ToString() ?? string.Empty);
+                    return result;
+                }
+                default:
+                    return new List<string> { items.ToString() };
+            }
+        }
     }
 }

@@ -8,6 +8,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using InventorySystem.Items.Usables.Scp330;
 using System.Collections.Generic;
 using InventorySystem.Items;
@@ -21,12 +22,24 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
             "candies"
         };
 
-        internal List<CandyKindID> Kinds => Args.TryGetValue("candies", out object kinds) ? kinds as List<CandyKindID> : new();
+        internal List<string> Kinds         
+        {
+            get
+            {
+                if (!Args.TryGetValue("candies", out object items) || items == null)
+                    return new List<string>();
+                
+                return ConvertToList(items);
+            }
+        }
 
         public override void OnAdded()
         {
-            foreach (CandyKindID kind in Kinds)
-                CustomRole.Player.GiveCandy(kind, ItemAddReason.AdminCommand);
+            foreach (string kind in Kinds)
+            {
+                if (Enum.TryParse(kind, out CandyKindID candyKind))
+                    CustomRole.Player.GiveCandy(candyKind, ItemAddReason.AdminCommand);
+            }
         }
     }
 }
