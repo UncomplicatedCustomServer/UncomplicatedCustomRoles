@@ -38,7 +38,7 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
         /// Gets or sets how fast the Hume Shield regenerates (in seconds)
         /// 0 is 1 frame.
         /// </summary>
-        public float RegenerationSpeed { get; set; } = 0.1f;
+        public float RegenerationSpeed { get; set; } = 0f;
 
         /// <summary>
         /// Apply the current instance of <see cref="HumeShieldBehaviour"/> to the given <see cref="Player"/>
