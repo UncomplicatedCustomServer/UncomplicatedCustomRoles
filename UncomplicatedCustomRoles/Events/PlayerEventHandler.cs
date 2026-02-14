@@ -379,7 +379,7 @@ namespace UncomplicatedCustomRoles.Events
         public void OnPickingUp(PlayerPickingUpItemEventArgs ev)
         {
             if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) && summonedInstance.TryGetModule(out ItemBan itemBan))
-                ev.IsAllowed = !itemBan.Items.Contains(ev.Pickup.Type.ToString());
+                ev.IsAllowed = !itemBan.Items.Contains(ev.Pickup.Category);
         }
         
         public void OnPlayerRequestedRaPlayerInfo(PlayerRequestedRaPlayerInfoEventArgs ev)

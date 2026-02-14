@@ -19,15 +19,6 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
             "item_type"
         };
 
-        internal List<string> Items
-        {
-            get
-            {
-                if (!Args.TryGetValue("item_type", out object items) || items == null)
-                    return new List<string>();
-
-                return ConvertToList(items);
-            }
-        }
+        public List<ItemCategory> Items => TryGetCastedListValue<ItemCategory>("item_type");
     }
 }

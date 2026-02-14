@@ -114,7 +114,54 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         /// <param name="def"></param>
         /// <returns></returns>
         public string TryGetStringValue(string param, string def = null) => StringArgs.TryGetValue(param, out string value) ? value : def;
-        
+
+        /// <summary>
+        /// Try to get a value from the <see cref="Args"/> and if not present just return a default value, with the value converted to the given type <see cref="T"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="param"></param>
+        /// <param name="def"></param>
+        /// <returns></returns>
+        public T TryGetCastedValue<T>(string param, T def = default)
+        {
+            if (!Args.TryGetValue(param, out object value))
+                return def;
+
+            try
+            {
+                return (T)Convert.ChangeType(value, typeof(T));
+            }
+            catch
+            {
+                return def;
+            }
+        }
+
+        /// <summary>
+        /// Try to get a value from the <see cref="Args"/> and if not present just return a default value, with the value converted to a list of the given type <see cref="T"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="param"></param>
+        /// <param name="def"></param>
+        /// <returns></returns>
+        public List<T> TryGetCastedListValue<T>(string param, List<T> def = null)
+        {
+            if (!Args.TryGetValue(param, out object value))
+                return def;
+            try
+            {
+                if (value is List<T> list)
+                    return list;
+                if (value is IEnumerable<T> enumerable)
+                    return enumerable.ToList();
+                return new List<T> { (T)Convert.ChangeType(value, typeof(T)) };
+            }
+            catch
+            {
+                return def;
+            }
+        }
+
         /// <summary>
         /// Logs an error message indicating that the custom module failed to load or had an issue.
         /// </summary>
@@ -186,8 +233,8 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
                 return null;
             }
         }
-        
-        internal static List<string> ConvertToList(object items)
+
+/*        internal static List<string> ConvertToList(object items)
         {
             switch (items)
             {
@@ -209,6 +256,6 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
                 default:
                     return new List<string> { items.ToString() };
             }
-        }
+        }*/
     }
 }
