@@ -46,7 +46,7 @@ internal class ChangeCustomPlayerInfoPatch
                 ServerLogs.AddLog(ServerLogs.Modules.Administrative, $"{sender.LogName} cleared custom info of player {me.PlayerId} ({me.nicknameSync.MyNick}).", ServerLogs.ServerLogType.RemoteAdminActivity_GameChanging);
                 stringBuilder.AppendFormat("Reset {0}'s custom info.\n", (object) me.LoggedNameFromRefHub());
                 if (player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
-                    player.RefreshInfoArea(summonedInstance.Role.CustomInfo);
+                    new CustomInfo(player, summonedInstance.Role);
                 else
                     me.nicknameSync.CustomPlayerInfo = null;
             }
@@ -54,8 +54,8 @@ internal class ChangeCustomPlayerInfoPatch
             {
                 ServerLogs.AddLog(ServerLogs.Modules.Administrative, $"{sender.LogName} set custom info of player {me.PlayerId} ({me.nicknameSync.MyNick}) to \"{str}\".", ServerLogs.ServerLogType.RemoteAdminActivity_GameChanging);
                 stringBuilder.AppendFormat("Set {0}'s custom info to: {1}\n", (object) me.LoggedNameFromRefHub(), (object) str);
-                if (player.HasCustomRole())
-                    player.RefreshInfoArea(str);
+                if (player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
+                    summonedInstance.CustomInfo.Info = str;
                 else
                     me.nicknameSync.CustomPlayerInfo = str;
             }

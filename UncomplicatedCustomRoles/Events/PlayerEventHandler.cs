@@ -24,6 +24,7 @@ using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 using UncomplicatedCustomRoles.Extensions;
+using MEC;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -141,7 +142,6 @@ namespace UncomplicatedCustomRoles.Events
 
                 if (customRole.HasModule<DropNothingOnDeath>())
                     ev.Player.ClearInventory();
-                
             }
         }
 
@@ -153,6 +153,29 @@ namespace UncomplicatedCustomRoles.Events
             TerminationQueue.TryRemove(ev.Player.PlayerId, out _);
 
             SpawnManager.ClearCustomTypes(ev.Player);
+
+            // Try change appearance of the killer
+            if (ev.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole) && attackerCustomRole.TryGetModule(out ChangeAppearanceOnKill changeAppearanceOnKill))
+            {
+                if (changeAppearanceOnKill.Forever && changeAppearanceOnKill.AlreadyChanged)
+                    return;
+
+                changeAppearanceOnKill.AlreadyChanged = true;
+
+                // Change
+                attackerCustomRole.Player.ChangeAppearance(changeAppearanceOnKill.NewAppearance);
+
+                if (!changeAppearanceOnKill.Forever)
+                    Timing.CallDelayed(changeAppearanceOnKill.Duration, () =>
+                    {
+                        if (attackerCustomRole.Player is null || !attackerCustomRole.Player.IsAlive)
+                            return;
+
+                        attackerCustomRole.Player.ChangeAppearance(attackerCustomRole.Role.RoleAppearance);
+                    });
+            }
+
+            // DON'T DO ANYTHING HERE AS THERE ARE TWO return UP THERE!
         }
 
         public void OnRagdollSpawn(PlayerSpawningRagdollEventArgs ev)
@@ -374,7 +397,7 @@ namespace UncomplicatedCustomRoles.Events
         public void OnChangedNickname(PlayerChangedNicknameEventArgs ev)
         {
             if (SummonedCustomRole.TryGet(ev.Player.ReferenceHub, out SummonedCustomRole customRole))
-                ev.Player.RefreshInfoArea(customRole.Role.CustomInfo);
+                customRole.CustomInfo.Nickname = ev.NewNickname;
         }
     }
 }

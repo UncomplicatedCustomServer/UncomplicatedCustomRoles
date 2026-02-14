@@ -94,6 +94,11 @@ namespace UncomplicatedCustomRoles.API.Features
         public PlayerInfoArea PlayerInfoArea { get; }
 
         /// <summary>
+        /// Gets the <see cref="API.Features.CustomInfo"/> instance of the player
+        /// </summary>
+        public CustomInfo CustomInfo { get; }
+
+        /// <summary>
         /// Gets the <see cref="CoroutineHandle"/> of a generic Coroutine that can be used by the custom role manager
         /// </summary>
         public CoroutineHandle GenericCoroutine { get; private set; }
@@ -140,14 +145,13 @@ namespace UncomplicatedCustomRoles.API.Features
         internal RoleTypeId Appearance => Role.RoleAppearance != Role.Role ? Role.RoleAppearance : RoleTypeId.None;
 
         internal Vector3 Scale => Role.Scale != Vector3.one && Role.Scale != Vector3.zero ? Role.Scale : Vector3.one; 
-
         
         /// <summary>
         /// The duration of a tick
         /// </summary>
         public const float TickDuration = 0.25f;
 
-        internal SummonedCustomRole(Player player, ICustomRole role, Triplet<string, string, bool>? badge, List<IEffect> infiniteEffects, PlayerInfoArea playerInfo, bool isCustomNickname = false)
+        internal SummonedCustomRole(Player player, ICustomRole role, Triplet<string, string, bool>? badge, List<IEffect> infiniteEffects, PlayerInfoArea playerInfo, CustomInfo customInfo, bool isCustomNickname = false)
         {
             Id = Guid.NewGuid().ToString();
             Player = player;
@@ -157,6 +161,7 @@ namespace UncomplicatedCustomRoles.API.Features
             InfiniteEffects = infiniteEffects;
             IsCustomNickname = isCustomNickname;
             PlayerInfoArea = playerInfo;
+            CustomInfo = customInfo;
             _internalValid = true;
 
             if (IsDefaultCoroutineRole)
@@ -183,6 +188,18 @@ namespace UncomplicatedCustomRoles.API.Features
             
             if (Role is EventCustomRole eventCustomRole)
                 eventCustomRole.OnSpawned(this);
+
+            // Appearance handling
+            if (Appearance != RoleTypeId.None)
+            {
+                Timing.CallDelayed(0.75f, () =>
+                {
+                    LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
+                    Player.ChangeAppearance(Role.RoleAppearance, SpawnManager.LoadAppearanceAffectedPlayers(Player), true);
+
+                    CustomInfo.Role = Role.RoleAppearance.GetFullName();
+                });
+            }
         }
 
         /// <summary>
