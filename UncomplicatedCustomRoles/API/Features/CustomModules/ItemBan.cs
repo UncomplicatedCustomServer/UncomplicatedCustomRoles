@@ -19,6 +19,6 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
             "item_type"
         };
 
-        public List<ItemCategory> Items => TryGetCastedListValue<ItemCategory>("item_type");
+        public List<ItemType> Items => TryGetCastedListValue<ItemType>("item_type");
     }
 }
