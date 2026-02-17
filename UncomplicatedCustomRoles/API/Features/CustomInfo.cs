@@ -18,12 +18,16 @@ namespace UncomplicatedCustomRoles.API.Features
 {
     public class CustomInfo
     {
+        private string _nickname;
+        private string _role;
+        private string _info;
+
         public string Nickname
         {
-            get => Nickname;
+            get => _nickname;
             set
             {
-                Nickname = value;
+                _nickname = value;
                 if (_lastOwner is not null)
                     UpdateInfo(_lastOwner);
             }
@@ -31,10 +35,10 @@ namespace UncomplicatedCustomRoles.API.Features
 
         public string Role
         {
-            get => Role;
+            get => _role;
             set
             {
-                Role = value;
+                _role = value;
                 if (_lastOwner is not null)
                     UpdateInfo(_lastOwner);
             }
@@ -42,10 +46,10 @@ namespace UncomplicatedCustomRoles.API.Features
 
         public string Info
         {
-            get => Info;
+            get => _info;
             set
             {
-                Info = value;
+                _info = value;
                 if (_lastOwner is not null)
                     UpdateInfo(_lastOwner);
             }
@@ -112,6 +116,7 @@ namespace UncomplicatedCustomRoles.API.Features
 
                 if (summonedCustomRole.TryGetModule(out ColorfulNickname colorfulNickname))
                 {
+                    LogManager.Debug($"Applying ColorfulNickname module to player {player.PlayerId} with color {colorfulNickname.Color} and nickname {Nickname}");
                     if (string.IsNullOrEmpty(colorfulNickname.Color))
                         return;
                     string nick = Nickname.Replace("<color=#855439>*</color>", "");
@@ -129,6 +134,12 @@ namespace UncomplicatedCustomRoles.API.Features
                 rawInfo = PlaceholderManager.ApplyPlaceholders(rawInfo, player, null);
             }
 
+            if (string.IsNullOrEmpty(rawInfo))
+                rawCustomInfo = rawCustomInfo.Replace("%custominfo%", "");
+            
+            if (string.IsNullOrEmpty(rawNickname))
+                rawNickname = player.Nickname;
+            
             player.CustomInfo = rawCustomInfo.Replace("%%", "%\n%").BulkReplace(new()
             {
                 {
