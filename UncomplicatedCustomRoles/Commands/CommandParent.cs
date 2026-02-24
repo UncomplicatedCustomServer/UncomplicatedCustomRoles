@@ -36,6 +36,7 @@ namespace UncomplicatedCustomRoles.Commands
             RegisteredCommands.Add(new Info());
             RegisteredCommands.Add(new Role());
             RegisteredCommands.Add(new Spawn());
+            RegisteredCommands.Add(new CustomInfo());
             RegisteredCommands.Add(new Reload());
             RegisteredCommands.Add(new SpawnPoint());
             RegisteredCommands.Add(new Percentages());
