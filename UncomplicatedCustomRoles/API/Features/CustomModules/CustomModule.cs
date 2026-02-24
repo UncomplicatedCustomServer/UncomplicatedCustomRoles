@@ -10,6 +10,7 @@
 
 using LabApi.Events.Arguments.Interfaces;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using LabApi.Features.Wrappers;
@@ -142,24 +143,52 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="param"></param>
-        /// <param name="def"></param>
         /// <returns></returns>
-        public List<T> TryGetCastedListValue<T>(string param, List<T> def = null)
+        public List<T> TryGetCastedListValue<T>(string param)
         {
-            if (!Args.TryGetValue(param, out object value))
-                return def;
+            if (!Args.TryGetValue(param, out var value) || value is null)
+                return new List<T>();
+            switch (value)
+            {
+                case T t:
+                    return new List<T> { t };
+                case List<T> listT:
+                    return listT;
+                case IEnumerable<T> enumT:
+                    return enumT.ToList();
+                case IEnumerable nonGenericEnum:
+                    var result = nonGenericEnum is ICollection col ? new List<T>(col.Count) : new List<T>();
+                    foreach (var o in nonGenericEnum)
+                        if (TryConvertTo(o, out T converted))
+                            result.Add(converted);
+                    return result;
+                default:
+                    return TryConvertTo(value, out T single) ? new List<T> { single } : new List<T>();
+            }
+        }
+
+        private static bool TryConvertTo<T>(object o, out T result)
+        {
             try
             {
-                if (value is List<T> list)
-                    return list;
-                if (value is IEnumerable<T> enumerable)
-                    return enumerable.ToList();
-                return new List<T> { (T)Convert.ChangeType(value, typeof(T)) };
+                result = ConvertTo<T>(o);
+                return true;
             }
             catch
             {
-                return def;
+                result = default;
+                return false;
             }
+        }
+
+        private static T ConvertTo<T>(object o)
+        {
+            var type = typeof(T);
+            if (!type.IsEnum)
+                return (T)Convert.ChangeType(o, type);
+            if (o is string s)
+                return (T)Enum.Parse(type, s, true);
+            return (T)Enum.ToObject(type, Convert.ChangeType(o, Enum.GetUnderlyingType(type)));
         }
 
         /// <summary>

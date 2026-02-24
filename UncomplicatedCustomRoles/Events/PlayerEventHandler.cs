@@ -44,13 +44,16 @@ namespace UncomplicatedCustomRoles.Events
             PlayerEvents.UsedItem += OnItemUsed;
             PlayerEvents.Hurting += OnHurting;
             PlayerEvents.Hurt += OnHurt;
-            PlayerEvents.PickingUpItem += OnPickingUp;
+            PlayerEvents.PickingUpItem += OnPickingUpItem;
             PlayerEvents.Joined += OnJoined;
             PlayerEvents.DamagingWindow += OnDamagingWindow;
             PlayerEvents.UnlockingWarheadButton += OnUnlockingWarheadButton;
             PlayerEvents.RequestedRaPlayerInfo += OnPlayerRequestedRaPlayerInfo;
             PlayerEvents.RaPlayerListAddingPlayer += OnPlayerRaPlayerListAddingPlayer;
             PlayerEvents.ChangedNickname += OnChangedNickname;
+            PlayerEvents.PickingUpArmor += OnPickingUpArmor;
+            PlayerEvents.PickingUpScp330 += OnPickingUpScp330;
+            PlayerEvents.InteractingScp330 += OnInteractingScp330;
 
             Instance = this;
         }
@@ -69,13 +72,16 @@ namespace UncomplicatedCustomRoles.Events
             PlayerEvents.UsedItem -= OnItemUsed;
             PlayerEvents.Hurting -= OnHurting;
             PlayerEvents.Hurt -= OnHurt;
-            PlayerEvents.PickingUpItem -= OnPickingUp;
+            PlayerEvents.PickingUpItem -= OnPickingUpItem;
             PlayerEvents.Joined -= OnJoined;
             PlayerEvents.DamagingWindow -= OnDamagingWindow;
             PlayerEvents.UnlockingWarheadButton -= OnUnlockingWarheadButton;
             PlayerEvents.RequestedRaPlayerInfo -= OnPlayerRequestedRaPlayerInfo;
             PlayerEvents.RaPlayerListAddingPlayer -= OnPlayerRaPlayerListAddingPlayer;
             PlayerEvents.ChangedNickname -= OnChangedNickname;
+            PlayerEvents.PickingUpArmor -= OnPickingUpArmor;
+            PlayerEvents.PickingUpScp330 -= OnPickingUpScp330;
+            PlayerEvents.InteractingScp330 -= OnInteractingScp330;
         }
 
         public void OnJoined(PlayerJoinedEventArgs ev)
@@ -376,10 +382,28 @@ namespace UncomplicatedCustomRoles.Events
                 summoned?.InfiniteEffects.RemoveAll(effect => effect is not null && effect.Removable);
         }
 
-        public void OnPickingUp(PlayerPickingUpItemEventArgs ev)
+        public void OnPickingUpItem(PlayerPickingUpItemEventArgs ev)
         {
             if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) && summonedInstance.TryGetModule(out ItemBan itemBan))
                 ev.IsAllowed = !itemBan.Items.Contains(ev.Pickup.Type);
+        }
+        
+        public void OnPickingUpArmor(PlayerPickingUpArmorEventArgs ev)
+        {
+            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) && summonedInstance.TryGetModule(out ItemBan itemBan))
+                ev.IsAllowed = !itemBan.Items.Contains(ev.BodyArmorPickup.Type);
+        }
+        
+        public void OnPickingUpScp330(PlayerPickingUpScp330EventArgs ev)
+        {
+            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) && summonedInstance.TryGetModule(out ItemBan itemBan))
+                ev.IsAllowed = !itemBan.Items.Contains(ev.CandyPickup.Type);
+        }
+        
+        public void OnInteractingScp330(PlayerInteractingScp330EventArgs ev)
+        {
+            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) && summonedInstance.TryGetModule(out ItemBan itemBan))
+                ev.IsAllowed = !itemBan.Items.Contains(ItemType.SCP330);
         }
         
         public void OnPlayerRequestedRaPlayerInfo(PlayerRequestedRaPlayerInfoEventArgs ev)
