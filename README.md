@@ -9,7 +9,7 @@
   <br><br>
 </div>
 
-**EXILED** >= `v9.x`
+**EXILED** >= `v9.x` OR **LabAPI** >= `v1.x`
 <br><br>
 
 ## Localized READMEs
@@ -21,17 +21,18 @@
 - [🇨🇳 Simplified Chinese](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-CN.md)
 
 ## What's UncomplicatedCustomRoles
-**UncomplicatedCustomRoles** or **UCR** is a plugin for [EXILED](https://github.com/ExMod-Team/EXILED) that allow you to create fully configurable and customizable custom role with YAML.\
+**UncomplicatedCustomRoles** or **UCR** is a plugin for [EXILED](https://github.com/ExMod-Team/EXILED) and **LabAPI** that allow you to create fully configurable and customizable custom role with YAML.\
 You'll be able to configure the <ins>role</ins>, the <ins>health</ins>, the <ins>role after escape</ins> and many more things. 
 
 ## Features
 **UCR** has lots of features like:
 - Unlimited number of custom roles
-- Configs are in a separate file, not the EXILED default one
-- Exhaustive [wiki](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki)
+- Exhaustive [wiki](https://docs.ucr.ucserver.it/)
 - Active community on **Discord**
 - __Special privileges and previews__ for verified server owners
 - In-game commands to handle the plugin and the roles
+
+WE NEED TO REWORK THE FEATURES THING! AND ADD THE bugs LINK!!!
 
 ## Installation
 Download the `UncomplicatedCustomRoles.dll` from the [latest release](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/releases/latest) and put it inside the `EXILED/Plugins` folder.
