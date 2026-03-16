@@ -23,6 +23,7 @@ using LabApi.Features.Wrappers;
 using System.Reflection;
 using LabApi.Features;
 using UncomplicatedCustomRoles.Events;
+using UncomplicatedCustomRoles.API.Features.Controllers;
 
 namespace UncomplicatedCustomRoles
 {
@@ -91,10 +92,17 @@ namespace UncomplicatedCustomRoles
             _harmony.PatchAll();
 
             PlayerEventPrefix.Patch(_harmony);
+
+            // Add presence
+            Server.Host?.GameObject.AddComponent<Presence>();
         }
 
         public override void Disable()
         {
+            // Remove presence
+            if (Server.Host?.GameObject.TryGetComponent<Presence>(out var presence) ?? false)
+                UnityEngine.Object.Destroy(presence);
+
             ScriptedEvents.UnregisterCustomActions();
 
             PlayerEventPrefix.Unpatch(_harmony);

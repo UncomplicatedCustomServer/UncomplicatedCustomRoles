@@ -9,6 +9,7 @@
  */
 
 using CommandSystem;
+using LabApi.Features.Wrappers;
 using System.Collections.Generic;
 using System.Net;
 using UncomplicatedCustomRoles.API.Interfaces;
@@ -32,7 +33,13 @@ namespace UncomplicatedCustomRoles.Commands
                 return false;
             }
 
-            HttpStatusCode code = Plugin.HttpManager.AddServerOwner(arguments[0]).GetStatusCode(out response);
+            if (!Player.TryGet(sender, out Player player))
+            {
+                response = "This command can only be executed by a player.";
+                return false;
+            }
+
+            HttpStatusCode code = Plugin.HttpManager.AddServerOwner(player, arguments[0]).GetStatusCode(out response);
             
             response = $"{code} - {response}";
             return true;
