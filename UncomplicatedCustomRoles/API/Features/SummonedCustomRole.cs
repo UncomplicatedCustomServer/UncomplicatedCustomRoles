@@ -25,6 +25,7 @@ using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Commands;
 using UncomplicatedCustomRoles.Extensions;
+using UncomplicatedCustomRoles.Integrations;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 
@@ -195,7 +196,11 @@ namespace UncomplicatedCustomRoles.API.Features
                 Timing.CallDelayed(0.75f, () =>
                 {
                     LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
-                    Player.ChangeAppearance(Role.RoleAppearance, SpawnManager.LoadAppearanceAffectedPlayers(Player), true);
+
+                    if (LabApiExtensions.IsAvailable)
+                        LabApiExtensions.AddFakeRole(Player, Role.RoleAppearance);
+                    else
+                        Player.ChangeAppearance(Role.RoleAppearance, SpawnManager.LoadAppearanceAffectedPlayers(Player), true);
 
                     CustomInfo.Role = Role.RoleAppearance.GetFullName();
                 });
@@ -355,6 +360,9 @@ namespace UncomplicatedCustomRoles.API.Features
                 Player.DisableAllEffects();
                 InfiniteEffects.Clear();
                 
+                if (Appearance != RoleTypeId.None && LabApiExtensions.IsAvailable)
+                    LabApiExtensions.RemoveFakeRole(Player);
+
                 if (Role is EventCustomRole eventCustomRole)
                     eventCustomRole.OnRemoved(this);
             }

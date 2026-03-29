@@ -24,6 +24,7 @@ using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 using UncomplicatedCustomRoles.Extensions;
+using UncomplicatedCustomRoles.Integrations;
 using MEC;
 
 namespace UncomplicatedCustomRoles.Events
@@ -88,9 +89,10 @@ namespace UncomplicatedCustomRoles.Events
         {
             FirstRoundPlayers.Add(ev.Player.PlayerId);
 
-            // Sync role appearance
-            foreach (SummonedCustomRole role in SummonedCustomRole.List.Values.Where(role => role.Appearance != RoleTypeId.None))
-                role.Player.ChangeAppearance(role.Appearance, new Player[] { ev.Player });
+            // Sync role appearance - LabApiExtensions handles it if available
+            if (!LabApiExtensions.IsAvailable)
+                foreach (SummonedCustomRole role in SummonedCustomRole.List.Values.Where(role => role.Appearance != RoleTypeId.None))
+                    role.Player.ChangeAppearance(role.Appearance, new Player[] { ev.Player });
 
             foreach (SummonedCustomRole role in SummonedCustomRole.List.Values.Where(role => role.Scale != Vector3.one))
                 role.Player.Scale = role.Scale;
@@ -169,7 +171,10 @@ namespace UncomplicatedCustomRoles.Events
                 changeAppearanceOnKill.AlreadyChanged = true;
 
                 // Change
-                attackerCustomRole.Player.ChangeAppearance(changeAppearanceOnKill.NewAppearance);
+                if (LabApiExtensions.IsAvailable)
+                    LabApiExtensions.AddFakeRole(attackerCustomRole.Player, changeAppearanceOnKill.NewAppearance);
+                else
+                    attackerCustomRole.Player.ChangeAppearance(changeAppearanceOnKill.NewAppearance);
 
                 if (!changeAppearanceOnKill.Forever)
                     Timing.CallDelayed(changeAppearanceOnKill.Duration, () =>
@@ -177,7 +182,17 @@ namespace UncomplicatedCustomRoles.Events
                         if (attackerCustomRole.Player is null || !attackerCustomRole.Player.IsAlive)
                             return;
 
-                        attackerCustomRole.Player.ChangeAppearance(attackerCustomRole.Role.RoleAppearance);
+                        if (LabApiExtensions.IsAvailable)
+                        {
+                            if (attackerCustomRole.Appearance != RoleTypeId.None)
+                                LabApiExtensions.AddFakeRole(attackerCustomRole.Player, attackerCustomRole.Role.RoleAppearance);
+                            else
+                                LabApiExtensions.RemoveFakeRole(attackerCustomRole.Player);
+                        }
+                        else
+                        {
+                            attackerCustomRole.Player.ChangeAppearance(attackerCustomRole.Role.RoleAppearance);
+                        }
                     });
             }
 

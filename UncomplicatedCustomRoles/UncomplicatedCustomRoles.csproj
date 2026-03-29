@@ -133,6 +133,7 @@
     <Compile Include="Extensions\Vector3Extension.cs" />
     <Compile Include="Integrations\DynamicInvoke.cs" />
     <Compile Include="Integrations\ECI.cs" />
+    <Compile Include="Integrations\LabApiExtensions.cs" />
     <Compile Include="Integrations\RespawnTimer.cs" />
     <Compile Include="Integrations\ScriptedEvents.cs" />
     <Compile Include="API\Interfaces\IUCRCommand.cs" />
