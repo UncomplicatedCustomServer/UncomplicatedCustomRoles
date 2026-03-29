@@ -37,7 +37,7 @@ namespace UncomplicatedCustomRoles.Commands
                 return false;
             }
 
-            if (!Round.IsRoundInProgress)
+            if (!LabApi.Features.Wrappers.Round.IsRoundInProgress)
             {
                 response = "Sorry but you can't use this command if the round is not started!";
                 return false;

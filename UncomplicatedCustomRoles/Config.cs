@@ -15,9 +15,6 @@ namespace UncomplicatedCustomRoles
 {
     internal class Config
     {
-        [Description("Is the plugin enabled?")]
-        public bool IsEnabled { get; set; } = true;
-
         [Description("Is the debug mode enabled?")]
         public bool Debug { get; set; } = false;
 

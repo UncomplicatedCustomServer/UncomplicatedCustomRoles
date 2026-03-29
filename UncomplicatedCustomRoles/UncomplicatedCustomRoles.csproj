@@ -196,16 +196,16 @@
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>$(sl_references)\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
-    <Reference Include="LabApi">
-      <HintPath>$(sl_references)\LabApi.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Lib.Harmony">
       <Version>2.4.2</Version>
     </PackageReference>
+    <PackageReference Include="Northwood.LabAPI">
+      <Version>1.1.6.1</Version>
+    </PackageReference>
     <PackageReference Include="System.Text.Json">
-      <Version>10.0.3</Version>
+      <Version>10.0.5</Version>
     </PackageReference>
     <PackageReference Include="System.ComponentModel">
       <Version>4.3.0</Version>

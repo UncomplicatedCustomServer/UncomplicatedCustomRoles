@@ -209,10 +209,10 @@ namespace UncomplicatedCustomRoles.Events
             if (!ev.IsAllowed)
                 return;
 
-            if (!Round.IsRoundStarted)
+            if (!LabApi.Features.Wrappers.Round.IsRoundStarted)
                 return;
 
-            if (ev.NewRole is RoleTypeId.Spectator || ev.NewRole is RoleTypeId.None || ev.NewRole is RoleTypeId.Filmmaker)
+            if (ev.NewRole is RoleTypeId.Spectator or RoleTypeId.None or RoleTypeId.Filmmaker)
                 return;
 
             if (Spawn.Spawning.Contains(ev.Player.PlayerId))
