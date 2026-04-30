@@ -5,7 +5,7 @@ namespace UncomplicatedCustomRoles.API.Features.Messages
 {
     internal class PresenceMessage
     {
-        [JsonPropertyName("server_id")]
+        [JsonPropertyName("server_port")]
         public int Port { get; set; } = Server.Port;
 
         [JsonPropertyName("player_count")]
