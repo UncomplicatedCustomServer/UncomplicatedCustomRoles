@@ -209,7 +209,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         internal HttpStatusCode ShareLogs(string data, out string content)
         {
-            content = HttpQuery.Post($"{Endpoint}/{Prefix}/error", JsonSerializer.Serialize(new ShareLogMessage(data)), "application/json");
+            content = HttpQuery.Post($"{Endpoint}/{Prefix}/logs", JsonSerializer.Serialize(new ShareLogMessage(data)), "application/json");
             return content.GetStatusCode(out _);
         }
 
