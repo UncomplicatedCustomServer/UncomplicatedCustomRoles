@@ -1,225 +1,55 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B108B68B-3300-4638-BC8F-FEEE1BE0EEF1}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UncomplicatedCustomRoles</RootNamespace>
-    <AssemblyName>UncomplicatedCustomRoles-LabAPI</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>embedded</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>11</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <Optimize>false</Optimize>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>11</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DebugSymbols>false</DebugSymbols>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="API\Attributes\PluginCustomRole.cs" />
-    <Compile Include="API\Enums\DamageType.cs" />
-    <Compile Include="API\Enums\LoadStatusType.cs" />
-    <Compile Include="API\Features\Behaviour\AhpBehaviour.cs" />
-    <Compile Include="API\Features\Behaviour\HealthBehaviour.cs" />
-    <Compile Include="API\Features\Behaviour\HumeShieldBehaviour.cs" />
-    <Compile Include="API\Features\Controllers\EscapeController.cs" />
-    <Compile Include="API\Features\Controllers\Presence.cs" />
-    <Compile Include="API\Features\Controllers\SchematicController.cs" />
-    <Compile Include="API\Features\CustomInfo.cs" />
-    <Compile Include="API\Features\CustomModules\AmnesiaResistance.cs" />
-    <Compile Include="API\Features\CustomModules\ChangeAppearanceOnKill.cs" />
-    <Compile Include="API\Features\CustomModules\ColorfulNickname.cs" />
-    <Compile Include="API\Features\CustomModules\ColorfulRaName.cs" />
-    <Compile Include="API\Features\CustomModules\CustomInfoOrder.cs" />
-    <Compile Include="API\Features\CustomModules\CustomModule.cs" />
-    <Compile Include="API\Features\CustomModules\CustomPermissions.cs" />
-    <Compile Include="API\Features\CustomModules\CustomScpAnnouncer.cs" />
-    <Compile Include="API\Features\CustomModules\DamageResistance.cs" />
-    <Compile Include="API\Features\CustomModules\DoNotTrigger096.cs" />
-    <Compile Include="API\Features\CustomModules\DoNotTriggerTeslaGates.cs" />
-    <Compile Include="API\Features\CustomModules\DropItemOnDeath.cs" />
-    <Compile Include="API\Features\CustomModules\DropNothingOnDeath.cs" />
-    <Compile Include="API\Features\CustomModules\FullCandyBag.cs" />
-    <Compile Include="API\Features\CustomModules\ItemBan.cs" />
-    <Compile Include="API\Features\CustomModules\KeepInventoryOnEscape.cs" />
-    <Compile Include="API\Features\CustomModules\LifeStealer.cs" />
-    <Compile Include="API\Features\CustomModules\NotAffectedByAppearance.cs" />
-    <Compile Include="API\Features\CustomModules\PacifismUntilDamage.cs" />
-    <Compile Include="API\Features\CustomModules\Schematic.cs" />
-    <Compile Include="API\Features\CustomModules\SilentAnnouncer.cs" />
-    <Compile Include="API\Features\CustomModules\SilentWalker.cs" />
-    <Compile Include="API\Features\CustomModules\TutorialRagdoll.cs" />
-    <Compile Include="API\Features\CustomModules\Wardrobe.cs" />
-    <Compile Include="API\Features\CustomRole.cs" />
-    <Compile Include="API\Features\CustomRoleEventHandler.cs" />
-    <Compile Include="API\Features\DisguiseTeam.cs" />
-    <Compile Include="API\Features\EventCustomRole.cs" />
-    <Compile Include="API\Features\Escape.cs" />
-    <Compile Include="API\Features\InfiniteEffect.cs" />
-    <Compile Include="API\Features\Behaviour\SpawnBehaviour.cs" />
-    <Compile Include="API\Features\Behaviour\StaminaBehaviour.cs" />
-    <Compile Include="API\Features\LogEntry.cs" />
-    <Compile Include="API\Features\Messages\OwnerMessage.cs" />
-    <Compile Include="API\Features\Messages\PresenceMessage.cs" />
-    <Compile Include="API\Features\Messages\ShareLogMessage.cs" />
-    <Compile Include="API\Features\Spawn.cs" />
-    <Compile Include="API\Features\SpawnPoint.cs" />
-    <Compile Include="API\Features\SummonedCustomRole.cs" />
-    <Compile Include="API\Struct\Quadruple.cs" />
-    <Compile Include="API\Struct\Triplet.cs" />
-    <Compile Include="Commands\CommandParent.cs" />
-    <Compile Include="Commands\CustomInfo.cs" />
-    <Compile Include="Commands\Debug.cs" />
-    <Compile Include="Commands\Errors.cs" />
-    <Compile Include="Commands\Generate.cs" />
-    <Compile Include="Commands\Info.cs" />
-    <Compile Include="Commands\List.cs" />
-    <Compile Include="Commands\LogShare.cs" />
-    <Compile Include="Commands\Owner.cs" />
-    <Compile Include="Commands\Percentages.cs" />
-    <Compile Include="Commands\Role.cs" />
-    <Compile Include="Commands\Reload.cs" />
-    <Compile Include="Commands\Spawn.cs" />
-    <Compile Include="Commands\SpawnPoint.cs" />
-    <Compile Include="Commands\Update.cs" />
-    <Compile Include="Commands\Version.cs" />
-    <Compile Include="Compatibility\CompatibilityManager.cs" />
-    <Compile Include="Compatibility\ErrorCustomRole.cs" />
-    <Compile Include="Compatibility\OutdatedCustomRole.cs" />
-    <Compile Include="Compatibility\PreviousVersionElements\BonolisSpawnBehaviour.cs" />
-    <Compile Include="Compatibility\PreviousVersionElements\Enums\ExiledAmmoType.cs" />
-    <Compile Include="Compatibility\PreviousVersionElements\Enums\ExiledRoomType.cs" />
-    <Compile Include="Compatibility\PreviousVersionElements\Enums\ExiledZoneType.cs" />
-    <Compile Include="Compatibility\PreviousVersionElements\FossuonHealthBehaviour.cs" />
-    <Compile Include="Compatibility\PreviousVersionRoles\BonolisCustomRole.cs" />
-    <Compile Include="Compatibility\PreviousVersionRoles\IPreviousVersionRole.cs" />
-    <Compile Include="Compatibility\PreviousVersionRoles\PreviousVersionRole.cs" />
-    <Compile Include="Compatibility\PreviousVersionRoles\FossuonCustomRole.cs" />
-    <Compile Include="Config.cs" />
-    <Compile Include="API\Enums\CustomFlags.cs" />
-    <Compile Include="API\Enums\SpawnType.cs" />
-    <Compile Include="Events\EventHandlerBase.cs" />
-    <Compile Include="Events\PlayerEventHandler.cs" />
-    <Compile Include="Events\ScpEventHandler.cs" />
-    <Compile Include="Events\ServerEventHandler.cs" />
-    <Compile Include="Extensions\CompatibilityExtension.cs" />
-    <Compile Include="Extensions\DictionaryExtension.cs" />
-    <Compile Include="Extensions\ListExtension.cs" />
-    <Compile Include="Extensions\MirrorExtension.cs" />
-    <Compile Include="Extensions\PlayerExtension.cs" />
-    <Compile Include="Extensions\RoleExtension.cs" />
-    <Compile Include="Extensions\StringExtension.cs" />
-    <Compile Include="Extensions\Vector3Extension.cs" />
-    <Compile Include="Integrations\DynamicInvoke.cs" />
-    <Compile Include="Integrations\ECI.cs" />
-    <Compile Include="Integrations\LabApiExtensions.cs" />
-    <Compile Include="Integrations\RespawnTimer.cs" />
-    <Compile Include="Integrations\ScriptedEvents.cs" />
-    <Compile Include="API\Interfaces\IUCRCommand.cs" />
-    <Compile Include="Integrations\SLWardobe.cs" />
-    <Compile Include="Integrations\UCI.cs" />
-    <Compile Include="Integrations\UCT.cs" />
-    <Compile Include="Manager\FileConfigs.cs" />
-    <Compile Include="API\Features\Effect.cs" />
-    <Compile Include="Manager\NET\HttpManager.cs" />
-    <Compile Include="Manager\ImportManager.cs" />
-    <Compile Include="Manager\LogManager.cs" />
-    <Compile Include="Manager\NET\SpawnPointApiCommunicator.cs" />
-    <Compile Include="Manager\NET\VersionInfo.cs" />
-    <Compile Include="Manager\PlaceholderManager.cs" />
-    <Compile Include="Manager\PluginImportManager.cs" />
-    <Compile Include="Manager\SpawnManager.cs" />
-    <Compile Include="Manager\VersionManager.cs" />
-    <Compile Include="Manager\YamlFlagsHandler.cs" />
-    <Compile Include="Patches\Announcer.cs" />
-    <Compile Include="Patches\ChangeCustomPlayerInfoPatch.cs" />
-    <Compile Include="Patches\MakingNoise.cs" />
-    <Compile Include="Patches\PlayerEventPrefix.cs" />
-    <Compile Include="Patches\Scp3114StranglePrefix.cs" />
-    <Compile Include="Patches\ServerNamePatch.cs" />
-    <Compile Include="Patches\SetRolePatch.cs" />
-    <Compile Include="Patches\StaminaUsagePatch.cs" />
-    <Compile Include="Patches\TeamPatch.cs" />
-    <Compile Include="Plugin.cs" />
-    <Compile Include="API\Interfaces\ICustomRole.cs" />
-    <Compile Include="API\Interfaces\IEffect.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Connected Services\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>$(sl_references)\Assembly-CSharp-firstpass.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp-Publicized">
-      <HintPath>$(sl_references)\Assembly-CSharp-Publicized.dll</HintPath>
-    </Reference>
-    <Reference Include="CommandSystem.Core">
-      <HintPath>$(sl_references)\CommandSystem.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Mirror-Publicized">
-      <HintPath>$(sl_references)\Mirror-Publicized.dll</HintPath>
-    </Reference>
-    <Reference Include="NorthwoodLib">
-      <HintPath>$(sl_references)\NorthwoodLib.dll</HintPath>
-    </Reference>
-    <Reference Include="Pooling">
-      <HintPath>$(sl_references)\Pooling.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(sl_references)\UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>$(sl_references)\UnityEngine.PhysicsModule.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Lib.Harmony">
-      <Version>2.4.2</Version>
-    </PackageReference>
-    <PackageReference Include="Northwood.LabAPI">
-      <Version>1.1.6.1</Version>
-    </PackageReference>
-    <PackageReference Include="System.Text.Json">
-      <Version>10.0.5</Version>
-    </PackageReference>
-    <PackageReference Include="System.ComponentModel">
-      <Version>4.3.0</Version>
-    </PackageReference>
-    <PackageReference Include="System.Net.Http">
-      <Version>4.3.4</Version>
-    </PackageReference>
-    <PackageReference Include="YamlDotNet">
-      <Version>11.0.1</Version>
-    </PackageReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="AfterBuild">
-    <Exec Command="xcopy &quot;$(TargetPath)&quot; &quot;%appdata%\SCP Secret Laboratory\LabAPI\plugins\global&quot; /y" />
-  </Target>
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net48</TargetFramework>
+        <AssemblyName>UncomplicatedCustomRoles-LabAPI</AssemblyName>
+        <RootNamespace>UncomplicatedCustomRoles</RootNamespace>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+        <Deterministic>true</Deterministic>
+        <PlatformTarget>x64</PlatformTarget>
+        <Nullable>disable</Nullable>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>embedded</DebugType>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <Optimize>false</Optimize>
+        <OutputPath>bin\x64\Debug\</OutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <DebugSymbols>false</DebugSymbols>
+        <DebugType>pdbonly</DebugType>
+        <DefineConstants>TRACE</DefineConstants>
+        <Optimize>true</Optimize>
+        <OutputPath>bin\x64\Release\</OutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all"/>
+        <PackageReference Include="Lib.Harmony" Version="2.4.2"/>
+        <PackageReference Include="Northwood.LabAPI" Version="1.1.6.1"/>
+        <PackageReference Include="System.Text.Json" Version="10.0.7"/>
+        <PackageReference Include="System.ComponentModel" Version="4.3.0"/>
+        <PackageReference Include="System.Net.Http" Version="4.3.4"/>
+        <PackageReference Include="YamlDotNet" Version="11.0.1"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="Assembly-CSharp-firstpass" HintPath="$(sl_references)\Assembly-CSharp-firstpass.dll"/>
+        <Reference Include="Assembly-CSharp" Publicize="true" HintPath="$(sl_references)\Assembly-CSharp.dll"/>
+        <Reference Include="CommandSystem.Core" HintPath="$(sl_references)\CommandSystem.Core.dll"/>
+        <Reference Include="Mirror" Publicize="true" HintPath="$(sl_references)\Mirror.dll"/>
+        <Reference Include="NorthwoodLib" HintPath="$(sl_references)\NorthwoodLib.dll"/>
+        <Reference Include="Pooling" HintPath="$(sl_references)\Pooling.dll"/>
+        <Reference Include="UnityEngine.CoreModule" HintPath="$(sl_references)\UnityEngine.CoreModule.dll"/>
+        <Reference Include="UnityEngine.PhysicsModule" HintPath="$(sl_references)\UnityEngine.PhysicsModule.dll"/>
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="xcopy &quot;$(TargetPath)&quot; &quot;%appdata%\SCP Secret Laboratory\LabAPI\plugins\global&quot; /y"/>
+    </Target>
 </Project>

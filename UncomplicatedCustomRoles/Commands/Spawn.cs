@@ -52,7 +52,7 @@ namespace UncomplicatedCustomRoles.Commands
             else if (arguments[0] is "spectators" or "spect")
                 players = Player.ReadyList.Where(p => p.Role is RoleTypeId.Spectator or RoleTypeId.None).Select(p => new Tuple<string, Player>(null, p));
             else if (arguments[0] is "alive" or "al")
-                players = Player.ReadyList.Where(p => p.Role is not RoleTypeId.Spectator or RoleTypeId.None).Select(p => new Tuple<string, Player>(null, p));
+                players = Player.ReadyList.Where(p => p.Role is not (RoleTypeId.Spectator or RoleTypeId.None)).Select(p => new Tuple<string, Player>(null, p));           
             else
                 players = new[] { new Tuple<string, Player>(arguments[0], Player.Get(int.Parse(arguments[0]))) };
 

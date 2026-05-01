@@ -72,7 +72,7 @@ namespace UncomplicatedCustomRoles.Commands
                 return false;
             }
 
-            if (args.Count is 4 && args[3] is "true" && args[0] is not "ref" or "reference")
+            if (args.Count is 4 && args[3] is "true" && args[0] is not ("ref" or "reference"))
                 ReferenceObject = obj;
 
             if (obj is not null && target is not null && obj.GetType() != target)
