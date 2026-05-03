@@ -113,7 +113,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
         {
             string Version = HttpQuery.Get($"{Endpoint}/{Prefix}/versions/latest@text/plain");
 
-            if (Version is not null && Version != string.Empty && Version.Contains("."))
+            if (!string.IsNullOrEmpty(Version) && Version.Contains("."))
                 _latestVersion = new(Version);
             else
                 _latestVersion = new();
@@ -173,7 +173,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
             Triplet<string, string, bool> Tag = GetCreditTag(player);
             
-            if (player.ReferenceHub.serverRoles.Network_myText is not null && player.ReferenceHub.serverRoles.Network_myText != string.Empty)
+            if (!string.IsNullOrEmpty(player.ReferenceHub.serverRoles.Network_myText))
             {
                 if (Credits.Any(k => k.Value.First == player.ReferenceHub.serverRoles.Network_myText && k.Value.Second == player.ReferenceHub.serverRoles.Network_myColor))
                     _alreadyManaged = true;
