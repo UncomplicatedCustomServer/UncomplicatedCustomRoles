@@ -18,7 +18,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
-using LabApi.Features;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Extensions;

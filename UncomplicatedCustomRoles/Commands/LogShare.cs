@@ -41,24 +41,34 @@ namespace UncomplicatedCustomRoles.Commands
             }
 
             long Start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            response = $"Loading the JSON content to share with the developers...";
+            response = "Loading the JSON content to share with the developers...";
 
+            bool online = arguments.Count > 0;
             Task.Run(() =>
             {
-                HttpStatusCode Response = LogManager.SendReport(out string content, arguments.Count > 0);
+                HttpStatusCode Response = LogManager.SendReport(out string content, online);
                 try
                 {
+                    if (!online)
+                        LogManager.Info("Logs saved to file successfully.");
+
                     if (Response is HttpStatusCode.OK)
                     {
+                        if (string.IsNullOrEmpty(content))
+                        {
+                            LogManager.Error("Server returned OK but the response body was empty.");
+                            return;
+                        }
+
                         Dictionary<string, string> Data = JsonSerializer.Deserialize<Dictionary<string, string>>(content);
-                        Logger.Info($"[ShareTheLog] Successfully shared the UCR logs with the developers!\nSend this Id to the developers: {Data["id"]}\n\nTook {DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start}ms");
-                    } 
+                        LogManager.Info($"Successfully shared the UCR logs with the developers!\nSend this Id to the developers: {Data["id"]}\n\nTook {DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start}ms");
+                    }
                     else
-                        Logger.Info($"Failed to share the UCR logs with the developers: Server says: {Response}");
+                        LogManager.Info($"Failed to share the UCR logs with the developers: Server says: {Response}");
                 }
                 catch (Exception e) 
                 { 
-                    Logger.Error(e.ToString()); 
+                    LogManager.Error(e.ToString()); 
                 }
             });
             
