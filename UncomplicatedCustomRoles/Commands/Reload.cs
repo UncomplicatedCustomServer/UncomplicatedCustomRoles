@@ -35,9 +35,11 @@ namespace UncomplicatedCustomRoles.Commands
             CustomRole.CustomRoles = new();
             CustomRole.NotLoadedRoles.Clear();
             CustomRole.OutdatedRoles.Clear();
+            ImportManager.Unload();
 
             FileConfigs.LoadAll();
             FileConfigs.LoadAll(Server.Port.ToString());
+            ImportManager.Reload();
 
             IEnumerable<int> removedRoles = oldRoles.Keys.Except(CustomRole.CustomRoles.Keys);
 

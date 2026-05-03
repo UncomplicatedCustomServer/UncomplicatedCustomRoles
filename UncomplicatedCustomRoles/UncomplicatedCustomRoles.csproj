@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net48</TargetFramework>
-        <AssemblyName>UncomplicatedCustomRoles-LabAPI</AssemblyName>
+        <AssemblyName>UncomplicatedCustomRoles-LabApi</AssemblyName>
         <RootNamespace>UncomplicatedCustomRoles</RootNamespace>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>
@@ -46,7 +46,6 @@
         <Reference Include="NorthwoodLib" HintPath="$(sl_references)\NorthwoodLib.dll"/>
         <Reference Include="Pooling" HintPath="$(sl_references)\Pooling.dll"/>
         <Reference Include="UnityEngine.CoreModule" HintPath="$(sl_references)\UnityEngine.CoreModule.dll"/>
-        <Reference Include="UnityEngine.PhysicsModule" HintPath="$(sl_references)\UnityEngine.PhysicsModule.dll"/>
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
