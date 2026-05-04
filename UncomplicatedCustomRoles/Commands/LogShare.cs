@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is a part of the UncomplicatedCustomRoles project.
  * 
  * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
@@ -15,7 +15,6 @@ using UncomplicatedCustomRoles.Manager;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
-using LabApi.Features.Console;
 
 namespace UncomplicatedCustomRoles.Commands
 {
@@ -43,7 +42,7 @@ namespace UncomplicatedCustomRoles.Commands
             long Start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             response = "Loading the JSON content to share with the developers...";
 
-            bool online = arguments.Count > 0;
+            bool online = arguments.Count < 1;
             Task.Run(() =>
             {
                 HttpStatusCode Response = LogManager.SendReport(out string content, online);
@@ -59,9 +58,9 @@ namespace UncomplicatedCustomRoles.Commands
                             LogManager.Error("Server returned OK but the response body was empty.");
                             return;
                         }
-
-                        Dictionary<string, string> Data = JsonSerializer.Deserialize<Dictionary<string, string>>(content);
-                        LogManager.Info($"Successfully shared the UCR logs with the developers!\nSend this Id to the developers: {Data["id"]}\n\nTook {DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start}ms");
+                        LogManager.Debug($"Received content: {content}");
+                        Dictionary<string, JsonElement> Data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(content);
+                        LogManager.Info($"Successfully shared the UCR logs with the developers!\nSend this Id to the developers: {Data["id"].GetString()}\n\nTook {DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start}ms");
                     }
                     else
                         LogManager.Info($"Failed to share the UCR logs with the developers: Server says: {Response}");
