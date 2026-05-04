@@ -1,34 +1,28 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Text.Json;
+using MEC;
 using UncomplicatedCustomRoles.API.Features.Messages;
-using UnityEngine;
+using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.API.Features.Controllers
 {
-    internal class Presence : MonoBehaviour
+    internal static class Presence
     {
-        private DateTime _lastUpdate = default;
-        private readonly string _endpoint = "https://api.ucserver.it/v3/plugin/ucr/presence";
-        private readonly int _delay = 60;
-
-        public void Update()
+        internal static IEnumerator<float> PresenceCoroutine()
         {
-            if ((DateTime.UtcNow - _lastUpdate).TotalSeconds < _delay)
-                return;
-
-            _lastUpdate = DateTime.UtcNow;
-            StartCoroutine(PresenceRequest());
-        }
-
-        public void OnDestroy()
-        {
-            StopAllCoroutines();
-        }
-
-        public IEnumerator PresenceRequest()
-        {
-            yield return HttpQuery.PostCoroutine(_endpoint, JsonSerializer.Serialize(new PresenceMessage()), "application/json").Wait();
+            while (true)
+            {
+                yield return Timing.WaitForSeconds(60f);
+                try
+                {
+                    HttpQuery.Post("https://api.ucserver.it/v3/plugin/ucr/presence", JsonSerializer.Serialize(new PresenceMessage()), "application/json");
+                }
+                catch (Exception e)
+                {
+                    LogManager.Error($"Failed to send presence data: {e.Message}");
+                }
+            }
         }
     }
 }

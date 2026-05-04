@@ -22,6 +22,7 @@ using LabApi.Loader.Features.Plugins.Enums;
 using LabApi.Features.Wrappers;
 using System.Reflection;
 using LabApi.Features;
+using MEC;
 using UncomplicatedCustomRoles.Events;
 using UncomplicatedCustomRoles.API.Features.Controllers;
 
@@ -94,14 +95,13 @@ namespace UncomplicatedCustomRoles
             PlayerEventPrefix.Patch(_harmony);
 
             // Add presence
-            Server.Host?.GameObject.AddComponent<Presence>();
+            if (Config.EnableTelemetry)
+                Timing.RunCoroutine(Presence.PresenceCoroutine(), "UCR_Presence");
         }
 
         public override void Disable()
         {
-            // Remove presence
-            if (Server.Host?.GameObject.TryGetComponent<Presence>(out var presence) ?? false)
-                UnityEngine.Object.Destroy(presence);
+            Timing.KillCoroutines("UCR_Presence");
 
             ScriptedEvents.UnregisterCustomActions();
 
