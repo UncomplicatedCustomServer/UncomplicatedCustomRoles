@@ -52,7 +52,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// <summary>
         /// Gets the UCS APIs endpoint
         /// </summary>
-        public string Endpoint { get; } = "https://api.ucserver.it/v2/plugin";
+        public string Endpoint { get; } = "https://api.ucserver.it/v3/plugin";
 
         /// <summary>
         /// Gets the CreditTag storage for the plugin, downloaded from our central server
