@@ -13,7 +13,6 @@ namespace UncomplicatedCustomRoles.API.Features.Controllers
         {
             while (true)
             {
-                yield return Timing.WaitForSeconds(60f);
                 try
                 {
                     HttpQuery.Post("https://api.ucserver.it/v3/plugin/ucr/presence", JsonSerializer.Serialize(new PresenceMessage()), "application/json");
@@ -22,6 +21,7 @@ namespace UncomplicatedCustomRoles.API.Features.Controllers
                 {
                     LogManager.Error($"Failed to send presence data: {e.Message}");
                 }
+                yield return Timing.WaitForSeconds(60f);
             }
         }
     }
