@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net48</TargetFramework>
-        <AssemblyName>UncomplicatedCustomRoles-LabApi</AssemblyName>
+        <AssemblyName>UncomplicatedCustomRoles</AssemblyName>
         <RootNamespace>UncomplicatedCustomRoles</RootNamespace>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>
