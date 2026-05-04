@@ -184,14 +184,18 @@ namespace UncomplicatedCustomRoles.Manager
                             {
                                 if (UCI.HasCustomItem(itemId, out _))
                                 {
-                                    LogManager.Debug($"Going to give CustomItem (UCR) {itemId} to {Player.PlayerId}");
+                                    LogManager.Debug($"Going to give UCI CustomItem {itemId} to {Player.PlayerId}");
                                     UCI.GiveCustomItem(itemId, Player);
+                                }
+                                else
+                                {
+                                    LogManager.Debug($"Going to give EXILED CustomItem {itemId} to {Player.PlayerId}");
+                                    ECI.GiveCustomItem(itemId, Player);
                                 }
                             }
                             catch (Exception ex)
                             {
-                                LogManager.Debug($"Error while giving a custom item.\nError: {ex.Message}");
-                                LogManager.Error(ex.ToString());
+                                LogManager.Error($"Failed to give the custom item {itemId} to player {Player.PlayerId} ({Player.Nickname})! Exception: {ex}");
                             }
 
                 Player.ClearAmmo();
@@ -308,21 +312,13 @@ namespace UncomplicatedCustomRoles.Manager
 
                     ChangedNick = true;
                 }
-                
-                Timing.CallDelayed(0.75f, () =>
-                {
-                    if (Role.RoleAppearance != Role.Role)
-                    {
-                        LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
-                        Player.ChangeAppearance(Role.RoleAppearance, LoadAppearanceAffectedPlayers(Player), true);
-                    }
-                        
-                    Player.RefreshInfoArea();
-                });
+
+                // Roll out custom info
+                CustomInfo customInfo = new(Player, Role);
 
                 LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})!");
 
-                SummonedCustomRole roleInstance = new(Player, Role, Badge, PermanentEffects, InfoArea, ChangedNick); // IMPORTANT!
+                SummonedCustomRole roleInstance = new(Player, Role, Badge, PermanentEffects, InfoArea, customInfo, ChangedNick);
 
                 EscapeController escapeController = Player.GameObject.AddComponent<EscapeController>();
                 escapeController.Init(roleInstance);
@@ -470,7 +466,7 @@ namespace UncomplicatedCustomRoles.Manager
                             return player.HasAnyPermission(permission);
                         }
 
-                        IEnumerable<string> ExtractPermissions(object obj)
+                        static IEnumerable<string> ExtractPermissions(object obj)
                         {
                             switch (obj)
                             {
@@ -547,7 +543,7 @@ namespace UncomplicatedCustomRoles.Manager
             LabApi.Events.Handlers.ServerEvents.OnCassieQueuedScpTermination(new CassieQueuedScpTerminationEventArgs(scp, announcement2, subtitleParts2, hit));
         }
 
-        private static IEnumerable<Player> LoadAppearanceAffectedPlayers(Player target)
+        internal static IEnumerable<Player> LoadAppearanceAffectedPlayers(Player target)
         {
             List<Player> result = new();
             foreach (Player player in Player.ReadyList.Where(p => p.PlayerId != target.PlayerId))

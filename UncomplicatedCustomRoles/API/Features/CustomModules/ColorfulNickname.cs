@@ -9,6 +9,7 @@
  */
 
 using System.Collections.Generic;
+using MEC;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
@@ -20,5 +21,14 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         };
 
         internal string Color => TryGetStringValue("color", string.Empty);
+
+        public override void OnAdded()
+        {
+            Timing.CallDelayed(Timing.WaitForOneFrame, ()  =>
+            {
+                CustomRole.CustomInfo.UpdateInfo(CustomRole.Player);
+            });
+            base.OnAdded();
+        }
     }
 }

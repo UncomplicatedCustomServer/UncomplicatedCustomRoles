@@ -10,6 +10,7 @@
 
 using LabApi.Events.Arguments.Interfaces;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using LabApi.Features.Wrappers;
@@ -114,7 +115,82 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
         /// <param name="def"></param>
         /// <returns></returns>
         public string TryGetStringValue(string param, string def = null) => StringArgs.TryGetValue(param, out string value) ? value : def;
-        
+
+        /// <summary>
+        /// Try to get a value from the <see cref="Args"/> and if not present just return a default value, with the value converted to the given type <see cref="T"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="param"></param>
+        /// <param name="def"></param>
+        /// <returns></returns>
+        public T TryGetCastedValue<T>(string param, T def = default)
+        {
+            if (!Args.TryGetValue(param, out object value))
+                return def;
+
+            try
+            {
+                return (T)Convert.ChangeType(value, typeof(T));
+            }
+            catch
+            {
+                return def;
+            }
+        }
+
+        /// <summary>
+        /// Try to get a value from the <see cref="Args"/> and if not present just return a default value, with the value converted to a list of the given type <see cref="T"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public List<T> TryGetCastedListValue<T>(string param)
+        {
+            if (!Args.TryGetValue(param, out var value) || value is null)
+                return new List<T>();
+            switch (value)
+            {
+                case T t:
+                    return new List<T> { t };
+                case List<T> listT:
+                    return listT;
+                case IEnumerable<T> enumT:
+                    return enumT.ToList();
+                case IEnumerable nonGenericEnum:
+                    var result = nonGenericEnum is ICollection col ? new List<T>(col.Count) : new List<T>();
+                    foreach (var o in nonGenericEnum)
+                        if (TryConvertTo(o, out T converted))
+                            result.Add(converted);
+                    return result;
+                default:
+                    return TryConvertTo(value, out T single) ? new List<T> { single } : new List<T>();
+            }
+        }
+
+        private static bool TryConvertTo<T>(object o, out T result)
+        {
+            try
+            {
+                result = ConvertTo<T>(o);
+                return true;
+            }
+            catch
+            {
+                result = default;
+                return false;
+            }
+        }
+
+        private static T ConvertTo<T>(object o)
+        {
+            var type = typeof(T);
+            if (!type.IsEnum)
+                return (T)Convert.ChangeType(o, type);
+            if (o is string s)
+                return (T)Enum.Parse(type, s, true);
+            return (T)Enum.ToObject(type, Convert.ChangeType(o, Enum.GetUnderlyingType(type)));
+        }
+
         /// <summary>
         /// Logs an error message indicating that the custom module failed to load or had an issue.
         /// </summary>
@@ -186,5 +262,29 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
                 return null;
             }
         }
+
+/*        internal static List<string> ConvertToList(object items)
+        {
+            switch (items)
+            {
+                case null:
+                    return new List<string>();
+                case string:
+                    return  new List<string> { items.ToString() };
+                case List<string> listStr:
+                    return listStr;
+                case IEnumerable<string> enumStr:
+                    return enumStr.ToList();
+                case System.Collections.IEnumerable nonGenericEnum:
+                {
+                    var result = new List<string>();
+                    foreach (var o in nonGenericEnum)
+                        result.Add(o?.ToString() ?? string.Empty);
+                    return result;
+                }
+                default:
+                    return new List<string> { items.ToString() };
+            }
+        }*/
     }
 }

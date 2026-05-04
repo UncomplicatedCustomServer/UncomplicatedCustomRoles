@@ -12,6 +12,6 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
     internal class KeepInventoryOnEscape : CustomModule
     {
-        public bool DropItems => (bool)TryGetValue("drop", true); // Not mandatory
+        public bool DropItems => TryGetValue("drop", true) is not bool drop || drop;
     }
 }

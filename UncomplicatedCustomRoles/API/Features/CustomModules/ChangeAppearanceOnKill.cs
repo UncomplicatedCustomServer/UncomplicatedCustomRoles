@@ -8,17 +8,27 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+using PlayerRoles;
+using System;
 using System.Collections.Generic;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
-    public class ItemBan : CustomModule
+    internal class ChangeAppearanceOnKill : CustomModule
     {
         public override List<string> RequiredArgs => new()
         {
-            "item_type"
+            "new_appearance",
+            "duration",
+            "forever"
         };
 
-        public List<ItemType> Items => TryGetCastedListValue<ItemType>("item_type");
+        public RoleTypeId NewAppearance => Enum.TryParse(TryGetStringValue("new_appearance", "None"), out RoleTypeId role) ? role : RoleTypeId.None;
+
+        public uint Duration => Convert.ToUInt32(TryGetValue("duration", 0));
+
+        public bool Forever => Convert.ToBoolean(TryGetValue("forever", false));
+
+        public bool AlreadyChanged { get; internal set; } = false;
     }
 }

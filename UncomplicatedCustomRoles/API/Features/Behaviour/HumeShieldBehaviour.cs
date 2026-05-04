@@ -33,6 +33,12 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
         /// Gets or sets the time that the player has to be untouched (not damaged) in order to regen the hume shield (in seconds)
         /// </summary>
         public float RegenerationDelay { get; set; } = 7.5f;
+        
+        /// <summary>
+        /// Gets or sets how fast the Hume Shield regenerates (in seconds)
+        /// 0 is 1 frame.
+        /// </summary>
+        public float RegenerationSpeed { get; set; } = 0f;
 
         /// <summary>
         /// Apply the current instance of <see cref="HumeShieldBehaviour"/> to the given <see cref="Player"/>

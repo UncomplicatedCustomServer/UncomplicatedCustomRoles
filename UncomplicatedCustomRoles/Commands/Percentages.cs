@@ -34,7 +34,7 @@ namespace UncomplicatedCustomRoles.Commands
 
             foreach (RoleTypeId role in Enum.GetValues(typeof(RoleTypeId)))
             {
-                IEnumerable<ICustomRole> roles = CustomRole.List.Where(r => r.SpawnSettings is not null && r.SpawnSettings.CanReplaceRoles.Contains(role));
+                IEnumerable<ICustomRole> roles = CustomRole.List.Where(r => r.SpawnSettings?.CanReplaceRoles != null && r.SpawnSettings.CanReplaceRoles.Contains(role));
                 if (roles.Any())
                 {
                     float total = roles.Sum(r => r.SpawnSettings.SpawnChance);

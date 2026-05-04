@@ -18,11 +18,16 @@ using PlayerRoles.PlayableScps.Scp939.Mimicry;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using InventorySystem.Disarming;
 using InventorySystem.Items;
 using InventorySystem.Searching;
+using LabApi.Features.Console;
+using MapGeneration.Distributors;
+using PlayerRoles.PlayableScps.Scp079;
+using PlayerStatsSystem;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Manager;
 using static HarmonyLib.AccessTools;
@@ -71,7 +76,10 @@ namespace UncomplicatedCustomRoles.Patches
             $"{typeof(GeneralKillsHandler)}::{nameof(GeneralKillsHandler.HandleAttackerKill)}",
             $"{typeof(TerminationRewards)}::{nameof(TerminationRewards.EvaluateGainReason)}",
             $"{typeof(MimicryRecorder)}::{nameof(MimicryRecorder.WasKilledByTeammate)}",
-            $"{typeof(ExplosionGrenade)}::{nameof(ExplosionGrenade.Explode)}"
+            $"{typeof(ExplosionGrenade)}::{nameof(ExplosionGrenade.Explode)}",
+            $"{typeof(FlashbangGrenade)}::{nameof(FlashbangGrenade.ServerFuseEnd)}",
+            $"{typeof(AttackerDamageHandler)}::{nameof(AttackerDamageHandler.ProcessDamage)}",
+            $"{typeof(Scp079Recontainer)}::{nameof(Scp079Recontainer.OnServerRoleChanged)}"
         };
 
         static bool Prefix(ReferenceHub hub, ref RoleTypeId __result)
@@ -87,10 +95,17 @@ namespace UncomplicatedCustomRoles.Patches
             for (int i = 0; i < trace.FrameCount; i++)
             {
                 StackFrame frame = trace.GetFrame(i);
+                /*if (frame.GetMethod().Name.Contains("FpcServerPositionDistributor") || frame.GetMethod().Name.Contains("GetVisibleRole") ||
+                    frame.GetMethod().DeclaringType.FullName.Contains("RemoteAdmin"))
+                    break;
 
+                if (frame.GetMethod().DeclaringType.FullName.Contains("UncomplicatedCustomRoles") || frame.GetMethod().Name.Contains("GetRoleId_Patch1"))
+                {}
+                else
+                    LogManager.Debug($"[{i}] - {frame.GetMethod().DeclaringType.FullName}::{frame.GetMethod().Name} - {frame.GetFileName()} - {frame.GetFileLineNumber()}");
+                */
                 if (allowedMethods.Contains($"{frame.GetMethod().DeclaringType.FullName}::{frame.GetMethod().Name}"))
                 {
-                    //LogManager.Info($"[{i}] - {frame.GetMethod().DeclaringType.FullName}::{frame.GetMethod().Name} - {frame.GetFileName()} - {frame.GetFileLineNumber()}");
                     __result = _roleTeam[team];
                     return false;
                 }
@@ -194,6 +209,43 @@ namespace UncomplicatedCustomRoles.Patches
 
             __result = combinedPermissions;
             return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(Scp079Recontainer), nameof(Scp079Recontainer.OnServerRoleChanged))]
+    public class Scp079RecontainerPatch
+    {
+        static bool Prefix(Scp079Recontainer __instance, ReferenceHub hub, RoleTypeId newRole, RoleChangeReason reason)
+        {
+            Team team = hub.GetRoleId().GetTeam();
+            if (DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team t))
+                team = t;
+            Logger.Debug($"Player {hub.PlayerId} changed role to {newRole} for reason {reason}. Checking if recontainment is needed...");
+            Logger.Debug($"Player's current role: {hub.GetRoleId()}, team: {team}");
+            if (newRole != RoleTypeId.Spectator || !IsScpButNot079(hub.GetRoleId(), team) || Scp079Role.ActiveInstances.Count == 0 ||
+                ReferenceHub.AllHubs.Any(x =>
+                {
+                    if (x == hub)
+                        return false;
+
+                    Team effectiveTeam = x.GetRoleId().GetTeam();
+                    if (DisguiseTeam.List.TryGetValue(x.PlayerId, out Team fakeTeam))
+                        effectiveTeam = fakeTeam;
+
+                    return IsScpButNot079(x.GetRoleId(), effectiveTeam);
+                }))
+                return false;
+            __instance.SetContainmentDoors(true, true);
+            __instance.Recontain(true);
+            foreach (Scp079Generator allGenerator in Scp079Recontainer.AllGenerators)
+                allGenerator.Engaged = true;
+            return false;
+        }
+
+        private static bool IsScpButNot079(RoleTypeId roleTypeId, Team team)
+        {
+            Logger.Debug($"Checking if role {roleTypeId} is an SCP but not 079 for team {team}");
+            return team == Team.SCPs && roleTypeId != RoleTypeId.Scp079;
         }
     }
 }

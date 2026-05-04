@@ -25,6 +25,7 @@ using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Commands;
 using UncomplicatedCustomRoles.Extensions;
+using UncomplicatedCustomRoles.Integrations;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 
@@ -94,6 +95,11 @@ namespace UncomplicatedCustomRoles.API.Features
         public PlayerInfoArea PlayerInfoArea { get; }
 
         /// <summary>
+        /// Gets the <see cref="API.Features.CustomInfo"/> instance of the player
+        /// </summary>
+        public CustomInfo CustomInfo { get; }
+
+        /// <summary>
         /// Gets the <see cref="CoroutineHandle"/> of a generic Coroutine that can be used by the custom role manager
         /// </summary>
         public CoroutineHandle GenericCoroutine { get; private set; }
@@ -140,14 +146,13 @@ namespace UncomplicatedCustomRoles.API.Features
         internal RoleTypeId Appearance => Role.RoleAppearance != Role.Role ? Role.RoleAppearance : RoleTypeId.None;
 
         internal Vector3 Scale => Role.Scale != Vector3.one && Role.Scale != Vector3.zero ? Role.Scale : Vector3.one; 
-
         
         /// <summary>
         /// The duration of a tick
         /// </summary>
         public const float TickDuration = 0.25f;
 
-        internal SummonedCustomRole(Player player, ICustomRole role, Triplet<string, string, bool>? badge, List<IEffect> infiniteEffects, PlayerInfoArea playerInfo, bool isCustomNickname = false)
+        internal SummonedCustomRole(Player player, ICustomRole role, Triplet<string, string, bool>? badge, List<IEffect> infiniteEffects, PlayerInfoArea playerInfo, CustomInfo customInfo, bool isCustomNickname = false)
         {
             Id = Guid.NewGuid().ToString();
             Player = player;
@@ -157,6 +162,7 @@ namespace UncomplicatedCustomRoles.API.Features
             InfiniteEffects = infiniteEffects;
             IsCustomNickname = isCustomNickname;
             PlayerInfoArea = playerInfo;
+            CustomInfo = customInfo;
             _internalValid = true;
 
             if (IsDefaultCoroutineRole)
@@ -183,6 +189,22 @@ namespace UncomplicatedCustomRoles.API.Features
             
             if (Role is EventCustomRole eventCustomRole)
                 eventCustomRole.OnSpawned(this);
+
+            // Appearance handling
+            if (Appearance != RoleTypeId.None)
+            {
+                Timing.CallDelayed(0.75f, () =>
+                {
+                    LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
+
+                    if (LabApiExtensions.IsAvailable)
+                        LabApiExtensions.AddFakeRole(Player, Role.RoleAppearance);
+                    else
+                        Player.ChangeAppearance(Role.RoleAppearance, SpawnManager.LoadAppearanceAffectedPlayers(Player), true);
+
+                    CustomInfo.Role = Role.RoleAppearance.GetFullName();
+                });
+            }
         }
 
         /// <summary>
@@ -338,6 +360,9 @@ namespace UncomplicatedCustomRoles.API.Features
                 Player.DisableAllEffects();
                 InfiniteEffects.Clear();
                 
+                if (Appearance != RoleTypeId.None && LabApiExtensions.IsAvailable)
+                    LabApiExtensions.RemoveFakeRole(Player);
+
                 if (Role is EventCustomRole eventCustomRole)
                     eventCustomRole.OnRemoved(this);
             }
@@ -351,14 +376,14 @@ namespace UncomplicatedCustomRoles.API.Features
         }
 
         /// <summary>
-        /// If the role is <see cref="IsDfaultCoroutineRole"/> this coroutine will handle every functions that requires one
+        /// If the role is <see cref="IsDefaultCoroutineRole"/> this coroutine will handle every functions that requires one
         /// </summary>
         /// <returns></returns>
         private IEnumerator<float> RoleTickCoroutine()
         {
             while (_internalValid && Player.IsAlive && IsDefaultCoroutineRole)
             {
-                if (EvaluateCustomActions() && Player.HumeShield < Role.HumeShield.Amount && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.RegenerationDelay && !_isRegeneratingHume)
+                if (Player.HumeShield < Role.HumeShield.Maximum && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.RegenerationDelay && !_isRegeneratingHume)
                     Timing.RunCoroutine(HumeShieldCoroutine());
 
                 yield return Timing.WaitForSeconds(TickDuration);
@@ -372,10 +397,10 @@ namespace UncomplicatedCustomRoles.API.Features
         public IEnumerator<float> HumeShieldCoroutine()
         {
             _isRegeneratingHume = true;
-            while (_internalValid && Player.IsAlive && Player.HumeShield < Role.HumeShield.Amount && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.RegenerationDelay)
+            while (_internalValid && Player.IsAlive && Player.HumeShield < Role.HumeShield.Maximum && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.RegenerationDelay)
             {
                 Player.HumeShield += Role.HumeShield.RegenerationAmount;
-                yield return Timing.WaitForSeconds(1f);
+                yield return Role.HumeShield.RegenerationSpeed == 0 ? Timing.WaitForOneFrame : Timing.WaitForSeconds(Role.HumeShield.RegenerationSpeed);
             }
             _isRegeneratingHume = false;
         }
@@ -630,15 +655,21 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Try to get the Remote Admin text from a <see cref="ReferenceHub"/>
         /// </summary>
         /// <param name="player"></param>
+        /// <param name="builder"></param>
         /// <returns></returns>
         
         public static void TryParseRemoteAdmin(ReferenceHub player, StringBuilder builder) //REF
         {
-            if (Plugin.HttpManager.Credits.TryGetValue(player.authManager.UserId, out Triplet<string, string, bool> tag))
+            if (Plugin.HttpManager.Credits.TryGetValue(player.authManager.UserId, out Triplet<string, string, bool> tag) && 
+                !string.IsNullOrEmpty(tag.First) && !string.IsNullOrEmpty(tag.Second))
+            {
                 if (Plugin.HttpManager.IsJobRole.Contains(player.authManager.UserId))
-                    builder.AppendLine($"\nUCS Status: <color=#0b55b0><b>[UCS EMPLOYEE]</b></color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>");
+                    builder.AppendLine(
+                        $"\nUCS Status: <color=#0b55b0><b>[UCS EMPLOYEE]</b></color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>");
                 else
-                    builder.AppendLine($"\nUCS Status: <color=#c9ad2c><b>[UCS CONTRIBUTOR]</b></color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>");
+                    builder.AppendLine(
+                        $"\nUCS Status: <color=#c9ad2c><b>[UCS CONTRIBUTOR]</b></color> <color={SpawnManager.colorMap[tag.Second]}>{tag.First}</color>");
+            }
 
             if (TryGet(player, out SummonedCustomRole role))
             {

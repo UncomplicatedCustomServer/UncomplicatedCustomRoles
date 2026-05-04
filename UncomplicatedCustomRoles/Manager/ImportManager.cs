@@ -40,6 +40,12 @@ namespace UncomplicatedCustomRoles.Manager
             Task.Run(Actor);
         }
 
+        public static void Reload()
+        {
+            _alreadyLoaded = false;
+            Actor();
+        }
+
         public static void Unload()
         {
             ActivePlugins.Clear();

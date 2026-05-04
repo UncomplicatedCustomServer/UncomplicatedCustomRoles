@@ -21,20 +21,39 @@ namespace UncomplicatedCustomRoles.Integrations
 {
     internal static class ScriptedEvents
     {
+        private static object _mainPlugin;
+
         /// <summary>
         /// Gets the main class of Scripted Events
         /// </summary>
-        internal static object MainPlugin = DynamicInvoke.GetMethod("ScriptedEvents", "ScriptedEvents.MainPlugin.Singleton_get");
+        internal static object MainPlugin => _mainPlugin ??= DynamicInvoke.GetMethod("ScriptedEvents", "ScriptedEvents.MainPlugin.Singleton_get");
 
         /// <summary>
         /// Gets the current version of ScriptedEvents
         /// </summary>
-        internal static Version Version = (Version)(DynamicInvoke.GetMethod("ScriptedEvents", "ScriptedEvents.MainPlugin.Version_get")?.Invoke(MainPlugin, new object[] {}) ?? new Version(0, 0, 0));
+        internal static Version Version
+        {
+            get
+            {
+                if (field is not null)
+                    return field;
+                try
+                {
+                    field = (Version)(DynamicInvoke.GetMethod("ScriptedEvents", "ScriptedEvents.MainPlugin.Version_get")
+                        ?.Invoke(MainPlugin, []) ?? new Version(0, 0, 0));
+                }
+                catch
+                {
+                    field = new Version(0, 0, 0);
+                }
+                return field;
+            }
+        }
 
         /// <summary>
         /// Gets whether the version is correct or not
         /// </summary>
-        internal static bool IsRightVersion { get; private set; } = Version.CompareTo(new(3, 1, 6)) > 0;
+        internal static bool IsRightVersion => Version.CompareTo(new Version(3, 1, 6)) > 0;
 
         /// <summary>
         /// Gets a list of every CustomAction registered by UCR

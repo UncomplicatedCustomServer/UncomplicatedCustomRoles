@@ -78,7 +78,8 @@ namespace UncomplicatedCustomRoles.Manager.NET
             }
             catch (Exception e)
             {
-                LogManager.Error(e.ToString());
+                LogManager.Warn($"Failed to load SpawnPoints from the UCS cloud: {e.Message}");
+                LogManager.Debug($"SpawnPointApiCommunicator::LoadFromCloud() failed - {e}");
             }
         }
 
@@ -110,7 +111,8 @@ namespace UncomplicatedCustomRoles.Manager.NET
             }
             catch (Exception e)
             {
-                LogManager.Error(e.ToString());
+                LogManager.Warn($"Failed to push SpawnPoints to the UCS cloud: {e.Message}");
+                LogManager.Debug($"SpawnPointApiCommunicator::PushSpawnPoints() failed - {e}");
             }
         }
 

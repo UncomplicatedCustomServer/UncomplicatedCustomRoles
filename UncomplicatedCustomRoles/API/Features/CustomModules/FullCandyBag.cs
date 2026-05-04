@@ -21,7 +21,7 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules
             "candies"
         };
 
-        internal List<CandyKindID> Kinds => Args.TryGetValue("candies", out object kinds) ? kinds as List<CandyKindID> : new();
+        internal List<CandyKindID> Kinds => TryGetCastedListValue<CandyKindID>("candies");
 
         public override void OnAdded()
         {

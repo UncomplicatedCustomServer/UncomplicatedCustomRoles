@@ -27,7 +27,7 @@
   <br><br>
 </div>
 
-**EXILED** >= `v9.x`
+**LabAPI** >= `v1.x`
 <br><br>
 
 ## Zlokalizowane README
@@ -36,36 +36,46 @@
 - [&#127479;&#127482; Rosyjski](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-RU.md)
 - [&#127465;&#127466; Niemiecki](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-DE.md)
 - [&#127477;&#127473; Polski](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-PL.md)
+- [🇨🇳 Uproszczony Chiński](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/blob/main/Localization/README-CN.md)
 
 ## Czym jest UncomplicatedCustomRoles?
-**UncomplicatedCustomRoles** (UCR) to plugin dla [EXILED](https://github.com/ExMod-Team/EXILED), który pozwala na tworzenie w pełni konfigurowalnych ról z użyciem YAML.\
-Możesz ustawić <ins>rolę</ins>, <ins>ilość HP</ins>, <ins>rolę po ucieczce</ins> i wiele więcej!
+**UncomplicatedCustomRoles** lub **UCR** to plugin do **LabAPI**, który pozwala na tworzenie w pełni konfigurowalnych i personalizowanych niestandardowych ról za pomocą YAML.\
+Dzięki UCR możesz w pełni dostosować swoje Custom Role, modyfikując niemal każde ustawienie, co pozwala na stworzenie wszystkiego, co tylko wymyślisz: jedynym ograniczeniem jest Twoja wyobraźnia.
 
 ## Funkcje
-**UCR** oferuje mnóstwo możliwości, m.in.:
-- Nieograniczona liczba custom ról
-- Konfiguracja w osobnym pliku, a nie w domyślnym pliku EXILED
-- Szczegółowa [wiki](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki)
-- Aktywna społeczność na **Discordzie**
-- __Specjalne przywileje i dostęp do wersji testowych__ dla właścicieli zweryfikowanych serwerów
-- Komendy w grze do zarządzania customowymi rolami i pluginem
+### 🖥️ W pełni personalizowane Custom Role
+Puść wodze fantazji dzięki niemal całkowitej możliwości dostosowania podstawowych ról.\
+Zdrowie, tagi, rola, nazwa, specjalne mechaniki: uczyń swój serwer SCP:SL jedynym w swoim rodzaju!
+
+### 🫂 Aktywna społeczność na Discordzie
+Dołącz do naszej społeczności na Discordzie, aby porozmawiać z innymi użytkownikami, a nawet z samymi programistami!\
+Wchodź w interakcje, proś o pomoc, dziel się swoją wiedzą i swoimi rolami: będzie nam niezmiernie miło Cię gościć!
+
+### 📑 Wyczerpująca dokumentacja
+Sprawdź [oficjalną dokumentację UCR](https://docs.ucr.ucserver.it/), gdzie znajdziesz wszystko, czego potrzebujesz do korzystania z pluginu: od pierwszych kroków po zaawansowane ustawienia!
+
+### 🗂️ Oparte na YAML
+Nie musisz potrafić programować, aby używać UCR: Custom Role są tworzone za pomocą plików `yml` ([YAML](https://en.wikipedia.org/wiki/YAML)), niezwykle prostego i intuicyjnego języka serializacji danych!
+
+### 🔌 Zaprojektowane dla programistów
+UCR został zaprojektowany również z myślą o ułatwieniu życia programistom: integracja z pluginem jest prosta, intuicyjna i dobrze udokumentowana!\
+[Sprawdź to!](https://docs.ucr.ucserver.it/developers/intro)
+
+### ⌨️ Komendy w grze
+Zarządzaj swoimi Custom Rolami za pomocą wielu wbudowanych komend dostarczanych przez UCR.
+
+## Błędy i plany
+Aby śledzić błędy i plany rozwoju UCR, UCSC udostępniło instancję FlySpray.\
+[bugs.ucserver.it](https://bugs.ucserver.it/index.php?project=2&do=index&switch=1)
 
 ## Instalacja
-Pobierz `UncomplicatedCustomRoles.dll` z [najnowszego wydania](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/releases/latest) i wrzuć go do folderu `EXILED/Plugins`.
+Sprawdź [dokumentację](https://docs.ucr.ucserver.it/getting-started/installation)
 
-## Dla deweloperów
-UncomplicatedCustomRoles ma prosty i szybki system API, który pozwala na łatwe rozszerzanie funkcjonalności pluginu.\
-W [wiki dla deweloperów](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki/Developers-World) znajdziesz przykłady użycia.
-
-## Masz skill issue?
-Przeczytaj [WIKI](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/wiki), a jeśli dalej nie możesz rozwiązać problemu, zapytaj społeczność na naszym [Discordzie](https://discord.gg/5StRGu8EJV)!
-
-## Wesprzyj UncomplicatedCustomServer Collective
-Wszystkie nasze pluginy są **darmowe** i **open-source**.\
-Jeśli chcesz wesprzeć naszą pracę, możesz przekazać dotację przez **OpenCollective**:  
-<a href="https://opencollective.com/ucs">
-  <img height="15" src="https://raw.githubusercontent.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/refs/heads/resources/oc_icon.png">&nbsp;&nbsp;Wesprzyj nas!
-</a>
+## Jeśli używasz UCR, rozważ przekazanie darowizny
+UCR to plugin stworzony przez **UCS Collective**.\
+Każdy plugin, który tworzymy, jest **darmowy** i **open-source**.\
+Prosimy, rozważ przekazanie darowizny, aby wesprzeć naszą pracę przez OpenCollective: 
+<a href="https://opencollective.com/ucs"><img height="15" src="https://raw.githubusercontent.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/refs/heads/resources/oc_icon.png">&nbsp;&nbsp;Wesprzyj nas</a>
 
 ## Kontakt
 ### UncomplicatedCustomRoles
@@ -74,7 +84,8 @@ Jeśli chcesz wesprzeć naszą pracę, możesz przekazać dotację przez **OpenC
 ### FoxWorn3365
   **Discord:** `@foxworn`\
   **Email:** `foxworn3365@gmail.com`
-
+### MedveMarci
+  **Discord:** `medvemarci`
 ### Dr.Agenda
   **Discord:** `dr.agenda`
 
@@ -84,3 +95,4 @@ Jeśli chcesz wesprzeć naszą pracę, możesz przekazać dotację przez **OpenC
 **Rosyjski:** `@naxefir`\
 **Niemiecki:** `@seekedstroy`\
 **Polski:** `@.piwnica2137`
+**Chiński uproszczony** `@Raiden-Yayi`

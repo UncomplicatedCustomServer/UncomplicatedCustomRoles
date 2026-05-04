@@ -24,6 +24,8 @@ using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 using UncomplicatedCustomRoles.Extensions;
+using UncomplicatedCustomRoles.Integrations;
+using MEC;
 
 namespace UncomplicatedCustomRoles.Events
 {
@@ -43,12 +45,16 @@ namespace UncomplicatedCustomRoles.Events
             PlayerEvents.UsedItem += OnItemUsed;
             PlayerEvents.Hurting += OnHurting;
             PlayerEvents.Hurt += OnHurt;
-            PlayerEvents.PickingUpItem += OnPickingUp;
+            PlayerEvents.PickingUpItem += OnPickingUpItem;
             PlayerEvents.Joined += OnJoined;
             PlayerEvents.DamagingWindow += OnDamagingWindow;
             PlayerEvents.UnlockingWarheadButton += OnUnlockingWarheadButton;
             PlayerEvents.RequestedRaPlayerInfo += OnPlayerRequestedRaPlayerInfo;
             PlayerEvents.RaPlayerListAddingPlayer += OnPlayerRaPlayerListAddingPlayer;
+            PlayerEvents.ChangedNickname += OnChangedNickname;
+            PlayerEvents.PickingUpArmor += OnPickingUpArmor;
+            PlayerEvents.PickingUpScp330 += OnPickingUpScp330;
+            PlayerEvents.InteractingScp330 += OnInteractingScp330;
 
             Instance = this;
         }
@@ -67,21 +73,26 @@ namespace UncomplicatedCustomRoles.Events
             PlayerEvents.UsedItem -= OnItemUsed;
             PlayerEvents.Hurting -= OnHurting;
             PlayerEvents.Hurt -= OnHurt;
-            PlayerEvents.PickingUpItem -= OnPickingUp;
+            PlayerEvents.PickingUpItem -= OnPickingUpItem;
             PlayerEvents.Joined -= OnJoined;
             PlayerEvents.DamagingWindow -= OnDamagingWindow;
             PlayerEvents.UnlockingWarheadButton -= OnUnlockingWarheadButton;
             PlayerEvents.RequestedRaPlayerInfo -= OnPlayerRequestedRaPlayerInfo;
             PlayerEvents.RaPlayerListAddingPlayer -= OnPlayerRaPlayerListAddingPlayer;
+            PlayerEvents.ChangedNickname -= OnChangedNickname;
+            PlayerEvents.PickingUpArmor -= OnPickingUpArmor;
+            PlayerEvents.PickingUpScp330 -= OnPickingUpScp330;
+            PlayerEvents.InteractingScp330 -= OnInteractingScp330;
         }
 
         public void OnJoined(PlayerJoinedEventArgs ev)
         {
             FirstRoundPlayers.Add(ev.Player.PlayerId);
 
-            // Sync role appearance
-            foreach (SummonedCustomRole role in SummonedCustomRole.List.Values.Where(role => role.Appearance != RoleTypeId.None))
-                role.Player.ChangeAppearance(role.Appearance, new Player[] { ev.Player });
+            // Sync role appearance - LabApiExtensions handles it if available
+            if (!LabApiExtensions.IsAvailable)
+                foreach (SummonedCustomRole role in SummonedCustomRole.List.Values.Where(role => role.Appearance != RoleTypeId.None))
+                    role.Player.ChangeAppearance(role.Appearance, new Player[] { ev.Player });
 
             foreach (SummonedCustomRole role in SummonedCustomRole.List.Values.Where(role => role.Scale != Vector3.one))
                 role.Player.Scale = role.Scale;
@@ -139,7 +150,6 @@ namespace UncomplicatedCustomRoles.Events
 
                 if (customRole.HasModule<DropNothingOnDeath>())
                     ev.Player.ClearInventory();
-                
             }
         }
 
@@ -151,6 +161,42 @@ namespace UncomplicatedCustomRoles.Events
             TerminationQueue.TryRemove(ev.Player.PlayerId, out _);
 
             SpawnManager.ClearCustomTypes(ev.Player);
+
+            // Try change appearance of the killer
+            if (ev.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole) && attackerCustomRole.TryGetModule(out ChangeAppearanceOnKill changeAppearanceOnKill))
+            {
+                if (changeAppearanceOnKill.Forever && changeAppearanceOnKill.AlreadyChanged)
+                    return;
+
+                changeAppearanceOnKill.AlreadyChanged = true;
+
+                // Change
+                if (LabApiExtensions.IsAvailable)
+                    LabApiExtensions.AddFakeRole(attackerCustomRole.Player, changeAppearanceOnKill.NewAppearance);
+                else
+                    attackerCustomRole.Player.ChangeAppearance(changeAppearanceOnKill.NewAppearance);
+
+                if (!changeAppearanceOnKill.Forever)
+                    Timing.CallDelayed(changeAppearanceOnKill.Duration, () =>
+                    {
+                        if (attackerCustomRole.Player is null || !attackerCustomRole.Player.IsAlive)
+                            return;
+
+                        if (LabApiExtensions.IsAvailable)
+                        {
+                            if (attackerCustomRole.Appearance != RoleTypeId.None)
+                                LabApiExtensions.AddFakeRole(attackerCustomRole.Player, attackerCustomRole.Role.RoleAppearance);
+                            else
+                                LabApiExtensions.RemoveFakeRole(attackerCustomRole.Player);
+                        }
+                        else
+                        {
+                            attackerCustomRole.Player.ChangeAppearance(attackerCustomRole.Role.RoleAppearance);
+                        }
+                    });
+            }
+
+            // DON'T DO ANYTHING HERE AS THERE ARE TWO return UP THERE!
         }
 
         public void OnRagdollSpawn(PlayerSpawningRagdollEventArgs ev)
@@ -178,10 +224,10 @@ namespace UncomplicatedCustomRoles.Events
             if (!ev.IsAllowed)
                 return;
 
-            if (!Round.IsRoundStarted)
+            if (!LabApi.Features.Wrappers.Round.IsRoundStarted)
                 return;
 
-            if (ev.NewRole is RoleTypeId.Spectator || ev.NewRole is RoleTypeId.None || ev.NewRole is RoleTypeId.Filmmaker)
+            if (ev.NewRole is RoleTypeId.Spectator or RoleTypeId.None or RoleTypeId.Filmmaker)
                 return;
 
             if (Spawn.Spawning.Contains(ev.Player.PlayerId))
@@ -351,10 +397,28 @@ namespace UncomplicatedCustomRoles.Events
                 summoned?.InfiniteEffects.RemoveAll(effect => effect is not null && effect.Removable);
         }
 
-        public void OnPickingUp(PlayerPickingUpItemEventArgs ev)
+        public void OnPickingUpItem(PlayerPickingUpItemEventArgs ev)
         {
-            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
-                ev.IsAllowed = ItemBan.ValidatePickup(summonedInstance, ev.Pickup);
+            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) && summonedInstance.TryGetModule(out ItemBan itemBan))
+                ev.IsAllowed = !itemBan.Items.Contains(ev.Pickup.Type);
+        }
+        
+        public void OnPickingUpArmor(PlayerPickingUpArmorEventArgs ev)
+        {
+            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) && summonedInstance.TryGetModule(out ItemBan itemBan))
+                ev.IsAllowed = !itemBan.Items.Contains(ev.BodyArmorPickup.Type);
+        }
+        
+        public void OnPickingUpScp330(PlayerPickingUpScp330EventArgs ev)
+        {
+            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) && summonedInstance.TryGetModule(out ItemBan itemBan))
+                ev.IsAllowed = !itemBan.Items.Contains(ev.CandyPickup.Type);
+        }
+        
+        public void OnInteractingScp330(PlayerInteractingScp330EventArgs ev)
+        {
+            if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) && summonedInstance.TryGetModule(out ItemBan itemBan))
+                ev.IsAllowed = !itemBan.Items.Contains(ItemType.SCP330);
         }
         
         public void OnPlayerRequestedRaPlayerInfo(PlayerRequestedRaPlayerInfoEventArgs ev)
@@ -367,6 +431,12 @@ namespace UncomplicatedCustomRoles.Events
             if (SummonedCustomRole.TryGet(ev.Target.ReferenceHub, out SummonedCustomRole customRole))
                 if (customRole.TryGetModule(out ColorfulRaName colorfulRaName))
                     ev.Body = ev.Body.Replace("{RA_ClassColor}", $"#{colorfulRaName.Color.TrimStart('#')}");
+        }
+
+        public void OnChangedNickname(PlayerChangedNicknameEventArgs ev)
+        {
+            if (SummonedCustomRole.TryGet(ev.Player.ReferenceHub, out SummonedCustomRole customRole))
+                customRole.CustomInfo.Nickname = ev.NewNickname ?? ev.Player.Nickname;
         }
     }
 }

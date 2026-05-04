@@ -18,10 +18,10 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
-using LabApi.Features;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomRoles.API.Struct;
 using UncomplicatedCustomRoles.Extensions;
+using UncomplicatedCustomRoles.API.Features.Messages;
 
 namespace UncomplicatedCustomRoles.Manager.NET
 {
@@ -52,7 +52,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
         /// <summary>
         /// Gets the UCS APIs endpoint
         /// </summary>
-        public string Endpoint { get; } = "https://api.ucserver.it/v2";
+        public string Endpoint { get; } = "https://api.ucserver.it/v3/plugin";
 
         /// <summary>
         /// Gets the CreditTag storage for the plugin, downloaded from our central server
@@ -103,16 +103,16 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         public void OnVerified(PlayerJoinedEventArgs ev) => ApplyCreditTag(ev.Player);
 
-        public string AddServerOwner(string discordId)
+        public string AddServerOwner(Player player, string discordId)
         {
-            return HttpQuery.Get($"{Endpoint}/owners/add?discordid={discordId}");
+            return HttpQuery.Post("https://api.ucserver.it/v3/owners", JsonSerializer.Serialize(new OwnerMessage(player, discordId)), "application/json");
         }
 
         public void LoadLatestVersion()
         {
-            string Version = HttpQuery.Get($"{Endpoint}/{Prefix}/version?vts=5");
+            string Version = HttpQuery.Get($"{Endpoint}/{Prefix}/versions/latest@text/plain");
 
-            if (Version is not null && Version != string.Empty && Version.Contains("."))
+            if (!string.IsNullOrEmpty(Version) && Version.Contains("."))
                 _latestVersion = new(Version);
             else
                 _latestVersion = new();
@@ -172,7 +172,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
             Triplet<string, string, bool> Tag = GetCreditTag(player);
             
-            if (player.ReferenceHub.serverRoles.Network_myText is not null && player.ReferenceHub.serverRoles.Network_myText != string.Empty)
+            if (!string.IsNullOrEmpty(player.ReferenceHub.serverRoles.Network_myText))
             {
                 if (Credits.Any(k => k.Value.First == player.ReferenceHub.serverRoles.Network_myText && k.Value.Second == player.ReferenceHub.serverRoles.Network_myColor))
                     _alreadyManaged = true;
@@ -208,14 +208,14 @@ namespace UncomplicatedCustomRoles.Manager.NET
 
         internal HttpStatusCode ShareLogs(string data, out string content)
         {
-            content = HttpQuery.Post($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={LabApiProperties.CurrentVersion}&using_labapi=true&plugin_version={Plugin.Instance.Version.ToString(4)}&hash={VersionManager.HashFile(Plugin.Instance.FilePath)}", data, "text/plain");
+            content = HttpQuery.Post($"{Endpoint}/{Prefix}/logs", JsonSerializer.Serialize(new ShareLogMessage(data)), "application/json");
             return content.GetStatusCode(out _);
         }
 
 #nullable enable
         internal string VersionInfo()
         {
-            return HttpQuery.Get($"{Endpoint.Replace("/v2", "")}/vinfo/info?v={Plugin.Instance.Version.ToString(4)}&labapi=true");
+            return HttpQuery.Get($"{Endpoint}/{Prefix}/versions/{Plugin.Instance.Version.ToString(4)}");
         }
     }
 }

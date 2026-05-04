@@ -15,9 +15,6 @@ namespace UncomplicatedCustomRoles
 {
     internal class Config
     {
-        [Description("Is the plugin enabled?")]
-        public bool IsEnabled { get; set; } = true;
-
         [Description("Is the debug mode enabled?")]
         public bool Debug { get; set; } = false;
 
@@ -35,6 +32,9 @@ namespace UncomplicatedCustomRoles
 
         [Description("If true the UCS credit tag system won't be activated. PLEASE DON'T DEACTIVATE IT as LOTS OF PEOPLE WORKED ON THIS PLUGIN completly for FREE!")]
         public bool EnableCreditTags { get; set; } = true;
+        
+        [Description("If true the plugin will send anonymous data to our central server every 60 sec.")]
+        public bool EnableTelemetry { get; set; } = true;
 
         [Description("Whether the NPCs can naturally spawn custom roles")]
         public bool IgnoreNpcs { get; set; } = true;

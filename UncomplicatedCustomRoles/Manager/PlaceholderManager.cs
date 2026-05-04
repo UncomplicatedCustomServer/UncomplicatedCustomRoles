@@ -16,9 +16,11 @@ using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Manager
 {
+#nullable enable
+
     public class PlaceholderManager
     {
-        public static string ApplyPlaceholders(string origin, Player player, ICustomRole role) => origin.BulkReplace(new()
+        public static string ApplyPlaceholders(string origin, Player player, ICustomRole? role) => origin.BulkReplace(new()
             {
                 { "nick", player.Nickname },
                 { "displayname", player.DisplayName },
@@ -27,9 +29,15 @@ namespace UncomplicatedCustomRoles.Manager
                 { "unitid", player.UnitId },
                 { "unitname", NamingRulesManager.TryGetNamingRule(player.Team, out UnitNamingRule namingRule) ? namingRule.LastGeneratedName : string.Empty },
                 { "rolename", player.Role.GetFullName() },
-                { "customrolename", role.Name },
-                { "customroleid", role.Id },
-                { "customrolebadge", role.BadgeName },
+                { "customrolename", role?.Name },
+                { "customroleid", role?.Id },
+                { "customrolebadge", role?.BadgeName },
+                { "health", player.Health },
+                { "max_health", player.MaxHealth },
+                { "ahp", player.ArtificialHealth },
+                { "max_ahp", player.MaxArtificialHealth },
+                { "hume", player.HumeShield },
+                { "max_hume", player.MaxHumeShield },
             }, "%<val>%");
     }
 }
