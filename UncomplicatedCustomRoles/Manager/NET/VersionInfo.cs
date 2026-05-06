@@ -29,16 +29,16 @@ namespace UncomplicatedCustomRoles.Manager.NET
         public string? CustomName { get; }
 
         [JsonPropertyName("pre_release")]
-        public bool PreRelease { get; }
+        public int PreRelease { get; }
 
         [JsonPropertyName("force_debug")]
-        public bool ForceDebug { get; }
+        public int ForceDebug { get; }
 
         [JsonPropertyName("message")]
         public string Message { get; }
 
         [JsonPropertyName("recall")]
-        public bool Recall { get; }
+        public int Recall { get; }
 
         [JsonPropertyName("recall_target")]
         public string? RecallTarget { get; }
@@ -53,7 +53,7 @@ namespace UncomplicatedCustomRoles.Manager.NET
         public string Hash { get; }
 
         [JsonConstructor]
-        public VersionInfo(string name, string source, string? sourceLink, string? customName, bool preRelease, bool forceDebug, string message, bool recall, string? recallTarget, string? recallReason, bool? recallImportant, string hash)
+        public VersionInfo(string name, string source, string? sourceLink, string? customName, int preRelease, int forceDebug, string message, int recall, string? recallTarget, string? recallReason, bool? recallImportant, string hash)
         {
             Name = name;
             Source = source;

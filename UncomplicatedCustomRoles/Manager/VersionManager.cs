@@ -31,13 +31,7 @@ namespace UncomplicatedCustomRoles.Manager
             try
             {
                 string data = Plugin.HttpManager.VersionInfo();
-                HttpStatusCode code = data.GetStatusCode(out string msg);
-                if (code is not HttpStatusCode.OK)
-                {
-                    LogManager.Warn($"Failed to gain the current version info from our central servers: API endpoint says {msg ?? "Message is null"}");
-                    return;
-                }
-
+                data.GetStatusCode(out string msg);
                 VersionInfo = JsonSerializer.Deserialize<VersionInfo>(data);
                 if (VersionInfo is null)
                 {
@@ -45,10 +39,10 @@ namespace UncomplicatedCustomRoles.Manager
                     return;
                 }
 
-                if (VersionInfo.PreRelease)
+                if (VersionInfo.PreRelease != 0)
                 {
                     LogManager.Info($"\nNOTICE!\nYou are currently using the version v{Plugin.Instance.Version}, who's a PRE-RELEASE or an EXPERIMENTAL RELESE of UncomplicatedCustomRoles!\nLatest stable release: {Plugin.HttpManager.LatestVersion}\nNOTE: This is NOT a stable version, so there can be bugs and malfunctions, for this reason we do not recommend use in production.");
-                    if (VersionInfo.ForceDebug && !(Plugin.Instance.Config?.Debug ?? true))
+                    if (VersionInfo.ForceDebug != 0 && !(Plugin.Instance.Config?.Debug ?? true))
                     {
                         LogManager.Info("Debug logs have been activated!");
                         Plugin.Instance.Config.Debug = true;
@@ -69,7 +63,7 @@ namespace UncomplicatedCustomRoles.Manager
                 if (VersionInfo.Message is not null)
                     LogManager.Info(VersionInfo.Message);
 
-                if (VersionInfo.Recall && VersionInfo.RecallTarget is not null && VersionInfo.RecallImportant is not null && VersionInfo.RecallReason is not null)
+                if (VersionInfo.Recall != 0 && VersionInfo.RecallTarget is not null && VersionInfo.RecallImportant is not null && VersionInfo.RecallReason is not null)
                 {
                     RecallMessageSender();
                     if ((bool)VersionInfo.RecallImportant)
