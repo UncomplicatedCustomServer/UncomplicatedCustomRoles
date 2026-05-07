@@ -8,25 +8,24 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Achievements.Handlers;
-using HarmonyLib;
-using Interactables.Interobjects.DoorUtils;
-using InventorySystem.Items.ThrowableProjectiles;
-using PlayerRoles;
-using PlayerRoles.PlayableScps.Scp079.Rewards;
-using PlayerRoles.PlayableScps.Scp939.Mimicry;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using Achievements.Handlers;
+using HarmonyLib;
+using Interactables.Interobjects.DoorUtils;
 using InventorySystem.Disarming;
 using InventorySystem.Items;
+using InventorySystem.Items.ThrowableProjectiles;
 using InventorySystem.Searching;
-using LabApi.Features.Console;
 using MapGeneration.Distributors;
+using PlayerRoles;
+using PlayerRoles.PlayableScps.HumanTracker;
 using PlayerRoles.PlayableScps.Scp079;
+using PlayerRoles.PlayableScps.Scp079.Rewards;
+using PlayerRoles.PlayableScps.Scp939.Mimicry;
 using PlayerStatsSystem;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Manager;
@@ -37,12 +36,13 @@ namespace UncomplicatedCustomRoles.Patches
     [HarmonyPatch(typeof(PlayerRoleManager), nameof(PlayerRoleManager.CurrentRole), MethodType.Getter)]
     internal class PlayerRoleManagerPatch
     {
-        static bool Prefix(PlayerRoleManager __instance, ref PlayerRoleBase __result)
+        private static bool Prefix(PlayerRoleManager __instance, ref PlayerRoleBase __result)
         {
             if (__instance.Hub == null || __instance.Hub.netId == 0)
                 return true;
 
-            if (__instance.Hub is not null && DisguiseTeam.RoleBaseList.TryGetValue(__instance.Hub.PlayerId, out PlayerRoleBase role))
+            if (__instance.Hub is not null &&
+                DisguiseTeam.RoleBaseList.TryGetValue(__instance.Hub.PlayerId, out PlayerRoleBase role))
             {
                 if (role is null)
                     LogManager.Error($"Disguised role for player {__instance.Hub.PlayerId} is null!");
@@ -55,7 +55,7 @@ namespace UncomplicatedCustomRoles.Patches
             return true;
         }
     }
-    
+
     [HarmonyPatch(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetRoleId))]
     internal class PlayerRolesUtilsPatch
     {
@@ -82,11 +82,11 @@ namespace UncomplicatedCustomRoles.Patches
             $"{typeof(Scp079Recontainer)}::{nameof(Scp079Recontainer.OnServerRoleChanged)}"
         };
 
-        static bool Prefix(ReferenceHub hub, ref RoleTypeId __result)
+        private static bool Prefix(ReferenceHub hub, ref RoleTypeId __result)
         {
             if (hub == null)
                 return true;
-            
+
             if (!DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team team))
                 return true;
 
@@ -118,21 +118,22 @@ namespace UncomplicatedCustomRoles.Patches
     [HarmonyPatch(typeof(ExplosionGrenade), nameof(ExplosionGrenade.ExplodeDestructible))]
     internal class GrenadeTranspiler
     {
-        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> newInstructions = new(instructions);
             int index = -1;
 
             for (int i = 0; i < newInstructions.Count; i++)
-            {
-                if (newInstructions[i].opcode == OpCodes.Call && newInstructions[i].operand is MethodInfo method && method == Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetRoleId), new Type[] { typeof(ReferenceHub) }))
+                if (newInstructions[i].opcode == OpCodes.Call && newInstructions[i].operand is MethodInfo method &&
+                    method == Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetRoleId),
+                        [typeof(ReferenceHub)]))
                 {
                     index = i;
                     break;
                 }
-            }
 
-            newInstructions[index+1].operand = Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), new Type[] { typeof(ReferenceHub) });
+            newInstructions[index + 1].operand = Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam),
+                [typeof(ReferenceHub)]);
             newInstructions.RemoveAt(index);
 
             return newInstructions;
@@ -142,7 +143,7 @@ namespace UncomplicatedCustomRoles.Patches
     [HarmonyPatch(typeof(PickupSearchCompletor), nameof(PickupSearchCompletor.ValidateAny))]
     public class PickupSearchCompletorPatch
     {
-        static bool Prefix(PickupSearchCompletor __instance, ref bool __result)
+        private static bool Prefix(PickupSearchCompletor __instance, ref bool __result)
         {
             if (!DisguiseTeam.List.TryGetValue(__instance.Hub.PlayerId, out Team team) || team != Team.SCPs ||
                 __instance.Hub.roleManager.CurrentRole.RoleTypeId.GetTeam() == Team.SCPs) return true;
@@ -151,16 +152,21 @@ namespace UncomplicatedCustomRoles.Patches
             return false;
         }
     }
-    
+
     [HarmonyPatch]
     public class DoorPermissionsPolicyPatch
     {
-        static MethodBase TargetMethod()
+        private static MethodBase TargetMethod()
         {
-            return Method(typeof(DoorPermissionsPolicy), "CheckPermissions", new[] { typeof(ReferenceHub), typeof(IDoorPermissionRequester), typeof(PermissionUsed).MakeByRefType() });
+            return Method(typeof(DoorPermissionsPolicy), "CheckPermissions",
+            [
+                typeof(ReferenceHub), typeof(IDoorPermissionRequester), typeof(PermissionUsed).MakeByRefType()
+            ]);
         }
 
-        static bool Prefix(DoorPermissionsPolicy __instance, ReferenceHub hub, IDoorPermissionRequester requester, out PermissionUsed callback, ref bool __result)
+        private static bool Prefix(DoorPermissionsPolicy __instance, ReferenceHub hub,
+            IDoorPermissionRequester requester,
+            out PermissionUsed callback, ref bool __result)
         {
             callback = null;
             if (__instance.RequiredPermissions == DoorPermissionFlags.None || hub.serverRoles.BypassMode)
@@ -168,22 +174,27 @@ namespace UncomplicatedCustomRoles.Patches
                 __result = true;
                 return false;
             }
+
             if (hub.roleManager.CurrentRole is IDoorPermissionProvider currentRole &&
                 (!DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team team) || team != Team.SCPs))
             {
                 __result = __instance.CheckPermissions(currentRole, requester, out callback);
                 return false;
             }
+
             ItemBase curInstance = hub.inventory.CurInstance;
-            __result = curInstance != null && curInstance is IDoorPermissionProvider provider && __instance.CheckPermissions(provider, requester, out callback);
+            __result = curInstance != null && curInstance is IDoorPermissionProvider provider &&
+                       __instance.CheckPermissions(provider, requester, out callback);
             return false;
         }
     }
-    
-    [HarmonyPatch(typeof(DoorPermissionsPolicyExtensions), nameof(DoorPermissionsPolicyExtensions.GetCombinedPermissions))]
+
+    [HarmonyPatch(typeof(DoorPermissionsPolicyExtensions),
+        nameof(DoorPermissionsPolicyExtensions.GetCombinedPermissions))]
     public class DoorPermissionsPolicyExtensionsPatch
     {
-        static bool Prefix(ReferenceHub hub, IDoorPermissionRequester requester, ref DoorPermissionFlags __result)
+        private static bool Prefix(ReferenceHub hub, IDoorPermissionRequester requester,
+            ref DoorPermissionFlags __result)
         {
             if (hub == null)
             {
@@ -212,17 +223,51 @@ namespace UncomplicatedCustomRoles.Patches
         }
     }
 
+    [HarmonyPatch(typeof(LastHumanTracker), nameof(LastHumanTracker.TryGetLastTarget))]
+    public class LastHumanTrackerPatch
+    {
+        private static bool Prefix(ref ReferenceHub lastTarget, ref bool __result)
+        {
+            lastTarget = null;
+            int humanCount = 0;
+            int scpCount = 0;
+
+            foreach (ReferenceHub hub in ReferenceHub.AllHubs)
+            {
+                Team effectiveTeam = hub.GetRoleId().GetTeam();
+                if (DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team fakeTeam))
+                    effectiveTeam = fakeTeam;
+
+                if (effectiveTeam == Team.SCPs)
+                {
+                    ++scpCount;
+                }
+                else if (hub.IsAlive() && effectiveTeam != Team.Dead && effectiveTeam != Team.Dead)
+                {
+                    ++humanCount;
+                    lastTarget = hub;
+                }
+            }
+
+            __result = humanCount == 1 && scpCount > 0;
+            return false;
+        }
+    }
+
     [HarmonyPatch(typeof(Scp079Recontainer), nameof(Scp079Recontainer.OnServerRoleChanged))]
     public class Scp079RecontainerPatch
     {
-        static bool Prefix(Scp079Recontainer __instance, ReferenceHub hub, RoleTypeId newRole, RoleChangeReason reason)
+        private static bool Prefix(Scp079Recontainer __instance, ReferenceHub hub, RoleTypeId newRole,
+            RoleChangeReason reason)
         {
             Team team = hub.GetRoleId().GetTeam();
             if (DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team t))
                 team = t;
-            LogManager.Debug($"Player {hub.PlayerId} changed role to {newRole} for reason {reason}. Checking if recontainment is needed...");
+            LogManager.Debug(
+                $"Player {hub.PlayerId} changed role to {newRole} for reason {reason}. Checking if recontainment is needed...");
             LogManager.Debug($"Player's current role: {hub.GetRoleId()}, team: {team}");
-            if (newRole != RoleTypeId.Spectator || !IsScpButNot079(hub.GetRoleId(), team) || Scp079Role.ActiveInstances.Count == 0 ||
+            if (newRole != RoleTypeId.Spectator || !IsScpButNot079(hub.GetRoleId(), team) ||
+                Scp079Role.ActiveInstances.Count == 0 ||
                 ReferenceHub.AllHubs.Any(x =>
                 {
                     if (x == hub)
