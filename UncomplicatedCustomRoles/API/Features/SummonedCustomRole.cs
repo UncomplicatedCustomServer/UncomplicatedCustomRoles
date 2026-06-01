@@ -264,7 +264,7 @@ namespace UncomplicatedCustomRoles.API.Features
                 
                 Timing.CallDelayed(3.25f, delegate {
                     _roleBase.Pooled = false;
-                    DisguiseTeam.RoleBaseList.Add(Player.PlayerId, _roleBase);
+                    DisguiseTeam.RoleBaseList[Player.PlayerId] = _roleBase;
                 });
                 
             }

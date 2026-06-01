@@ -340,7 +340,7 @@ namespace UncomplicatedCustomRoles.Manager
         public static KeyValuePair<bool, object>? ParseEscapeRole(Dictionary<string, string> roleAfterEscape, Player player)
         {
             Dictionary<Team, KeyValuePair<bool, object>?> AsCuffedByInternalTeam = new();
-            Dictionary<uint, KeyValuePair<bool, object>?> AsCuffedByCustomTeam = new(); //we will add the support to UCT and UIU-RS
+            Dictionary<uint, KeyValuePair<bool, object>?> AsCuffedByCustomTeam = new();
             // cuffed by InternalTeam FoundationForces
             //   0     1       2             3           = 4
             Dictionary<int, KeyValuePair<bool, object>?> AsCuffedByCustomRole = new();
@@ -387,11 +387,13 @@ namespace UncomplicatedCustomRoles.Manager
             // Now let's assign
             if (!player.IsDisarmed)
                 return Default;
-            else if (player.IsDisarmed && player.DisarmedBy is not null)
-                if (player.DisarmedBy.TryGetSummonedInstance(out SummonedCustomRole role) && AsCuffedByCustomRole.ContainsKey(role.Role.Id))
-                    return AsCuffedByCustomRole[role.Role.Id];
-                else if (AsCuffedByInternalTeam.ContainsKey(player.DisarmedBy.Team))
-                    return AsCuffedByInternalTeam[player.DisarmedBy.Team];
+            if (player.IsDisarmed && player.DisarmedBy is not null)
+                if (player.DisarmedBy.TryGetSummonedInstance(out SummonedCustomRole role) && AsCuffedByCustomRole.TryGetValue(role.Role.Id, out var crEscapeRole))
+                    return crEscapeRole;
+                else if (UCT.TryGetCustomTeamId(player.DisarmedBy, out uint uctTeamId) && AsCuffedByCustomTeam.TryGetValue(uctTeamId, out var uctEscapeRole))
+                    return uctEscapeRole;
+                else if (AsCuffedByInternalTeam.TryGetValue(player.DisarmedBy.Team, out var internalEscapeRole))
+                    return internalEscapeRole;
 
             LogManager.Silent($"Returing default type for escaping evaluation of player {player.PlayerId} who's cuffed by {player.DisarmedBy?.Team}");
             return Default;
@@ -411,10 +413,9 @@ namespace UncomplicatedCustomRoles.Manager
 
             if (Elements[0] is "CustomRole" || Elements[0] is "CR")
                 return new(true, int.Parse(Elements[1]));
-            else if ((Elements[0] is "InternalRole" || Elements[0] is "IR") && Enum.TryParse(Elements[1], out RoleTypeId role))
+            if ((Elements[0] is "InternalRole" || Elements[0] is "IR") && Enum.TryParse(Elements[1], out RoleTypeId role))
                 return new(false, role);
-            else
-                LogManager.Warn($"Function SpawnManager::ParseEscapeString(string escape) failed!\nPossible causes can be:\n- The source is not valid. Allowed: InternalRole / IR / CustomRole / CR. Found: {Elements[0]}\n- The target is not a CustomRole / InternalRole. Found: {Elements[1]} (int32: {int.Parse(Elements[1])}");
+            LogManager.Warn($"Function SpawnManager::ParseEscapeString(string escape) failed!\nPossible causes can be:\n- The source is not valid. Allowed: InternalRole / IR / CustomRole / CR. Found: {Elements[0]}\n- The target is not a CustomRole / InternalRole. Found: {Elements[1]} (int32: {int.Parse(Elements[1])}");
 
             return new(false, RoleTypeId.Spectator);
         }

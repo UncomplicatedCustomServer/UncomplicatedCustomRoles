@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is a part of the UncomplicatedCustomRoles project.
  *
  * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
@@ -8,13 +8,46 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
+using LabApi.Features.Wrappers;
+using UncomplicatedCustomRoles.Manager;
+
 namespace UncomplicatedCustomRoles.Integrations
 {
     internal static class UCT
     {
-        /*public static bool GetCustomTeam(Player player, out uint team)
-        { TODO // INTEGRATION WITH UCT IS ON HOLD
-            object role = DynamicInvoke.GetMethod("UncomplicatedCustomTeams", "UncomplicatedCustomTeams.API.Features.SummonedTeam.SummonedPlayersTryGet"); ON HOLD
-        }*/
+        private const string PluginName = "UncomplicatedCustomTeams";
+        
+        public static bool TryGetCustomTeamId(Player player, out uint teamId)
+        {
+            teamId = 0;
+            try
+            {
+                object summonedTeam = DynamicInvoke.GetMethod(PluginName,
+                    "UncomplicatedCustomTeams.API.TeamExtensions.GetCustomTeam", true)?
+                    .Invoke(null, new object[] { player });
+
+                if (summonedTeam is null)
+                    return false;
+
+                object definition = DynamicInvoke.GetMethod(PluginName,
+                    "UncomplicatedCustomTeams.API.Features.Runtime.SummonedTeam.Definition_get", true)?
+                    .Invoke(summonedTeam, null);
+
+                if (definition is null)
+                    return false;
+
+                teamId = Convert.ToUInt32(DynamicInvoke.GetMethod(PluginName,
+                    "UncomplicatedCustomTeams.API.Features.Definitions.Team.Id_get", true)?
+                    .Invoke(definition, null));
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                LogManager.Error(e.ToString());
+                return false;
+            }
+        }
     }
 }
