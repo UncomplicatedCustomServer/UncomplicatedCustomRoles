@@ -332,8 +332,16 @@ namespace UncomplicatedCustomRoles.API.Features
                     LogManager.Debug($"Badge detected, fixed");
                 }
 
-                Player.ReferenceHub.nicknameSync.Network_playerInfoToShow = PlayerInfoArea;
-                Player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = string.Empty;
+                CustomInfo.SuppressExternalSync = true;
+                try
+                {
+                    Player.ReferenceHub.nicknameSync.Network_playerInfoToShow = PlayerInfoArea;
+                    Player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = string.Empty;
+                }
+                finally
+                {
+                    CustomInfo.SuppressExternalSync = false;
+                }
 
                 LogManager.Debug("Scale reset to 1, 1, 1");
                 Player.Scale = new(1, 1, 1);

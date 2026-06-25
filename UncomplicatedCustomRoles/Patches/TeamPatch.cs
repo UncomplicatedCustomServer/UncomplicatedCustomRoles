@@ -11,6 +11,7 @@
 using Achievements.Handlers;
 using HarmonyLib;
 using Interactables.Interobjects.DoorUtils;
+using Mirror;
 using InventorySystem.Items.ThrowableProjectiles;
 using PlayerRoles;
 using PlayerRoles.PlayableScps.Scp079.Rewards;
@@ -40,6 +41,9 @@ namespace UncomplicatedCustomRoles.Patches
         {
             if (__instance.Hub == null || __instance.Hub.netId == 0)
                 return true;
+            
+            if (RoleSerializationContext.Active)
+                return true;
 
             if (__instance.Hub is not null && DisguiseTeam.RoleBaseList.TryGetValue(__instance.Hub.PlayerId, out PlayerRoleBase role))
             {
@@ -58,7 +62,7 @@ namespace UncomplicatedCustomRoles.Patches
     internal static class TeamFakeContext
     {
         [ThreadStatic] private static int _depth;
-        
+
         internal static bool Active => _depth > 0;
 
         internal static void Enter() => _depth++;
@@ -68,6 +72,30 @@ namespace UncomplicatedCustomRoles.Patches
             if (_depth > 0)
                 _depth--;
         }
+    }
+    
+    internal static class RoleSerializationContext
+    {
+        [ThreadStatic] private static int _depth;
+
+        internal static bool Active => _depth > 0;
+
+        internal static void Enter() => _depth++;
+
+        internal static void Exit()
+        {
+            if (_depth > 0)
+                _depth--;
+        }
+    }
+
+    [HarmonyPatchCategory(TeamPatchManager.Category)]
+    [HarmonyPatch(typeof(RoleSyncInfo), MethodType.Constructor, new[] { typeof(ReferenceHub), typeof(RoleTypeId), typeof(ReferenceHub), typeof(NetworkWriter) })]
+    internal class RoleSyncInfoCtorPatch
+    {
+        static void Prefix() => RoleSerializationContext.Enter();
+
+        static void Finalizer() => RoleSerializationContext.Exit();
     }
 
     [HarmonyPatchCategory(TeamPatchManager.Category)]

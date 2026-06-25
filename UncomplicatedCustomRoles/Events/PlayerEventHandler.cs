@@ -435,7 +435,10 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnChangedNickname(PlayerChangedNicknameEventArgs ev)
         {
-            if (SummonedCustomRole.TryGet(ev.Player.ReferenceHub, out SummonedCustomRole customRole))
+            if (ev.Player.ReferenceHub is null)
+                return;
+
+            if (SummonedCustomRole.TryGet(ev.Player.ReferenceHub, out SummonedCustomRole customRole) && customRole.CustomInfo is not null)
                 customRole.CustomInfo.Nickname = ev.NewNickname ?? ev.Player.Nickname;
         }
     }
