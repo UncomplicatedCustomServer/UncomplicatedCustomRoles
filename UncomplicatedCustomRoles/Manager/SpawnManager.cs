@@ -26,7 +26,6 @@ using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.Integrations;
 using LabApi.Features.Wrappers;
 using MapGeneration;
-using CommandSystem;
 using Footprinting;
 using InventorySystem;
 using LabApi.Events.Arguments.ServerEvents;
@@ -130,10 +129,14 @@ namespace UncomplicatedCustomRoles.Manager
                         case SpawnType.RoomsSpawn:
                             string roomType = Role.SpawnSettings.SpawnRooms.RandomItem();
                             
-                            Room room = Room.List.Where(r => r.GameObject.name.RemoveBracketsOnEndOfName() == roomType && r is not null).RandomValue();
+                            Room room = Room.List.Where(r => r is not null && r.GameObject.name.RemoveBracketsOnEndOfName() == roomType).RandomValue();
 
                             if (room is null)
+                            {
                                 LogManager.Error("Failed to load room with Room Name " + roomType + "!\nMake sure it exists!");
+                                player.Position = BasicPosition;
+                                break;
+                            }
 
                             player.Position = room.Position.AddY(1.5f);
 
@@ -252,7 +255,7 @@ namespace UncomplicatedCustomRoles.Manager
                     Player.Scale = Role.Scale;
 
                 List<IEffect> PermanentEffects = new();
-                if (Role.Effects.Any() && Role.Effects != null)
+                if (Role.Effects != null && Role.Effects.Any())
                 {
                     foreach (IEffect effect in Role.Effects)
                     {
@@ -380,7 +383,7 @@ namespace UncomplicatedCustomRoles.Manager
                     else if ((Elements[2] is "CustomRole" || Elements[2] is "CR") && int.TryParse(Elements[3], out int id) && CustomRole.CustomRoles.ContainsKey(id))
                         AsCuffedByCustomRole.TryAdd(id, Data);
                     else
-                        LogManager.Warn($"Function SpawnManager::ParseEscapeRole[2](<...>) failed!\nPossible causes can be:\n- The source is not valid. Allowed: InternalTeam / IT / CustomRole / CR. Found: {Elements[2]}\n- The target is not a CustomRole / InternalRole. Found: {Elements[3]} (int32: {int.Parse(Elements[3])}");
+                        LogManager.Warn($"Function SpawnManager::ParseEscapeRole[2](<...>) failed!\nPossible causes can be:\n- The source is not valid. Allowed: InternalTeam / IT / CustomRole / CR. Found: {Elements[2]}\n- The target is not a CustomRole / InternalRole. Found: {Elements[3]}");
                 }
             }
 
@@ -411,11 +414,11 @@ namespace UncomplicatedCustomRoles.Manager
                 return new(false, RoleTypeId.Spectator);
             }
 
-            if (Elements[0] is "CustomRole" || Elements[0] is "CR")
-                return new(true, int.Parse(Elements[1]));
+            if ((Elements[0] is "CustomRole" || Elements[0] is "CR") && int.TryParse(Elements[1], out int customRoleId))
+                return new(true, customRoleId);
             if ((Elements[0] is "InternalRole" || Elements[0] is "IR") && Enum.TryParse(Elements[1], out RoleTypeId role))
                 return new(false, role);
-            LogManager.Warn($"Function SpawnManager::ParseEscapeString(string escape) failed!\nPossible causes can be:\n- The source is not valid. Allowed: InternalRole / IR / CustomRole / CR. Found: {Elements[0]}\n- The target is not a CustomRole / InternalRole. Found: {Elements[1]} (int32: {int.Parse(Elements[1])}");
+            LogManager.Warn($"Function SpawnManager::ParseEscapeString(string escape) failed!\nPossible causes can be:\n- The source is not valid. Allowed: InternalRole / IR / CustomRole / CR. Found: {Elements[0]}\n- The target is not a CustomRole / InternalRole. Found: {Elements[1]}");
 
             return new(false, RoleTypeId.Spectator);
         }

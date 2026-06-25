@@ -172,9 +172,9 @@ namespace UncomplicatedCustomRoles.API.Features
 
             if (Role.Team is not null && Role.Team != Role.Role.GetTeam())
             {
-                DisguiseTeam.List[Player.PlayerId] = (Team)Role.Team;
+                DisguiseTeam.Set(Player.PlayerId, (Team)Role.Team);
                 EvaluateRoleBase();
-                LogManager.Debug($"EVALUATED ROLEBASE {_roleBase.GetType().FullName} with team {_roleBase?.Team}");
+                LogManager.Debug($"EVALUATED ROLEBASE {_roleBase?.GetType().FullName} with team {_roleBase?.Team}");
             }
 
             UnityEngine.Object.Destroy(Player.GameObject.GetComponent<EscapeController>());
@@ -262,18 +262,21 @@ namespace UncomplicatedCustomRoles.API.Features
                         SpectatorModule = originalRole.SpectatorModule
                     };
                 
-                Timing.CallDelayed(3.25f, delegate {
+                DisguiseTeam.SetRoleBase(Player.PlayerId, _roleBase);
+
+                Timing.CallDelayed(3.25f, delegate
+                {
+                    if (!_internalValid || _roleBase is null)
+                        return;
+
                     _roleBase.Pooled = false;
-                    DisguiseTeam.RoleBaseList[Player.PlayerId] = _roleBase;
+                    DisguiseTeam.SetRoleBase(Player.PlayerId, _roleBase);
                 });
-                
             }
             catch (Exception e)
             {
                 LogManager.Error($"Failed to evaluate RoleBase for SummonedCustomRole::EvaluateRoleBase() - {e}");
             }
-
-            DisguiseTeam.RoleBaseList[Player.PlayerId] = _roleBase;
         }
 
         /// <summary>
@@ -337,9 +340,8 @@ namespace UncomplicatedCustomRoles.API.Features
                 
                 Player.IsDisarmed = false;
                 
-                DisguiseTeam.List.TryRemove(Player.PlayerId, out _);
-                DisguiseTeam.RoleBaseList.TryRemove(Player.PlayerId);
-                 
+                DisguiseTeam.Remove(Player.PlayerId);
+
                 // Reset ammo limit
                 if (Role.Ammo is Dictionary<ItemType, ushort> ammoList && ammoList.Count > 0)
                     foreach (ItemType ammo in ammoList.Keys)

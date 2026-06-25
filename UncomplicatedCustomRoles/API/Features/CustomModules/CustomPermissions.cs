@@ -10,7 +10,6 @@
 
 using System.Collections.Generic;
 using LabApi.Features.Permissions;
-using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {

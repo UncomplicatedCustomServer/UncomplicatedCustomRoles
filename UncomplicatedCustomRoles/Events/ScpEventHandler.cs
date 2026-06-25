@@ -1,5 +1,4 @@
-﻿using CustomPlayerEffects;
-using LabApi.Events.Arguments.PlayerEvents;
+﻿using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Arguments.Scp049Events;
 using LabApi.Events.Arguments.Scp096Events;
 using LabApi.Events.Arguments.Scp914Events;

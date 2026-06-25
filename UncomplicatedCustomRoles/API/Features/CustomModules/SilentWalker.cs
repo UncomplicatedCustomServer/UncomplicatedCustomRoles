@@ -8,9 +8,6 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using LabApi.Events.Arguments.Interfaces;
-using System.Collections.Generic;
-
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
     public class SilentWalker : CustomModule

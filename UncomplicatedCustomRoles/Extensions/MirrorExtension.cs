@@ -13,8 +13,6 @@ namespace UncomplicatedCustomRoles.Extensions
     using System.Linq;
     using System.Reflection;
     using System.Reflection.Emit;
-    using System.Text;
-
     using LabApi.Features.Wrappers;
     using Mirror;
 
@@ -24,9 +22,6 @@ namespace UncomplicatedCustomRoles.Extensions
     using PlayerRoles.PlayableScps.Scp1507;
     using PlayerRoles.Voice;
     using RelativePositioning;
-
-    using Respawning;
-
     using UnityEngine;
 
     /// <summary>
@@ -96,7 +91,7 @@ namespace UncomplicatedCustomRoles.Extensions
                         byte[] bytecodes = methodBody.GetILAsByteArray();
 
                         if (!SyncVarDirtyBitsValue.ContainsKey($"{property.ReflectedType.Name}.{property.Name}"))
-                            SyncVarDirtyBitsValue.Add($"{property.ReflectedType.Name}.{property.Name}", bytecodes[bytecodes.LastIndexOf((byte)OpCodes.Ldc_I8.Value) + 1]);
+                            SyncVarDirtyBitsValue.Add($"{property.ReflectedType.Name}.{property.Name}", bytecodes[Array.LastIndexOf(bytecodes, (byte)OpCodes.Ldc_I8.Value) + 1]);
                     }
                 }
 
@@ -125,7 +120,7 @@ namespace UncomplicatedCustomRoles.Extensions
                         byte[] bytecodes = methodBody.GetILAsByteArray();
 
                         if (!RpcFullNamesValue.ContainsKey($"{method.ReflectedType.Name}.{method.Name}"))
-                            RpcFullNamesValue.Add($"{method.ReflectedType.Name}.{method.Name}", method.Module.ResolveString(BitConverter.ToInt32(bytecodes, bytecodes.IndexOf((byte)OpCodes.Ldstr.Value) + 1)));
+                            RpcFullNamesValue.Add($"{method.ReflectedType.Name}.{method.Name}", method.Module.ResolveString(BitConverter.ToInt32(bytecodes, Array.IndexOf(bytecodes, (byte)OpCodes.Ldstr.Value) + 1)));
                     }
                 }
 

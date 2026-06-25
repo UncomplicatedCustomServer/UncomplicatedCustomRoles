@@ -11,7 +11,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
 
 namespace UncomplicatedCustomRoles.Extensions
 {
@@ -41,6 +40,10 @@ namespace UncomplicatedCustomRoles.Extensions
             return data;
         }
 
-        public static T RandomValue<T>(this IEnumerable<T> list) => list.Count() < 1 ? default : list.ElementAt(UnityEngine.Random.Range(0, list.Count()));
+        public static T RandomValue<T>(this IEnumerable<T> list)
+        {
+            IList<T> enumerable = list as IList<T> ?? list.ToList();
+            return enumerable.Count < 1 ? default : enumerable[UnityEngine.Random.Range(0, enumerable.Count)];
+        }
     }
 }

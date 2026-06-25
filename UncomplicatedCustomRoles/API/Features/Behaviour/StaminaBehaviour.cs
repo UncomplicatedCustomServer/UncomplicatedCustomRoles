@@ -9,7 +9,6 @@
  */
 
 using LabApi.Features.Wrappers;
-using PlayerRoles.FirstPersonControl;
 
 namespace UncomplicatedCustomRoles.API.Features.Behaviour
 {
