@@ -23,7 +23,6 @@ using System.Reflection.Emit;
 using InventorySystem.Disarming;
 using InventorySystem.Items;
 using InventorySystem.Searching;
-using LabApi.Features.Console;
 using MapGeneration.Distributors;
 using PlayerRoles.PlayableScps.Scp079;
 using PlayerStatsSystem;
@@ -237,8 +236,6 @@ namespace UncomplicatedCustomRoles.Patches
             Team team = hub.GetRoleId().GetTeam();
             if (DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team t))
                 team = t;
-            Logger.Debug($"Player {hub.PlayerId} changed role to {newRole} for reason {reason}. Checking if recontainment is needed...");
-            Logger.Debug($"Player's current role: {hub.GetRoleId()}, team: {team}");
             if (newRole != RoleTypeId.Spectator || !IsScpButNot079(hub.GetRoleId(), team) || Scp079Role.ActiveInstances.Count == 0 ||
                 ReferenceHub.AllHubs.Any(x =>
                 {
@@ -261,7 +258,6 @@ namespace UncomplicatedCustomRoles.Patches
 
         private static bool IsScpButNot079(RoleTypeId roleTypeId, Team team)
         {
-            Logger.Debug($"Checking if role {roleTypeId} is an SCP but not 079 for team {team}");
             return team == Team.SCPs && roleTypeId != RoleTypeId.Scp079;
         }
     }
