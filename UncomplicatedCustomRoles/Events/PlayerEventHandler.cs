@@ -109,10 +109,6 @@ namespace UncomplicatedCustomRoles.Events
             if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole role))
                 switch (ev.Effect)
                 {
-                    case SeveredHands when role.Role.MaxScp330Candies >= role.Scp330Count:
-                        LogManager.Debug($"Tried to add the {ev.Effect.name} but was not allowed due to {role.Scp330Count} <= {role.Role.MaxScp330Candies}");
-                        ev.IsAllowed = false;
-                        break;
                     case CardiacArrest when role.Role.IsFriendOf is not null && role.Role.IsFriendOf.Contains(Team.SCPs):
                     case AmnesiaVision or AmnesiaItems when role.HasModule<AmnesiaResistance>():
                         ev.IsAllowed = false;

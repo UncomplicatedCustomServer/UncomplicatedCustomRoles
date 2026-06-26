@@ -85,11 +85,6 @@ namespace UncomplicatedCustomRoles.API.Features
         public CustomRoleEventHandler EventHandler { get; }
 
         /// <summary>
-        /// Gets or sets the number of candies taken by this player as this <see cref="ICustomRole"/>
-        /// </summary>
-        public uint Scp330Count { get; internal set; } = 0;
-
-        /// <summary>
         /// Gets the original <see cref="PlayerInfoArea"/> of the player
         /// </summary>
         public PlayerInfoArea PlayerInfoArea { get; }
