@@ -271,10 +271,12 @@ namespace UncomplicatedCustomRoles.Manager
                         {
                             effect.Duration = int.MaxValue;
                             PermanentEffects.Add(effect);
+                            
+                            Player.ReferenceHub.ForceApplyEffect(effect.EffectType, effect.Intensity, float.MaxValue);
                             continue;
                         }
                         LogManager.Debug($"Enabling effect {effect.EffectType} to {Player.Nickname} for {effect.Duration} (i:{effect.Intensity})");
-                        Player.ReferenceHub.playerEffectsController.ChangeState(effect.EffectType, effect.Intensity, effect.Duration, false);
+                        Player.ReferenceHub.ForceApplyEffect(effect.EffectType, effect.Intensity, effect.Duration);
                     }
                 }
                 LogManager.Silent($"Found {PermanentEffects.Count} permament effects");

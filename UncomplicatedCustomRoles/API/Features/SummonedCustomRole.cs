@@ -705,7 +705,7 @@ namespace UncomplicatedCustomRoles.API.Features
             foreach (SummonedCustomRole Role in List.Values)
                 if (Role.InfiniteEffects.Any())
                     foreach (IEffect Effect in Role.InfiniteEffects)
-                        Role.Player.ReferenceHub.playerEffectsController.ChangeState(Effect.EffectType, Effect.Intensity, float.MaxValue, false);
+                        Role.Player.ReferenceHub.ForceApplyEffect(Effect.EffectType, Effect.Intensity, float.MaxValue);
         }
 
         public override string ToString() => $"Player {Player.Nickname} ({Player.PlayerId}) - CustomRole {Role.Id} ({Role.Nickname})";

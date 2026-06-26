@@ -16,6 +16,7 @@ using PlayerRoles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CustomPlayerEffects;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
@@ -35,6 +36,15 @@ namespace UncomplicatedCustomRoles.Extensions
             return SummonedCustomRole.TryGet(player, out _);
         }
 
+        internal static void ForceApplyEffect(this ReferenceHub hub, string effectName, byte intensity, float duration, bool addDuration = false)
+        {
+            if (hub is null || !hub.playerEffectsController.TryGetEffect(effectName, out StatusEffectBase effect))
+                return;
+
+            effect.ForceIntensity(intensity);
+            effect.ServerChangeDuration(duration, addDuration);
+        }
+        
         /// <summary>
         /// Set a <see cref="ICustomRole"/> to a <see cref="Player"/> without a coroutine.
         /// </summary>
