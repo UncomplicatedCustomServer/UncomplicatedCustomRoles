@@ -111,7 +111,15 @@ namespace UncomplicatedCustomRoles.Manager
                 if (Role.SpawnSettings.Spawn == SpawnType.KeepRoleSpawn)
                     SpawnFlag = RoleSpawnFlags.UseSpawnpoint;
 
-                player.SetRole(Role.Role, RoleChangeReason.Respawn, SpawnFlag);
+                Patches.UcrSpawnContext.Enter();
+                try
+                {
+                    player.SetRole(Role.Role, RoleChangeReason.Respawn, SpawnFlag);
+                }
+                finally
+                {
+                    Patches.UcrSpawnContext.Exit();
+                }
 
                 if (Role.SpawnSettings.Spawn == SpawnType.KeepCurrentPositionSpawn)
                     player.Position = BasicPosition;
@@ -296,7 +304,7 @@ namespace UncomplicatedCustomRoles.Manager
 
                 // Changing nickname if needed
                 bool ChangedNick = false;
-                if (Plugin.Instance.Config.AllowNicknameEdit && Role.Nickname is not null && Role.Nickname != string.Empty)
+                if (Plugin.Instance.Config.AllowNicknameEdit && !string.IsNullOrEmpty(Role.Nickname))
                 {
                     string Nick = PlaceholderManager.ApplyPlaceholders(Role.Nickname, Player, Role);
                     if (Role.Nickname.Contains(","))
@@ -323,6 +331,8 @@ namespace UncomplicatedCustomRoles.Manager
 
                 SummonedCustomRole roleInstance = new(Player, Role, Badge, PermanentEffects, InfoArea, customInfo, ChangedNick);
 
+                customInfo.UpdateInfo(Player);
+                
                 EscapeController escapeController = Player.GameObject.AddComponent<EscapeController>();
                 escapeController.Init(roleInstance);
                 

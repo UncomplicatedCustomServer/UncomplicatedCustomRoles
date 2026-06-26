@@ -9,6 +9,8 @@
  */
 
 using LabApi.Features.Wrappers;
+using PlayerRoles;
+using Respawning.NamingRules;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Extensions;
@@ -137,6 +139,11 @@ namespace UncomplicatedCustomRoles.API.Features
                                 rawNickname = $"<color={color}>{nick}</color>";
                         }
                     }
+                    
+                    if (!string.IsNullOrEmpty(rawRole)
+                        && NamingRulesManager.TryGetNamingRule(summonedCustomRole.Role.Role.GetTeam(), out UnitNamingRule unitNamingRule)
+                        && !string.IsNullOrEmpty(unitNamingRule.LastGeneratedName))
+                        rawRole = $"{rawRole} ({unitNamingRule.LastGeneratedName})";
                 }
                 else
                 {
