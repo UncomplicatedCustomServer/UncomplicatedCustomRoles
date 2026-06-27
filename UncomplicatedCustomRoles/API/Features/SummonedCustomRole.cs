@@ -167,7 +167,6 @@ namespace UncomplicatedCustomRoles.API.Features
 
             if (Role.Team is not null && Role.Team != Role.Role.GetTeam())
             {
-                DisguiseTeam.Set(Player.PlayerId, (Team)Role.Team);
                 EvaluateRoleBase();
                 LogManager.Debug($"EVALUATED ROLEBASE {_roleBase?.GetType().FullName} with team {_roleBase?.Team}");
             }
@@ -190,6 +189,9 @@ namespace UncomplicatedCustomRoles.API.Features
             {
                 Timing.CallDelayed(0.75f, () =>
                 {
+                    if (!_internalValid || Player is null || !Player.IsAlive)
+                        return;
+
                     LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
 
                     if (LabApiExtensions.IsAvailable)
@@ -203,7 +205,7 @@ namespace UncomplicatedCustomRoles.API.Features
         }
 
         /// <summary>
-        /// Try to set <see cref="_roleBase"/> in order to override the current Player.Role.Base to trick the server into thinking that the player is / is not an Human
+        /// Try to set <see cref="RoleBase"/> in order to override the current Player.Role.Base to trick the server into thinking that the player is / is not an Human
         /// </summary>
         private void EvaluateRoleBase()
         {
@@ -257,7 +259,7 @@ namespace UncomplicatedCustomRoles.API.Features
                         SpectatorModule = originalRole.SpectatorModule
                     };
                 
-                DisguiseTeam.SetRoleBase(Player.PlayerId, _roleBase);
+                DisguiseTeam.Set(Player.PlayerId, Role.Team ?? Role.Role.GetTeam(), _roleBase);
 
                 Timing.CallDelayed(3.25f, delegate
                 {
@@ -265,7 +267,7 @@ namespace UncomplicatedCustomRoles.API.Features
                         return;
 
                     _roleBase.Pooled = false;
-                    DisguiseTeam.SetRoleBase(Player.PlayerId, _roleBase);
+                    DisguiseTeam.Set(Player.PlayerId, Role.Team ?? Role.Role.GetTeam(), _roleBase);
                 });
             }
             catch (Exception e)
@@ -648,7 +650,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <param name="player"></param>
         /// <param name="def"></param>
         /// <returns></returns>
-        public static Team TryGetCusomTeam(ReferenceHub player, Team? def = null)
+        public static Team TryGetCustomTeam(ReferenceHub player, Team? def = null)
         {
             if (TryGet(player, out SummonedCustomRole customRole) && customRole.Role.Team is not null && customRole.Role.Team != customRole.Role.Role.GetTeam())
                 return (Team)customRole.Role.Team;

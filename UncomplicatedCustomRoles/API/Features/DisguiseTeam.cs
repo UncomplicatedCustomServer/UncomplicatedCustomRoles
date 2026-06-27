@@ -28,22 +28,19 @@ namespace UncomplicatedCustomRoles.API.Features
         public static readonly ConcurrentDictionary<int, PlayerRoleBase> RoleBaseList = new();
 
         /// <summary>
-        /// Registers a faked <see cref="Team"/> for the given player and makes sure the team patches are active.
+        /// Registers a faked <see cref="Team"/> together with the overridden <see cref="PlayerRoleBase"/> that is
+        /// exposed as the player's current role. The role base is always set alongside its team, so there is no
+        /// separate "role base only" entry point.
         /// </summary>
         /// <param name="playerId">The player id.</param>
         /// <param name="team">The team to fake.</param>
-        public static void Set(int playerId, Team team)
+        /// <param name="roleBase">The role base to expose as the player's current role.</param>
+        public static void Set(int playerId, Team team, PlayerRoleBase roleBase)
         {
             List[playerId] = team;
+            RoleBaseList[playerId] = roleBase;
             TeamPatchManager.EnsurePatched();
         }
-
-        /// <summary>
-        /// Registers the overridden <see cref="PlayerRoleBase"/> for the given player.
-        /// </summary>
-        /// <param name="playerId">The player id.</param>
-        /// <param name="roleBase">The role base to expose as the player's current role.</param>
-        public static void SetRoleBase(int playerId, PlayerRoleBase roleBase) => RoleBaseList[playerId] = roleBase;
 
         /// <summary>
         /// Removes every disguise data for the given player and, if no disguise is left, removes the team patches.
