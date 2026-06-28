@@ -1,5 +1,4 @@
-﻿using LabApi.Loader.Features.Plugins;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -9,9 +8,9 @@ using UncomplicatedCustomRoles.API.Interfaces;
 
 namespace UncomplicatedCustomRoles.Manager
 {
-    internal class PluginImportManager
+    internal static class PluginImportManager
     {
-        public static Dictionary<Assembly, string> List { get; } = new();
+        private static Dictionary<Assembly, string> List { get; } = new();
 
         public static void Load(string file)
         {

@@ -85,11 +85,6 @@ namespace UncomplicatedCustomRoles.API.Features
         public CustomRoleEventHandler EventHandler { get; }
 
         /// <summary>
-        /// Gets or sets the number of candies taken by this player as this <see cref="ICustomRole"/>
-        /// </summary>
-        public uint Scp330Count { get; internal set; } = 0;
-
-        /// <summary>
         /// Gets the original <see cref="PlayerInfoArea"/> of the player
         /// </summary>
         public PlayerInfoArea PlayerInfoArea { get; }
@@ -172,9 +167,8 @@ namespace UncomplicatedCustomRoles.API.Features
 
             if (Role.Team is not null && Role.Team != Role.Role.GetTeam())
             {
-                DisguiseTeam.List[Player.PlayerId] = (Team)Role.Team;
                 EvaluateRoleBase();
-                LogManager.Debug($"EVALUATED ROLEBASE {_roleBase.GetType().FullName} with team {_roleBase?.Team}");
+                LogManager.Debug($"EVALUATED ROLEBASE {_roleBase?.GetType().FullName} with team {_roleBase?.Team}");
             }
 
             UnityEngine.Object.Destroy(Player.GameObject.GetComponent<EscapeController>());
@@ -195,6 +189,9 @@ namespace UncomplicatedCustomRoles.API.Features
             {
                 Timing.CallDelayed(0.75f, () =>
                 {
+                    if (!_internalValid || Player is null || !Player.IsAlive)
+                        return;
+
                     LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
 
                     if (LabApiExtensions.IsAvailable)
@@ -208,7 +205,7 @@ namespace UncomplicatedCustomRoles.API.Features
         }
 
         /// <summary>
-        /// Try to set <see cref="_roleBase"/> in order to override the current Player.Role.Base to trick the server into thinking that the player is / is not an Human
+        /// Try to set <see cref="RoleBase"/> in order to override the current Player.Role.Base to trick the server into thinking that the player is / is not an Human
         /// </summary>
         private void EvaluateRoleBase()
         {
@@ -262,18 +259,21 @@ namespace UncomplicatedCustomRoles.API.Features
                         SpectatorModule = originalRole.SpectatorModule
                     };
                 
-                Timing.CallDelayed(3.25f, delegate {
+                DisguiseTeam.Set(Player.PlayerId, Role.Team ?? Role.Role.GetTeam(), _roleBase);
+
+                Timing.CallDelayed(3.25f, delegate
+                {
+                    if (!_internalValid || _roleBase is null)
+                        return;
+
                     _roleBase.Pooled = false;
-                    DisguiseTeam.RoleBaseList[Player.PlayerId] = _roleBase;
+                    DisguiseTeam.Set(Player.PlayerId, Role.Team ?? Role.Role.GetTeam(), _roleBase);
                 });
-                
             }
             catch (Exception e)
             {
                 LogManager.Error($"Failed to evaluate RoleBase for SummonedCustomRole::EvaluateRoleBase() - {e}");
             }
-
-            DisguiseTeam.RoleBaseList[Player.PlayerId] = _roleBase;
         }
 
         /// <summary>
@@ -329,17 +329,24 @@ namespace UncomplicatedCustomRoles.API.Features
                     LogManager.Debug($"Badge detected, fixed");
                 }
 
-                Player.ReferenceHub.nicknameSync.Network_playerInfoToShow = PlayerInfoArea;
-                Player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = string.Empty;
+                CustomInfo.SuppressExternalSync = true;
+                try
+                {
+                    Player.ReferenceHub.nicknameSync.Network_playerInfoToShow = PlayerInfoArea;
+                    Player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = string.Empty;
+                }
+                finally
+                {
+                    CustomInfo.SuppressExternalSync = false;
+                }
 
                 LogManager.Debug("Scale reset to 1, 1, 1");
                 Player.Scale = new(1, 1, 1);
                 
                 Player.IsDisarmed = false;
                 
-                DisguiseTeam.List.TryRemove(Player.PlayerId, out _);
-                DisguiseTeam.RoleBaseList.TryRemove(Player.PlayerId);
-                 
+                DisguiseTeam.Remove(Player.PlayerId);
+
                 // Reset ammo limit
                 if (Role.Ammo is Dictionary<ItemType, ushort> ammoList && ammoList.Count > 0)
                     foreach (ItemType ammo in ammoList.Keys)
@@ -643,7 +650,7 @@ namespace UncomplicatedCustomRoles.API.Features
         /// <param name="player"></param>
         /// <param name="def"></param>
         /// <returns></returns>
-        public static Team TryGetCusomTeam(ReferenceHub player, Team? def = null)
+        public static Team TryGetCustomTeam(ReferenceHub player, Team? def = null)
         {
             if (TryGet(player, out SummonedCustomRole customRole) && customRole.Role.Team is not null && customRole.Role.Team != customRole.Role.Role.GetTeam())
                 return (Team)customRole.Role.Team;
@@ -695,7 +702,7 @@ namespace UncomplicatedCustomRoles.API.Features
             foreach (SummonedCustomRole Role in List.Values)
                 if (Role.InfiniteEffects.Any())
                     foreach (IEffect Effect in Role.InfiniteEffects)
-                        Role.Player.ReferenceHub.playerEffectsController.ChangeState(Effect.EffectType, Effect.Intensity, float.MaxValue, false);
+                        Role.Player.ReferenceHub.ForceApplyEffect(Effect.EffectType, Effect.Intensity, float.MaxValue);
         }
 
         public override string ToString() => $"Player {Player.Nickname} ({Player.PlayerId}) - CustomRole {Role.Id} ({Role.Nickname})";

@@ -36,7 +36,7 @@ namespace UncomplicatedCustomRoles
 
         public override string Author => "FoxWorn3365, Dr.Agenda, MedveMarci";
 
-        public override Version Version { get; } = new(9, 5, 0, 0);
+        public override Version Version { get; } = new(9, 5, 1, 0);
 
         public override Version RequiredApiVersion => new(LabApiProperties.CompiledVersion);
 
@@ -85,12 +85,14 @@ namespace UncomplicatedCustomRoles
             FileConfigs.LoadAll();
             FileConfigs.LoadAll(Server.Port.ToString());
 
-            // Start communicating with the endpoint API
             SpawnPointApiCommunicator.Init();
 
-            // Patch with Harmony
+            DisguiseTeam.Clear();
+            
+            TeamPatchManager.Initialize();
+
             _harmony = new($"com.ucs.ucr_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
-            _harmony.PatchAll();
+            _harmony.PatchAllUncategorized();
 
             PlayerEventPrefix.Patch(_harmony);
 
@@ -108,7 +110,9 @@ namespace UncomplicatedCustomRoles
             PlayerEventPrefix.Unpatch(_harmony);
 
             _harmony.UnpatchAll();
-            
+
+            TeamPatchManager.Shutdown();
+
             EventHandlerBase.UnregisterAll();
 
             HttpManager.UnregisterEvents();

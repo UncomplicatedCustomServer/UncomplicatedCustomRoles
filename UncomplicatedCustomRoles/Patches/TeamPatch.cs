@@ -8,24 +8,24 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
 using Achievements.Handlers;
 using HarmonyLib;
 using Interactables.Interobjects.DoorUtils;
-using InventorySystem.Disarming;
-using InventorySystem.Items;
+using Mirror;
 using InventorySystem.Items.ThrowableProjectiles;
-using InventorySystem.Searching;
-using MapGeneration.Distributors;
 using PlayerRoles;
-using PlayerRoles.PlayableScps.HumanTracker;
-using PlayerRoles.PlayableScps.Scp079;
 using PlayerRoles.PlayableScps.Scp079.Rewards;
 using PlayerRoles.PlayableScps.Scp939.Mimicry;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
+using InventorySystem.Disarming;
+using InventorySystem.Items;
+using InventorySystem.Searching;
+using MapGeneration.Distributors;
+using PlayerRoles.PlayableScps.Scp079;
 using PlayerStatsSystem;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Manager;
@@ -33,16 +33,19 @@ using static HarmonyLib.AccessTools;
 
 namespace UncomplicatedCustomRoles.Patches
 {
+    [HarmonyPatchCategory(TeamPatchManager.Category)]
     [HarmonyPatch(typeof(PlayerRoleManager), nameof(PlayerRoleManager.CurrentRole), MethodType.Getter)]
     internal class PlayerRoleManagerPatch
     {
-        private static bool Prefix(PlayerRoleManager __instance, ref PlayerRoleBase __result)
+        static bool Prefix(PlayerRoleManager __instance, ref PlayerRoleBase __result)
         {
             if (__instance.Hub == null || __instance.Hub.netId == 0)
                 return true;
+            
+            if (RoleSerializationContext.Active)
+                return true;
 
-            if (__instance.Hub is not null &&
-                DisguiseTeam.RoleBaseList.TryGetValue(__instance.Hub.PlayerId, out PlayerRoleBase role))
+            if (__instance.Hub is not null && DisguiseTeam.RoleBaseList.TryGetValue(__instance.Hub.PlayerId, out PlayerRoleBase role))
             {
                 if (role is null)
                     LogManager.Error($"Disguised role for player {__instance.Hub.PlayerId} is null!");
@@ -55,7 +58,47 @@ namespace UncomplicatedCustomRoles.Patches
             return true;
         }
     }
+    
+    internal static class TeamFakeContext
+    {
+        [ThreadStatic] private static int _depth;
 
+        internal static bool Active => _depth > 0;
+
+        internal static void Enter() => _depth++;
+
+        internal static void Exit()
+        {
+            if (_depth > 0)
+                _depth--;
+        }
+    }
+    
+    internal static class RoleSerializationContext
+    {
+        [ThreadStatic] private static int _depth;
+
+        internal static bool Active => _depth > 0;
+
+        internal static void Enter() => _depth++;
+
+        internal static void Exit()
+        {
+            if (_depth > 0)
+                _depth--;
+        }
+    }
+
+    [HarmonyPatchCategory(TeamPatchManager.Category)]
+    [HarmonyPatch(typeof(RoleSyncInfo), MethodType.Constructor, new[] { typeof(ReferenceHub), typeof(RoleTypeId), typeof(ReferenceHub), typeof(NetworkWriter) })]
+    internal class RoleSyncInfoCtorPatch
+    {
+        static void Prefix() => RoleSerializationContext.Enter();
+
+        static void Finalizer() => RoleSerializationContext.Exit();
+    }
+
+    [HarmonyPatchCategory(TeamPatchManager.Category)]
     [HarmonyPatch(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetRoleId))]
     internal class PlayerRolesUtilsPatch
     {
@@ -70,80 +113,77 @@ namespace UncomplicatedCustomRoles.Patches
             { Team.OtherAlive, RoleTypeId.Tutorial }
         };
 
-        private static readonly HashSet<string> allowedMethods = new()
+        static bool Prefix(ReferenceHub hub, ref RoleTypeId __result)
         {
-            $"{typeof(HitboxIdentity)}::{nameof(HitboxIdentity.IsEnemy)}",
-            $"{typeof(GeneralKillsHandler)}::{nameof(GeneralKillsHandler.HandleAttackerKill)}",
-            $"{typeof(TerminationRewards)}::{nameof(TerminationRewards.EvaluateGainReason)}",
-            $"{typeof(MimicryRecorder)}::{nameof(MimicryRecorder.WasKilledByTeammate)}",
-            $"{typeof(ExplosionGrenade)}::{nameof(ExplosionGrenade.Explode)}",
-            $"{typeof(FlashbangGrenade)}::{nameof(FlashbangGrenade.ServerFuseEnd)}",
-            $"{typeof(AttackerDamageHandler)}::{nameof(AttackerDamageHandler.ProcessDamage)}",
-            $"{typeof(Scp079Recontainer)}::{nameof(Scp079Recontainer.OnServerRoleChanged)}"
-        };
-
-        private static bool Prefix(ReferenceHub hub, ref RoleTypeId __result)
-        {
-            if (hub == null)
+            if (hub == null || !TeamFakeContext.Active)
                 return true;
 
             if (!DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team team))
                 return true;
 
-            StackTrace trace = new();
-
-            for (int i = 0; i < trace.FrameCount; i++)
+            if (_roleTeam.TryGetValue(team, out RoleTypeId fakeRole))
             {
-                StackFrame frame = trace.GetFrame(i);
-                /*if (frame.GetMethod().Name.Contains("FpcServerPositionDistributor") || frame.GetMethod().Name.Contains("GetVisibleRole") ||
-                    frame.GetMethod().DeclaringType.FullName.Contains("RemoteAdmin"))
-                    break;
-
-                if (frame.GetMethod().DeclaringType.FullName.Contains("UncomplicatedCustomRoles") || frame.GetMethod().Name.Contains("GetRoleId_Patch1"))
-                {}
-                else
-                    LogManager.Debug($"[{i}] - {frame.GetMethod().DeclaringType.FullName}::{frame.GetMethod().Name} - {frame.GetFileName()} - {frame.GetFileLineNumber()}");
-                */
-                if (allowedMethods.Contains($"{frame.GetMethod().DeclaringType.FullName}::{frame.GetMethod().Name}"))
-                {
-                    __result = _roleTeam[team];
-                    return false;
-                }
+                __result = fakeRole;
+                return false;
             }
 
             return true;
         }
     }
 
+    [HarmonyPatchCategory(TeamPatchManager.Category)]
+    [HarmonyPatch]
+    internal class TeamFakeContextPatch
+    {
+        static IEnumerable<MethodBase> TargetMethods() =>
+            Declared(typeof(HitboxIdentity), nameof(HitboxIdentity.IsEnemy))
+                .Concat(Declared(typeof(GeneralKillsHandler), nameof(GeneralKillsHandler.HandleAttackerKill)))
+                .Concat(Declared(typeof(TerminationRewards), nameof(TerminationRewards.EvaluateGainReason)))
+                .Concat(Declared(typeof(MimicryRecorder), nameof(MimicryRecorder.WasKilledByTeammate)))
+                .Concat(Declared(typeof(ExplosionGrenade), nameof(ExplosionGrenade.Explode)))
+                .Concat(Declared(typeof(FlashbangGrenade), nameof(FlashbangGrenade.ServerFuseEnd)))
+                .Concat(Declared(typeof(AttackerDamageHandler), nameof(AttackerDamageHandler.ProcessDamage)))
+                .Concat(Declared(typeof(Scp079Recontainer), nameof(Scp079Recontainer.OnServerRoleChanged)));
+
+        static IEnumerable<MethodBase> Declared(Type type, string name) =>
+            type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                .Where(m => m.Name == name && !m.IsAbstract && !m.ContainsGenericParameters);
+
+        static void Prefix() => TeamFakeContext.Enter();
+
+        static void Finalizer() => TeamFakeContext.Exit();
+    }
+
+    [HarmonyPatchCategory(TeamPatchManager.Category)]
     [HarmonyPatch(typeof(ExplosionGrenade), nameof(ExplosionGrenade.ExplodeDestructible))]
     internal class GrenadeTranspiler
     {
-        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> newInstructions = new(instructions);
             int index = -1;
 
             for (int i = 0; i < newInstructions.Count; i++)
-                if (newInstructions[i].opcode == OpCodes.Call && newInstructions[i].operand is MethodInfo method &&
-                    method == Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetRoleId),
-                        [typeof(ReferenceHub)]))
+            {
+                if (newInstructions[i].opcode == OpCodes.Call && newInstructions[i].operand is MethodInfo method && method == Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetRoleId), new Type[] { typeof(ReferenceHub) }))
                 {
                     index = i;
                     break;
                 }
+            }
 
-            newInstructions[index + 1].operand = Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam),
-                [typeof(ReferenceHub)]);
+            newInstructions[index+1].operand = Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), [typeof(ReferenceHub)]);
             newInstructions.RemoveAt(index);
 
             return newInstructions;
         }
     }
 
+    [HarmonyPatchCategory(TeamPatchManager.Category)]
     [HarmonyPatch(typeof(PickupSearchCompletor), nameof(PickupSearchCompletor.ValidateAny))]
     public class PickupSearchCompletorPatch
     {
-        private static bool Prefix(PickupSearchCompletor __instance, ref bool __result)
+        static bool Prefix(PickupSearchCompletor __instance, ref bool __result)
         {
             if (!DisguiseTeam.List.TryGetValue(__instance.Hub.PlayerId, out Team team) || team != Team.SCPs ||
                 __instance.Hub.roleManager.CurrentRole.RoleTypeId.GetTeam() == Team.SCPs) return true;
@@ -152,21 +192,17 @@ namespace UncomplicatedCustomRoles.Patches
             return false;
         }
     }
-
+    
+    [HarmonyPatchCategory(TeamPatchManager.Category)]
     [HarmonyPatch]
     public class DoorPermissionsPolicyPatch
     {
-        private static MethodBase TargetMethod()
+        static MethodBase TargetMethod()
         {
-            return Method(typeof(DoorPermissionsPolicy), "CheckPermissions",
-            [
-                typeof(ReferenceHub), typeof(IDoorPermissionRequester), typeof(PermissionUsed).MakeByRefType()
-            ]);
+            return Method(typeof(DoorPermissionsPolicy), "CheckPermissions", new[] { typeof(ReferenceHub), typeof(IDoorPermissionRequester), typeof(PermissionUsed).MakeByRefType() });
         }
 
-        private static bool Prefix(DoorPermissionsPolicy __instance, ReferenceHub hub,
-            IDoorPermissionRequester requester,
-            out PermissionUsed callback, ref bool __result)
+        static bool Prefix(DoorPermissionsPolicy __instance, ReferenceHub hub, IDoorPermissionRequester requester, out PermissionUsed callback, ref bool __result)
         {
             callback = null;
             if (__instance.RequiredPermissions == DoorPermissionFlags.None || hub.serverRoles.BypassMode)
@@ -174,27 +210,23 @@ namespace UncomplicatedCustomRoles.Patches
                 __result = true;
                 return false;
             }
-
             if (hub.roleManager.CurrentRole is IDoorPermissionProvider currentRole &&
                 (!DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team team) || team != Team.SCPs))
             {
                 __result = __instance.CheckPermissions(currentRole, requester, out callback);
                 return false;
             }
-
             ItemBase curInstance = hub.inventory.CurInstance;
-            __result = curInstance != null && curInstance is IDoorPermissionProvider provider &&
-                       __instance.CheckPermissions(provider, requester, out callback);
+            __result = curInstance != null && curInstance is IDoorPermissionProvider provider && __instance.CheckPermissions(provider, requester, out callback);
             return false;
         }
     }
-
-    [HarmonyPatch(typeof(DoorPermissionsPolicyExtensions),
-        nameof(DoorPermissionsPolicyExtensions.GetCombinedPermissions))]
+    
+    [HarmonyPatchCategory(TeamPatchManager.Category)]
+    [HarmonyPatch(typeof(DoorPermissionsPolicyExtensions), nameof(DoorPermissionsPolicyExtensions.GetCombinedPermissions))]
     public class DoorPermissionsPolicyExtensionsPatch
     {
-        private static bool Prefix(ReferenceHub hub, IDoorPermissionRequester requester,
-            ref DoorPermissionFlags __result)
+        static bool Prefix(ReferenceHub hub, IDoorPermissionRequester requester, ref DoorPermissionFlags __result)
         {
             if (hub == null)
             {
@@ -223,51 +255,16 @@ namespace UncomplicatedCustomRoles.Patches
         }
     }
 
-    [HarmonyPatch(typeof(LastHumanTracker), nameof(LastHumanTracker.TryGetLastTarget))]
-    public class LastHumanTrackerPatch
-    {
-        private static bool Prefix(ref ReferenceHub lastTarget, ref bool __result)
-        {
-            lastTarget = null;
-            int humanCount = 0;
-            int scpCount = 0;
-
-            foreach (ReferenceHub hub in ReferenceHub.AllHubs)
-            {
-                Team effectiveTeam = hub.GetRoleId().GetTeam();
-                if (DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team fakeTeam))
-                    effectiveTeam = fakeTeam;
-
-                if (effectiveTeam == Team.SCPs)
-                {
-                    ++scpCount;
-                }
-                else if (hub.IsAlive() && effectiveTeam != Team.Dead && effectiveTeam != Team.Dead)
-                {
-                    ++humanCount;
-                    lastTarget = hub;
-                }
-            }
-
-            __result = humanCount == 1 && scpCount > 0;
-            return false;
-        }
-    }
-
+    [HarmonyPatchCategory(TeamPatchManager.Category)]
     [HarmonyPatch(typeof(Scp079Recontainer), nameof(Scp079Recontainer.OnServerRoleChanged))]
     public class Scp079RecontainerPatch
     {
-        private static bool Prefix(Scp079Recontainer __instance, ReferenceHub hub, RoleTypeId newRole,
-            RoleChangeReason reason)
+        static bool Prefix(Scp079Recontainer __instance, ReferenceHub hub, RoleTypeId newRole, RoleChangeReason reason)
         {
             Team team = hub.GetRoleId().GetTeam();
             if (DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team t))
                 team = t;
-            LogManager.Debug(
-                $"Player {hub.PlayerId} changed role to {newRole} for reason {reason}. Checking if recontainment is needed...");
-            LogManager.Debug($"Player's current role: {hub.GetRoleId()}, team: {team}");
-            if (newRole != RoleTypeId.Spectator || !IsScpButNot079(hub.GetRoleId(), team) ||
-                Scp079Role.ActiveInstances.Count == 0 ||
+            if (newRole != RoleTypeId.Spectator || !IsScpButNot079(hub.GetRoleId(), team) || Scp079Role.ActiveInstances.Count == 0 ||
                 ReferenceHub.AllHubs.Any(x =>
                 {
                     if (x == hub)
@@ -289,7 +286,6 @@ namespace UncomplicatedCustomRoles.Patches
 
         private static bool IsScpButNot079(RoleTypeId roleTypeId, Team team)
         {
-            LogManager.Debug($"Checking if role {roleTypeId} is an SCP but not 079 for team {team}");
             return team == Team.SCPs && roleTypeId != RoleTypeId.Scp079;
         }
     }

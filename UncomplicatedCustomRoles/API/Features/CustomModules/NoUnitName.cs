@@ -10,6 +10,6 @@
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules
 {
-    public class SilentWalker : CustomModule
+    public class NoUnitName : CustomModule
     { }
 }

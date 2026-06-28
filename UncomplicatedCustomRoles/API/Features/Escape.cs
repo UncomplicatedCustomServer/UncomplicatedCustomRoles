@@ -11,7 +11,6 @@
 using LabApi.Features.Wrappers;
 using MEC;
 using System.Collections.Generic;
-using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.API.Features
 {

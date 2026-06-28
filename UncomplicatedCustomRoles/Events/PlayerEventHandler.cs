@@ -109,10 +109,6 @@ namespace UncomplicatedCustomRoles.Events
             if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole role))
                 switch (ev.Effect)
                 {
-                    case SeveredHands when role.Role.MaxScp330Candies >= role.Scp330Count:
-                        LogManager.Debug($"Tried to add the {ev.Effect.name} but was not allowed due to {role.Scp330Count} <= {role.Role.MaxScp330Candies}");
-                        ev.IsAllowed = false;
-                        break;
                     case CardiacArrest when role.Role.IsFriendOf is not null && role.Role.IsFriendOf.Contains(Team.SCPs):
                     case AmnesiaVision or AmnesiaItems when role.HasModule<AmnesiaResistance>():
                         ev.IsAllowed = false;
@@ -155,7 +151,7 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnDeath(PlayerDeathEventArgs ev)
         {
-            if (TerminationQueue.TryGetValue(ev.Player.PlayerId, out Tuple<CustomScpAnnouncer, DateTimeOffset> data) && (DateTimeOffset.Now - data.Item2).Milliseconds < 1300)
+            if (TerminationQueue.TryGetValue(ev.Player.PlayerId, out Tuple<CustomScpAnnouncer, DateTimeOffset> data) && (DateTimeOffset.Now - data.Item2).TotalMilliseconds < 1300)
                 SpawnManager.AnnounceScpTermination(ev.Player.ReferenceHub, ev.DamageHandler);
 
             TerminationQueue.TryRemove(ev.Player.PlayerId, out _);
@@ -435,7 +431,10 @@ namespace UncomplicatedCustomRoles.Events
 
         public void OnChangedNickname(PlayerChangedNicknameEventArgs ev)
         {
-            if (SummonedCustomRole.TryGet(ev.Player.ReferenceHub, out SummonedCustomRole customRole))
+            if (ev.Player.ReferenceHub is null)
+                return;
+
+            if (SummonedCustomRole.TryGet(ev.Player.ReferenceHub, out SummonedCustomRole customRole) && customRole.CustomInfo is not null)
                 customRole.CustomInfo.Nickname = ev.NewNickname ?? ev.Player.Nickname;
         }
     }

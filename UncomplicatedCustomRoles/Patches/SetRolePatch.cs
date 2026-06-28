@@ -8,14 +8,30 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using HarmonyLib;
 using Mirror;
 using PlayerRoles;
+using Respawning.NamingRules;
 using UncomplicatedCustomRoles.API.Features;
 
 namespace UncomplicatedCustomRoles.Patches
 {
-#pragma warning disable IDE0060
+    internal static class UcrSpawnContext
+    {
+        [ThreadStatic] private static int _depth;
+
+        internal static bool Active => _depth > 0;
+
+        internal static void Enter() => _depth++;
+
+        internal static void Exit()
+        {
+            if (_depth > 0)
+                _depth--;
+        }
+    }
+    
     [HarmonyPatch(typeof(PlayerRoleManager), nameof(PlayerRoleManager.InitializeNewRole))]
     internal class SetRolePatch
     {
@@ -23,6 +39,19 @@ namespace UncomplicatedCustomRoles.Patches
         {
             if (SummonedCustomRole.TryGet(__instance.Hub, out SummonedCustomRole role))
                 role.Destroy();
+        }
+        
+        static void Postfix(PlayerRoleManager __instance, RoleChangeReason reason)
+        {
+            if (!UcrSpawnContext.Active || reason is not RoleChangeReason.Respawn)
+                return;
+            
+            if (__instance.CurrentRole is HumanRole humanRole
+                && NamingRulesManager.TryGetNamingRule(humanRole.Team, out _)
+                && NamingRulesManager.GeneratedNames.TryGetValue(humanRole.Team, out var names)
+                && names.Count > 0
+                && humanRole.UnitNameId >= names.Count)
+                humanRole.UnitNameId = (byte)(names.Count - 1);
         }
     }
 }

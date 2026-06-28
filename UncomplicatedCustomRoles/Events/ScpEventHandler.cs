@@ -1,5 +1,4 @@
-﻿using CustomPlayerEffects;
-using LabApi.Events.Arguments.PlayerEvents;
+﻿using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Arguments.Scp049Events;
 using LabApi.Events.Arguments.Scp096Events;
 using LabApi.Events.Arguments.Scp914Events;
@@ -79,13 +78,9 @@ namespace UncomplicatedCustomRoles.Events
         {
             if (!ev.IsAllowed)
                 return;
-
+            
             if (SummonedCustomRole.TryGet(ev.Player, out SummonedCustomRole role))
-            {
-                role.Scp330Count++;
-
-                LogManager.Debug($"Player {ev.Player} took {role.Scp330Count} candies!");
-            }
+                ev.AllowPunishment = ev.Uses > role.Role.MaxScp330Candies;
         }
 
         public void OnProcessedInventoryItem(Scp914ProcessedInventoryItemEventArgs ev)
