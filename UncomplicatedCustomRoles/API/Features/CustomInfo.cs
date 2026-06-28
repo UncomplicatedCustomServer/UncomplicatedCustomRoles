@@ -142,8 +142,13 @@ namespace UncomplicatedCustomRoles.API.Features
                         }
                     }
                     
-                    if (!string.IsNullOrEmpty(rawRole)
-                        && NamingRulesManager.TryGetNamingRule(summonedCustomRole.Role.Role.GetTeam(), out UnitNamingRule unitNamingRule)
+                    Team roleTeam = summonedCustomRole.Role.Role.GetTeam();
+                    if (DisguiseTeam.List.TryGetValue(player.PlayerId, out Team fakeTeam))
+                        roleTeam = fakeTeam;
+
+                    if (!string.IsNullOrEmpty(rawRole) && !summonedCustomRole.HasModule<NoUnitName>()
+                        && roleTeam is Team.FoundationForces
+                        && NamingRulesManager.TryGetNamingRule(roleTeam, out UnitNamingRule unitNamingRule)
                         && !string.IsNullOrEmpty(unitNamingRule.LastGeneratedName))
                         rawRole = $"{rawRole} ({unitNamingRule.LastGeneratedName})";
                 }
