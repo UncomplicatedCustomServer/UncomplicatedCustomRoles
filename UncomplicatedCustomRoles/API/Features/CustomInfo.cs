@@ -132,6 +132,8 @@ namespace UncomplicatedCustomRoles.API.Features
                         else
                         {
                             string nick = Nickname?.Replace("<color=#855439>*</color>", "") ?? string.Empty;
+                            if (string.IsNullOrEmpty(nick))
+                                nick = player.Nickname;
                             string color = colorfulNickname.Color.StartsWith("#") ? colorfulNickname.Color : $"#{colorfulNickname.Color}";
                             if (!Misc.AcceptedColours.Contains(color.Replace("#", "")))
                                 LogManager.Warn($"The color {color} is not acceptable by the game in ColorfulNicknames! Please use a valid hex color code.");
@@ -155,6 +157,13 @@ namespace UncomplicatedCustomRoles.API.Features
 
                 if (string.IsNullOrEmpty(rawNickname))
                     rawNickname = player.Nickname;
+                
+                if (string.IsNullOrEmpty(rawInfo) && string.IsNullOrEmpty(rawRole) && string.IsNullOrEmpty(player.Nickname))
+                {
+                    player.InfoArea |= PlayerInfoArea.Nickname | PlayerInfoArea.Role | PlayerInfoArea.UnitName;
+                    player.CustomInfo = string.Empty;
+                    return;
+                }
 
                 player.CustomInfo = rawCustomInfo.Replace("%%", "%\n%").BulkReplace(new()
                 {
