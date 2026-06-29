@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using Footprinting;
 using InventorySystem.Disarming;
 using InventorySystem.Items;
 using InventorySystem.Searching;
@@ -154,6 +155,28 @@ namespace UncomplicatedCustomRoles.Patches
         static void Prefix() => TeamFakeContext.Enter();
 
         static void Finalizer() => TeamFakeContext.Exit();
+    }
+
+    [HarmonyPatchCategory(TeamPatchManager.Category)]
+    [HarmonyPatch(typeof(AttackerDamageHandler), nameof(AttackerDamageHandler.ProcessDamage))]
+    internal class FriendlyFireDisguiseTranspiler
+    {
+        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            FieldInfo roleField = Field(typeof(Footprint), nameof(Footprint.Role));
+            MethodInfo resolver = Method(typeof(FriendlyFireDisguiseTranspiler), nameof(ResolveAttackerRole));
+
+            foreach (CodeInstruction instruction in instructions)
+            {
+                if (instruction.opcode == OpCodes.Ldfld && instruction.operand is FieldInfo field && field == roleField)
+                    yield return new CodeInstruction(OpCodes.Call, resolver);
+                else
+                    yield return instruction;
+            }
+        }
+
+        private static RoleTypeId ResolveAttackerRole(Footprint attacker) =>
+            attacker.Hub?.GetRoleId() ?? attacker.Role;
     }
 
     [HarmonyPatchCategory(TeamPatchManager.Category)]
