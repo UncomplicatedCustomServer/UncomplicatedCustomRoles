@@ -25,6 +25,7 @@ using InventorySystem.Disarming;
 using InventorySystem.Items;
 using InventorySystem.Searching;
 using MapGeneration.Distributors;
+using PlayerRoles.PlayableScps.HumanTracker;
 using PlayerRoles.PlayableScps.Scp079;
 using PlayerStatsSystem;
 using UncomplicatedCustomRoles.API.Features;
@@ -143,6 +144,7 @@ namespace UncomplicatedCustomRoles.Patches
                 .Concat(Declared(typeof(ExplosionGrenade), nameof(ExplosionGrenade.Explode)))
                 .Concat(Declared(typeof(FlashbangGrenade), nameof(FlashbangGrenade.ServerFuseEnd)))
                 .Concat(Declared(typeof(AttackerDamageHandler), nameof(AttackerDamageHandler.ProcessDamage)))
+                .Concat(Declared(typeof(LastHumanTracker), nameof(LastHumanTracker.IsLastTarget)))
                 .Concat(Declared(typeof(Scp079Recontainer), nameof(Scp079Recontainer.OnServerRoleChanged)));
 
         static IEnumerable<MethodBase> Declared(Type type, string name) =>
@@ -251,6 +253,34 @@ namespace UncomplicatedCustomRoles.Patches
                 combinedPermissions |= permissionProvider.GetPermissions(requester);
 
             __result = combinedPermissions;
+            return false;
+        }
+    }
+
+    [HarmonyPatchCategory(TeamPatchManager.Category)]
+    [HarmonyPatch(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.IsSCP), new[] { typeof(ReferenceHub), typeof(bool) })]
+    internal class IsScpPatch
+    {
+        static bool Prefix(ReferenceHub hub, ref bool __result)
+        {
+            if (hub == null || !DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team team))
+                return true;
+
+            __result = team == Team.SCPs;
+            return false;
+        }
+    }
+
+    [HarmonyPatchCategory(TeamPatchManager.Category)]
+    [HarmonyPatch(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.IsHuman), new[] { typeof(ReferenceHub) })]
+    internal class IsHumanPatch
+    {
+        static bool Prefix(ReferenceHub hub, ref bool __result)
+        {
+            if (hub == null || !DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team team))
+                return true;
+
+            __result = team != Team.SCPs && team != Team.Dead && team != Team.Flamingos;
             return false;
         }
     }
