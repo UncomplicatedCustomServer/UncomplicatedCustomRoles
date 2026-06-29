@@ -29,9 +29,9 @@ public class CustomKeycard : CustomModule
     private KeycardItem _keycardItem;
 
     internal ItemType KeycardType => ParseEnum("KeycardType", ItemType.None);
-    internal string ItemName => TryGetStringValue("ItemName", "Custom Keycard");
-    internal string HolderName => TryGetStringValue("HolderName", "Unknown");
-    internal string CardLabel => TryGetStringValue("CardLabel", string.Empty);
+    internal string ItemName => PlaceholderManager.ApplyPlaceholders(TryGetStringValue("ItemName", "Custom Keycard"), Player, CustomRole.Role);
+    internal string HolderName => PlaceholderManager.ApplyPlaceholders(TryGetStringValue("HolderName", "Unknown"), Player, CustomRole.Role);
+    internal string CardLabel => PlaceholderManager.ApplyPlaceholders(TryGetStringValue("CardLabel", string.Empty), Player, CustomRole.Role);
     internal KeycardLevels Permissions => new(ParseEnum("Permissions", DoorPermissionFlags.None));
     internal Color KeycardColor => ParseColor("KeycardColor", Color.white);
     internal Color PermissionsColor => ParseColor("PermissionsColor", Color.white);
