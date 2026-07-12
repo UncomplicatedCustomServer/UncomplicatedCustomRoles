@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.Compatibility;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
 
@@ -40,6 +41,10 @@ namespace UncomplicatedCustomRoles.Commands
             FileConfigs.LoadAll();
             FileConfigs.LoadAll(Server.Port.ToString());
             ImportManager.Reload();
+            
+            foreach (KeyValuePair<int, ICustomRole> oldRole in oldRoles)
+                if (!CustomRole.CustomRoles.ContainsKey(oldRole.Key) && !CompatibilityManager.RolePaths.ContainsKey(oldRole.Value))
+                    CustomRole.Register(oldRole.Value);
 
             IEnumerable<int> removedRoles = oldRoles.Keys.Except(CustomRole.CustomRoles.Keys);
 

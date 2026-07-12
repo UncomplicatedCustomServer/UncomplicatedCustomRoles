@@ -67,7 +67,7 @@ namespace UncomplicatedCustomRoles.Manager
                     try
                     {
                         object[] attribs = type.GetCustomAttributes(typeof(PluginCustomRole), false);
-                        if (attribs != null && attribs.Length > 0 && (type.IsSubclassOf(typeof(ICustomRole)) || type.IsSubclassOf(typeof(CustomRole)) || type.IsSubclassOf(typeof(EventCustomRole))))
+                        if (attribs != null && attribs.Length > 0 && typeof(ICustomRole).IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface)
                         {
                             ActivePlugins.TryAdd(plugin.Key);
 

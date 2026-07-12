@@ -34,19 +34,17 @@ namespace UncomplicatedCustomRoles.Commands
 
             foreach (RoleTypeId role in Enum.GetValues(typeof(RoleTypeId)))
             {
-                IEnumerable<ICustomRole> roles = CustomRole.List.Where(r => r.SpawnSettings?.CanReplaceRoles != null && r.SpawnSettings.CanReplaceRoles.Contains(role));
-                if (roles.Any())
+                IEnumerable<ICustomRole> manualRoles = CustomRole.List.Where(r => r.SpawnSettings?.CanReplaceRoles == null || !r.SpawnSettings.CanReplaceRoles.Any());
+                if (manualRoles.Any())
                 {
-                    float total = roles.Sum(r => r.SpawnSettings.SpawnChance);
-                    response += $"\n\n{(total >= 100 ? $"<color=#ff0000>❗</color>" : "<color=#00ff00>✔️</color>")} <color={role.GetColor().ToHex()}><b>{role.GetFullName()}</b></color> ({roles.Count()})";
-                    response += $"\nChanche of spawning as a <b>CustomRole</b>: {total}%\nChanche of spawning as a regular role: {100 - total}%";
-
-                    if (detailed)
-                        foreach (ICustomRole customRole in roles.Where(r => r.SpawnSettings.SpawnChance > 0))
-                            response += $"\n  ∟ {customRole} - {customRole.SpawnSettings.SpawnChance}%";
+                    response += $"\n\n<color=#00ffff>ℹ️</color> <b>Roles without a linked vanilla role</b> ({manualRoles.Count()}) - spawned manually or by another plugin:";
+                    foreach (ICustomRole customRole in manualRoles)
+                        response += customRole.SpawnSettings is not null && customRole.SpawnSettings.SpawnChance > 0
+                            ? $"\n  ∟ {customRole} - {customRole.SpawnSettings.SpawnChance}%"
+                            : $"\n  ∟ {customRole}";
                 }
             }
-
+            
             response += "\n<size=1>OwO</size>"; // We want to render everything
 
             return true;
