@@ -9,6 +9,7 @@
  */
 
 using Achievements.Handlers;
+using Footprinting;
 using HarmonyLib;
 using Interactables.Interobjects.DoorUtils;
 using Mirror;
@@ -21,7 +22,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using Footprinting;
 using InventorySystem.Disarming;
 using InventorySystem.Items;
 using InventorySystem.Searching;
@@ -41,23 +41,17 @@ namespace UncomplicatedCustomRoles.Patches
     {
         static bool Prefix(PlayerRoleManager __instance, ref PlayerRoleBase __result)
         {
-            if (__instance.Hub == null || __instance.Hub.netId == 0)
+
+            ReferenceHub hub = __instance.Hub;
+            if (hub is null || !DisguiseTeam.RoleBaseList.TryGetValue(hub.PlayerId, out PlayerRoleBase role) || role is null)
                 return true;
-            
+
+ 
             if (RoleSerializationContext.Active)
                 return true;
 
-            if (__instance.Hub is not null && DisguiseTeam.RoleBaseList.TryGetValue(__instance.Hub.PlayerId, out PlayerRoleBase role))
-            {
-                if (role is null)
-                    LogManager.Error($"Disguised role for player {__instance.Hub.PlayerId} is null!");
-
-                __result = role;
-
-                return false;
-            }
-
-            return true;
+            __result = role;
+            return false;
         }
     }
     
@@ -131,6 +125,33 @@ namespace UncomplicatedCustomRoles.Patches
 
             return true;
         }
+        
+        internal static RoleTypeId GetCombatRoleId(ReferenceHub hub)
+        {
+            if (hub != null && DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team team) &&
+                _roleTeam.TryGetValue(team, out RoleTypeId fakeRole))
+                return fakeRole;
+
+            return hub.GetRoleId();
+        }
+    }
+
+    [HarmonyPatchCategory(TeamPatchManager.Category)]
+    [HarmonyPatch(typeof(AttackerDamageHandler), nameof(AttackerDamageHandler.ProcessDamage))]
+    internal class ProcessDamageRolePatch
+    {
+        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> code = new(instructions);
+            MethodInfo original = Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetRoleId), [typeof(ReferenceHub)]);
+            MethodInfo replacement = Method(typeof(PlayerRolesUtilsPatch), nameof(PlayerRolesUtilsPatch.GetCombatRoleId));
+
+            foreach (CodeInstruction instruction in code)
+                if (instruction.opcode == OpCodes.Call && instruction.operand is MethodInfo method && method == original)
+                    instruction.operand = replacement;
+
+            return code;
+        }
     }
 
     [HarmonyPatchCategory(TeamPatchManager.Category)]
@@ -158,25 +179,12 @@ namespace UncomplicatedCustomRoles.Patches
     }
 
     [HarmonyPatchCategory(TeamPatchManager.Category)]
-    [HarmonyPatch(typeof(AttackerDamageHandler), nameof(AttackerDamageHandler.ProcessDamage))]
-    internal class FriendlyFireDisguiseTranspiler
+    [HarmonyPatch(typeof(Footprint), MethodType.Constructor, new[] { typeof(ReferenceHub) })]
+    internal class FootprintContextPatch
     {
-        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-        {
-            FieldInfo roleField = Field(typeof(Footprint), nameof(Footprint.Role));
-            MethodInfo resolver = Method(typeof(FriendlyFireDisguiseTranspiler), nameof(ResolveAttackerRole));
+        static void Prefix() => TeamFakeContext.Enter();
 
-            foreach (CodeInstruction instruction in instructions)
-            {
-                if (instruction.opcode == OpCodes.Ldfld && instruction.operand is FieldInfo field && field == roleField)
-                    yield return new CodeInstruction(OpCodes.Call, resolver);
-                else
-                    yield return instruction;
-            }
-        }
-
-        private static RoleTypeId ResolveAttackerRole(Footprint attacker) =>
-            attacker.Hub?.GetRoleId() ?? attacker.Role;
+        static void Finalizer() => TeamFakeContext.Exit();
     }
 
     [HarmonyPatchCategory(TeamPatchManager.Category)]
