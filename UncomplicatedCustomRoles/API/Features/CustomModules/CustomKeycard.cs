@@ -9,7 +9,9 @@
  */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Interactables.Interobjects.DoorUtils;
 using InventorySystem;
 using LabApi.Features.Wrappers;
@@ -21,18 +23,39 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules;
 
 public class CustomKeycard : CustomModule
 {
-    public override List<string> RequiredArgs => new()
-    {
-        "KeycardType"
-    };
+    public override List<string> RequiredArgs => ["KeycardType"];
 
     private KeycardItem _keycardItem;
 
-    internal ItemType KeycardType => ParseEnum("KeycardType", ItemType.None);
+    private static readonly Dictionary<string, ItemType> KeycardTypeAliases = new(StringComparer.OrdinalIgnoreCase)
+    {
+        { "Management", ItemType.KeycardCustomManagement },
+        { "Metal", ItemType.KeycardCustomMetalCase },
+        { "MetalCase", ItemType.KeycardCustomMetalCase },
+        { "Site02", ItemType.KeycardCustomSite02 },
+        { "Site", ItemType.KeycardCustomSite02 },
+        { "TaskForce", ItemType.KeycardCustomTaskForce },
+    };
+
+    internal ItemType KeycardType
+    {
+        get
+        {
+            string raw = TryGetStringValue("KeycardType")?.Trim();
+            if (string.IsNullOrEmpty(raw))
+                return ItemType.None;
+
+            if (KeycardTypeAliases.TryGetValue(raw, out ItemType alias))
+                return alias;
+
+            return Enum.TryParse(raw, true, out ItemType parsed) ? parsed : ItemType.None;
+        }
+    }
+
     internal string ItemName => PlaceholderManager.ApplyPlaceholders(TryGetStringValue("ItemName", "Custom Keycard"), Player, CustomRole.Role);
     internal string HolderName => PlaceholderManager.ApplyPlaceholders(TryGetStringValue("HolderName", "Unknown"), Player, CustomRole.Role);
     internal string CardLabel => PlaceholderManager.ApplyPlaceholders(TryGetStringValue("CardLabel", string.Empty), Player, CustomRole.Role);
-    internal KeycardLevels Permissions => new(ParseEnum("Permissions", DoorPermissionFlags.None));
+    internal KeycardLevels Permissions => BuildPermissions();
     internal Color KeycardColor => ParseColor("KeycardColor", Color.white);
     internal Color PermissionsColor => ParseColor("PermissionsColor", Color.white);
     internal Color LabelColor => ParseColor("LabelColor", Color.white);
@@ -40,8 +63,8 @@ public class CustomKeycard : CustomModule
     internal string SerialLabel => TryGetStringValue("SerialLabel", "000000000000");
     internal int RankIndex => TryGetCastedValue("RankIndex", 0);
 
-    private const string ValidKeycardTypes =
-        "KeycardCustomManagement, KeycardCustomMetalCase, KeycardCustomSite02, KeycardCustomTaskForce";
+    private static readonly string ValidKeycardTypes =
+        string.Join(", ", KeycardTypeAliases.Keys.OrderBy(k => k));
 
     public override void OnAdded()
     {
@@ -82,17 +105,42 @@ public class CustomKeycard : CustomModule
         });
         base.OnAdded();
     }
-
-    private T ParseEnum<T>(string param, T def) where T : struct, Enum
+    
+    private KeycardLevels BuildPermissions()
     {
-        string raw = TryGetStringValue(param);
-        if (raw is null)
-            return def;
+        bool hasLevels = HasArg("ContainmentLevel") || HasArg("ArmoryLevel") || HasArg("AdminLevel");
 
-        if (!Enum.TryParse(raw, true, out T result))
+        KeycardLevels levels = new(
+            TryGetCastedValue("ContainmentLevel", 0),
+            TryGetCastedValue("ArmoryLevel", 0),
+            TryGetCastedValue("AdminLevel", 0));
+
+        DoorPermissionFlags rawFlags = ParseFlags("Permissions");
+
+        if (!hasLevels && rawFlags == DoorPermissionFlags.None)
+            return levels;
+
+        return new KeycardLevels(levels.Permissions | rawFlags);
+    }
+
+    private bool HasArg(string param) => Args is not null && Args.ContainsKey(param);
+
+    private DoorPermissionFlags ParseFlags(string param)
+    {
+        if (Args is null || !Args.TryGetValue(param, out object raw) || raw is null)
+            return DoorPermissionFlags.None;
+
+        string joined = raw as string ?? (raw is IEnumerable enumerable
+            ? string.Join(",", enumerable.Cast<object>().Where(o => o is not null).Select(o => o.ToString()))
+            : raw.ToString());
+
+        if (string.IsNullOrWhiteSpace(joined))
+            return DoorPermissionFlags.None;
+
+        if (!Enum.TryParse(joined.Replace(" ", string.Empty), true, out DoorPermissionFlags result))
         {
-            LogManager.Warn($"[CustomKeycard] Invalid value '{raw}' for '{param}'. Valid values: {string.Join(", ", Enum.GetNames(typeof(T)))}. Using default: {def}");
-            return def;
+            LogManager.Warn($"[CustomKeycard] Invalid value '{joined}' for '{param}'. Valid flags: {string.Join(", ", Enum.GetNames(typeof(DoorPermissionFlags)))}. Ignoring it.");
+            return DoorPermissionFlags.None;
         }
 
         return result;
