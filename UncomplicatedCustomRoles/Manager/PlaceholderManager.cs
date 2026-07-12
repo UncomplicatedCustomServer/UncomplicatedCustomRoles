@@ -20,7 +20,7 @@ namespace UncomplicatedCustomRoles.Manager
 
     public class PlaceholderManager
     {
-        public static string ApplyPlaceholders(string origin, Player player, ICustomRole? role) => origin.BulkReplace(new()
+        public static string ApplyPlaceholders(string? origin, Player player, ICustomRole? role) => (origin ?? string.Empty).BulkReplace(new()
             {
                 { "nick", player.Nickname },
                 { "displayname", player.DisplayName },
