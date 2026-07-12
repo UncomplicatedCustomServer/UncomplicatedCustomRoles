@@ -36,9 +36,9 @@ public class PlaceholderManager
                     : string.Empty
             },
             { "rolename", player.Role.GetFullName() },
-            { "customrolename", role?.Name },
-            { "customroleid", role?.Id },
-            { "customrolebadge", role?.BadgeName },
+            { "customrolename", role?.Name ?? string.Empty },
+            { "customroleid", role?.Id ?? 0 },
+            { "customrolebadge", role?.BadgeName ?? string.Empty },
             { "health", player.Health },
             { "max_health", player.MaxHealth },
             { "ahp", player.ArtificialHealth },
