@@ -25,11 +25,22 @@ namespace UncomplicatedCustomRoles.API.Features
         public ICustomRole Role => SummonedInstance.Role;
 
         public List<Listener> Listeners { get; } = new();
+        
+        private static int _activeListeners;
 
         internal CustomRoleEventHandler(SummonedCustomRole summonedInstance)
         {
             SummonedInstance = summonedInstance;
             LoadListeners();
+            _activeListeners += Listeners.Count;
+        }
+        
+        internal void Unload()
+        {
+            _activeListeners -= Listeners.Count;
+            if (_activeListeners < 0)
+                _activeListeners = 0;
+            Listeners.Clear();
         }
 
         private void LoadListeners()
@@ -62,34 +73,37 @@ namespace UncomplicatedCustomRoles.API.Features
 
         internal void InvokeSafely(IPlayerEvent playerEvent)
         {
-            if (playerEvent is ICancellableEvent cancellableEvent && !cancellableEvent.IsAllowed)
+            if (Listeners.Count == 0)
                 return;
 
-            Listener listener = Listeners.FirstOrDefault(l => l.Event == playerEvent.GetType());
+            if (playerEvent is ICancellableEvent { IsAllowed: false })
+                return;
 
-            listener?.Method.Invoke(listener.Instance, new object[] { playerEvent });
+            Type eventType = playerEvent.GetType();
+            foreach (Listener listener in Listeners)
+                if (listener.Event == eventType)
+                {
+                    listener.Method.Invoke(listener.Instance, [playerEvent]);
+                    return;
+                }
         }
 
         internal static void InvokeAll(IPlayerEvent ev)
         {
-            foreach (SummonedCustomRole summonedCustomRole in SummonedCustomRole.List.Values)
-                summonedCustomRole.EventHandler?.InvokeSafely(ev);
+            if (_activeListeners == 0)
+                return;
+            
+            foreach (KeyValuePair<string, SummonedCustomRole> pair in SummonedCustomRole.List)
+                pair.Value.EventHandler?.InvokeSafely(ev);
         }
     }
 
-    public class Listener
+    public class Listener(Type @event, MethodInfo method, object instance)
     {
-        public Type Event { get; }
+        public Type Event { get; } = @event;
 
-        public MethodInfo Method { get; }
+        public MethodInfo Method { get; } = method;
 
-        public object Instance { get; }
-
-        public Listener(Type @event, MethodInfo method, object instance)
-        {
-            Event = @event;
-            Method = method;
-            Instance = instance;
-        }
+        public object Instance { get; } = instance;
     }
 }

@@ -137,6 +137,10 @@ namespace UncomplicatedCustomRoles.API.Features
         private bool _isRegeneratingHume { get; set; }
 
         private List<CustomModule> _customModules { get; }
+        
+        private int _eventModuleCount;
+
+        internal static int EventTriggeredModuleTotal;
 
         internal RoleTypeId Appearance => Role.RoleAppearance != Role.Role ? Role.RoleAppearance : RoleTypeId.None;
 
@@ -165,6 +169,9 @@ namespace UncomplicatedCustomRoles.API.Features
 
             _customModules = CustomModule.Load(Role.CustomFlags ?? new(), this);
 
+            _eventModuleCount = _customModules.Count(m => m.TriggerOnEvents.Count > 0);
+            EventTriggeredModuleTotal += _eventModuleCount;
+            
             if (Role.Team is not null && Role.Team != Role.Role.GetTeam())
             {
                 EvaluateRoleBase();
@@ -378,6 +385,13 @@ namespace UncomplicatedCustomRoles.API.Features
                 LogManager.Error($"Failed to act SummonedCustomRole::Remove() - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
             }
 
+            EventHandler?.Unload();
+            
+            EventTriggeredModuleTotal -= _eventModuleCount;
+            if (EventTriggeredModuleTotal < 0)
+                EventTriggeredModuleTotal = 0;
+            _eventModuleCount = 0;
+            
             _customModules.Clear();
             _internalValid = false;
         }
@@ -461,7 +475,14 @@ namespace UncomplicatedCustomRoles.API.Features
         public void AddModule(Type type, Dictionary<string, object>? args = null)
         {
             if (CustomModule.FastAdd(type, this, args) is CustomModule module)
+            {
                 _customModules.Add(module);
+                if (module.TriggerOnEvents.Count > 0)
+                {
+                    _eventModuleCount++;
+                    EventTriggeredModuleTotal++;
+                }
+            }
         }
 #nullable disable
 
@@ -473,6 +494,13 @@ namespace UncomplicatedCustomRoles.API.Features
         {
             if (TryGetModule(out T module))
             {
+                if (module.TriggerOnEvents.Count > 0)
+                {
+                    _eventModuleCount--;
+                    EventTriggeredModuleTotal--;
+                    if (EventTriggeredModuleTotal < 0)
+                        EventTriggeredModuleTotal = 0;
+                }
                 module.OnRemoved();
                 _customModules.Remove(module);
             }

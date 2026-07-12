@@ -24,7 +24,9 @@ namespace UncomplicatedCustomRoles.Patches
 {
     internal class PlayerEventPrefix
     {
-        private static IEnumerable<MethodInfo> PatchedMethods = new List<MethodInfo>();
+        private static IEnumerable<MethodInfo> _patchedMethods = new List<MethodInfo>();
+
+        private static readonly Dictionary<Type, string> EventNameCache = new();
 
         private static void Prefix(IPlayerEvent ev)
         {
@@ -32,9 +34,15 @@ namespace UncomplicatedCustomRoles.Patches
             {
                 CustomRoleEventHandler.InvokeAll(ev);
 
-                if (ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole))
+                if (SummonedCustomRole.EventTriggeredModuleTotal > 0 
+                    && ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole))
                 {
-                    string name = ev.GetType().Name.Replace("EventArgs", string.Empty).Replace("Player", string.Empty);
+                    Type eventType = ev.GetType();
+                    if (!EventNameCache.TryGetValue(eventType, out string name))
+                    {
+                        name = eventType.Name.Replace("EventArgs", string.Empty).Replace("Player", string.Empty);
+                        EventNameCache[eventType] = name;
+                    }
 
                     foreach (CustomModule module in customRole.CustomModules)
                         if (module.TriggerOnEvents.Contains(name))
@@ -52,15 +60,15 @@ namespace UncomplicatedCustomRoles.Patches
         {
             HarmonyMethod prefixMethod = new(typeof(PlayerEventPrefix).GetMethod("Prefix", BindingFlags.Static | BindingFlags.NonPublic));
 
-            PatchedMethods = typeof(PlayerEvents).GetMethods().Where(m => m.Name.StartsWith("On") && m.GetParameters().Length > 0 && typeof(IPlayerEvent).IsAssignableFrom(m.GetParameters()[0].ParameterType));
+            _patchedMethods = typeof(PlayerEvents).GetMethods().Where(m => m.Name.StartsWith("On") && m.GetParameters().Length > 0 && typeof(IPlayerEvent).IsAssignableFrom(m.GetParameters()[0].ParameterType));
 
-            foreach (MethodInfo method in PatchedMethods)
+            foreach (MethodInfo method in _patchedMethods)
                 harmony.Patch(method, prefix: prefixMethod);
         }
 
         internal static void Unpatch(Harmony harmony)
         {
-            foreach (MethodInfo method in PatchedMethods)
+            foreach (MethodInfo method in _patchedMethods)
                 harmony.Unpatch(method, HarmonyPatchType.All);
         }
     }
