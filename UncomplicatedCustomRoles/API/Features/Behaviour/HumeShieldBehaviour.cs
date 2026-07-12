@@ -46,7 +46,7 @@ namespace UncomplicatedCustomRoles.API.Features.Behaviour
         /// <param name="player"></param>
         public void Apply(Player player)
         {
-            if (Amount > 0)
+            if (Amount > 0 || Maximum > 0)
             {
                 player.HumeShield = Amount;
                 player.MaxHumeShield = Maximum;
