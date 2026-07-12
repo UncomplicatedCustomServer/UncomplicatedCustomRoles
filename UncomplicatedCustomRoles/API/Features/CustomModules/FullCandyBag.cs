@@ -8,25 +8,43 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using InventorySystem.Items.Usables.Scp330;
+using System;
 using System.Collections.Generic;
 using InventorySystem.Items;
+using InventorySystem.Items.Usables.Scp330;
 
-namespace UncomplicatedCustomRoles.API.Features.CustomModules
+namespace UncomplicatedCustomRoles.API.Features.CustomModules;
+
+public class FullCandyBag : CustomModule
 {
-    public class FullCandyBag : CustomModule
+    public override List<string> RequiredArgs => ["candies"];
+
+    internal List<CandyKindID> Kinds => TryGetCastedListValue<CandyKindID>("candies");
+
+    public override bool Validate(out string error)
     {
-        public override List<string> RequiredArgs => new()
+        var invalid = GetInvalidEnumEntries<CandyKindID>("candies");
+        if (invalid.Count > 0)
         {
-            "candies"
-        };
-
-        internal List<CandyKindID> Kinds => TryGetCastedListValue<CandyKindID>("candies");
-
-        public override void OnAdded()
-        {
-            foreach (CandyKindID kind in Kinds)
-                CustomRole.Player.GiveCandy(kind, ItemAddReason.AdminCommand);
+            error =
+                $"'candies' contains invalid candy value(s): {string.Join(", ", invalid)}. Valid values: {string.Join(", ", Enum.GetNames(typeof(CandyKindID)))}.";
+            return false;
         }
+
+        if (Kinds.Count == 0)
+        {
+            error =
+                $"'candies' must list at least one valid candy. Valid values: {string.Join(", ", Enum.GetNames(typeof(CandyKindID)))}.";
+            return false;
+        }
+
+        error = null;
+        return true;
+    }
+
+    public override void OnAdded()
+    {
+        foreach (var kind in Kinds)
+            CustomRole.Player.GiveCandy(kind, ItemAddReason.AdminCommand);
     }
 }

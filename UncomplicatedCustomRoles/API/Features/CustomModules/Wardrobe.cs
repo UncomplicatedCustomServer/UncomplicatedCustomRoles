@@ -11,37 +11,45 @@
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.Integrations;
 
-namespace UncomplicatedCustomRoles.API.Features.CustomModules
+namespace UncomplicatedCustomRoles.API.Features.CustomModules;
+
+internal class Wardrobe : CustomModule
 {
-    internal class Wardrobe : CustomModule
+    public override List<string> RequiredArgs => ["name"];
+
+    private string TargetName => TryGetStringValue("name");
+
+    public override bool Validate(out string error)
     {
-        public override List<string> RequiredArgs => new()
+        if (string.IsNullOrWhiteSpace(TargetName))
         {
-            "name"
-        };
-
-        private string TargetName => TryGetStringValue("name");
-
-        public override void OnAdded()
-        {
-            if (TargetName is null)
-            {
-                ThrowError("Argument 'name' not found!");
-                return;
-            }
-
-            if (SLWardobe.PluginInstance is null)
-                ThrowError("Plugin 'SLWardrobe' not found!\nMake sure it's installed and enabled to use that flag!");
-
-            SLWardobe.ApplySuit(CustomRole.Player, TargetName);
+            error = "'name' must be the name of an SLWardrobe suit; it cannot be empty.";
+            return false;
         }
 
-        public override void OnRemoved()
+        error = null;
+        return true;
+    }
+
+    public override void OnAdded()
+    {
+        if (TargetName is null)
         {
-            if (TargetName is null)
-                return;
-            
-            SLWardobe.RemoveSuit(CustomRole.Player);
+            ThrowError("Argument 'name' not found!");
+            return;
         }
+
+        if (SLWardobe.PluginInstance is null)
+            ThrowError("Plugin 'SLWardrobe' not found!\nMake sure it's installed and enabled to use that flag!");
+
+        SLWardobe.ApplySuit(CustomRole.Player, TargetName);
+    }
+
+    public override void OnRemoved()
+    {
+        if (TargetName is null)
+            return;
+
+        SLWardobe.RemoveSuit(CustomRole.Player);
     }
 }

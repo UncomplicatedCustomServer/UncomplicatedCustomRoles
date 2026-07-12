@@ -8,8 +8,8 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace UncomplicatedCustomRoles.API.Features.CustomModules
+namespace UncomplicatedCustomRoles.API.Features.CustomModules;
+
+internal class AmnesiaResistance : CustomModule
 {
-    internal class AmnesiaResistance : CustomModule
-    { }
 }

@@ -12,43 +12,43 @@ using HarmonyLib;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Extensions;
 
-namespace UncomplicatedCustomRoles.Patches
+namespace UncomplicatedCustomRoles.Patches;
+
+[HarmonyPatch(typeof(NicknameSync), nameof(NicknameSync.Network_customPlayerInfoString), MethodType.Setter)]
+internal class CustomPlayerInfoSyncPatch
 {
-    [HarmonyPatch(typeof(NicknameSync), nameof(NicknameSync.Network_customPlayerInfoString), MethodType.Setter)]
-    internal class CustomPlayerInfoSyncPatch
+    private static bool Prefix(NicknameSync __instance, string value)
     {
-        private static bool Prefix(NicknameSync __instance, string value)
-        {
-            if (CustomInfo.SuppressExternalSync)
-                return true;
-
-            if (__instance._hub is not null && __instance._hub.TryGetSummonedInstance(out SummonedCustomRole role) && role.CustomInfo is not null)
-            {
-                if (role.CustomInfo.Info != value)
-                    role.CustomInfo.Info = value;
-
-                return false;
-            }
-
+        if (CustomInfo.SuppressExternalSync)
             return true;
-        }
-    }
 
-    [HarmonyPatch(typeof(NicknameSync), nameof(NicknameSync.Network_playerInfoToShow), MethodType.Setter)]
-    internal class PlayerInfoAreaSyncPatch
-    {
-        private static void Prefix(NicknameSync __instance, ref PlayerInfoArea value)
+        if (__instance._hub is not null && __instance._hub.TryGetSummonedInstance(out var role) &&
+            role.CustomInfo is not null)
         {
-            if (CustomInfo.SuppressExternalSync)
-                return;
+            if (role.CustomInfo.Info != value)
+                role.CustomInfo.Info = value;
 
-            if (__instance._hub is not null && __instance._hub.TryGetSummonedInstance(out SummonedCustomRole _))
-            {
-                value |= PlayerInfoArea.CustomInfo;
-                value &= ~PlayerInfoArea.Role;
-                value &= ~PlayerInfoArea.Nickname;
-                value &= ~PlayerInfoArea.UnitName;
-            }
+            return false;
+        }
+
+        return true;
+    }
+}
+
+[HarmonyPatch(typeof(NicknameSync), nameof(NicknameSync.Network_playerInfoToShow), MethodType.Setter)]
+internal class PlayerInfoAreaSyncPatch
+{
+    private static void Prefix(NicknameSync __instance, ref PlayerInfoArea value)
+    {
+        if (CustomInfo.SuppressExternalSync)
+            return;
+
+        if (__instance._hub is not null && __instance._hub.TryGetSummonedInstance(out var _))
+        {
+            value |= PlayerInfoArea.CustomInfo;
+            value &= ~PlayerInfoArea.Role;
+            value &= ~PlayerInfoArea.Nickname;
+            value &= ~PlayerInfoArea.UnitName;
         }
     }
 }

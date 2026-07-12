@@ -10,15 +10,11 @@
 
 using System.Collections.Generic;
 
-namespace UncomplicatedCustomRoles.API.Features.CustomModules
-{
-    public class CustomScpAnnouncer : CustomModule
-    {
-        public override List<string> RequiredArgs => new()
-        {
-            "name"
-        };
+namespace UncomplicatedCustomRoles.API.Features.CustomModules;
 
-        internal string RoleName => TryGetStringValue("name", "SCP-404");
-    }
+public class CustomScpAnnouncer : CustomModule
+{
+    public override List<string> RequiredArgs => ["name"];
+
+    internal string RoleName => TryGetStringValue("name", "SCP-404");
 }

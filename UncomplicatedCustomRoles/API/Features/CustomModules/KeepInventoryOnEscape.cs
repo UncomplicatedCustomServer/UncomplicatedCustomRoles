@@ -8,10 +8,21 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace UncomplicatedCustomRoles.API.Features.CustomModules
+namespace UncomplicatedCustomRoles.API.Features.CustomModules;
+
+internal class KeepInventoryOnEscape : CustomModule
 {
-    internal class KeepInventoryOnEscape : CustomModule
+    public bool DropItems => TryGetCastedValue("drop", true);
+
+    public override bool Validate(out string error)
     {
-        public bool DropItems => TryGetValue("drop", true) is not bool drop || drop;
+        if (Args.TryGetValue("drop", out var raw) && raw is not null && !bool.TryParse(raw.ToString(), out _))
+        {
+            error = $"'drop' must be true or false, got '{raw}'.";
+            return false;
+        }
+
+        error = null;
+        return true;
     }
 }

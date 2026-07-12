@@ -23,10 +23,6 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules;
 
 public class CustomKeycard : CustomModule
 {
-    public override List<string> RequiredArgs => ["KeycardType"];
-
-    private KeycardItem _keycardItem;
-
     private static readonly Dictionary<string, ItemType> KeycardTypeAliases = new(StringComparer.OrdinalIgnoreCase)
     {
         { "Management", ItemType.KeycardCustomManagement },
@@ -34,27 +30,39 @@ public class CustomKeycard : CustomModule
         { "MetalCase", ItemType.KeycardCustomMetalCase },
         { "Site02", ItemType.KeycardCustomSite02 },
         { "Site", ItemType.KeycardCustomSite02 },
-        { "TaskForce", ItemType.KeycardCustomTaskForce },
+        { "TaskForce", ItemType.KeycardCustomTaskForce }
     };
+
+    private static readonly string ValidKeycardTypes =
+        string.Join(", ", KeycardTypeAliases.Keys.OrderBy(k => k));
+
+    private KeycardItem _keycardItem;
+    public override List<string> RequiredArgs => ["KeycardType"];
 
     internal ItemType KeycardType
     {
         get
         {
-            string raw = TryGetStringValue("KeycardType")?.Trim();
+            var raw = TryGetStringValue("KeycardType")?.Trim();
             if (string.IsNullOrEmpty(raw))
                 return ItemType.None;
 
-            if (KeycardTypeAliases.TryGetValue(raw, out ItemType alias))
+            if (KeycardTypeAliases.TryGetValue(raw, out var alias))
                 return alias;
 
             return Enum.TryParse(raw, true, out ItemType parsed) ? parsed : ItemType.None;
         }
     }
 
-    internal string ItemName => PlaceholderManager.ApplyPlaceholders(TryGetStringValue("ItemName", "Custom Keycard"), Player, CustomRole.Role);
-    internal string HolderName => PlaceholderManager.ApplyPlaceholders(TryGetStringValue("HolderName", "Unknown"), Player, CustomRole.Role);
-    internal string CardLabel => PlaceholderManager.ApplyPlaceholders(TryGetStringValue("CardLabel", string.Empty), Player, CustomRole.Role);
+    internal string ItemName =>
+        PlaceholderManager.ApplyPlaceholders(TryGetStringValue("ItemName", "Custom Keycard"), Player, CustomRole.Role);
+
+    internal string HolderName =>
+        PlaceholderManager.ApplyPlaceholders(TryGetStringValue("HolderName", "Unknown"), Player, CustomRole.Role);
+
+    internal string CardLabel =>
+        PlaceholderManager.ApplyPlaceholders(TryGetStringValue("CardLabel", string.Empty), Player, CustomRole.Role);
+
     internal KeycardLevels Permissions => BuildPermissions();
     internal Color KeycardColor => ParseColor("KeycardColor", Color.white);
     internal Color PermissionsColor => ParseColor("PermissionsColor", Color.white);
@@ -63,36 +71,102 @@ public class CustomKeycard : CustomModule
     internal string SerialLabel => TryGetStringValue("SerialLabel", "000000000000");
     internal int RankIndex => TryGetCastedValue("RankIndex", 0);
 
-    private static readonly string ValidKeycardTypes =
-        string.Join(", ", KeycardTypeAliases.Keys.OrderBy(k => k));
+    public override bool Validate(out string error)
+    {
+        if (KeycardType == ItemType.None)
+        {
+            error =
+                $"'KeycardType' '{TryGetStringValue("KeycardType")}' is not a valid keycard. Valid values: {ValidKeycardTypes}.";
+            return false;
+        }
+
+        if (!KeycardType.TryGetTemplate<InventorySystem.Items.Keycards.KeycardItem>(out var template) ||
+            !template.Customizable)
+        {
+            error = $"'{KeycardType}' is not a customizable keycard type. Valid values: {ValidKeycardTypes}.";
+            return false;
+        }
+
+        foreach (var level in new[] { "ContainmentLevel", "ArmoryLevel", "AdminLevel" })
+            if (HasArg(level))
+            {
+                var raw = TryGetStringValue(level);
+                if (!int.TryParse(raw, out var value) || value is < 0 or > 3)
+                {
+                    error = $"'{level}' must be a whole number between 0 and 3, got '{raw}'.";
+                    return false;
+                }
+            }
+
+        if (HasArg("WearLevel") && !byte.TryParse(TryGetStringValue("WearLevel"), out _))
+        {
+            error = $"'WearLevel' must be a whole number between 0 and 255, got '{TryGetStringValue("WearLevel")}'.";
+            return false;
+        }
+
+        foreach (var colorParam in new[] { "KeycardColor", "PermissionsColor", "LabelColor" })
+            if (HasArg(colorParam) && !TryParseColor(TryGetStringValue(colorParam)))
+            {
+                error =
+                    $"'{colorParam}' '{TryGetStringValue(colorParam)}' is not a valid hex color. Use a value like #FF0000.";
+                return false;
+            }
+
+        if (HasArg("Permissions"))
+        {
+            var joined = JoinArg("Permissions");
+            if (!string.IsNullOrWhiteSpace(joined) &&
+                !Enum.TryParse(joined.Replace(" ", string.Empty), true, out DoorPermissionFlags _))
+            {
+                error =
+                    $"'Permissions' value '{joined}' contains invalid door permission flag(s). Valid flags: {string.Join(", ", Enum.GetNames(typeof(DoorPermissionFlags)))}.";
+                return false;
+            }
+        }
+
+        error = null;
+        return true;
+    }
+
+    private static bool TryParseColor(string raw)
+    {
+        if (string.IsNullOrEmpty(raw))
+            return false;
+
+        if (!raw.StartsWith("#"))
+            raw = "#" + raw;
+
+        return ColorUtility.TryParseHtmlString(raw, out _);
+    }
+
+    private string JoinArg(string param)
+    {
+        if (Args is null || !Args.TryGetValue(param, out var raw) || raw is null)
+            return string.Empty;
+
+        return raw is string s
+            ? s
+            : raw is IEnumerable enumerable
+                ? string.Join(",", enumerable.Cast<object>().Where(o => o is not null).Select(o => o.ToString()))
+                : raw.ToString();
+    }
 
     public override void OnAdded()
     {
         Timing.CallDelayed(Timing.WaitForOneFrame, () =>
         {
-            if (KeycardType == ItemType.None)
-            {
-                LogManager.Error($"[CustomKeycard] 'KeycardType' is missing or invalid for player {Player?.Nickname}. Valid values: {ValidKeycardTypes}");
-                return;
-            }
-
-            if (!KeycardType.TryGetTemplate<InventorySystem.Items.Keycards.KeycardItem>(out var template) ||
-                !template.Customizable)
-            {
-                LogManager.Error($"[CustomKeycard] '{KeycardType}' is not a customizable keycard type for player {Player?.Nickname}. Valid values: {ValidKeycardTypes}");
-                return;
-            }
-
             _keycardItem = KeycardType switch
             {
                 ItemType.KeycardCustomManagement => KeycardItem.CreateCustomKeycardManagement(
                     Player, ItemName, CardLabel, Permissions, KeycardColor, PermissionsColor, LabelColor),
 
                 ItemType.KeycardCustomMetalCase => KeycardItem.CreateCustomKeycardMetal(
-                    Player, ItemName, HolderName, CardLabel, Permissions, KeycardColor, PermissionsColor, LabelColor, WearLevel, SerialLabel),
+                    Player, ItemName, HolderName, CardLabel, Permissions, KeycardColor, PermissionsColor, LabelColor,
+                    WearLevel, SerialLabel),
 
                 ItemType.KeycardCustomSite02 => KeycardItem.CreateCustomKeycardSite02(
-                    Player, ItemName, HolderName, CardLabel, Permissions, KeycardColor, PermissionsColor, LabelColor, WearLevel),
+                    Player, ItemName, HolderName, CardLabel, Permissions, KeycardColor, PermissionsColor, LabelColor,
+                    WearLevel),
 
                 ItemType.KeycardCustomTaskForce => KeycardItem.CreateCustomKeycardTaskForce(
                     Player, ItemName, HolderName, Permissions, KeycardColor, PermissionsColor, SerialLabel, RankIndex),
@@ -101,21 +175,22 @@ public class CustomKeycard : CustomModule
             };
 
             if (_keycardItem is null)
-                LogManager.Error($"[CustomKeycard] Failed to create keycard of type '{KeycardType}' for player {Player?.Nickname}. This is likely a bug, please report it.");
+                LogManager.Error(
+                    $"[CustomKeycard] Failed to create keycard of type '{KeycardType}' for player {Player?.Nickname}. This is likely a bug, please report it.");
         });
         base.OnAdded();
     }
-    
+
     private KeycardLevels BuildPermissions()
     {
-        bool hasLevels = HasArg("ContainmentLevel") || HasArg("ArmoryLevel") || HasArg("AdminLevel");
+        var hasLevels = HasArg("ContainmentLevel") || HasArg("ArmoryLevel") || HasArg("AdminLevel");
 
         KeycardLevels levels = new(
             TryGetCastedValue("ContainmentLevel", 0),
             TryGetCastedValue("ArmoryLevel", 0),
             TryGetCastedValue("AdminLevel", 0));
 
-        DoorPermissionFlags rawFlags = ParseFlags("Permissions");
+        var rawFlags = ParseFlags("Permissions");
 
         if (!hasLevels && rawFlags == DoorPermissionFlags.None)
             return levels;
@@ -123,23 +198,22 @@ public class CustomKeycard : CustomModule
         return new KeycardLevels(levels.Permissions | rawFlags);
     }
 
-    private bool HasArg(string param) => Args is not null && Args.ContainsKey(param);
+    private bool HasArg(string param)
+    {
+        return Args is not null && Args.ContainsKey(param);
+    }
 
     private DoorPermissionFlags ParseFlags(string param)
     {
-        if (Args is null || !Args.TryGetValue(param, out object raw) || raw is null)
-            return DoorPermissionFlags.None;
-
-        string joined = raw as string ?? (raw is IEnumerable enumerable
-            ? string.Join(",", enumerable.Cast<object>().Where(o => o is not null).Select(o => o.ToString()))
-            : raw.ToString());
+        var joined = JoinArg(param);
 
         if (string.IsNullOrWhiteSpace(joined))
             return DoorPermissionFlags.None;
 
         if (!Enum.TryParse(joined.Replace(" ", string.Empty), true, out DoorPermissionFlags result))
         {
-            LogManager.Warn($"[CustomKeycard] Invalid value '{joined}' for '{param}'. Valid flags: {string.Join(", ", Enum.GetNames(typeof(DoorPermissionFlags)))}. Ignoring it.");
+            LogManager.Warn(
+                $"[CustomKeycard] Invalid value '{joined}' for '{param}'. Valid flags: {string.Join(", ", Enum.GetNames(typeof(DoorPermissionFlags)))}. Ignoring it.");
             return DoorPermissionFlags.None;
         }
 
@@ -148,16 +222,17 @@ public class CustomKeycard : CustomModule
 
     private Color ParseColor(string param, Color def)
     {
-        string raw = TryGetStringValue(param);
+        var raw = TryGetStringValue(param);
         if (raw is null)
             return def;
 
         if (!raw.StartsWith("#"))
             raw = "#" + raw;
 
-        if (!ColorUtility.TryParseHtmlString(raw, out Color color))
+        if (!ColorUtility.TryParseHtmlString(raw, out var color))
         {
-            LogManager.Warn($"[CustomKeycard] Invalid color '{TryGetStringValue(param)}' for '{param}'. Expected a hex color like #FF0000. Using default (white).");
+            LogManager.Warn(
+                $"[CustomKeycard] Invalid color '{TryGetStringValue(param)}' for '{param}'. Expected a hex color like #FF0000. Using default (white).");
             return def;
         }
 

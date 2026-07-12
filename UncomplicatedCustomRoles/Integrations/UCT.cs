@@ -12,42 +12,41 @@ using System;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomRoles.Manager;
 
-namespace UncomplicatedCustomRoles.Integrations
+namespace UncomplicatedCustomRoles.Integrations;
+
+internal static class UCT
 {
-    internal static class UCT
+    private const string PluginName = "UncomplicatedCustomTeams";
+
+    public static bool TryGetCustomTeamId(Player player, out uint teamId)
     {
-        private const string PluginName = "UncomplicatedCustomTeams";
-        
-        public static bool TryGetCustomTeamId(Player player, out uint teamId)
+        teamId = 0;
+        try
         {
-            teamId = 0;
-            try
-            {
-                object summonedTeam = DynamicInvoke.GetMethod(PluginName,
+            var summonedTeam = DynamicInvoke.GetMethod(PluginName,
                     "UncomplicatedCustomTeams.API.TeamExtensions.GetCustomTeam", true)?
-                    .Invoke(null, new object[] { player });
+                .Invoke(null, [player]);
 
-                if (summonedTeam is null)
-                    return false;
-
-                object definition = DynamicInvoke.GetMethod(PluginName,
-                    "UncomplicatedCustomTeams.API.Features.Runtime.SummonedTeam.Definition_get", true)?
-                    .Invoke(summonedTeam, null);
-
-                if (definition is null)
-                    return false;
-
-                teamId = Convert.ToUInt32(DynamicInvoke.GetMethod(PluginName,
-                    "UncomplicatedCustomTeams.API.Features.Definitions.Team.Id_get", true)?
-                    .Invoke(definition, null));
-
-                return true;
-            }
-            catch (Exception e)
-            {
-                LogManager.Error(e.ToString());
+            if (summonedTeam is null)
                 return false;
-            }
+
+            var definition = DynamicInvoke.GetMethod(PluginName,
+                    "UncomplicatedCustomTeams.API.Features.Runtime.SummonedTeam.Definition_get", true)?
+                .Invoke(summonedTeam, null);
+
+            if (definition is null)
+                return false;
+
+            teamId = Convert.ToUInt32(DynamicInvoke.GetMethod(PluginName,
+                    "UncomplicatedCustomTeams.API.Features.Definitions.Team.Id_get", true)?
+                .Invoke(definition, null));
+
+            return true;
+        }
+        catch (Exception e)
+        {
+            LogManager.Error(e.ToString());
+            return false;
         }
     }
 }

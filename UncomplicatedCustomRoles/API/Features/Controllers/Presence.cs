@@ -5,24 +5,25 @@ using MEC;
 using UncomplicatedCustomRoles.API.Features.Messages;
 using UncomplicatedCustomRoles.Manager;
 
-namespace UncomplicatedCustomRoles.API.Features.Controllers
+namespace UncomplicatedCustomRoles.API.Features.Controllers;
+
+internal static class Presence
 {
-    internal static class Presence
+    internal static IEnumerator<float> PresenceCoroutine()
     {
-        internal static IEnumerator<float> PresenceCoroutine()
+        while (true)
         {
-            while (true)
+            try
             {
-                try
-                {
-                    HttpQuery.Post("https://api.ucserver.it/v3/plugin/ucr/presence", JsonSerializer.Serialize(new PresenceMessage()), "application/json");
-                }
-                catch (Exception e)
-                {
-                    LogManager.Error($"Failed to send presence data: {e.Message}");
-                }
-                yield return Timing.WaitForSeconds(60f);
+                HttpQuery.Post("https://api.ucserver.it/v3/plugin/ucr/presence",
+                    JsonSerializer.Serialize(new PresenceMessage()), "application/json");
             }
+            catch (Exception e)
+            {
+                LogManager.Error($"Failed to send presence data: {e.Message}");
+            }
+
+            yield return Timing.WaitForSeconds(60f);
         }
     }
 }

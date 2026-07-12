@@ -6,15 +6,14 @@
 // -----------------------------------------------------------------------
 
 
-namespace UncomplicatedCustomRoles.Compatibility.PreviousVersionElements.Enums
+namespace UncomplicatedCustomRoles.Compatibility.PreviousVersionElements.Enums;
+
+public enum ExiledAmmoType
 {
-    public enum ExiledAmmoType
-    {
-        None,
-        Nato556,
-        Nato762,
-        Nato9,
-        Ammo12Gauge,
-        Ammo44Cal,
-    }
+    None,
+    Nato556,
+    Nato762,
+    Nato9,
+    Ammo12Gauge,
+    Ammo44Cal
 }
