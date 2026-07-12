@@ -18,6 +18,8 @@ namespace UncomplicatedCustomRoles.API.Features.Controllers
     {
         private SummonedCustomRole _role;
 
+        private bool _wasInEscapeZone;
+
         public void Init(SummonedCustomRole role)
         {
             _role = role;
@@ -25,9 +27,22 @@ namespace UncomplicatedCustomRoles.API.Features.Controllers
 
         private void Update()
         {
+            if (_role is null || PlayerEventHandler.Instance is null)
+                return;
+
+            bool inZone = false;
             foreach (Bounds escapeZone in global::Escape.EscapeZones)
                 if (escapeZone.Contains(_role.Player.Position))
-                    PlayerEventHandler.Instance.OnEscaping(new(_role.Player.ReferenceHub, _role.Player.Role, RoleTypeId.ChaosConscript, global::Escape.EscapeScenarioType.Custom, escapeZone));
+                {
+                    inZone = true;
+
+                    if (!_wasInEscapeZone)
+                        PlayerEventHandler.Instance.OnEscaping(new(_role.Player.ReferenceHub, _role.Player.Role, RoleTypeId.ChaosConscript, global::Escape.EscapeScenarioType.Custom, escapeZone));
+
+                    break;
+                }
+
+            _wasInEscapeZone = inZone;
         }
 
         private void OnDestroy()
