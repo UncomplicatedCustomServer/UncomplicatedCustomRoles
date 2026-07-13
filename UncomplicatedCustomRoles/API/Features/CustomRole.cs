@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is a part of the UncomplicatedCustomRoles project.
  * 
  * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
@@ -230,6 +230,13 @@ namespace UncomplicatedCustomRoles.API.Features
         /// Gets or sets whether the custom role should be evaluated during normal spawn events or not
         /// </summary>
         public virtual bool IgnoreSpawnSystem { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets an optional custom team/faction identifier (e.g. "SerpentHand", "UIU").<br></br>
+        /// Used by EndConditionsExtension for custom win conditions and escape-based scoring.
+        /// When null or empty, the role uses the standard <see cref="Team"/> for round-end evaluation.
+        /// </summary>
+        public virtual string CustomTeamId { get; set; } = null;
 
         /// <summary>
         /// Invoked when the custom role is spawned

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is a part of the UncomplicatedCustomRoles project.
  * 
  * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
@@ -202,6 +202,9 @@ namespace UncomplicatedCustomRoles.API.Features
                     CustomInfo.Role = Role.RoleAppearance.GetFullName();
                 });
             }
+
+            // Raise the public event for external plugins/extensions
+            UcrEvents.RaiseCustomRoleAssigned(Player, Role, this);
         }
 
         /// <summary>
@@ -294,6 +297,10 @@ namespace UncomplicatedCustomRoles.API.Features
         public void Destroy()
         {
             LogManager.Silent($"Destroying instance {Id} of CR {Role.Id} of PL {Player}");
+
+            // Raise the public event before cleanup so extensions can still read state
+            UcrEvents.RaiseCustomRoleRemoved(Player, Role, this);
+
             Remove();
             List.TryRemove(Id, out _);
             _cachedListByPlayerId.TryRemove(Player.PlayerId, out _);

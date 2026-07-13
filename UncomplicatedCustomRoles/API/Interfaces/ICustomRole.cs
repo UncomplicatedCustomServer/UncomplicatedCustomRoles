@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is a part of the UncomplicatedCustomRoles project.
  * 
  * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
@@ -82,5 +82,12 @@ namespace UncomplicatedCustomRoles.API.Interfaces
         public abstract List<object>? CustomFlags { get; set; }
 
         public abstract bool IgnoreSpawnSystem { get; set; }
+
+        /// <summary>
+        /// Gets or sets an optional custom team/faction identifier (e.g. "SerpentHand", "UIU").
+        /// Used by EndConditionsExtension for custom win conditions and escape-based scoring.
+        /// When null or empty, the role uses the standard <see cref="Team"/> for round-end evaluation.
+        /// </summary>
+        public abstract string CustomTeamId { get; set; }
     }
 }

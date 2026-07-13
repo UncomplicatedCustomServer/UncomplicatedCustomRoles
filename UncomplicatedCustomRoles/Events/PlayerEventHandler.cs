@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is a part of the UncomplicatedCustomRoles project.
  * 
  * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
@@ -325,10 +325,15 @@ namespace UncomplicatedCustomRoles.Events
                     return;
                 }
 
+                bool isCuffed = Escaping.Player.IsDisarmed;
+
                 if (summoned.Role.CanEscape && (summoned.Role.RoleAfterEscape is null || summoned.Role.RoleAfterEscape.Count < 1))
                 {
                     LogManager.Debug($"Player with the role {summoned.Role.Id} ({summoned.Role.Name}) evaluated for a natural respawn!");
                     Escaping.IsAllowed = true;
+
+                    // Raise escape event for extensions (natural escape, no new custom role)
+                    UcrEvents.RaiseCustomRoleEscaped(Escaping.Player, summoned.Role, summoned, isCuffed);
                     return;
                 }
 
@@ -346,6 +351,9 @@ namespace UncomplicatedCustomRoles.Events
                 if (NewRole.Value is null)
                 {
                     Escaping.IsAllowed = true;
+
+                    // Raise escape event for extensions (natural escape)
+                    UcrEvents.RaiseCustomRoleEscaped(Escaping.Player, summoned.Role, summoned, isCuffed);
                     return;
                 }
 
@@ -358,6 +366,9 @@ namespace UncomplicatedCustomRoles.Events
                         {
                             Escaping.NewRole = role;
                             Escaping.IsAllowed = true;
+
+                            // Raise escape event for extensions (escape to internal role)
+                            UcrEvents.RaiseCustomRoleEscaped(Escaping.Player, summoned.Role, summoned, isCuffed);
                         }
                     }
                 }
@@ -378,6 +389,9 @@ namespace UncomplicatedCustomRoles.Events
                             LogManager.Silent($"Successfully activated the call to method SpawnManager::SummonCustomSubclass(<...>) as the player is not inside the Escape::Bucket bucket! - Adding it...");
                             API.Features.Escape.Bucket.Add(Escaping.Player.PlayerId);
                             SpawnManager.SummonCustomSubclass(Escaping.Player, role.Id);
+
+                            // Raise escape event for extensions (escape to custom role)
+                            UcrEvents.RaiseCustomRoleEscaped(Escaping.Player, summoned.Role, summoned, isCuffed, role);
                         }
                         else
                             LogManager.Silent($"Canceled call to method SpawnManager::SummonCustomSubclass(<...>) due to the presence of the player inside the Escape::Bucket! - Event already fired!");
