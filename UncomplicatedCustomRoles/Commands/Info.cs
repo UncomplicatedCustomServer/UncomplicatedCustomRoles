@@ -57,7 +57,7 @@ public class Info : IUCRCommand
             { "<color=#757575>👤</color> Role:", $"<color={role.Role.GetColor().ToHex()}><b>{role.Role}</b></color>" },
             {
                 "<color=#459426>💳</color> Badge:",
-                $"<color={(role.BadgeColor != null && SpawnManager.colorMap.TryGetValue(role.BadgeColor, out var value) ? value : "white")}>{(role.BadgeName != null ? role.BadgeName.Replace("@hidden", string.Empty) : string.Empty)}</color>{(role.BadgeName != null && role.BadgeName.EndsWith("@hidden") ? " [HIDDEN]" : string.Empty)}"
+                $"<color={(role.BadgeColor != null && SpawnManager.ColorMap.TryGetValue(role.BadgeColor, out var value) ? value : "white")}>{(role.BadgeName != null ? role.BadgeName.Replace("@hidden", string.Empty) : string.Empty)}</color>{(role.BadgeName != null && role.BadgeName.EndsWith("@hidden") ? " [HIDDEN]" : string.Empty)}"
             },
             { "<color=#ff0000>❤️</color> Health:", $"<b>{role?.Health.Amount ?? 0}</b>/{role?.Health.Maximum ?? 0}" },
             { "<color=#00ff00>💉</color> AHP:", $"<b>{role?.Ahp.Amount ?? 0}</b>/{role?.Ahp.Limit ?? 0}" },

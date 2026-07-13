@@ -740,7 +740,7 @@ public class SummonedCustomRole
         if (Plugin.HttpManager.Credits.TryGetValue(player.authManager.UserId, out var tag) &&
             !string.IsNullOrEmpty(tag.First) && !string.IsNullOrEmpty(tag.Second))
         {
-            if (!SpawnManager.colorMap.TryGetValue(tag.Second, out var tagColor))
+            if (!SpawnManager.ColorMap.TryGetValue(tag.Second, out var tagColor))
                 tagColor = "white";
 
             if (Plugin.HttpManager.IsJobRole.Contains(player.authManager.UserId))

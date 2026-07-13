@@ -143,9 +143,9 @@ internal static class RoleValidator
         }
 
         if (nameUsable && colorUsable && role.BadgeColor is not "default" &&
-            !SpawnManager.colorMap.ContainsKey(role.BadgeColor))
+            !SpawnManager.ColorMap.ContainsKey(role.BadgeColor))
             warnings.Add(
-                $"'badge_color' '{role.BadgeColor}' is not a badge color the game knows, clients may show it as white. Known colors: default, {string.Join(", ", SpawnManager.colorMap.Keys)}.");
+                $"'badge_color' '{role.BadgeColor}' is not a badge color the game knows, clients may show it as white. Known colors: default, {string.Join(", ", SpawnManager.ColorMap.Keys)}.");
     }
 
     private static void ValidateRoles(ICustomRole role, List<string> errors, List<string> warnings)

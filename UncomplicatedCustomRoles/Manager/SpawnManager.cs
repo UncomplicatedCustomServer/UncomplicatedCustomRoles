@@ -44,8 +44,9 @@ namespace UncomplicatedCustomRoles.Manager;
 
 internal class SpawnManager
 {
-    public static readonly IReadOnlyDictionary<string, string> colorMap = new Dictionary<string, string>
+    public static readonly IReadOnlyDictionary<string, string> ColorMap = new Dictionary<string, string>
     {
+        { "white", "#FFFFFF" },
         { "pink", "#FF96DE" },
         { "red", "#C50000" },
         { "brown", "#944710" },
