@@ -23,7 +23,7 @@ namespace UncomplicatedCustomRoles.Patches;
 
 internal class PlayerEventPrefix
 {
-    private static IEnumerable<MethodInfo> _patchedMethods = new List<MethodInfo>();
+    private static List<MethodInfo> _patchedMethods = [];
 
     private static readonly Dictionary<Type, string> EventNameCache = new();
 
@@ -62,7 +62,7 @@ internal class PlayerEventPrefix
 
         _patchedMethods = typeof(PlayerEvents).GetMethods().Where(m =>
             m.Name.StartsWith("On") && m.GetParameters().Length > 0 &&
-            typeof(IPlayerEvent).IsAssignableFrom(m.GetParameters()[0].ParameterType));
+            typeof(IPlayerEvent).IsAssignableFrom(m.GetParameters()[0].ParameterType)).ToList();
 
         foreach (var method in _patchedMethods)
             harmony.Patch(method, prefixMethod);

@@ -35,6 +35,8 @@ internal class Plugin : Plugin<Config>
     internal static HttpManager HttpManager;
 
     private Harmony _harmony;
+
+    private bool _welcomeShown;
     public override string Name => "UncomplicatedCustomRoles";
 
     public override string Description => "Customize your SCP:SL server with Custom Roles!";
@@ -107,15 +109,19 @@ internal class Plugin : Plugin<Config>
 
         ScriptedEvents.UnregisterCustomActions();
 
-        PlayerEventPrefix.Unpatch(_harmony);
-
-        _harmony.UnpatchAll(_harmony.Id);
+        if (_harmony is not null)
+        {
+            PlayerEventPrefix.Unpatch(_harmony);
+            _harmony.UnpatchAll(_harmony.Id);
+            _harmony = null;
+        }
 
         TeamPatchManager.Shutdown();
 
         EventHandlerBase.UnregisterAll();
 
-        HttpManager.UnregisterEvents();
+        HttpManager?.UnregisterEvents();
+        HttpManager = null;
 
         Instance = null;
     }
@@ -128,10 +134,11 @@ internal class Plugin : Plugin<Config>
         // Register ScriptedEvents integration
         ScriptedEvents.RegisterCustomActions();
 
-        // Run the import managet
+        // Run the import manager
         ImportManager.Init();
 
-        if (Config is not { EnableBasicLogs: true }) return;
+        if (_welcomeShown || Config is not { EnableBasicLogs: true }) return;
+        _welcomeShown = true;
         LogManager.Info($"Thanks for using UncomplicatedCustomRoles v{Version.ToString(3)} by {Author}!",
             ConsoleColor.Blue);
         LogManager.Info(

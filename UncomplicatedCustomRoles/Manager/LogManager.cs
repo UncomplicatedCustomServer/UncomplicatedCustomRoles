@@ -55,7 +55,7 @@ internal class LogManager
 
     public static void Error(string message, string error = "CS0000")
     {
-        History.Add(new LogEntry(DateTimeOffset.Now.ToUnixTimeMilliseconds(), nameof(LogLevel.Warn), message, error));
+        History.Add(new LogEntry(DateTimeOffset.Now.ToUnixTimeMilliseconds(), nameof(LogLevel.Error), message, error));
         Logger.Error(message);
     }
 

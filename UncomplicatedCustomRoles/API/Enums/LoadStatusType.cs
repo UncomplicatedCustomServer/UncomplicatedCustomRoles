@@ -14,5 +14,6 @@ public enum LoadStatusType
 {
     Success,
     ValidatorError,
-    SameId
+    SameId,
+    Denied
 }

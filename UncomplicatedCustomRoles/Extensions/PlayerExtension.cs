@@ -34,6 +34,39 @@ public static class PlayerExtension
         return SummonedCustomRole.TryGet(player, out _);
     }
 
+    /// <summary>
+    ///     Check if a <see cref="Player" /> is currently playing the <see cref="ICustomRole" /> with the given Id.
+    /// </summary>
+    /// <param name="player"></param>
+    /// <param name="id"></param>
+    /// <returns><see cref="true" /> if the player is playing the given custom role.</returns>
+    public static bool HasCustomRole(this Player player, int id)
+    {
+        return SummonedCustomRole.TryGet(player, out var summoned) && summoned.Role.Id == id;
+    }
+
+    /// <summary>
+    ///     Get the <see cref="ICustomRole" /> definition the <see cref="Player" /> is currently playing.
+    /// </summary>
+    /// <param name="player"></param>
+    /// <returns>The <see cref="ICustomRole" /> or <see cref="null" /> if the player has no custom role.</returns>
+    public static ICustomRole GetCustomRole(this Player player)
+    {
+        return SummonedCustomRole.Get(player)?.Role;
+    }
+
+    /// <summary>
+    ///     Try to get the <see cref="ICustomRole" /> definition the <see cref="Player" /> is currently playing.
+    /// </summary>
+    /// <param name="player"></param>
+    /// <param name="role"></param>
+    /// <returns><see cref="true" /> if the player has a custom role.</returns>
+    public static bool TryGetCustomRole(this Player player, out ICustomRole role)
+    {
+        role = player.GetCustomRole();
+        return role is not null;
+    }
+
     internal static void ForceApplyEffect(this ReferenceHub hub, string effectName, byte intensity, float duration,
         bool addDuration = false)
     {
@@ -49,10 +82,14 @@ public static class PlayerExtension
     /// </summary>
     /// <param name="player"></param>
     /// <param name="role"></param>
-    public static void SetCustomRoleSync(this Player player, ICustomRole role)
+    /// <returns>The created <see cref="SummonedCustomRole" /> instance or <see cref="null" /> if the spawn failed.</returns>
+    public static SummonedCustomRole SetCustomRoleSync(this Player player, ICustomRole role)
     {
+        if (role is null)
+            return null;
+
         SpawnManager.ClearCustomTypes(player);
-        SpawnManager.SummonCustomSubclass(player, role.Id);
+        return SummonedCustomRole.Summon(player, role);
     }
 
     /// <summary>
@@ -60,10 +97,10 @@ public static class PlayerExtension
     /// </summary>
     /// <param name="player"></param>
     /// <param name="role"></param>
-    public static void SetCustomRoleSync(this Player player, int role)
+    /// <returns>The created <see cref="SummonedCustomRole" /> instance or <see cref="null" /> if the spawn failed.</returns>
+    public static SummonedCustomRole SetCustomRoleSync(this Player player, int role)
     {
-        SpawnManager.ClearCustomTypes(player);
-        SpawnManager.SummonCustomSubclass(player, role);
+        return CustomRole.TryGet(role, out var customRole) ? player.SetCustomRoleSync(customRole) : null;
     }
 
     /// <summary>

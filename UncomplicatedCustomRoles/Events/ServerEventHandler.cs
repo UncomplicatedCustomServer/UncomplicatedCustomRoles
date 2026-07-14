@@ -62,6 +62,14 @@ internal class ServerEventHandler : EventHandlerBase
     public void OnRoundRestarted()
     {
         Announcer.SavedCustomAnnouncements.Clear();
+
+        RespawnInventoryQueue.Clear();
+        RagdollAppearanceQueue.Clear();
+        TerminationQueue.Clear();
+        FirstRoundPlayers.Clear();
+        Spawn.SpawnQueue.Clear();
+        Spawn.Spawning.Clear();
+        API.Features.Escape.Bucket.Clear();
     }
 
     public void OnWaveRespawning(WaveRespawningEventArgs ev)

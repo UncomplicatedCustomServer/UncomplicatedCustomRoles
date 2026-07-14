@@ -53,7 +53,7 @@ public class CompatibilityManager
 
             role = YamlConfigParser.Deserializer.Deserialize<CustomRole>(content);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // Try to decode older roles in order to make everything work
             foreach (var kvp in previousVersionRoles)
@@ -72,7 +72,7 @@ public class CompatibilityManager
                 }
 
             if (role is null)
-                throw ex;
+                throw;
         }
 
         RolePaths.TryAdd(role, file);
@@ -141,7 +141,7 @@ public class CompatibilityManager
         var el = pieces.FirstOrDefault(l => l.Contains(rowPart)) ?? "N/D";
 
         if (removeSpaces)
-            el.Replace(" ", string.Empty);
+            el = el.Replace(" ", string.Empty);
 
         return el.Replace($"{rowPart} ", string.Empty).Replace(rowPart, string.Empty);
     }

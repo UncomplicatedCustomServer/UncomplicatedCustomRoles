@@ -85,8 +85,8 @@ public class SummonedCustomRole
         else
             _cachedCountByRoleId[role.Id] = 1;
 
-        if (Role is EventCustomRole eventCustomRole)
-            eventCustomRole.OnSpawned(this);
+        if (Role is CustomRole customRole)
+            customRole.OnSpawned(this);
 
         // Appearance handling
         if (Appearance != RoleTypeId.None)
@@ -186,7 +186,7 @@ public class SummonedCustomRole
     ///     features
     /// </summary>
     public bool IsDefaultCoroutineRole =>
-        (Role.HumeShield?.Amount ?? 0) > 0 && (Role.HumeShield?.RegenerationAmount ?? 0) > 0;
+        (Role.HumeShield?.Maximum ?? 0) > 0 && (Role.HumeShield?.RegenerationAmount ?? 0) > 0;
 
     /// <summary>
     ///     Gets if the current SummonedCustomRole is valid or not
@@ -333,8 +333,7 @@ public class SummonedCustomRole
                 _customModules.Remove(module);
             }
 
-            if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null &&
-                Role.BadgeColor.Length > 2 && Badge is not null && Badge is Triplet<string, string, bool> badge)
+            if (Badge is { } badge)
             {
                 Player.ReferenceHub.serverRoles.SetText(badge.First);
                 Player.ReferenceHub.serverRoles.SetColor(badge.Second);
@@ -362,14 +361,13 @@ public class SummonedCustomRole
             DisguiseTeam.Remove(Player.PlayerId);
 
             // Reset ammo limit
-            if (Role.Ammo is Dictionary<ItemType, ushort> ammoList && ammoList.Count > 0)
-                foreach (var ammo in ammoList.Keys)
+            if (Role.Ammo is { Count: > 0 })
+                foreach (var ammo in Role.Ammo.Keys)
                     Player.ResetAmmoLimit(ammo);
 
             // Reset category limit
-            if (Role.CustomInventoryLimits is Dictionary<ItemCategory, sbyte> inventoryLimits &&
-                inventoryLimits.Count > 0)
-                foreach (var category in inventoryLimits.Keys)
+            if (Role.CustomInventoryLimits is { Count: > 0 })
+                foreach (var category in Role.CustomInventoryLimits.Keys)
                     Player.ResetCategoryLimit(category);
 
             if (IsCustomNickname)
@@ -385,8 +383,8 @@ public class SummonedCustomRole
             if (Appearance != RoleTypeId.None && LabApiExtensions.IsAvailable)
                 LabApiExtensions.RemoveFakeRole(Player);
 
-            if (Role is EventCustomRole eventCustomRole)
-                eventCustomRole.OnRemoved(this);
+            if (Role is CustomRole customRole)
+                customRole.OnRemoved(this);
         }
         catch (Exception e)
         {
@@ -402,7 +400,12 @@ public class SummonedCustomRole
         _eventModuleCount = 0;
 
         _customModules.Clear();
+
+        var wasValid = _internalValid;
         _internalValid = false;
+
+        if (wasValid)
+            API.Events.CustomRoleEvents.OnRemoved(new API.Events.CustomRoleRemovedEventArgs(this));
     }
 
     /// <summary>
@@ -587,7 +590,7 @@ public class SummonedCustomRole
     /// <returns></returns>
     public static SummonedCustomRole Get(string id)
     {
-        return List.Values.FirstOrDefault(scr => scr.Id == id);
+        return id is not null && List.TryGetValue(id, out var role) ? role : null;
     }
 
     /// <summary>

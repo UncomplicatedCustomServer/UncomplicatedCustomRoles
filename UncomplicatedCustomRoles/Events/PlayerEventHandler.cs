@@ -170,11 +170,9 @@ internal class PlayerEventHandler : EventHandlerBase
 
         // Try change appearance of the killer
         if (ev.Attacker.TryGetSummonedInstance(out var attackerCustomRole) &&
-            attackerCustomRole.TryGetModule(out ChangeAppearanceOnKill changeAppearanceOnKill))
+            attackerCustomRole.TryGetModule(out ChangeAppearanceOnKill changeAppearanceOnKill) &&
+            !(changeAppearanceOnKill.Forever && changeAppearanceOnKill.AlreadyChanged))
         {
-            if (changeAppearanceOnKill.Forever && changeAppearanceOnKill.AlreadyChanged)
-                return;
-
             changeAppearanceOnKill.AlreadyChanged = true;
 
             // Change
@@ -203,8 +201,6 @@ internal class PlayerEventHandler : EventHandlerBase
                     }
                 });
         }
-
-        // DON'T DO ANYTHING HERE AS THERE ARE TWO return UP THERE!
     }
 
     public void OnRagdollSpawn(PlayerSpawningRagdollEventArgs ev)
@@ -227,11 +223,11 @@ internal class PlayerEventHandler : EventHandlerBase
         if (ev.Player is null)
             return;
 
-        // Let's clear for custom types
-        SpawnManager.ClearCustomTypes(ev.Player);
-
         if (!ev.IsAllowed)
             return;
+
+        // Let's clear for custom types
+        SpawnManager.ClearCustomTypes(ev.Player);
 
         if (!Round.IsRoundStarted)
             return;
@@ -293,7 +289,7 @@ internal class PlayerEventHandler : EventHandlerBase
                     return;
                 }
 
-                if (attackerCustomRole?.HasModule<PacifismUntilDamage>() ?? false)
+                if (attackerCustomRole.HasModule<PacifismUntilDamage>())
                     attackerCustomRole.RemoveModules<PacifismUntilDamage>();
 
                 if (Hurting.DamageHandler is StandardDamageHandler standardDamageHandler)
@@ -311,7 +307,7 @@ internal class PlayerEventHandler : EventHandlerBase
                     return;
                 }
 
-                if (playerCustomRole?.HasModule<PacifismUntilDamage>() ?? false)
+                if (playerCustomRole.HasModule<PacifismUntilDamage>())
                     Hurting.IsAllowed = false;
             }
         }
@@ -401,7 +397,7 @@ internal class PlayerEventHandler : EventHandlerBase
                     {
                         LogManager.Silent(
                             "Successfully activated the call to method SpawnManager::SummonCustomSubclass(<...>) as the player is not inside the Escape::Bucket bucket! - Adding it...");
-                        API.Features.Escape.Bucket.Add(Escaping.Player.PlayerId);
+                        API.Features.Escape.AddBucket(Escaping.Player);
                         SpawnManager.SummonCustomSubclass(Escaping.Player, role.Id);
                     }
                     else

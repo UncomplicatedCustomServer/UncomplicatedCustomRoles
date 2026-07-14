@@ -134,6 +134,15 @@ internal class SpawnManager
                 return;
             }
 
+            var spawningArgs = new API.Events.CustomRoleSpawningEventArgs(player, Role);
+            API.Events.CustomRoleEvents.OnSpawning(spawningArgs);
+            if (!spawningArgs.IsAllowed)
+            {
+                LogManager.Debug(
+                    $"Spawn of player {player.Nickname} as CustomRole {Role.Name} ({Role.Id}) denied by an external plugin through CustomRoleEvents.Spawning");
+                return;
+            }
+
             // This will allow us to avoid the loop of another OnSpawning
             Spawn.Spawning.Add(player.PlayerId);
 
@@ -252,28 +261,41 @@ internal class SpawnManager
                         break;
                 }
 
-            SummonSubclassApplier(player, Role);
+            SummonSubclassApplier(player, Role, true);
         }
         catch (Exception ex)
         {
             LogManager.Error(ex.ToString(), "SP0002");
         }
+        finally
+        {
+            Spawn.Spawning.Remove(player.PlayerId);
+        }
     }
 
-    public static void SummonSubclassApplier(Player Player, ICustomRole Role)
+    internal static void SummonSubclassApplier(Player Player, ICustomRole Role, bool spawningEventAlreadyFired = false)
     {
         try
         {
-            if (Role.CustomInventoryLimits is Dictionary<ItemCategory, sbyte> inventoryLimits &&
-                inventoryLimits.Count > 0)
+            if (!spawningEventAlreadyFired)
+            {
+                var spawningArgs = new API.Events.CustomRoleSpawningEventArgs(Player, Role);
+                API.Events.CustomRoleEvents.OnSpawning(spawningArgs);
+                if (!spawningArgs.IsAllowed)
+                {
+                    LogManager.Debug(
+                        $"Spawn of player {Player.Nickname} as CustomRole {Role.Name} ({Role.Id}) denied by an external plugin through CustomRoleEvents.Spawning");
+                    return;
+                }
+            }
+
+            if (Role.CustomInventoryLimits is { Count: > 0 } inventoryLimits)
                 foreach (var category in inventoryLimits)
                     Player.SetCategoryLimit(category.Key, category.Value);
 
             Player.ResetInventory(Role.Inventory);
 
-            LogManager.Silent($"Can we give any CustomItem? {Role.CustomItemsInventory.Count}");
-
-            if (Role.CustomItemsInventory.Any())
+            if (Role.CustomItemsInventory is { Count: > 0 })
                 foreach (var itemId in Role.CustomItemsInventory)
                     if (!Player.IsInventoryFull)
                         try
@@ -297,7 +319,7 @@ internal class SpawnManager
 
             Player.ClearAmmo();
 
-            if (Role.Ammo is not null && Role.Ammo.GetType() == typeof(Dictionary<ItemType, ushort>) && Role.Ammo.Any())
+            if (Role.Ammo is { Count: > 0 })
                 foreach (var Ammo in Role.Ammo)
                 {
                     if (Ammo.Value > Player.GetAmmoLimit(Ammo.Key))
@@ -372,13 +394,13 @@ internal class SpawnManager
 
             LogManager.Silent($"Found {PermanentEffects.Count} permament effects");
 
-            if (Role.SpawnBroadcast != string.Empty)
+            if (!string.IsNullOrEmpty(Role.SpawnBroadcast))
             {
                 Player.ClearBroadcasts();
                 Player.SendBroadcast(Role.SpawnBroadcast, Role.SpawnBroadcastDuration);
             }
 
-            if (Role.SpawnHint != string.Empty)
+            if (!string.IsNullOrEmpty(Role.SpawnHint))
                 Player.SendHint(Role.SpawnHint, Role.SpawnHintDuration);
 
             Triplet<string, string, bool>? Badge = null;
@@ -440,6 +462,8 @@ internal class SpawnManager
             if (API.Features.Escape.Bucket.Contains(Player.PlayerId))
                 API.Features.Escape.Bucket.Remove(Player.PlayerId);
 
+            API.Events.CustomRoleEvents.OnSpawned(new API.Events.CustomRoleSpawnedEventArgs(roleInstance));
+
             LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})! [2VDS]");
         }
         catch (Exception ex)
@@ -466,27 +490,13 @@ internal class SpawnManager
             }
             else
             {
-                var Elements = kvp.Key.Split(' ').ToList();
+                var Elements = kvp.Key.Split(' ');
 
-                if (Elements.Count != 4)
+                if (Elements.Length != 4 || Elements[0] is not "cuffed" || Elements[1] is not "by")
                 {
                     LogManager.Warn(
-                        $"Failed to parse an EscapeRole[key]: syntax should be cuffed by <source> <id>, found {Elements.Count} args!\nSource: {kvp.Key}");
-                    return new KeyValuePair<bool, object>(false, RoleTypeId.Spectator);
-                }
-
-                if (Elements[0] is not "cuffed")
-                {
-                    LogManager.Warn(
-                        $"Failed to parse an EscapeRole[key]: syntax should be cuffed by <source> <id>, found {Elements.Count} args!\nSource: {kvp.Key}");
-                    return new KeyValuePair<bool, object>(false, RoleTypeId.Spectator);
-                }
-
-                if (Elements[1] is not "by")
-                {
-                    LogManager.Warn(
-                        $"Failed to parse an EscapeRole[key]: syntax should be cuffed by <source> <id>, found {Elements.Count} args!\nSource: {kvp.Key}");
-                    return new KeyValuePair<bool, object>(false, RoleTypeId.Spectator);
+                        $"Failed to parse an EscapeRole[key]: syntax should be 'cuffed by <source> <id>' (4 args), found {Elements.Length} args!\nSource: {kvp.Key}");
+                    continue;
                 }
 
                 if ((Elements[2] is "InternalTeam" || Elements[2] is "IT") && Enum.TryParse(Elements[3], out Team team))
@@ -560,12 +570,16 @@ internal class SpawnManager
             return null;
         }
 
-        Dictionary<RoleTypeId, List<ICustomRole>> RolePercentage = new();
-        foreach (var evaluated in SpawnEvaluatedRoles)
-            RolePercentage[evaluated] = [];
+        if (!SpawnEvaluatedRoles.Contains(NewRole))
+            return null;
 
-        foreach (var Role in CustomRole.CustomRoles.Values.Where(cr => cr.SpawnSettings is not null))
-            if (!Role.IgnoreSpawnSystem && Player.ReadyList.Count() >= Role.SpawnSettings?.MinPlayers &&
+        var readyPlayers = Player.ReadyList.Count();
+        List<ICustomRole> candidates = [];
+
+        foreach (var Role in CustomRole.CustomRoles.Values)
+            if (Role.SpawnSettings is not null && !Role.IgnoreSpawnSystem &&
+                Role.SpawnSettings.CanReplaceRoles is { } canReplaceRoles && canReplaceRoles.Contains(NewRole) &&
+                readyPlayers >= Role.SpawnSettings.MinPlayers &&
                 SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
             {
                 if (Role.SpawnSettings.RequiredPermission is not null)
@@ -613,20 +627,13 @@ internal class SpawnManager
                         }
                     }
                 }
-
-                foreach (var RoleType in Role.SpawnSettings.CanReplaceRoles)
-                {
-                    if (!RolePercentage.TryGetValue(RoleType, out var bucket))
-                        continue;
-
-                    for (var a = 0; a < Role.SpawnSettings.SpawnChance; a++)
-                        bucket.Add(Role);
-                }
+                
+                for (var a = 0; a < Role.SpawnSettings.SpawnChance; a++)
+                    candidates.Add(Role);
             }
 
-        if (RolePercentage.ContainsKey(NewRole))
-            if (Random.Range(0, 100) < RolePercentage[NewRole].Count)
-                return CustomRole.CustomRoles[RolePercentage[NewRole].RandomItem().Id];
+        if (candidates.Count > 0 && Random.Range(0, 100) < candidates.Count)
+            return candidates.RandomItem();
 
         return null;
     }

@@ -8,8 +8,10 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using PlayerRoles;
 using UncomplicatedCustomRoles.API.Enums;
@@ -238,6 +240,14 @@ public class CustomRole : ICustomRole
     {
     }
 
+    /// <summary>
+    ///     Invoked when the custom role is removed from the player
+    /// </summary>
+    /// <param name="role"></param>
+    public virtual void OnRemoved(SummonedCustomRole role)
+    {
+    }
+
     public override string ToString()
     {
         return $"{Regex.Replace(Name, "<color=.*?>(.*?)</color>", "$1")} ({Id})";
@@ -252,14 +262,44 @@ public class CustomRole : ICustomRole
     /// <returns><see cref="true" /> if the operation was successfull.</returns>
     public static bool TryGet(int id, out ICustomRole customRole)
     {
-        if (CustomRoles.ContainsKey(id))
-        {
-            customRole = CustomRoles[id];
-            return true;
-        }
+        return CustomRoles.TryGetValue(id, out customRole);
+    }
 
+    /// <summary>
+    ///     Try to get a registered <see cref="ICustomRole" /> by it's <see cref="Name" /> (case-insensitive).
+    ///     If more roles share the same name the first registered one is returned.
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="customRole"></param>
+    /// <returns><see cref="true" /> if a role with the given name was found.</returns>
+    public static bool TryGet(string name, out ICustomRole customRole)
+    {
         customRole = null;
+
+        if (string.IsNullOrEmpty(name))
+            return false;
+
+        foreach (var role in CustomRoles.Values)
+            if (string.Equals(role.Name, name, StringComparison.OrdinalIgnoreCase))
+            {
+                customRole = role;
+                return true;
+            }
+
         return false;
+    }
+
+    /// <summary>
+    ///     Try to get the first registered <see cref="ICustomRole" /> of the given type.
+    ///     Useful for plugins that register their roles as classes.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="customRole"></param>
+    /// <returns><see cref="true" /> if a role of the given type was found.</returns>
+    public static bool TryGet<T>(out T customRole) where T : class, ICustomRole
+    {
+        customRole = CustomRoles.Values.OfType<T>().FirstOrDefault();
+        return customRole is not null;
     }
 
     /// <summary>
@@ -276,6 +316,47 @@ public class CustomRole : ICustomRole
     }
 
     /// <summary>
+    ///     Get a registered <see cref="ICustomRole" /> by it's <see cref="Name" /> (case-insensitive)
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns>The first <see cref="ICustomRole" /> with the given name or <see cref="null" /> if not found.</returns>
+    public static ICustomRole Get(string name)
+    {
+        return TryGet(name, out var customRole) ? customRole : null;
+    }
+
+    /// <summary>
+    ///     Get the first registered <see cref="ICustomRole" /> of the given type
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns>The first role of the given type or <see cref="null" /> if not found.</returns>
+    public static T Get<T>() where T : class, ICustomRole
+    {
+        return TryGet<T>(out var customRole) ? customRole : null;
+    }
+
+    /// <summary>
+    ///     Gets whether a <see cref="ICustomRole" /> with the given Id is registered
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    public static bool IsRegistered(int id)
+    {
+        return CustomRoles.ContainsKey(id);
+    }
+
+    /// <summary>
+    ///     Gets the first Id that is not used by any registered <see cref="ICustomRole" />.
+    ///     Useful when creating roles at runtime.
+    /// </summary>
+    /// <param name="start">The Id from which the search starts</param>
+    /// <returns></returns>
+    public static int GetFirstFreeId(int start = 1)
+    {
+        return CompatibilityManager.GetFirstFreeId(start);
+    }
+
+    /// <summary>
     ///     Register a new <see cref="ICustomRole" /> instance.
     /// </summary>
     /// <param name="customRole"></param>
@@ -288,9 +369,50 @@ public class CustomRole : ICustomRole
     ///     Unregister a registered <see cref="ICustomRole" />.
     /// </summary>
     /// <param name="customRole"></param>
-    public static void Unregister(ICustomRole customRole)
+    /// <param name="removeFromPlayers">
+    ///     If true every player currently playing this role will lose it (the
+    ///     <see cref="SummonedCustomRole" /> instances get destroyed)
+    /// </param>
+    /// <returns><see cref="true" /> if the role was registered and has been removed.</returns>
+    public static bool Unregister(ICustomRole customRole, bool removeFromPlayers = false)
     {
-        CustomRoles.TryRemove(customRole.Id, out _);
+        return customRole is not null && Unregister(customRole.Id, removeFromPlayers);
+    }
+
+    /// <summary>
+    ///     Unregister a registered <see cref="ICustomRole" /> by it's Id.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="removeFromPlayers">
+    ///     If true every player currently playing this role will lose it (the
+    ///     <see cref="SummonedCustomRole" /> instances get destroyed)
+    /// </param>
+    /// <returns><see cref="true" /> if the role was registered and has been removed.</returns>
+    public static bool Unregister(int id, bool removeFromPlayers = false)
+    {
+        if (!CustomRoles.TryRemove(id, out var customRole))
+            return false;
+
+        if (removeFromPlayers)
+            foreach (var summoned in SummonedCustomRole.List.Values.Where(scr => scr.Role.Id == id).ToList())
+                summoned.Destroy();
+
+        Events.CustomRoleEvents.OnUnregistered(new Events.CustomRoleUnregisteredEventArgs(customRole));
+        return true;
+    }
+
+    /// <summary>
+    ///     Validate a <see cref="ICustomRole" /> without registering it.
+    ///     Useful to check roles that are being built at runtime before calling <see cref="Register(ICustomRole)" />.
+    /// </summary>
+    /// <param name="role"></param>
+    /// <param name="errors">The list of blocking problems - if not empty the role can't be registered</param>
+    /// <param name="warnings">The list of non-blocking problems</param>
+    /// <returns><see cref="true" /> if the role has no blocking problems.</returns>
+    public static bool Validate(ICustomRole role, out List<string> errors, out List<string> warnings)
+    {
+        RoleValidator.Validate(role, out errors, out warnings);
+        return errors.Count == 0;
     }
 
     internal static bool Validate(ICustomRole role, out string error)
@@ -308,8 +430,15 @@ public class CustomRole : ICustomRole
         if (errors.Count > 0)
             return LoadStatusType.ValidatorError;
 
-        if (CustomRoles.TryAdd(customRole.Id, customRole)) return LoadStatusType.Success;
+        var registeringArgs = new Events.CustomRoleRegisteringEventArgs(customRole);
+        Events.CustomRoleEvents.OnRegistering(registeringArgs);
+        if (!registeringArgs.IsAllowed)
+            return LoadStatusType.Denied;
 
-        return LoadStatusType.SameId;
+        if (!CustomRoles.TryAdd(customRole.Id, customRole))
+            return LoadStatusType.SameId;
+
+        Events.CustomRoleEvents.OnRegistered(new Events.CustomRoleRegisteredEventArgs(customRole));
+        return LoadStatusType.Success;
     }
 }

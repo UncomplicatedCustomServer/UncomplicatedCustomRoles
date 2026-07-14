@@ -132,6 +132,7 @@ internal class HttpManager
     public void LoadCreditTags()
     {
         Credits = new Dictionary<string, Triplet<string, string, bool>>();
+        IsJobRole.Clear();
         try
         {
             var Data = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, JsonElement>>>(
@@ -156,7 +157,7 @@ internal class HttpManager
                     _ => false
                 };
                 var isJob = kvp.Value["job"].ValueKind == JsonValueKind.True;
-                Credits.Add(kvp.Key, new Triplet<string, string, bool>(role, color, overrideStr));
+                Credits[kvp.Key] = new Triplet<string, string, bool>(role, color, overrideStr);
                 if (isJob)
                     IsJobRole.Add(kvp.Key);
             }
