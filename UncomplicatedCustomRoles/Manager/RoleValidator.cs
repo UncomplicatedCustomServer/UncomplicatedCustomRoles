@@ -9,7 +9,6 @@
  */
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -357,10 +356,6 @@ internal static class RoleValidator
                 warnings.Add(
                     $"'spawn_settings.can_replace_roles' lists '{duplicate.Key}' {duplicate.Count()} times, which multiplies the spawn chance for that role - remove the duplicates unless that is intended.");
         }
-
-        if (role.SpawnSettings.RequiredPermission is IDictionary)
-            warnings.Add(
-                "'spawn_settings.required_permission' is a mapping; it must be a single permission string or a list of permission strings.");
 
         if (role.SpawnSettings.SpawnZones is not null)
             foreach (var zone in role.SpawnSettings.SpawnZones.Where(z => z is FacilityZone.None))

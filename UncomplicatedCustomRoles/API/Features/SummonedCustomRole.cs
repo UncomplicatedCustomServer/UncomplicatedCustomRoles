@@ -145,9 +145,20 @@ public class SummonedCustomRole
     public List<IEffect> InfiniteEffects { get; }
 
     /// <summary>
-    ///     Gets the current nickname of the player - if null the role didn't changed it!
+    ///     Gets whether the player has a custom nickname applied by UCR
     /// </summary>
     public bool IsCustomNickname { get; }
+
+    /// <summary>
+    ///     Gets the nickname UCR applied to the player for this role (already resolved from placeholders),
+    ///     or <see langword="null" /> if the role didn't change the nickname.<br></br>
+    /// </summary>
+    public string AppliedNickname { get; internal set; }
+
+    /// <summary>
+    ///     Gets the <see cref="CoroutineHandle" /> of the delayed <c>override_rpnames</c> nickname re-apply.
+    /// </summary>
+    internal CoroutineHandle NicknameReapplyCoroutine { get; set; }
 
     /// <summary>
     ///     Gets the <see cref="CustomRoleEventHandler" /> instance of the current <see cref="SummonedCustomRole" /> instance
@@ -379,6 +390,9 @@ public class SummonedCustomRole
 
             if (IsDefaultCoroutineRole && GenericCoroutine.IsRunning)
                 Timing.KillCoroutines(GenericCoroutine);
+
+            if (NicknameReapplyCoroutine.IsRunning)
+                Timing.KillCoroutines(NicknameReapplyCoroutine);
 
             // Remove effects
             Player.DisableAllEffects();

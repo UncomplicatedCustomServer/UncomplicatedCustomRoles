@@ -274,7 +274,12 @@ internal class SpawnManager
         }
     }
 
-    internal static void SummonSubclassApplier(Player Player, ICustomRole Role, bool spawningEventAlreadyFired = false)
+    public static void SummonSubclassApplier(Player Player, ICustomRole Role)
+    {
+        SummonSubclassApplier(Player, Role, false);
+    }
+
+    internal static void SummonSubclassApplier(Player Player, ICustomRole Role, bool spawningEventAlreadyFired)
     {
         try
         {
@@ -329,39 +334,27 @@ internal class SpawnManager
                     Player.AddAmmo(Ammo.Key, Ammo.Value);
                 }
 
-            // Reset the inventory if we need to add the old one
-            if (PlayerEventHandler.RespawnInventoryQueue.TryGetValue(Player.PlayerId, out var oldInventory))
+            if (PlayerEventHandler.RespawnInventoryQueue.TryRemove(Player.PlayerId, out var oldInventory))
             {
-                Player.ClearInventory();
-                Player.ClearAmmo();
+                if (!oldInventory.Item3)
+                {
+                    Player.ClearInventory();
+                    Player.ClearAmmo();
 
-                foreach (var item in oldInventory.Item1)
-                    if (!oldInventory.Item3)
-                    {
+                    foreach (var item in oldInventory.Item1)
                         Player.AddItem(item);
-                    }
-                    else
-                    {
-                        var pickup = Pickup.Create(item, Player.Position);
-                        if (pickup is null)
-                            continue;
-                        pickup.Spawn();
-                    }
 
-                foreach (var item in oldInventory.Item2)
-                    if (!oldInventory.Item3)
-                    {
-                        Player.Inventory.ServerAddAmmo(item.Key, item.Value);
-                    }
-                    else
-                    {
-                        var pickup = Pickup.Create(item.Key, Player.Position);
-                        if (pickup is null)
-                            continue;
-                        pickup.Spawn();
-                    }
+                    foreach (var ammo in oldInventory.Item2)
+                        Player.Inventory.ServerAddAmmo(ammo.Key, ammo.Value);
+                }
+                else
+                {
+                    foreach (var item in oldInventory.Item1)
+                        Pickup.Create(item, Player.Position)?.Spawn();
 
-                PlayerEventHandler.RespawnInventoryQueue.TryRemove(Player.PlayerId, out _);
+                    foreach (var ammo in oldInventory.Item2)
+                        Pickup.Create(ammo.Key, Player.Position)?.Spawn();
+                }
             }
 
             var InfoArea = Player.ReferenceHub.nicknameSync.Network_playerInfoToShow;
@@ -424,22 +417,13 @@ internal class SpawnManager
 
             // Changing nickname if needed
             var ChangedNick = false;
+            string appliedNick = null;
             if (Plugin.Instance.Config.AllowNicknameEdit && !string.IsNullOrEmpty(Role.Nickname))
             {
                 var Nick = PlaceholderManager.ApplyPlaceholders(Role.Nickname, Player, Role);
-                if (Role.Nickname.Contains(","))
-                    Player.DisplayName = Nick.Split(',').RandomItem();
-                else
-                    Player.DisplayName = Nick;
 
-                if (Plugin.Instance.Config.OverrideRpNames)
-                    Timing.CallDelayed(3f, () => // Override RPNames shit (sowwy andrew)
-                    {
-                        if (Role.Nickname.Contains(","))
-                            Player.DisplayName = Nick.Split(',').RandomItem();
-                        else
-                            Player.DisplayName = Nick;
-                    });
+                appliedNick = Role.Nickname.Contains(",") ? Nick.Split(',').RandomItem().Trim() : Nick;
+                Player.DisplayName = appliedNick;
 
                 ChangedNick = true;
             }
@@ -452,7 +436,19 @@ internal class SpawnManager
             SummonedCustomRole roleInstance =
                 new(Player, Role, Badge, PermanentEffects, InfoArea, customInfo, ChangedNick);
 
+            roleInstance.AppliedNickname = appliedNick;
+
+            if (appliedNick is not null)
+                customInfo.Nickname = appliedNick;
+
             customInfo.UpdateInfo(Player);
+
+            if (appliedNick is not null && Plugin.Instance.Config.OverrideRpNames)
+                roleInstance.NicknameReapplyCoroutine = Timing.CallDelayed(3f, () =>
+                {
+                    if (roleInstance.IsValid && SummonedCustomRole.Get(roleInstance.Player) == roleInstance)
+                        roleInstance.Player.DisplayName = appliedNick;
+                });
 
             var escapeController = Player.GameObject.AddComponent<EscapeController>();
             escapeController.Init(roleInstance);

@@ -11,6 +11,7 @@
 using System.Collections.Generic;
 using LabApi.Features.Wrappers;
 using Respawning.NamingRules;
+using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Extensions;
 using UnityEngine;
@@ -25,7 +26,7 @@ public class PlaceholderManager
         return (origin ?? string.Empty).BulkReplace(new Dictionary<string, object>
         {
             { "nick", player.Nickname },
-            { "displayname", player.DisplayName },
+            { "displayname", ResolveDisplayName(player) },
             { "rand", Random.Range(0, 10) },
             { "dnumber", Random.Range(1000, 10000) },
             { "unitid", player.UnitId },
@@ -46,5 +47,13 @@ public class PlaceholderManager
             { "hume", player.HumeShield },
             { "max_hume", player.MaxHumeShield }
         }, "%<val>%");
+    }
+
+    private static string ResolveDisplayName(Player player)
+    {
+        if (SummonedCustomRole.TryGet(player, out var summoned) && !string.IsNullOrEmpty(summoned.AppliedNickname))
+            return summoned.AppliedNickname!;
+
+        return player.DisplayName;
     }
 }
