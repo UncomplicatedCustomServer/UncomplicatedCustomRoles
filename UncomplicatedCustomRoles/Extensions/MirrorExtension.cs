@@ -273,7 +273,7 @@ public static class MirrorExtensions
                 fpc = playerfpc;
 
             ushort value = 0;
-            fpc?.FpcModule.MouseLook.GetSyncValues(0, out value, out var _);
+            fpc?.FpcModule.MouseLook.GetSyncValues(0, out value, out _);
             writer.WriteRelativePosition(new RelativePosition(player.Position));
             writer.WriteUShort(value);
         }

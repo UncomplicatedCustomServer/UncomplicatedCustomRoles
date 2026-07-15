@@ -302,18 +302,8 @@ internal static class RoleValidator
         if (role.SpawnHintDuration < 0)
             warnings.Add($"'spawn_hint_duration' is negative ({role.SpawnHintDuration}).");
 
-        if (!string.IsNullOrEmpty(role.SpawnBroadcast) && role.SpawnBroadcastDuration == 0)
-            warnings.Add(
-                "'spawn_broadcast' is set but 'spawn_broadcast_duration' is 0; the broadcast would disappear instantly.");
-
-        if (!string.IsNullOrEmpty(role.SpawnHint) && role.SpawnHintDuration == 0)
-            warnings.Add("'spawn_hint' is set but 'spawn_hint_duration' is 0; the hint would disappear instantly.");
-
-        if (role.Scale.x == 0 && role.Scale.y == 0 && role.Scale.z == 0)
+        if (role.Scale is { x: 0, y: 0, z: 0 })
             warnings.Add("'scale' is 0 on every axis; the player would be invisible. Use 1 for the normal size.");
-        else if (role.Scale.x < 0 || role.Scale.y < 0 || role.Scale.z < 0)
-            warnings.Add(
-                $"'scale' has a negative axis ({role.Scale.x}, {role.Scale.y}, {role.Scale.z}); the model would be mirrored/broken.");
     }
 
     private static void ValidateSpawnSettings(ICustomRole role, List<string> errors, List<string> warnings)

@@ -19,6 +19,7 @@ using PlayerRoles;
 using PlayerRoles.FirstPersonControl;
 using PlayerRoles.PlayableScps;
 using Respawning.Objectives;
+using UncomplicatedCustomRoles.API.Events;
 using UncomplicatedCustomRoles.API.Features.Controllers;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.API.Interfaces;
@@ -408,7 +409,7 @@ public class SummonedCustomRole
         _internalValid = false;
 
         if (wasValid)
-            API.Events.CustomRoleEvents.OnRemoved(new API.Events.CustomRoleRemovedEventArgs(this));
+            CustomRoleEvents.OnRemoved(new CustomRoleRemovedEventArgs(this));
     }
 
     /// <summary>

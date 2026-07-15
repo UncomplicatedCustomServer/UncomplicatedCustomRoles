@@ -21,9 +21,8 @@ namespace UncomplicatedCustomRoles.API.Features;
 
 public class CustomInfo
 {
-    private Player _lastOwner;
-
     private bool _detached;
+    private Player _lastOwner;
 
     public CustomInfo(string nickname, string role, string info)
     {
@@ -84,7 +83,7 @@ public class CustomInfo
     }
 
     internal static bool SuppressExternalSync { get; set; }
-    
+
     internal void Detach()
     {
         _detached = true;

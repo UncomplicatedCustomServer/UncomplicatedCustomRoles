@@ -43,7 +43,7 @@ internal class PlayerInfoAreaSyncPatch
         if (CustomInfo.SuppressExternalSync)
             return;
 
-        if (__instance._hub is not null && __instance._hub.TryGetSummonedInstance(out var _))
+        if (__instance._hub is not null && __instance._hub.TryGetSummonedInstance(out _))
         {
             value |= PlayerInfoArea.CustomInfo;
             value &= ~PlayerInfoArea.Role;

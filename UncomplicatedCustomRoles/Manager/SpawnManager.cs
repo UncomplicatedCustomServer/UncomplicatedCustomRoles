@@ -25,6 +25,7 @@ using PlayerRoles;
 using PlayerStatsSystem;
 using Subtitles;
 using UncomplicatedCustomRoles.API.Enums;
+using UncomplicatedCustomRoles.API.Events;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Features.Controllers;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
@@ -134,8 +135,8 @@ internal class SpawnManager
                 return;
             }
 
-            var spawningArgs = new API.Events.CustomRoleSpawningEventArgs(player, Role);
-            API.Events.CustomRoleEvents.OnSpawning(spawningArgs);
+            var spawningArgs = new CustomRoleSpawningEventArgs(player, Role);
+            CustomRoleEvents.OnSpawning(spawningArgs);
             if (!spawningArgs.IsAllowed)
             {
                 LogManager.Debug(
@@ -279,8 +280,8 @@ internal class SpawnManager
         {
             if (!spawningEventAlreadyFired)
             {
-                var spawningArgs = new API.Events.CustomRoleSpawningEventArgs(Player, Role);
-                API.Events.CustomRoleEvents.OnSpawning(spawningArgs);
+                var spawningArgs = new CustomRoleSpawningEventArgs(Player, Role);
+                CustomRoleEvents.OnSpawning(spawningArgs);
                 if (!spawningArgs.IsAllowed)
                 {
                     LogManager.Debug(
@@ -462,7 +463,7 @@ internal class SpawnManager
             if (API.Features.Escape.Bucket.Contains(Player.PlayerId))
                 API.Features.Escape.Bucket.Remove(Player.PlayerId);
 
-            API.Events.CustomRoleEvents.OnSpawned(new API.Events.CustomRoleSpawnedEventArgs(roleInstance));
+            CustomRoleEvents.OnSpawned(new CustomRoleSpawnedEventArgs(roleInstance));
 
             LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})! [2VDS]");
         }
@@ -627,7 +628,7 @@ internal class SpawnManager
                         }
                     }
                 }
-                
+
                 for (var a = 0; a < Role.SpawnSettings.SpawnChance; a++)
                     candidates.Add(Role);
             }
