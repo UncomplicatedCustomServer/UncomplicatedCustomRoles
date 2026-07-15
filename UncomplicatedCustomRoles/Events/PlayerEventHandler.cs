@@ -371,13 +371,15 @@ internal class PlayerEventHandler : EventHandlerBase
 
             if (!NewRole.Key)
             {
-                // Natural role, let's try to parse it
-                if (Enum.TryParse(NewRole.Value.ToString(), out RoleTypeId role))
-                    if (role is not RoleTypeId.None)
-                    {
-                        Escaping.NewRole = role;
-                        Escaping.IsAllowed = true;
-                    }
+                // Natural (internal) role, let's try to parse it
+                if (Enum.TryParse(NewRole.Value.ToString(), out RoleTypeId role) && role is not RoleTypeId.None)
+                {
+                    Escaping.NewRole = role;
+                    Escaping.IsAllowed = true;
+
+                    if (Escaping.EscapeScenario is Escape.EscapeScenarioType.None)
+                        Escaping.EscapeScenario = Escape.EscapeScenarioType.Custom;
+                }
             }
             else
             {
@@ -386,17 +388,19 @@ internal class PlayerEventHandler : EventHandlerBase
                 {
                     LogManager.Silent("Role found!");
 
-                    if (summoned.TryGetModule(out KeepInventoryOnEscape module))
-                        RespawnInventoryQueue.TryAdd(Escaping.Player.PlayerId,
-                            new Tuple<List<ItemType>, Dictionary<ItemType, ushort>, bool>(
-                                [..Escaping.Player.Items.Select(i => i.Type)],
-                                new Dictionary<ItemType, ushort>(Escaping.Player.Ammo), module.DropItems));
-
                     Escaping.IsAllowed = false;
                     if (!API.Features.Escape.Bucket.Contains(Escaping.Player.PlayerId))
                     {
                         LogManager.Silent(
                             "Successfully activated the call to method SpawnManager::SummonCustomSubclass(<...>) as the player is not inside the Escape::Bucket bucket! - Adding it...");
+
+                        var dropOldInventory = !summoned.TryGetModule(out KeepInventoryOnEscape module) ||
+                                               module.DropItems;
+                        RespawnInventoryQueue[Escaping.Player.PlayerId] =
+                            new Tuple<List<ItemType>, Dictionary<ItemType, ushort>, bool>(
+                                [..Escaping.Player.Items.Select(i => i.Type)],
+                                new Dictionary<ItemType, ushort>(Escaping.Player.Ammo), dropOldInventory);
+
                         API.Features.Escape.AddBucket(Escaping.Player);
                         SpawnManager.SummonCustomSubclass(Escaping.Player, role.Id);
                     }
