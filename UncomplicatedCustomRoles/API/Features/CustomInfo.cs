@@ -23,6 +23,8 @@ public class CustomInfo
 {
     private Player _lastOwner;
 
+    private bool _detached;
+
     public CustomInfo(string nickname, string role, string info)
     {
         Nickname = nickname;
@@ -82,9 +84,18 @@ public class CustomInfo
     }
 
     internal static bool SuppressExternalSync { get; set; }
+    
+    internal void Detach()
+    {
+        _detached = true;
+        _lastOwner = null;
+    }
 
     public void UpdateInfo(Player player)
     {
+        if (_detached)
+            return;
+
         _lastOwner = player;
 
         var previousSuppress = SuppressExternalSync;

@@ -342,16 +342,10 @@ public class SummonedCustomRole
                 LogManager.Debug("Badge detected, fixed");
             }
 
-            CustomInfo.SuppressExternalSync = true;
-            try
-            {
-                Player.ReferenceHub.nicknameSync.Network_playerInfoToShow = PlayerInfoArea;
-                Player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = string.Empty;
-            }
-            finally
-            {
-                CustomInfo.SuppressExternalSync = false;
-            }
+            CustomInfo?.Detach();
+
+            if (IsCustomNickname)
+                Player.DisplayName = null!;
 
             LogManager.Debug("Scale reset to 1, 1, 1");
             Player.Scale = new Vector3(1, 1, 1);
@@ -370,8 +364,17 @@ public class SummonedCustomRole
                 foreach (var category in Role.CustomInventoryLimits.Keys)
                     Player.ResetCategoryLimit(category);
 
-            if (IsCustomNickname)
-                Player.DisplayName = null;
+            // Clear the custom info last so nothing re-applies it afterwards
+            CustomInfo.SuppressExternalSync = true;
+            try
+            {
+                Player.ReferenceHub.nicknameSync.Network_playerInfoToShow = PlayerInfoArea;
+                Player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = string.Empty;
+            }
+            finally
+            {
+                CustomInfo.SuppressExternalSync = false;
+            }
 
             if (IsDefaultCoroutineRole && GenericCoroutine.IsRunning)
                 Timing.KillCoroutines(GenericCoroutine);
