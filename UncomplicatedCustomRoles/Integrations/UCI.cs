@@ -9,20 +9,18 @@
  */
 
 using System;
-using System.Linq;
 using System.Reflection;
 using LabApi.Features.Wrappers;
-using LabApi.Loader;
 using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Integrations;
 
 internal static class UCI
 {
-    public static Assembly Assembly =
-        PluginLoader.Plugins.FirstOrDefault(p => p.Key.Name is "UncomplicatedCustomItems").Value;
+    public static readonly Assembly Assembly = DynamicInvoke.GetLabAPIAssembly("UncomplicatedCustomItems") ??
+                                               DynamicInvoke.GetExiledAssembly("UncomplicatedCustomItems");
 
-    public static Type SummonedCustomItem =
+    public static readonly Type SummonedCustomItem =
         Assembly?.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem");
 
     public static bool HasCustomItem(uint id, out object customItem)

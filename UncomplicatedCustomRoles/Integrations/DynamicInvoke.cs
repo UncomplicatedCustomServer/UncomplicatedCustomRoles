@@ -130,12 +130,13 @@ public static class DynamicInvoke
         }
     }
 
-    private static Assembly GetLabAPIAssembly(string pluginName)
+    internal static Assembly GetLabAPIAssembly(string pluginName)
     {
         try
         {
             KeyValuePair<LabApi.Loader.Features.Plugins.Plugin, Assembly>? plugin =
-                PluginLoader.Plugins.FirstOrDefault(p => p.Key.Name == pluginName);
+                PluginLoader.Plugins.FirstOrDefault(p =>
+                    p.Key.Name.Contains(pluginName, StringComparison.CurrentCultureIgnoreCase));
 
             if (plugin is not null)
                 return plugin.Value.Value;
@@ -149,11 +150,12 @@ public static class DynamicInvoke
         }
     }
 
-    private static Assembly GetExiledAssembly(string pluginName)
+    internal static Assembly GetExiledAssembly(string pluginName)
     {
         try
         {
-            var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(p => p.FullName.Contains(pluginName));
+            var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(p =>
+                p.FullName.Contains(pluginName, StringComparison.CurrentCultureIgnoreCase));
             return assembly;
         }
         catch (Exception e)
