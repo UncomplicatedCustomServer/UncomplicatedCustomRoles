@@ -39,7 +39,8 @@ internal class ServerEventHandler : EventHandlerBase
     {
         Started = false;
         Plugin.Instance.OnFinishedLoadingPlugins();
-        MapSpawnValidator.ValidateAll();
+        if (Plugin.Instance.Config.EnableValidator)
+            MapSpawnValidator.ValidateAll();
     }
 
     public void OnPlayersSpawned()
@@ -63,6 +64,7 @@ internal class ServerEventHandler : EventHandlerBase
     {
         Announcer.SavedCustomAnnouncements.Clear();
 
+        // Round-scoped state must not leak into the next round
         RespawnInventoryQueue.Clear();
         RagdollAppearanceQueue.Clear();
         TerminationQueue.Clear();

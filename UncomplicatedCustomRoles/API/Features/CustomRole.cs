@@ -15,6 +15,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using PlayerRoles;
 using UncomplicatedCustomRoles.API.Enums;
+using UncomplicatedCustomRoles.API.Events;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Compatibility;
@@ -397,7 +398,7 @@ public class CustomRole : ICustomRole
             foreach (var summoned in SummonedCustomRole.List.Values.Where(scr => scr.Role.Id == id).ToList())
                 summoned.Destroy();
 
-        Events.CustomRoleEvents.OnUnregistered(new Events.CustomRoleUnregisteredEventArgs(customRole));
+        CustomRoleEvents.OnUnregistered(new CustomRoleUnregisteredEventArgs(customRole));
         return true;
     }
 
@@ -422,23 +423,26 @@ public class CustomRole : ICustomRole
 
     internal static LoadStatusType InternalRegister(ICustomRole customRole)
     {
-        RoleValidator.Validate(customRole, out var errors, out var warnings);
+        if (Plugin.Instance.Config.EnableValidator)
+        {
+            RoleValidator.Validate(customRole, out var errors, out var warnings);
 
-        foreach (var warning in warnings)
-            LogManager.Warn($"[Role Validator] {customRole}: {warning}");
+            foreach (var warning in warnings)
+                LogManager.Warn($"[Role Validator] {customRole}: {warning}");
 
-        if (errors.Count > 0)
-            return LoadStatusType.ValidatorError;
+            if (errors.Count > 0)
+                return LoadStatusType.ValidatorError;
+        }
 
-        var registeringArgs = new Events.CustomRoleRegisteringEventArgs(customRole);
-        Events.CustomRoleEvents.OnRegistering(registeringArgs);
+        var registeringArgs = new CustomRoleRegisteringEventArgs(customRole);
+        CustomRoleEvents.OnRegistering(registeringArgs);
         if (!registeringArgs.IsAllowed)
             return LoadStatusType.Denied;
 
         if (!CustomRoles.TryAdd(customRole.Id, customRole))
             return LoadStatusType.SameId;
 
-        Events.CustomRoleEvents.OnRegistered(new Events.CustomRoleRegisteredEventArgs(customRole));
+        CustomRoleEvents.OnRegistered(new CustomRoleRegisteredEventArgs(customRole));
         return LoadStatusType.Success;
     }
 }

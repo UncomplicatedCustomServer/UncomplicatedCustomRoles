@@ -49,6 +49,9 @@ internal class Config
     [Description("Auto load the Custom Role ID from the file, bypassing YAML")]
     public bool UseIdFixer { get; set; } = false;
 
+    [Description("Enable the role validator. It shows warnings and errors in the console about the roles.")]
+    public bool EnableValidator { get; set; } = true;
+
     [Description(
         "The content that will be replaced instead of {CUSTOM_ROLE} on your RespawnTimer display config if the current spectated player is a custom role. %customrole% is the role name")]
     public string RespawnTimerContent { get; set; } = "Player has custom role %customrole%";
