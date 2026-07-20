@@ -233,41 +233,38 @@ public static class PlayerExtension
     // REF https://gitlab.com/exmod-team/EXILED/-/blob/master/EXILED/Exiled.API/Features/Player.cs?ref_type=heads#L2558
     internal static void SetCategoryLimit(this Player player, ItemCategory category, sbyte limit)
     {
-        var index = InventoryLimits.StandardCategoryLimits.Where(x => x.Value >= 0).OrderBy(x => x.Key).ToList()
-            .FindIndex(x => x.Key == category);
-
-        if (index is -1)
-            return;
-
-        MirrorExtensions.SendFakeSyncObject(player, ServerConfigSynchronizer.Singleton.netIdentity,
-            typeof(ServerConfigSynchronizer), writer =>
-            {
-                writer.WriteULong(1ul);
-                writer.WriteUInt(1);
-                writer.WriteByte((byte)SyncList<sbyte>.Operation.OP_SET);
-                writer.WriteInt(index);
-                writer.WriteSByte(limit);
-            });
+        InventoryLimitOverride.Set(player.PlayerId, category, limit);
+        SendCategoryLimit(player, category, limit);
     }
 
     // REF https://gitlab.com/exmod-team/EXILED/-/blob/master/EXILED/Exiled.API/Features/Player.cs?ref_type=heads#L2584
     internal static void ResetCategoryLimit(this Player player, ItemCategory category)
     {
-        var index = InventoryLimits.StandardCategoryLimits.Where(x => x.Value >= 0).OrderBy(x => x.Key).ToList()
-            .FindIndex(x => x.Key == category);
+        InventoryLimitOverride.Clear(player.PlayerId, category);
 
-        if (index is -1)
+        var config = ServerConfigSynchronizer.Singleton;
+        var index = (int)category;
+        if (config is null || index < 0 || index >= config.CategoryLimits.Count)
             return;
 
-        MirrorExtensions.SendFakeSyncObject(player, ServerConfigSynchronizer.Singleton.netIdentity,
-            typeof(ServerConfigSynchronizer), writer =>
-            {
-                writer.WriteULong(1ul);
-                writer.WriteUInt(1);
-                writer.WriteByte((byte)SyncList<sbyte>.Operation.OP_SET);
-                writer.WriteInt(index);
-                writer.WriteSByte(ServerConfigSynchronizer.Singleton.CategoryLimits[index]);
-            });
+        SendCategoryLimit(player, category, config.CategoryLimits[index]);
+    }
+
+    private static void SendCategoryLimit(Player player, ItemCategory category, sbyte limit)
+    {
+        var config = ServerConfigSynchronizer.Singleton;
+        var index = (int)category;
+        if (config is null || index < 0 || index >= config.CategoryLimits.Count)
+            return;
+
+        MirrorExtensions.SendFakeSyncObject(player, config.netIdentity, typeof(ServerConfigSynchronizer), writer =>
+        {
+            writer.WriteULong(1ul);
+            writer.WriteUInt(1);
+            writer.WriteByte((byte)SyncList<sbyte>.Operation.OP_SET);
+            writer.WriteUInt((uint)index);
+            writer.WriteSByte(limit);
+        });
     }
 
     internal static void ResetInventory(this Player player, IEnumerable<ItemType> items)

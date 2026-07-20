@@ -72,6 +72,7 @@ internal class ServerEventHandler : EventHandlerBase
         Spawn.SpawnQueue.Clear();
         Spawn.Spawning.Clear();
         API.Features.Escape.Bucket.Clear();
+        InventoryLimitOverride.ClearAll();
     }
 
     public void OnWaveRespawning(WaveRespawningEventArgs ev)
