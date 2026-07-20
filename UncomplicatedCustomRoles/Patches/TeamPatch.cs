@@ -282,8 +282,15 @@ public class DoorPermissionsPolicyPatch
             return false;
         }
 
-        if (hub.roleManager.CurrentRole is IDoorPermissionProvider currentRole &&
-            (!DisguiseTeam.List.TryGetValue(hub.PlayerId, out var team) || team != Team.SCPs))
+        var isFakedScp = DisguiseTeam.List.TryGetValue(hub.PlayerId, out var team) && team == Team.SCPs;
+
+        if (isFakedScp && __instance.CheckPermissions(DoorPermissionFlags.ScpOverride))
+        {
+            __result = true;
+            return false;
+        }
+
+        if (hub.roleManager.CurrentRole is IDoorPermissionProvider currentRole && !isFakedScp)
         {
             __result = __instance.CheckPermissions(currentRole, requester, out callback);
             return false;
@@ -314,15 +321,18 @@ public class DoorPermissionsPolicyExtensionsPatch
             return false;
         }
 
+        var isFakedScp = DisguiseTeam.List.TryGetValue(hub.PlayerId, out var team) && team == Team.SCPs;
         var combinedPermissions = DoorPermissionFlags.None;
 
-        if (hub.roleManager.CurrentRole is IDoorPermissionProvider currentRole &&
-            (!DisguiseTeam.List.TryGetValue(hub.PlayerId, out var team) || team != Team.SCPs))
+        if (hub.roleManager.CurrentRole is IDoorPermissionProvider currentRole && !isFakedScp)
             combinedPermissions |= currentRole.GetPermissions(requester);
 
         var curInstance = hub.inventory.CurInstance;
         if (curInstance != null && curInstance is IDoorPermissionProvider permissionProvider)
             combinedPermissions |= permissionProvider.GetPermissions(requester);
+
+        if (isFakedScp)
+            combinedPermissions |= DoorPermissionFlags.ScpOverride;
 
         __result = combinedPermissions;
         return false;
