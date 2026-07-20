@@ -16,6 +16,7 @@ using LabApi.Loader.Features.Yaml;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Compatibility;
+using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Commands;
 
@@ -23,7 +24,8 @@ public class Update : IUCRCommand
 {
     public string Name { get; } = "update";
 
-    public string Description { get; } = "Update one or more outdated (but loaded) CustomRole(s)";
+    public string Description { get; } =
+        "Rewrite one or more loaded CustomRole config files to the latest format (outdated roles and deprecated flags)";
 
     public string RequiredPermission { get; } = "ucr.update";
 
@@ -36,33 +38,58 @@ public class Update : IUCRCommand
             return false;
         }
 
+        var updated = 0;
+
         if (arguments[0].ToLower() is "all")
         {
-            foreach (var role in CustomRole.OutdatedRoles)
-                UpdateRole(role);
+            foreach (var role in CustomRole.OutdatedRoles.ToList())
+                if (UpdateRole(role))
+                    updated++;
+
+            foreach (var role in FlagMigrator.Migrated.ToList())
+                if (PersistMigrated(role))
+                    updated++;
+        }
+        else if (int.TryParse(arguments[0], out var id))
+        {
+            var outdated = CustomRole.OutdatedRoles.FirstOrDefault(r => r.CustomRole.Id == id);
+            var migrated = FlagMigrator.Migrated.FirstOrDefault(r => r.Id == id);
+
+            if (outdated is not null && UpdateRole(outdated))
+                updated++;
+            if (migrated is not null && PersistMigrated(migrated))
+                updated++;
+
+            if (outdated is null && migrated is null)
+                response = $"CustomRole {arguments[0]} is not outdated / doesn't need a config update!";
         }
         else
         {
-            if (int.TryParse(arguments[0], out var id))
-            {
-                var role = CustomRole.OutdatedRoles.FirstOrDefault(r => r.CustomRole.Id == id);
-                if (role is not null)
-                    UpdateRole(role);
-                else
-                    response = $"CustomRole {arguments[0]} not found!";
-            }
-            else
-            {
-                response = $"CustomRole {arguments[0]} not found!";
-            }
+            response = $"CustomRole {arguments[0]} not found!";
         }
 
-        response ??= "Successfully updated CustomRole(s)!";
+        response ??= updated > 0
+            ? $"Successfully updated {updated} CustomRole config file(s)!"
+            : "Nothing to update.";
         return true;
     }
 
-    private static void UpdateRole(OutdatedCustomRole role)
+    private static bool UpdateRole(OutdatedCustomRole role)
     {
+        if (string.IsNullOrEmpty(role.Path))
+            return false;
+
         File.WriteAllText(role.Path, YamlConfigParser.Serializer.Serialize(role.CustomRole));
+        return true;
+    }
+
+    private static bool PersistMigrated(ICustomRole role)
+    {
+        if (!CompatibilityManager.RolePaths.TryGetValue(role, out var path) || string.IsNullOrEmpty(path))
+            return false;
+
+        File.WriteAllText(path, YamlConfigParser.Serializer.Serialize(role));
+        FlagMigrator.Migrated.Remove(role);
+        return true;
     }
 }

@@ -21,8 +21,9 @@ namespace UncomplicatedCustomRoles.API.Features;
 
 public class CustomInfo
 {
-    private bool _detached;
     private Player _lastOwner;
+
+    private bool _detached;
 
     public CustomInfo(string nickname, string role, string info)
     {
@@ -131,6 +132,37 @@ public class CustomInfo
             {
                 rawInfo = PlaceholderManager.ApplyPlaceholders(rawInfo, player, summonedCustomRole.Role);
 
+                var infoTeam = summonedCustomRole.Role.Role.GetTeam();
+                if (DisguiseTeam.List.TryGetValue(player.PlayerId, out var infoFakeTeam))
+                    infoTeam = infoFakeTeam;
+
+                var rawUnit = string.Empty;
+                var showUnit = false;
+                if (!string.IsNullOrEmpty(rawRole) && !summonedCustomRole.HasModule<NoUnitName>()
+                    && infoTeam is Team.FoundationForces
+                    && NamingRulesManager.TryGetNamingRule(infoTeam, out var infoUnitRule)
+                    && !string.IsNullOrEmpty(infoUnitRule.LastGeneratedName))
+                {
+                    showUnit = true;
+                    rawUnit = infoUnitRule.LastGeneratedName;
+                }
+
+                if (summonedCustomRole.TryGetModule(out InfoTag infoTag))
+                {
+                    if (infoTag.ShowBadge)
+                        player.InfoArea |= PlayerInfoArea.Badge;
+                    else
+                        player.InfoArea &= ~PlayerInfoArea.Badge;
+
+                    if (infoTag.ShowPowerStatus)
+                        player.InfoArea |= PlayerInfoArea.PowerStatus;
+                    else
+                        player.InfoArea &= ~PlayerInfoArea.PowerStatus;
+
+                    ApplyCustomInfo(player, infoTag.Compose(player, rawInfo, rawNickname, rawRole, rawUnit, showUnit));
+                    return;
+                }
+
                 if (summonedCustomRole.TryGetModule(out CustomInfoOrder customInfoOrderModule))
                     rawCustomInfo = $"<color=#FFFFFF></color>{customInfoOrderModule.Order}";
 
@@ -160,16 +192,8 @@ public class CustomInfo
                     }
                 }
 
-                var roleTeam = summonedCustomRole.Role.Role.GetTeam();
-                if (DisguiseTeam.List.TryGetValue(player.PlayerId, out var fakeTeam))
-                    roleTeam = fakeTeam;
-
-                if (!string.IsNullOrEmpty(rawRole) && !summonedCustomRole.HasModule<NoUnitName>()
-                                                   && roleTeam is Team.FoundationForces
-                                                   && NamingRulesManager.TryGetNamingRule(roleTeam,
-                                                       out var unitNamingRule)
-                                                   && !string.IsNullOrEmpty(unitNamingRule.LastGeneratedName))
-                    rawRole = $"{rawRole} ({unitNamingRule.LastGeneratedName})";
+                if (showUnit)
+                    rawRole = $"{rawRole} ({rawUnit})";
             }
             else
             {
@@ -189,7 +213,7 @@ public class CustomInfo
                 return;
             }
 
-            player.CustomInfo = rawCustomInfo.Replace("%%", "%\n%").BulkReplace(new Dictionary<string, object>
+            ApplyCustomInfo(player, rawCustomInfo.Replace("%%", "%\n%").BulkReplace(new Dictionary<string, object>
             {
                 {
                     "custominfo",
@@ -203,11 +227,33 @@ public class CustomInfo
                     "rolename",
                     rawRole
                 }
-            }, "%<val>%");
+            }, "%<val>%"));
         }
         finally
         {
             SuppressExternalSync = previousSuppress;
+        }
+    }
+    
+    private static void ApplyCustomInfo(Player player, string composed)
+    {
+        if (!string.IsNullOrEmpty(composed) && !NicknameSync.ValidateCustomInfo(composed, out var error))
+        {
+            LogManager.Error(
+                $"The name tag of player {player.PlayerId} would be rejected by the game and won't be shown: {error}\n" +
+                $"Composed tag: {composed}\n" +
+                "Likely causes: a colour that isn't on the allowed list written inside 'custom_info', a '[' or ']' coming from a nickname, or a tag longer than 400 characters.");
+            composed = string.Empty;
+        }
+
+        if (string.IsNullOrEmpty(composed))
+        {
+            player.InfoArea |= PlayerInfoArea.Nickname | PlayerInfoArea.Role | PlayerInfoArea.UnitName;
+            player.CustomInfo = string.Empty;
+        }
+        else
+        {
+            player.CustomInfo = composed;
         }
     }
 }

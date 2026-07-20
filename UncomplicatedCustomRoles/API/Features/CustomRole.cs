@@ -423,6 +423,8 @@ public class CustomRole : ICustomRole
 
     internal static LoadStatusType InternalRegister(ICustomRole customRole)
     {
+        FlagMigrator.Migrate(customRole);
+        
         if (Plugin.Instance.Config.EnableValidator)
         {
             RoleValidator.Validate(customRole, out var errors, out var warnings);

@@ -36,6 +36,7 @@ public class Reload : IUCRCommand
         CustomRole.CustomRoles = new ConcurrentDictionary<int, ICustomRole>();
         CustomRole.NotLoadedRoles.Clear();
         CustomRole.OutdatedRoles.Clear();
+        FlagMigrator.Migrated.Clear();
         ImportManager.Unload();
 
         FileConfigs.LoadAll();

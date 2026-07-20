@@ -63,6 +63,7 @@ internal class Plugin : Plugin<Config>
 
         CustomRole.CustomRoles.Clear();
         CustomRole.NotLoadedRoles.Clear();
+        FlagMigrator.Migrated.Clear();
 
         EventHandlerBase.Register(new List<EventHandlerBase>
         {
