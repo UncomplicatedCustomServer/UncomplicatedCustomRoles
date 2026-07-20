@@ -16,6 +16,7 @@ using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules;
 
+[Obsolete("This module is deprecated and will be removed in a future version. Use InfoTag instead.")]
 public class CustomInfoOrder : CustomModule
 {
     private static readonly string[] KnownTokens = ["custominfo", "nickname", "rolename"];

@@ -15,6 +15,7 @@ using MEC;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules;
 
+[Obsolete("This module is deprecated and will be removed in a future version. Use InfoTag instead.")]
 public class ColorfulNickname : CustomModule
 {
     public override List<string> RequiredArgs => ["color"];

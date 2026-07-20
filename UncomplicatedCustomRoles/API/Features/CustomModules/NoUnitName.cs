@@ -8,8 +8,11 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
+
 namespace UncomplicatedCustomRoles.API.Features.CustomModules;
 
+[Obsolete("This module is deprecated and will be removed in a future version. Use InfoTag instead.")]
 public class NoUnitName : CustomModule
 {
 }
