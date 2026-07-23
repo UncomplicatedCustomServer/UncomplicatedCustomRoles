@@ -29,6 +29,7 @@ using PlayerRoles.PlayableScps.Scp079.Rewards;
 using PlayerRoles.PlayableScps.Scp939.Mimicry;
 using PlayerStatsSystem;
 using UncomplicatedCustomRoles.API.Features;
+using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.Manager;
 using static HarmonyLib.AccessTools;
 
@@ -401,5 +402,14 @@ public class Scp079RecontainerPatch
     private static bool IsScpButNot079(RoleTypeId roleTypeId, Team team)
     {
         return team == Team.SCPs && roleTypeId != RoleTypeId.Scp079;
+    }
+}
+
+[HarmonyPatch(typeof(FlashbangGrenade), nameof(FlashbangGrenade.ProcessPlayer))]
+internal static class FlashbangCustomTeamPatch
+{
+    private static bool Prefix(FlashbangGrenade __instance, ReferenceHub hub)
+    {
+        return !CustomTeam.SameTeam(__instance.PreviousOwner.Hub, hub);
     }
 }

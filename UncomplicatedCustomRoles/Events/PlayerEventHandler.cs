@@ -279,6 +279,12 @@ internal class PlayerEventHandler : EventHandlerBase
         if (Hurting.Player is not null && Hurting.Attacker is not null && Hurting.Player.IsAlive &&
             Hurting.Attacker.IsAlive)
         {
+            if (CustomTeam.SameTeam(Hurting.Attacker.ReferenceHub, Hurting.Player.ReferenceHub))
+            {
+                Hurting.IsAllowed = false;
+                return;
+            }
+            
             if (Hurting.Attacker.TryGetSummonedInstance(out var attackerCustomRole))
             {
                 if (attackerCustomRole.Role.IsFriendOf is not null &&
