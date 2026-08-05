@@ -331,9 +331,9 @@ internal static class RoleValidator
                 break;
         }
 
-        if (role.SpawnSettings.SpawnChance is < 0 or > 100)
+        if (role.SpawnSettings.SpawnChance < 0)
             warnings.Add(
-                $"'spawn_settings.spawn_chance' should be between 0 and 100, got {role.SpawnSettings.SpawnChance}.");
+                $"'spawn_settings.spawn_chance' should be more than 0, got {role.SpawnSettings.SpawnChance}.");
 
         if (role.SpawnSettings.MinPlayers < 1)
             warnings.Add($"'spawn_settings.min_players' should be at least 1, got {role.SpawnSettings.MinPlayers}.");
@@ -345,16 +345,28 @@ internal static class RoleValidator
             warnings.Add(
                 $"'spawn_settings.max_players' ({role.SpawnSettings.MaxPlayers}) is below 'min_players' ({role.SpawnSettings.MinPlayers}); the role will never spawn.");
 
+        var delayed = role.SpawnSettings.SpawnDelay > 0;
+
+        if (role.SpawnSettings.SpawnDelay < 0)
+            warnings.Add(
+                $"'spawn_settings.spawn_delay' is negative ({role.SpawnSettings.SpawnDelay}); use 0 to spawn the role together with the vanilla role it replaces.");
+
+        if (delayed && (role.SpawnSettings.CanReplaceRoles is null || !role.SpawnSettings.CanReplaceRoles.Any()))
+            warnings.Add(
+                "'spawn_settings.spawn_delay' is set but 'can_replace_roles' is empty; the delayed spawn has nobody to convert. List the roles the players should be taken from, e.g. 'Spectator'.");
+
         if (role.SpawnSettings.CanReplaceRoles is not null)
         {
-            foreach (var replace in role.SpawnSettings.CanReplaceRoles.Where(r =>
-                         !SpawnManager.SpawnEvaluatedRoles.Contains(r)))
-                warnings.Add(
-                    $"'spawn_settings.can_replace_roles' contains '{replace}', which the spawn system never evaluates - it will never trigger a replacement. Usable roles: {string.Join(", ", SpawnManager.SpawnEvaluatedRoles.OrderBy(r => r.ToString()))}.");
+            if (!delayed)
+                foreach (var replace in role.SpawnSettings.CanReplaceRoles.Where(r =>
+                             !SpawnManager.SpawnEvaluatedRoles.Contains(r)))
+                    warnings.Add(
+                        $"'spawn_settings.can_replace_roles' contains '{replace}', which the spawn system never evaluates - it will never trigger a replacement. Usable roles: {string.Join(", ", SpawnManager.SpawnEvaluatedRoles.OrderBy(r => r.ToString()))}. Set 'spawn_delay' if you want the role to be handed out mid-round instead.");
 
             foreach (var duplicate in role.SpawnSettings.CanReplaceRoles.GroupBy(r => r).Where(g => g.Count() > 1))
-                warnings.Add(
-                    $"'spawn_settings.can_replace_roles' lists '{duplicate.Key}' {duplicate.Count()} times, which multiplies the spawn chance for that role - remove the duplicates unless that is intended.");
+                warnings.Add(delayed
+                    ? $"'spawn_settings.can_replace_roles' lists '{duplicate.Key}' {duplicate.Count()} times; remove the duplicates."
+                    : $"'spawn_settings.can_replace_roles' lists '{duplicate.Key}' {duplicate.Count()} times, which multiplies the spawn chance for that role - remove the duplicates unless that is intended.");
         }
 
         if (role.SpawnSettings.SpawnZones is not null)
@@ -465,10 +477,10 @@ internal static class RoleValidator
         if (role.CustomFlags is null || role.CustomFlags.Count == 0)
             return;
 
-        Dictionary<string, Dictionary<string, object>> flags;
+        List<KeyValuePair<string, Dictionary<string, object>>> flags;
         try
         {
-            flags = YamlFlagsHandler.Decode(role.CustomFlags) ?? new Dictionary<string, Dictionary<string, object>>();
+            flags = YamlFlagsHandler.Decode(role.CustomFlags) ?? [];
         }
         catch (Exception e)
         {

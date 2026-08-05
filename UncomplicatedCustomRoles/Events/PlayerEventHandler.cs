@@ -48,6 +48,7 @@ internal class PlayerEventHandler : EventHandlerBase
         PlayerEvents.Hurt += OnHurt;
         PlayerEvents.PickingUpItem += OnPickingUpItem;
         PlayerEvents.Joined += OnJoined;
+        PlayerEvents.Left += OnLeft;
         PlayerEvents.DamagingWindow += OnDamagingWindow;
         PlayerEvents.UnlockingWarheadButton += OnUnlockingWarheadButton;
         PlayerEvents.RequestedRaPlayerInfo += OnPlayerRequestedRaPlayerInfo;
@@ -76,6 +77,7 @@ internal class PlayerEventHandler : EventHandlerBase
         PlayerEvents.Hurt -= OnHurt;
         PlayerEvents.PickingUpItem -= OnPickingUpItem;
         PlayerEvents.Joined -= OnJoined;
+        PlayerEvents.Left -= OnLeft;
         PlayerEvents.DamagingWindow -= OnDamagingWindow;
         PlayerEvents.UnlockingWarheadButton -= OnUnlockingWarheadButton;
         PlayerEvents.RequestedRaPlayerInfo -= OnPlayerRequestedRaPlayerInfo;
@@ -97,6 +99,31 @@ internal class PlayerEventHandler : EventHandlerBase
 
         foreach (var role in SummonedCustomRole.List.Values.Where(role => role.Scale != Vector3.one))
             role.Player.Scale = role.Scale;
+    }
+
+    public void OnLeft(PlayerLeftEventArgs ev)
+    {
+        if (ev.Player is null)
+            return;
+
+        var playerId = ev.Player.PlayerId;
+        
+        if (SummonedCustomRole.TryGet(ev.Player, out var customRole))
+        {
+            LogManager.Debug(
+                $"Player {ev.Player.Nickname} ({playerId}) left as CustomRole {customRole.Role.Name} ({customRole.Role.Id}), releasing the instance");
+            customRole.DestroyDetached();
+        }
+
+        FirstRoundPlayers.Remove(playerId);
+        RagdollAppearanceQueue.Remove(playerId);
+        TerminationQueue.TryRemove(playerId, out _);
+        RespawnInventoryQueue.TryRemove(playerId, out _);
+        Spawn.SpawnQueue.Remove(playerId);
+        Spawn.Spawning.Remove(playerId);
+        API.Features.Escape.Bucket.Remove(playerId);
+        InventoryLimitOverride.ClearAll(playerId);
+        DisguiseTeam.Remove(playerId);
     }
 
     public void OnUpdatingEffect(PlayerEffectUpdatingEventArgs ev)

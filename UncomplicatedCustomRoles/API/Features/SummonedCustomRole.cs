@@ -46,6 +46,8 @@ public class SummonedCustomRole
     private static readonly ConcurrentDictionary<int, int> _cachedCountByRoleId = new();
 
     internal static int EventTriggeredModuleTotal;
+    
+    private readonly int _playerId;
 
     private int _eventModuleCount;
 
@@ -54,6 +56,7 @@ public class SummonedCustomRole
     {
         Id = Guid.NewGuid().ToString();
         Player = player;
+        _playerId = player.PlayerId;
         Role = role;
         SpawnTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         Badge = badge;
@@ -320,8 +323,24 @@ public class SummonedCustomRole
     {
         LogManager.Silent($"Destroying instance {Id} of CR {Role.Id} of PL {Player}");
         Remove();
-        List.TryRemove(Id, out _);
-        _cachedListByPlayerId.TryRemove(Player.PlayerId, out _);
+        Untrack();
+    }
+    
+    internal void DestroyDetached()
+    {
+        LogManager.Silent($"Detaching instance {Id} of CR {Role.Id} because the player is gone");
+        RemoveInternal(true);
+        Untrack();
+    }
+    
+    private void Untrack()
+    {
+        if (!List.TryRemove(Id, out _))
+            return;
+
+        if (_cachedListByPlayerId.TryGetValue(_playerId, out var cached) && cached == this)
+            _cachedListByPlayerId.TryRemove(_playerId, out _);
+
         if (_cachedCountByRoleId.TryGetValue(Role.Id, out var count) && count > 0)
         {
             count--;
@@ -337,6 +356,11 @@ public class SummonedCustomRole
     /// </summary>
     public void Remove()
     {
+        RemoveInternal(false);
+    }
+    
+    private void RemoveInternal(bool detached)
+    {
         try
         {
             foreach (var module in _customModules.ToArray())
@@ -345,47 +369,55 @@ public class SummonedCustomRole
                 _customModules.Remove(module);
             }
 
-            if (Badge is { } badge)
+            if (!detached)
             {
-                Player.ReferenceHub.serverRoles.SetText(badge.First);
-                Player.ReferenceHub.serverRoles.SetColor(badge.Second);
-                Player.ReferenceHub.serverRoles.RefreshLocalTag();
+                if (Badge is { } badge)
+                {
+                    Player.ReferenceHub.serverRoles.SetText(badge.First);
+                    Player.ReferenceHub.serverRoles.SetColor(badge.Second);
+                    Player.ReferenceHub.serverRoles.RefreshLocalTag();
 
-                LogManager.Debug("Badge detected, fixed");
+                    LogManager.Debug("Badge detected, fixed");
+                }
+
+                CustomInfo?.Detach();
+
+                if (IsCustomNickname)
+                    Player.DisplayName = null!;
+
+                LogManager.Debug("Scale reset to 1, 1, 1");
+                Player.Scale = new Vector3(1, 1, 1);
+
+                Player.IsDisarmed = false;
             }
 
-            CustomInfo?.Detach();
+            DisguiseTeam.Remove(_playerId);
 
-            if (IsCustomNickname)
-                Player.DisplayName = null!;
-
-            LogManager.Debug("Scale reset to 1, 1, 1");
-            Player.Scale = new Vector3(1, 1, 1);
-
-            Player.IsDisarmed = false;
-
-            DisguiseTeam.Remove(Player.PlayerId);
-
-            // Reset ammo limit
-            if (Role.Ammo is { Count: > 0 })
-                foreach (var ammo in Role.Ammo.Keys)
-                    Player.ResetAmmoLimit(ammo);
-
-            // Reset category limit
-            if (Role.CustomInventoryLimits is { Count: > 0 })
-                foreach (var category in Role.CustomInventoryLimits.Keys)
-                    Player.ResetCategoryLimit(category);
-
-            // Clear the custom info last so nothing re-applies it afterwards
-            CustomInfo.SuppressExternalSync = true;
-            try
+            if (detached)
+                InventoryLimitOverride.ClearAll(_playerId);
+            else
             {
-                Player.ReferenceHub.nicknameSync.Network_playerInfoToShow = PlayerInfoArea;
-                Player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = string.Empty;
-            }
-            finally
-            {
-                CustomInfo.SuppressExternalSync = false;
+                // Reset ammo limit
+                if (Role.Ammo is { Count: > 0 })
+                    foreach (var ammo in Role.Ammo.Keys)
+                        Player.ResetAmmoLimit(ammo);
+
+                // Reset category limit
+                if (Role.CustomInventoryLimits is { Count: > 0 })
+                    foreach (var category in Role.CustomInventoryLimits.Keys)
+                        Player.ResetCategoryLimit(category);
+
+                // Clear the custom info last so nothing re-applies it afterwards
+                CustomInfo.SuppressExternalSync = true;
+                try
+                {
+                    Player.ReferenceHub.nicknameSync.Network_playerInfoToShow = PlayerInfoArea;
+                    Player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = string.Empty;
+                }
+                finally
+                {
+                    CustomInfo.SuppressExternalSync = false;
+                }
             }
 
             if (IsDefaultCoroutineRole && GenericCoroutine.IsRunning)
@@ -394,12 +426,16 @@ public class SummonedCustomRole
             if (NicknameReapplyCoroutine.IsRunning)
                 Timing.KillCoroutines(NicknameReapplyCoroutine);
 
-            // Remove effects
-            Player.DisableAllEffects();
-            InfiniteEffects.Clear();
+            if (!detached)
+            {
+                // Remove effects
+                Player.DisableAllEffects();
 
-            if (Appearance != RoleTypeId.None && LabApiExtensions.IsAvailable)
-                LabApiExtensions.RemoveFakeRole(Player);
+                if (Appearance != RoleTypeId.None && LabApiExtensions.IsAvailable)
+                    LabApiExtensions.RemoveFakeRole(Player);
+            }
+
+            InfiniteEffects.Clear();
 
             if (Role is CustomRole customRole)
                 customRole.OnRemoved(this);
@@ -407,7 +443,7 @@ public class SummonedCustomRole
         catch (Exception e)
         {
             LogManager.Error(
-                $"Failed to act SummonedCustomRole::Remove() - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
+                $"Failed to act SummonedCustomRole::Remove(detached: {detached}) - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
         }
 
         EventHandler?.Unload();
@@ -778,6 +814,17 @@ public class SummonedCustomRole
                 $"\n<size=26><color=#1780e3><b>UncomplicatedCustomRoles</b> v{Plugin.Instance.Version}</color></size>");
             builder.AppendLine(Info.BuildInfo(role.Role));
         }
+    }
+    
+    internal static void ClearAll()
+    {
+        foreach (var role in List.Values.ToArray())
+            role.DestroyDetached();
+
+        List.Clear();
+        _cachedListByPlayerId.Clear();
+        _cachedCountByRoleId.Clear();
+        EventTriggeredModuleTotal = 0;
     }
 
     public static void RemoveSpecificRole(int id)

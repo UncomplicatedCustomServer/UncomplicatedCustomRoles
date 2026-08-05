@@ -9,6 +9,7 @@
  */
 
 using System.Collections.Generic;
+using System.Linq;
 using CommandSystem;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features;
@@ -73,6 +74,10 @@ public class Info : IUCRCommand
 
         if (role.SpawnSettings != null)
         {
+            if (role.SpawnSettings.SpawnDelay > 0)
+                data.Add("<color=#ffff00>⏱️</color> Spawn delay:",
+                    $"<b>{role.SpawnSettings.SpawnDelay}s</b> after the round starts");
+
             if (role.SpawnSettings.Spawn is SpawnType.RoomsSpawn)
                 data.Add("<color=#632300>🚪</color> Spawn rooms:",
                     string.Join(", ", role.SpawnSettings?.SpawnRooms ?? []));
@@ -88,7 +93,8 @@ public class Info : IUCRCommand
         {
             var decodedFlags = YamlFlagsHandler.Decode(role.CustomFlags);
             if (decodedFlags != null)
-                data.Add("<color=#bf4eb6>🧩</color> Custom flags:", string.Join(", ", decodedFlags.Keys));
+                data.Add("<color=#bf4eb6>🧩</color> Custom flags:",
+                    string.Join(", ", decodedFlags.Select(f => f.Key)));
         }
 
         foreach (var kvp in data)

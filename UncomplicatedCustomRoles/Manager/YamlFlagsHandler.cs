@@ -35,23 +35,29 @@ internal class YamlFlagsHandler
         _modules = null;
     }
 
-    public static Dictionary<string, Dictionary<string, object>?>? Decode(List<object> flags)
+    public static List<KeyValuePair<string, Dictionary<string, object>?>>? Decode(List<object> flags)
     {
         if (flags is null)
             return null;
 
-        Dictionary<string, Dictionary<string, object>?> result = new();
+        List<KeyValuePair<string, Dictionary<string, object>?>> result = [];
 
         foreach (var flag in flags)
             if (flag is Dictionary<object, object> str)
             {
                 foreach (var res in str)
                     if (res.Value is Dictionary<object, object> dict)
-                        result[res.Key.ToString()] = dict.ConvertKeyToString();
+                        result.Add(new KeyValuePair<string, Dictionary<string, object>?>(res.Key.ToString(),
+                            dict.ConvertKeyToString()));
+                    else if (res.Value is null)
+                        result.Add(new KeyValuePair<string, Dictionary<string, object>?>(res.Key.ToString(), null));
+                    else
+                        LogManager.Warn(
+                            $"[CM Loader] The custom flag '{res.Key}' has its settings written as '{res.Value}' instead of a list of 'setting: value' lines, so it can't be read and will be ignored.");
             }
             else
             {
-                result[flag.ToString()] = null;
+                result.Add(new KeyValuePair<string, Dictionary<string, object>?>(flag.ToString(), null));
             }
 
         return result;

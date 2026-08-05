@@ -155,6 +155,16 @@ public class CustomKeycard : CustomModule
     {
         Timing.CallDelayed(Timing.WaitForOneFrame, () =>
         {
+            if (Player is null || !Player.IsAlive)
+                return;
+
+            if (Player.IsInventoryFull)
+            {
+                LogManager.Warn(
+                    $"[CustomKeycard] Can't give the '{KeycardType}' keycard to {Player.Nickname}: their inventory is already full. Free a slot in 'inventory' or remove one of the role's CustomKeycard flags.");
+                return;
+            }
+
             _keycardItem = KeycardType switch
             {
                 ItemType.KeycardCustomManagement => KeycardItem.CreateCustomKeycardManagement(
@@ -176,7 +186,7 @@ public class CustomKeycard : CustomModule
 
             if (_keycardItem is null)
                 LogManager.Error(
-                    $"[CustomKeycard] Failed to create keycard of type '{KeycardType}' for player {Player?.Nickname}. This is likely a bug, please report it.");
+                    $"[CustomKeycard] Failed to create keycard of type '{KeycardType}' for player {Player?.Nickname}. If the type is a valid customizable keycard this is a bug, please report it.");
         });
         base.OnAdded();
     }

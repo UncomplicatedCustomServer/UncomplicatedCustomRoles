@@ -573,56 +573,13 @@ internal class SpawnManager
         List<ICustomRole> candidates = [];
 
         foreach (var Role in CustomRole.CustomRoles.Values)
-            if (Role.SpawnSettings is not null && !Role.IgnoreSpawnSystem &&
+            if (Role.SpawnSettings is not null && !Role.IgnoreSpawnSystem && Role.SpawnSettings.SpawnDelay <= 0 &&
                 Role.SpawnSettings.CanReplaceRoles is { } canReplaceRoles && canReplaceRoles.Contains(NewRole) &&
                 readyPlayers >= Role.SpawnSettings.MinPlayers &&
                 SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
             {
-                if (Role.SpawnSettings.RequiredPermission is not null)
-                {
-                    static bool CheckPermission(Player player, string permission)
-                    {
-                        if (Enum.TryParse(permission, out PlayerPermissions playerPermissions))
-                            return player.HasPermission(playerPermissions);
-
-                        return player.HasAnyPermission(permission);
-                    }
-
-                    static IEnumerable<string> ExtractPermissions(object obj)
-                    {
-                        switch (obj)
-                        {
-                            case string s when !string.IsNullOrWhiteSpace(s):
-                                return [s];
-                            case IEnumerable enumerable:
-                            {
-                                var list = new List<string>();
-                                foreach (var item in enumerable)
-                                {
-                                    if (item is null) continue;
-                                    var s = item.ToString();
-                                    if (!string.IsNullOrWhiteSpace(s)) list.Add(s);
-                                }
-
-                                return list;
-                            }
-                            default:
-                                return [];
-                        }
-                    }
-
-                    var permsList = ExtractPermissions(Role.SpawnSettings.RequiredPermission).ToList();
-                    if (permsList.Any())
-                    {
-                        var hasAll = permsList.All(p => CheckPermission(player, p));
-                        if (!hasAll)
-                        {
-                            LogManager.Debug(
-                                $"Player {player.PlayerId} doesn't have the required permission(s) to spawn as role {Role.Name} ({Role.Id}), skipping... Player Permissions: {string.Join(", ", player.GetPermissions())}, Required permission(s): {string.Join(", ", permsList)}");
-                            continue;
-                        }
-                    }
-                }
+                if (!HasRequiredPermission(player, Role))
+                    continue;
 
                 for (var a = 0; a < Role.SpawnSettings.SpawnChance; a++)
                     candidates.Add(Role);
@@ -632,6 +589,54 @@ internal class SpawnManager
             return candidates.RandomItem();
 
         return null;
+    }
+
+    internal static bool HasRequiredPermission(Player player, ICustomRole role)
+    {
+        if (role.SpawnSettings?.RequiredPermission is null)
+            return true;
+
+        static bool CheckPermission(Player player, string permission)
+        {
+            if (Enum.TryParse(permission, out PlayerPermissions playerPermissions))
+                return player.HasPermission(playerPermissions);
+
+            return player.HasAnyPermission(permission);
+        }
+
+        static IEnumerable<string> ExtractPermissions(object obj)
+        {
+            switch (obj)
+            {
+                case string s when !string.IsNullOrWhiteSpace(s):
+                    return [s];
+                case IEnumerable enumerable:
+                {
+                    var list = new List<string>();
+                    foreach (var item in enumerable)
+                    {
+                        if (item is null) continue;
+                        var s = item.ToString();
+                        if (!string.IsNullOrWhiteSpace(s)) list.Add(s);
+                    }
+
+                    return list;
+                }
+                default:
+                    return [];
+            }
+        }
+
+        var permsList = ExtractPermissions(role.SpawnSettings.RequiredPermission).ToList();
+        if (!permsList.Any())
+            return true;
+
+        if (permsList.All(p => CheckPermission(player, p)))
+            return true;
+
+        LogManager.Debug(
+            $"Player {player.PlayerId} doesn't have the required permission(s) to spawn as role {role.Name} ({role.Id}), skipping... Player Permissions: {string.Join(", ", player.GetPermissions())}, Required permission(s): {string.Join(", ", permsList)}");
+        return false;
     }
 
     public static void AnnounceScpTermination(ReferenceHub scp, DamageHandlerBase hit)

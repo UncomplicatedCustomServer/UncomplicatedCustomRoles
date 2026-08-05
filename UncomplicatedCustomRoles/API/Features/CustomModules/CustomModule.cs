@@ -263,7 +263,7 @@ public abstract class CustomModule
         LogManager.Silent(
             $"[CM Loader] Initialize loading for {summonedCustomRole}\nPreloaded {YamlFlagsHandler.Modules.Length} modules...");
 
-        var data = YamlFlagsHandler.Decode(modules) ?? new Dictionary<string, Dictionary<string, object>?>();
+        var data = YamlFlagsHandler.Decode(modules) ?? [];
 
         List<CustomModule> mods = [];
 

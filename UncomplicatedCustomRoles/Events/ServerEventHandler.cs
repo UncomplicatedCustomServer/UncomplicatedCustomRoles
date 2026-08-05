@@ -48,7 +48,7 @@ internal class ServerEventHandler : EventHandlerBase
         Started = true;
         FirstRoundPlayers.Clear();
 
-        // Starts the infinite effect thing
+        DelayedSpawnManager.ScheduleAll();
         InfiniteEffect.Stop();
         InfiniteEffect.EffectAssociationAllowed = true;
         InfiniteEffect.Start();
@@ -57,6 +57,7 @@ internal class ServerEventHandler : EventHandlerBase
     public void OnRoundEnded(RoundEndedEventArgs _)
     {
         Started = false;
+        DelayedSpawnManager.Cancel();
         InfiniteEffect.Terminate();
     }
 
@@ -65,6 +66,9 @@ internal class ServerEventHandler : EventHandlerBase
         Announcer.SavedCustomAnnouncements.Clear();
 
         // Round-scoped state must not leak into the next round
+        DelayedSpawnManager.Cancel();
+        SummonedCustomRole.ClearAll();
+        DisguiseTeam.Clear();
         RespawnInventoryQueue.Clear();
         RagdollAppearanceQueue.Clear();
         TerminationQueue.Clear();

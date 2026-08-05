@@ -37,6 +37,11 @@ internal static class InventoryLimitOverride
         Categories.Clear();
     }
 
+    internal static void ClearAll(int playerId)
+    {
+        Categories.TryRemove(playerId, out _);
+    }
+
     internal static bool TryGet(int playerId, ItemCategory category, out sbyte limit)
     {
         limit = 0;

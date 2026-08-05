@@ -40,6 +40,11 @@ public class SpawnBehaviour
     public float SpawnChance { get; set; } = 60;
 
     /// <summary>
+    ///     Gets or sets how many seconds after the round starts the role is spawned.
+    /// </summary>
+    public float SpawnDelay { get; set; } = 0;
+
+    /// <summary>
     ///     Gets or sets the <see cref="SpawnType" /> of the role
     /// </summary>
     public SpawnType Spawn { get; set; } = SpawnType.RoomsSpawn;
