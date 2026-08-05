@@ -76,19 +76,56 @@ internal class HttpManager
     public List<string> IsJobRole { get; } = [];
 
     /// <summary>
-    ///     Gets the latest <see cref="Version" /> of the plugin, loaded by the UCS cloud
+    ///     Gets every version of the plugin known by the UCS cloud
+    /// </summary>
+    public List<VersionInfo> Versions
+    {
+        get
+        {
+            if (_versions is null)
+                LoadVersions();
+            return _versions;
+        }
+    }
+
+    /// <summary>
+    ///     Gets the latest <see cref="Version" /> of the plugin, pre-releases included, loaded by the UCS cloud
     /// </summary>
     public Version LatestVersion
     {
         get
         {
             if (_latestVersion is null)
-                LoadLatestVersion();
+                LoadVersions();
             return _latestVersion;
         }
     }
 
+    /// <summary>
+    ///     Gets the latest stable (non pre-release) <see cref="Version" /> of the plugin, loaded by the UCS cloud.
+    /// </summary>
+    public Version LatestStableVersion
+    {
+        get
+        {
+            if (_latestStableVersion is null)
+                LoadVersions();
+            return _latestStableVersion;
+        }
+    }
+
+    /// <summary>
+    ///     Gets whether the running build is a pre-release
+    /// </summary>
+    public bool IsPreRelease => TryGetVersionInfo(Plugin.Instance.Version, out var info)
+        ? info.PreRelease != 0
+        : Plugin.Instance.Version.Revision != 0;
+
+    private List<VersionInfo> _versions { get; set; }
+
     private Version _latestVersion { get; set; }
+
+    private Version _latestStableVersion { get; set; }
 
     internal void RegisterEvents()
     {
@@ -111,22 +148,89 @@ internal class HttpManager
             JsonSerializer.Serialize(new OwnerMessage(player, discordId)), "application/json");
     }
 
-    public void LoadLatestVersion()
+    public void LoadVersions()
     {
-        var Version = HttpQuery.Get($"{Endpoint}/{Prefix}/versions/latest@text/plain");
+        _versions = [];
+        _latestVersion = new Version();
+        _latestStableVersion = new Version();
+
+        string answer = null;
 
         try
         {
-            if (!string.IsNullOrEmpty(Version) && Version.Contains("."))
-                _latestVersion = new Version(Version.Trim());
-            else
-                _latestVersion = new Version();
+            answer = HttpQuery.Get($"{Endpoint}/{Prefix}/versions");
+            _versions = JsonSerializer.Deserialize<List<VersionInfo>>(answer) ?? [];
         }
         catch
         {
-            LogManager.Debug($"Failed to parse the latest version received from the UCS cloud: '{Version}'");
+            LogManager.Debug($"Failed to load the version list from the UCS cloud: '{answer}'");
+        }
+
+        foreach (var version in _versions)
+        {
+            if (!Version.TryParse(version.Name, out var parsed))
+                continue;
+
+            if (parsed > _latestVersion)
+                _latestVersion = parsed;
+
+            if (version.PreRelease == 0 && parsed > _latestStableVersion)
+                _latestStableVersion = parsed;
+        }
+
+        if (_versions.Count is 0)
+            LoadLatestVersionFallback();
+    }
+
+    /// <summary>
+    ///     Loads the latest version from the single-value endpoint, used when the version list is unavailable.
+    /// </summary>
+    private void LoadLatestVersionFallback()
+    {
+        string answer = null;
+
+        try
+        {
+            answer = HttpQuery.Get($"{Endpoint}/{Prefix}/versions/latest@text/plain");
+
+            if (string.IsNullOrEmpty(answer) || !answer.Contains("."))
+                return;
+
+            _latestVersion = new Version(answer.Trim());
+
+            // That endpoint doesn't tell us whether it's a pre-release, and only pre-releases ship with a non-zero
+            // revision, so anything else can safely be treated as the latest stable one.
+            if (_latestVersion.Revision is 0)
+                _latestStableVersion = _latestVersion;
+        }
+        catch
+        {
+            LogManager.Debug($"Failed to parse the latest version received from the UCS cloud: '{answer}'");
             _latestVersion = new Version();
         }
+    }
+
+    /// <summary>
+    ///     Tries to get the cloud informations about the given version of the plugin
+    /// </summary>
+    public bool TryGetVersionInfo(Version version, out VersionInfo info)
+    {
+        info = Versions.FirstOrDefault(v => Version.TryParse(v.Name, out var parsed) && parsed == version);
+        return info is not null;
+    }
+
+    /// <summary>
+    ///     Gets the release the current installation should be updated to, or <see langword="null" /> if there's
+    ///     nothing newer to install.
+    /// </summary>
+    public Version GetUpdateTarget()
+    {
+        var current = Plugin.Instance.Version;
+
+        if (IsPreRelease)
+            current = new Version(current.Major, current.Minor, Math.Max(current.Build, 0));
+
+        return LatestStableVersion.CompareTo(current) > 0 ? LatestStableVersion : null;
     }
 
     public void LoadCreditTags()
@@ -205,19 +309,13 @@ internal class HttpManager
 
     public bool IsLatestVersion(out Version latest)
     {
-        latest = LatestVersion;
-        if (latest.CompareTo(Plugin.Instance.Version) > 0)
-            return false;
-
-        return true;
+        latest = LatestStableVersion;
+        return GetUpdateTarget() is null;
     }
 
     public bool IsLatestVersion()
     {
-        if (LatestVersion.CompareTo(Plugin.Instance.Version) > 0)
-            return false;
-
-        return true;
+        return GetUpdateTarget() is null;
     }
 
     internal HttpStatusCode ShareLogs(string data, out string content)

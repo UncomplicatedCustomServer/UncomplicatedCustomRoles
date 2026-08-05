@@ -27,7 +27,8 @@ public class Version : IUCRCommand
     {
         if (VersionManager.VersionInfo is null)
         {
-            response = "Can't load VersionManager.VersionInfo: Failed to GET HTTPS";
+            response =
+                $"<size=22><b>UncomplicatedCustomRoles</b></size>\n<size=18>Authors: {Plugin.Instance.Author}\nVersion: {Plugin.Instance.Version}\n\n<color=yellow>The UCS cloud has no informations about this version, so it can't be verified.\nThis is expected on an unreleased build, otherwise check the server console for the reason.</color></size>";
             return false;
         }
 

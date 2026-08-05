@@ -74,9 +74,10 @@ internal class Plugin : Plugin<Config>
 
         Task.Run(delegate
         {
-            if (HttpManager.LatestVersion.CompareTo(Version) > 0)
+            var updateTarget = HttpManager.GetUpdateTarget();
+            if (updateTarget is not null)
                 LogManager.Warn(
-                    $"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Version} | Latest available: v{HttpManager.LatestVersion}\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
+                    $"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Version} | Latest available: v{updateTarget}\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
 
             VersionManager.Init();
         });

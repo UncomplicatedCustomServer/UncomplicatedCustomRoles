@@ -10,6 +10,7 @@
 
 using System;
 using System.IO;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text.Json;
 using MEC;
@@ -30,7 +31,21 @@ internal static class VersionManager
         try
         {
             var data = Plugin.HttpManager.VersionInfo();
-            data.GetStatusCode(out var msg);
+
+            if (string.IsNullOrWhiteSpace(data))
+            {
+                LogManager.Silent("The UCS cloud gave us an empty answer while asking for the version info.");
+                return;
+            }
+
+            var status = data.GetStatusCode(out var msg);
+            if (status is not HttpStatusCode.Unused)
+            {
+                LogManager.Silent(
+                    $"The UCS cloud has no info about v{Plugin.Instance.Version} - HTTP {(int)status}: {msg ?? "Message is null"}");
+                return;
+            }
+
             VersionInfo = JsonSerializer.Deserialize<VersionInfo>(data);
             if (VersionInfo is null)
             {
@@ -41,8 +56,9 @@ internal static class VersionManager
 
             if (VersionInfo.PreRelease != 0)
             {
+                var latestStable = Plugin.HttpManager.LatestStableVersion;
                 LogManager.Info(
-                    $"\nNOTICE!\nYou are currently using the version v{Plugin.Instance.Version}, who's a PRE-RELEASE or an EXPERIMENTAL RELESE of UncomplicatedCustomRoles!\nLatest stable release: {Plugin.HttpManager.LatestVersion}\nNOTE: This is NOT a stable version, so there can be bugs and malfunctions, for this reason we do not recommend use in production.");
+                    $"\nNOTICE!\nYou are currently using the version v{Plugin.Instance.Version}, who's a PRE-RELEASE or an EXPERIMENTAL RELESE of UncomplicatedCustomRoles!\nLatest stable release: {(latestStable > new Version() ? $"v{latestStable}" : "unknown")}\nNOTE: This is NOT a stable version, so there can be bugs and malfunctions, for this reason we do not recommend use in production.");
                 if (VersionInfo.ForceDebug != 0 && !(Plugin.Instance.Config?.Debug ?? true))
                 {
                     LogManager.Info("Debug logs have been activated!");
