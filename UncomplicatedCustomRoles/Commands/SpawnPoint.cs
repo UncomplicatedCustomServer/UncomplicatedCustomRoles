@@ -9,14 +9,10 @@
  */
 
 using System.Collections.Generic;
-using System.Net;
-using System.Threading.Tasks;
 using CommandSystem;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomRoles.API.Interfaces;
-using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
-using UncomplicatedCustomRoles.Manager.NET;
 using SpawnPointInstance = UncomplicatedCustomRoles.API.Features.SpawnPoint;
 
 namespace UncomplicatedCustomRoles.Commands;
@@ -25,10 +21,7 @@ internal class SpawnPoint : IUCRCommand
 {
     public const string CommandHeader = "UncomplicatedCustomRoles - SpawnPoint Feature\n";
 
-    public const string LocalError =
-        "Sorry but you can't perform that action while having your spawnpoints hosted in your local folder!";
-
-    public Dictionary<string, KeyValuePair<string, string>> SubCommands = new()
+    public readonly Dictionary<string, KeyValuePair<string, string>> SubCommands = new()
     {
         {
             "list",
@@ -47,22 +40,13 @@ internal class SpawnPoint : IUCRCommand
             new KeyValuePair<string, string>("(Name) ", "Teleport yourself to a SpawnPoint")
         },
         {
-            "sync",
+            "reload",
             new KeyValuePair<string, string>("",
-                "Update your local SpawnPoint list by downloading it from the UCS cloud")
+                "Reload the SpawnPoint list from the local file, discarding every unsaved change")
         },
         {
-            "migrate",
-            new KeyValuePair<string, string>("(NewPort) ", "Migrate current SpawnPoints to another port (but same IP)")
-        },
-        {
-            "download",
-            new KeyValuePair<string, string>("",
-                "Get a link to download the current SpawnPoint list from the UCS cloud")
-        },
-        {
-            "ip",
-            new KeyValuePair<string, string>("", "Get your current IPv4/IPv6")
+            "path",
+            new KeyValuePair<string, string>("", "Show where the SpawnPoints of this server are stored")
         }
     };
 
@@ -96,7 +80,7 @@ internal class SpawnPoint : IUCRCommand
             {
                 case "list":
                     response =
-                        $"{CommandHeader}Currently registered SpawnPoints ({SpawnPointInstance.List.Count}/{SpawnPointApiCommunicator.MaxSpawnPoints}):\n";
+                        $"{CommandHeader}Currently registered SpawnPoints ({SpawnPointInstance.List.Count}):\n";
 
                     foreach (var SpawnPoint in SpawnPointInstance.List)
                         response += $"- {SpawnPoint}\n";
@@ -115,17 +99,11 @@ internal class SpawnPoint : IUCRCommand
                         return false;
                     }
 
-                    if (SpawnPointInstance.List.Count >= SpawnPointApiCommunicator.MaxSpawnPoints)
-                    {
-                        response =
-                            $"You've reached the maximum number of SpawnPoints for this port!\nMaximum: {SpawnPointApiCommunicator.MaxSpawnPoints}";
-                        return false;
-                    }
-
                     new SpawnPointInstance(arguments[1], player);
-                    SpawnPointApiCommunicator.AsyncPushSpawnPoints();
 
-                    response = $"SpawnPoint {arguments[1]} successfully created!";
+                    response = SpawnPointManager.Save()
+                        ? $"SpawnPoint {arguments[1]} successfully created!"
+                        : $"SpawnPoint {arguments[1]} created!\nThe SpawnPoint list has been updated but it could NOT be saved on the disk: check the server console!";
                     break;
                 case "delete":
                     if (arguments.Count != 2)
@@ -137,67 +115,15 @@ internal class SpawnPoint : IUCRCommand
                     if (SpawnPointInstance.TryGet(arguments[1], out var spawnPoint))
                     {
                         spawnPoint.Destroy();
-                        response = "SpawnPoint successfully removed!";
-                        SpawnPointApiCommunicator.AsyncPushSpawnPoints();
+                        response = SpawnPointManager.Save()
+                            ? "SpawnPoint successfully removed!"
+                            : $"SpawnPoint removed!\nThe SpawnPoint list has been updated but it could NOT be saved on the disk: check the server console!";
                     }
                     else
                     {
                         response = $"SpawnPoint '{arguments[1]}' not found!";
                     }
 
-                    break;
-                case "migrate":
-                    if (SpawnPointApiCommunicator.Local)
-                    {
-                        response = LocalError;
-                        return false;
-                    }
-
-                    if (arguments.Count < 2)
-                    {
-                        response = "Wrong usage!\nucr spawnpoint migrate (NewPort)";
-                        return false;
-                    }
-
-                    if (!int.TryParse(arguments[1], out var newPort))
-                    {
-                        response = $"'{arguments[1]}' is not a valid port number!";
-                        return false;
-                    }
-
-                    if (arguments.Count == 2)
-                    {
-                        response =
-                            $"Are you sure to migrate every SpawnPoint from port {Server.Port} to port {newPort}?\nIf yes do again the command:\nucr spawnpoint migrate {arguments[1]} yes";
-                        return true;
-                    }
-
-                    if (arguments.Count == 3)
-                    {
-                        var Status = SpawnPointApiCommunicator.PushMigrationRequest(newPort).GetStatusCode(out _);
-
-                        if (Status is HttpStatusCode.OK)
-                        {
-                            response = "Migration completed!\nRefreshing the local database...";
-                            SpawnPointInstance.List.Clear();
-                        }
-                        else
-                        {
-                            response = $"Migration failed!\nUCS cloud says: {Status}";
-                        }
-                    }
-
-                    break;
-                case "download":
-                    if (SpawnPointApiCommunicator.Local)
-                    {
-                        response = LocalError;
-                        return false;
-                    }
-
-                    var url = SpawnPointApiCommunicator.AskDownloadUrl();
-                    LogManager.Info($"Download your SpawnPoint settings with this URL:\n{url}");
-                    response = $"Download URL:\n{url}";
                     break;
                 case "goto":
                     if (arguments.Count != 2)
@@ -223,24 +149,12 @@ internal class SpawnPoint : IUCRCommand
                     }
 
                     break;
-                case "ip":
-                    if (SpawnPointApiCommunicator.Local)
-                    {
-                        response = LocalError;
-                        return false;
-                    }
-
-                    response = $"Your IPv4/IPv6 is: {SpawnPointApiCommunicator.AskIp()}";
-                    break;
+                case "reload":
                 case "sync":
-                    if (SpawnPointApiCommunicator.Local)
-                    {
-                        response = LocalError;
-                        return false;
-                    }
-
-                    response = "Sync started! The SpawnPoints are being downloaded in the background...";
-                    Task.Run(SpawnPointApiCommunicator.LoadFromCloud);
+                    response = $"Reloaded {SpawnPointManager.Load()} SpawnPoints from the local storage!";
+                    break;
+                case "path":
+                    response = $"Your SpawnPoints are stored in:\n{SpawnPointManager.FilePath}";
                     break;
                 default:
                     response = $"SubCommand '{arguments[0]}' not found!";

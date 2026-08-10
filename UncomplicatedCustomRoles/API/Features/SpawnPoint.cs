@@ -48,12 +48,12 @@ public class SpawnPoint
     }
 
     /// <summary>
-    ///     Gets the list of every synced <see cref="SpawnPoint" /> in the server
+    ///     Gets the list of every stored <see cref="SpawnPoint" /> in the server
     /// </summary>
     public static HashSet<SpawnPoint> List { get; } = [];
 
     /// <summary>
-    ///     Gets the list of every unsynced <see cref="SpawnPoint" /> in the server
+    ///     Gets the list of every <see cref="SpawnPoint" /> in the server that is not written to the local storage file
     /// </summary>
     public static HashSet<SpawnPoint> UnsyncedList { get; } = [];
 
@@ -83,7 +83,7 @@ public class SpawnPoint
     public Triplet<float, float, float> RoomRotationBase { get; }
 
     /// <summary>
-    ///     Gets whether the <see cref="SpawnPoint" /> is synced with the UCS cloud (or local file) or not
+    ///     Gets whether the <see cref="SpawnPoint" /> is stored inside the local SpawnPoint file or not
     /// </summary>
     [JsonIgnore]
     public bool Sync { get; set; }
@@ -185,14 +185,14 @@ public class SpawnPoint
     }
 
     /// <summary>
-    ///     Creates a new <see cref="SpawnPoint" /> instance that is not synchronized with the network.
+    ///     Creates a new <see cref="SpawnPoint" /> instance that is not written to the local storage file.
     /// </summary>
     /// <param name="name">The unique name to assign to the spawn point. Cannot be null or empty.</param>
     /// <param name="roomId">The identifier of the room to which the spawn point belongs. Cannot be null or empty.</param>
     /// <param name="positionBase">The base position of the spawn point, specified as a triplet of coordinates.</param>
     /// <param name="rotationBase">The base rotation of the spawn point, specified as a quadruple representing rotation values.</param>
     /// <param name="roomRotationBase">The base rotation of the room, specified as a triplet of rotation values.</param>
-    /// <returns>A <see cref="SpawnPoint" /> instance that is not registered for network synchronization.</returns>
+    /// <returns>A <see cref="SpawnPoint" /> instance that is not stored on the disk.</returns>
     public static SpawnPoint CreateNotSync(string name, string roomId, Triplet<float, float, float> positionBase,
         Quadruple<float, float, float, float> rotationBase, Triplet<float, float, float> roomRotationBase)
     {

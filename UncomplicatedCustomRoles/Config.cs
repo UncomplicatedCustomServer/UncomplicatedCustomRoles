@@ -42,10 +42,6 @@ internal class Config
     [Description("Whether the NPCs can naturally spawn custom roles")]
     public bool IgnoreNpcs { get; set; } = true;
 
-    [Description(
-        "Whether you want your spawnpoints to be hosted inside our central server or locally in the configs folder")]
-    public bool LocalSpawnPoints { get; set; } = false;
-
     [Description("Auto load the Custom Role ID from the file, bypassing YAML")]
     public bool UseIdFixer { get; set; } = false;
 
