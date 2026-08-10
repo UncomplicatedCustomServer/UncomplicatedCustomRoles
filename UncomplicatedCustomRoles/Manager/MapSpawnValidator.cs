@@ -24,6 +24,9 @@ internal static class MapSpawnValidator
 {
     internal static void ValidateAll()
     {
+        foreach (var role in CustomRole.CustomRoles.Values)
+            RoleValidator.ValidatePostLoad(role);
+
         var rooms = Room.List;
         if (rooms is null || rooms.Count == 0)
             return;
@@ -38,8 +41,6 @@ internal static class MapSpawnValidator
 
         foreach (var role in CustomRole.CustomRoles.Values)
         {
-            RoleValidator.ValidatePostLoad(role);
-
             var spawn = role.SpawnSettings;
             if (spawn is null)
                 continue;

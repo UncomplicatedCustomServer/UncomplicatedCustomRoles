@@ -166,9 +166,6 @@ internal static class RoleValidator
                 errors.Add($"'health.maximum' must be at least 1, got {role.Health.Maximum}.");
             if (role.Health.Amount < 1)
                 warnings.Add($"'health.amount' is {role.Health.Amount}; the player would spawn (nearly) dead.");
-            if (role.Health.Maximum >= 1 && role.Health.Amount > role.Health.Maximum)
-                warnings.Add(
-                    $"'health.amount' ({role.Health.Amount}) is above 'health.maximum' ({role.Health.Maximum}); it will be capped.");
         }
 
         if (role.Ahp is not null)
@@ -197,7 +194,7 @@ internal static class RoleValidator
                     $"'hume_shield.maximum' ({role.HumeShield.Maximum}) is below 'hume_shield.amount' ({role.HumeShield.Amount}).");
             if (role.HumeShield.RegenerationAmount < 0)
                 warnings.Add(
-                    $"'hume_shield.regeneration_amount' is negative ({role.HumeShield.RegenerationAmount}); the shield would drain instead of regenerating.");
+                    $"'hume_shield.regeneration_amount' is negative ({role.HumeShield.RegenerationAmount}); the regeneration only runs when it is above 0, so the shield will never regenerate.");
             if (role.HumeShield.RegenerationDelay < 0)
                 warnings.Add(
                     $"'hume_shield.regeneration_delay' is negative ({role.HumeShield.RegenerationDelay}); use 0 for no delay.");
@@ -234,9 +231,16 @@ internal static class RoleValidator
             }
 
             if (string.IsNullOrWhiteSpace(effect.EffectType) ||
-                !EffectNames.Any(n => n.StartsWith(effect.EffectType, StringComparison.InvariantCultureIgnoreCase)))
+                !EffectNames.Any(n => string.Equals(n, effect.EffectType, StringComparison.InvariantCultureIgnoreCase)))
+            {
+                var closest = string.IsNullOrWhiteSpace(effect.EffectType)
+                    ? null
+                    : EffectNames.FirstOrDefault(n =>
+                        n.StartsWith(effect.EffectType, StringComparison.InvariantCultureIgnoreCase));
+
                 warnings.Add(
-                    $"'effects' entry #{i + 1} has an unknown effect_type '{effect.EffectType}'; it will be skipped. Valid effects: {string.Join(", ", EffectNames)}.");
+                    $"'effects' entry #{i + 1} has an unknown effect_type '{effect.EffectType}'; it will be skipped.{(closest is null ? string.Empty : $" Did you mean '{closest}'?")} Valid effects: {string.Join(", ", EffectNames)}.");
+            }
 
             if (effect.Intensity == 0)
                 warnings.Add(
@@ -280,8 +284,9 @@ internal static class RoleValidator
                     .Select(kvp => kvp.Key));
 
             foreach (var category in role.CustomInventoryLimits.Keys.Where(c => !configurable.Contains(c)))
-                warnings.Add(
-                    $"'custom_inventory_limits' contains '{category}', whose limit cannot be overridden; the entry is ignored. Configurable categories: {string.Join(", ", configurable.OrderBy(c => c.ToString()))}.");
+                warnings.Add(category is ItemCategory.Ammo
+                    ? "'custom_inventory_limits' contains 'Ammo', which the game does not count in inventory slots; the entry does nothing. Ammo is limited per ammo type, not per category."
+                    : $"'custom_inventory_limits' contains '{category}', which the game does not limit by slot count. UCR still applies the limit server-side, but the client's inventory HUD will not show it. Categories the game limits on its own: {string.Join(", ", configurable.OrderBy(c => c.ToString()))}.");
         }
         catch (Exception e)
         {
@@ -301,8 +306,16 @@ internal static class RoleValidator
         if (role.SpawnHintDuration < 0)
             warnings.Add($"'spawn_hint_duration' is negative ({role.SpawnHintDuration}).");
 
-        if (role.Scale is { x: 0, y: 0, z: 0 })
-            warnings.Add("'scale' is 0 on every axis; the player would be invisible. Use 1 for the normal size.");
+        var scale = role.Scale;
+        if (scale.x != 0 || scale.y != 0 || scale.z != 0)
+        {
+            if (scale.x < 0 || scale.y < 0 || scale.z < 0)
+                warnings.Add(
+                    $"'scale' has a negative axis ({scale.x}, {scale.y}, {scale.z}); the model will be turned inside out. Use 1 for the normal size.");
+            else if (scale.x == 0 || scale.y == 0 || scale.z == 0)
+                warnings.Add(
+                    $"'scale' has an axis set to 0 ({scale.x}, {scale.y}, {scale.z}); the model will be flattened on it. Use 1 for the normal size, or 0 on every axis to keep the vanilla one.");
+        }
     }
 
     private static void ValidateSpawnSettings(ICustomRole role, List<string> errors, List<string> warnings)
@@ -331,44 +344,6 @@ internal static class RoleValidator
                 break;
         }
 
-        if (role.SpawnSettings.SpawnChance < 0)
-            warnings.Add(
-                $"'spawn_settings.spawn_chance' should be more than 0, got {role.SpawnSettings.SpawnChance}.");
-
-        if (role.SpawnSettings.MinPlayers < 1)
-            warnings.Add($"'spawn_settings.min_players' should be at least 1, got {role.SpawnSettings.MinPlayers}.");
-
-        if (role.SpawnSettings.MaxPlayers < 1)
-            warnings.Add(
-                $"'spawn_settings.max_players' is {role.SpawnSettings.MaxPlayers}; the role will never spawn naturally.");
-        else if (role.SpawnSettings.MaxPlayers < role.SpawnSettings.MinPlayers)
-            warnings.Add(
-                $"'spawn_settings.max_players' ({role.SpawnSettings.MaxPlayers}) is below 'min_players' ({role.SpawnSettings.MinPlayers}); the role will never spawn.");
-
-        var delayed = role.SpawnSettings.SpawnDelay > 0;
-
-        if (role.SpawnSettings.SpawnDelay < 0)
-            warnings.Add(
-                $"'spawn_settings.spawn_delay' is negative ({role.SpawnSettings.SpawnDelay}); use 0 to spawn the role together with the vanilla role it replaces.");
-
-        if (delayed && (role.SpawnSettings.CanReplaceRoles is null || !role.SpawnSettings.CanReplaceRoles.Any()))
-            warnings.Add(
-                "'spawn_settings.spawn_delay' is set but 'can_replace_roles' is empty; the delayed spawn has nobody to convert. List the roles the players should be taken from, e.g. 'Spectator'.");
-
-        if (role.SpawnSettings.CanReplaceRoles is not null)
-        {
-            if (!delayed)
-                foreach (var replace in role.SpawnSettings.CanReplaceRoles.Where(r =>
-                             !SpawnManager.SpawnEvaluatedRoles.Contains(r)))
-                    warnings.Add(
-                        $"'spawn_settings.can_replace_roles' contains '{replace}', which the spawn system never evaluates - it will never trigger a replacement. Usable roles: {string.Join(", ", SpawnManager.SpawnEvaluatedRoles.OrderBy(r => r.ToString()))}. Set 'spawn_delay' if you want the role to be handed out mid-round instead.");
-
-            foreach (var duplicate in role.SpawnSettings.CanReplaceRoles.GroupBy(r => r).Where(g => g.Count() > 1))
-                warnings.Add(delayed
-                    ? $"'spawn_settings.can_replace_roles' lists '{duplicate.Key}' {duplicate.Count()} times; remove the duplicates."
-                    : $"'spawn_settings.can_replace_roles' lists '{duplicate.Key}' {duplicate.Count()} times, which multiplies the spawn chance for that role - remove the duplicates unless that is intended.");
-        }
-
         if (role.SpawnSettings.SpawnZones is not null)
             foreach (var zone in role.SpawnSettings.SpawnZones.Where(z => z is FacilityZone.None))
                 warnings.Add(
@@ -379,6 +354,41 @@ internal static class RoleValidator
                          r is RoleTypeId.None || r.GetTeam() is Team.Dead))
                 warnings.Add(
                     $"'spawn_settings.spawn_roles' contains '{spawnRole}', which is not a spawnable role to take a spawn position from.");
+
+        if (role.IgnoreSpawnSystem)
+            return;
+
+        ValidateSpawnEligibility(role, warnings);
+    }
+
+    private static void ValidateSpawnEligibility(ICustomRole role, List<string> warnings)
+    {
+        if (role.SpawnSettings.SpawnChance <= 0)
+            warnings.Add(
+                $"'spawn_settings.spawn_chance' is {role.SpawnSettings.SpawnChance}; it has to be above 0 or the role will never spawn on its own (only 'ucr spawn' and the API can still hand it out).");
+
+        if (role.SpawnSettings.MaxPlayers < 1)
+            warnings.Add(
+                $"'spawn_settings.max_players' is {role.SpawnSettings.MaxPlayers}; it is the number of players that can hold this role at the same time, so the role will never spawn on its own.");
+
+        var delayed = role.SpawnSettings.SpawnDelay > 0;
+
+        if (role.SpawnSettings.SpawnDelay < 0)
+            warnings.Add(
+                $"'spawn_settings.spawn_delay' is negative ({role.SpawnSettings.SpawnDelay}); use 0 to spawn the role together with the vanilla role it replaces.");
+
+        if (role.SpawnSettings.CanReplaceRoles is not { } canReplaceRoles || !canReplaceRoles.Any())
+        {
+            warnings.Add(delayed
+                ? "'spawn_settings.spawn_delay' is set but 'can_replace_roles' is empty; the delayed spawn has nobody to convert. List the roles the players should be taken from, e.g. 'Spectator'."
+                : "'spawn_settings.can_replace_roles' is empty; with no delay the role is handed out by replacing one of these roles at spawn, so an empty list means it never spawns on its own. List the vanilla roles it should replace, e.g. 'ClassD'.");
+            return;
+        }
+
+        if (!delayed)
+            foreach (var replace in canReplaceRoles.Where(r => !SpawnManager.SpawnEvaluatedRoles.Contains(r)))
+                warnings.Add(
+                    $"'spawn_settings.can_replace_roles' contains '{replace}', which the spawn system never evaluates - it will never trigger a replacement. Usable roles: {string.Join(", ", SpawnManager.SpawnEvaluatedRoles.OrderBy(r => r.ToString()))}. Set 'spawn_delay' if you want the role to be handed out mid-round instead.");
     }
 
     private static void ValidateRoleAfterEscape(ICustomRole role, List<string> warnings)
@@ -416,8 +426,15 @@ internal static class RoleValidator
                     }
             }
 
-            if (kvp.Value is "Deny" or "deny" or "DENY" || string.IsNullOrEmpty(kvp.Value))
+            if (kvp.Value is "Deny" or "deny" or "DENY")
                 continue;
+
+            if (string.IsNullOrWhiteSpace(kvp.Value))
+            {
+                warnings.Add(
+                    $"'role_after_escape' value for '{kvp.Key}' is empty; the escaping player would end up as a Spectator. Use 'Deny' to block the escape, or 'InternalRole <role>' / 'CustomRole <id>'.");
+                continue;
+            }
 
             var value = kvp.Value.Split(' ');
             if (value.Length != 2)
