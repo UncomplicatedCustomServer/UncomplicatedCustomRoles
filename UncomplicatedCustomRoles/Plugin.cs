@@ -76,8 +76,9 @@ internal class Plugin : Plugin<Config>
         {
             var updateTarget = HttpManager.GetUpdateTarget();
             if (updateTarget is not null)
-                LogManager.Warn(
-                    $"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Version} | Latest available: v{updateTarget}\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
+                LogManager.Warn(HttpManager.IsPreReleaseVersion(updateTarget)
+                    ? $"A newer PRE-RELEASE of UncomplicatedCustomRoles is available!\nCurrent: v{Version} | Latest pre-release: v{updateTarget}\n{HttpManager.GetDownloadHint(updateTarget)}"
+                    : $"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Version} | Latest available: v{updateTarget}\n{HttpManager.GetDownloadHint(updateTarget)}");
 
             VersionManager.Init();
         });
@@ -141,7 +142,7 @@ internal class Plugin : Plugin<Config>
 
         if (_welcomeShown || Config is not { EnableBasicLogs: true }) return;
         _welcomeShown = true;
-        LogManager.Info($"Thanks for using UncomplicatedCustomRoles v{Version.ToString(3)} by {Author}!",
+        LogManager.Info($"Thanks for using UncomplicatedCustomRoles v{Version} by {Author}!",
             ConsoleColor.Blue);
         LogManager.Info(
             "To receive support and to stay up-to-date, join our official Discord server: https://discord.gg/5StRGu8EJV",

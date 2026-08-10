@@ -28,6 +28,12 @@ namespace UncomplicatedCustomRoles.Manager.NET;
 
 internal class HttpManager
 {
+    private const string GitHubReleases = "https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/releases";
+
+    private const string GitHubLatestRelease = GitHubReleases + "/latest";
+
+    private const string DiscordInvite = "https://discord.gg/5StRGu8EJV";
+
     /// <summary>
     ///     Create a new istance of the HttpManager
     /// </summary>
@@ -115,17 +121,30 @@ internal class HttpManager
     }
 
     /// <summary>
+    ///     Gets the latest pre-release <see cref="Version" /> of the plugin, loaded by the UCS cloud.
+    /// </summary>
+    public Version LatestPreRelease
+    {
+        get
+        {
+            if (_latestPreRelease is null)
+                LoadVersions();
+            return _latestPreRelease;
+        }
+    }
+
+    /// <summary>
     ///     Gets whether the running build is a pre-release
     /// </summary>
-    public bool IsPreRelease => TryGetVersionInfo(Plugin.Instance.Version, out var info)
-        ? info.PreRelease != 0
-        : Plugin.Instance.Version.Revision != 0;
+    public bool IsPreRelease => IsPreReleaseVersion(Plugin.Instance.Version);
 
     private List<VersionInfo> _versions { get; set; }
 
     private Version _latestVersion { get; set; }
 
     private Version _latestStableVersion { get; set; }
+
+    private Version _latestPreRelease { get; set; }
 
     internal void RegisterEvents()
     {
@@ -148,11 +167,37 @@ internal class HttpManager
             JsonSerializer.Serialize(new OwnerMessage(player, discordId)), "application/json");
     }
 
+    internal static int CompareReleases(Version left, Version right)
+    {
+        var release = new Version(left.Major, left.Minor, Math.Max(left.Build, 0))
+            .CompareTo(new Version(right.Major, right.Minor, Math.Max(right.Build, 0)));
+
+        if (release != 0)
+            return release;
+
+        var leftPreRelease = Math.Max(left.Revision, 0);
+        var rightPreRelease = Math.Max(right.Revision, 0);
+
+        if (leftPreRelease == rightPreRelease)
+            return 0;
+
+        if (leftPreRelease is 0)
+            return 1;
+
+        return rightPreRelease is 0 ? -1 : leftPreRelease.CompareTo(rightPreRelease);
+    }
+    
+    public bool IsPreReleaseVersion(Version version)
+    {
+        return TryGetVersionInfo(version, out var info) ? info.PreRelease != 0 : version.Revision > 0;
+    }
+
     public void LoadVersions()
     {
         _versions = [];
         _latestVersion = new Version();
         _latestStableVersion = new Version();
+        _latestPreRelease = new Version();
 
         string answer = null;
 
@@ -171,11 +216,18 @@ internal class HttpManager
             if (!Version.TryParse(version.Name, out var parsed))
                 continue;
 
-            if (parsed > _latestVersion)
+            if (CompareReleases(parsed, _latestVersion) > 0)
                 _latestVersion = parsed;
 
-            if (version.PreRelease == 0 && parsed > _latestStableVersion)
-                _latestStableVersion = parsed;
+            if (version.PreRelease == 0)
+            {
+                if (CompareReleases(parsed, _latestStableVersion) > 0)
+                    _latestStableVersion = parsed;
+            }
+            else if (CompareReleases(parsed, _latestPreRelease) > 0)
+            {
+                _latestPreRelease = parsed;
+            }
         }
 
         if (_versions.Count is 0)
@@ -198,10 +250,10 @@ internal class HttpManager
 
             _latestVersion = new Version(answer.Trim());
 
-            // That endpoint doesn't tell us whether it's a pre-release, and only pre-releases ship with a non-zero
-            // revision, so anything else can safely be treated as the latest stable one.
-            if (_latestVersion.Revision is 0)
+            if (_latestVersion.Revision <= 0)
                 _latestStableVersion = _latestVersion;
+            else
+                _latestPreRelease = _latestVersion;
         }
         catch
         {
@@ -218,6 +270,16 @@ internal class HttpManager
         info = Versions.FirstOrDefault(v => Version.TryParse(v.Name, out var parsed) && parsed == version);
         return info is not null;
     }
+    
+    private Version ResolveChannelTarget()
+    {
+        var target = LatestStableVersion;
+
+        if (IsPreRelease && CompareReleases(LatestPreRelease, target) > 0)
+            target = LatestPreRelease;
+
+        return target;
+    }
 
     /// <summary>
     ///     Gets the release the current installation should be updated to, or <see langword="null" /> if there's
@@ -225,12 +287,22 @@ internal class HttpManager
     /// </summary>
     public Version GetUpdateTarget()
     {
-        var current = Plugin.Instance.Version;
+        var target = ResolveChannelTarget();
+        return CompareReleases(target, Plugin.Instance.Version) > 0 ? target : null;
+    }
 
-        if (IsPreRelease)
-            current = new Version(current.Major, current.Minor, Math.Max(current.Build, 0));
+    public string GetDownloadHint(Version version)
+    {
+        TryGetVersionInfo(version, out var info);
 
-        return LatestStableVersion.CompareTo(current) > 0 ? LatestStableVersion : null;
+        var link = string.IsNullOrWhiteSpace(info?.SourceLink) ? null : info.SourceLink.Trim();
+
+        return info?.Source?.Trim().ToLowerInvariant() switch
+        {
+            "discord" => $"Download it from our Discord server: {link ?? DiscordInvite}",
+            "other" when link is not null => $"Download it from: {link}",
+            _ => $"Download it from GitHub: {link ?? (IsPreReleaseVersion(version) ? GitHubReleases : GitHubLatestRelease)}"
+        };
     }
 
     public void LoadCreditTags()
@@ -309,7 +381,7 @@ internal class HttpManager
 
     public bool IsLatestVersion(out Version latest)
     {
-        latest = LatestStableVersion;
+        latest = ResolveChannelTarget();
         return GetUpdateTarget() is null;
     }
 

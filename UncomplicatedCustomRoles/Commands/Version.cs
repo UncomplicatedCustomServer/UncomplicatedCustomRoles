@@ -32,8 +32,15 @@ public class Version : IUCRCommand
             return false;
         }
 
+        var source = string.IsNullOrWhiteSpace(VersionManager.VersionInfo.Source)
+            ? "unknown"
+            : VersionManager.VersionInfo.Source;
+
+        if (!string.IsNullOrWhiteSpace(VersionManager.VersionInfo.SourceLink))
+            source += $" - {VersionManager.VersionInfo.SourceLink}";
+
         response =
-            $"<size=22><b>UncomplicatedCustomRoles</b></size>\n<size=18>Authors: {Plugin.Instance.Author}\nVersion: {VersionManager.VersionInfo.Name}{(VersionManager.VersionInfo.CustomName is not null ? $" '{VersionManager.VersionInfo.CustomName}'" : string.Empty)}  ({Plugin.Instance.Version})\nSource: {VersionManager.VersionInfo.Source} - {VersionManager.VersionInfo.SourceLink ?? string.Empty}\nPre release: {(VersionManager.VersionInfo.PreRelease != 0 ? "<color=red>TRUE</color>" : "<color=green>FALSE</color>")}\nForced debug: {(VersionManager.VersionInfo.ForceDebug != 0 ? "<color=red>TRUE</color>" : "<color=green>FALSE</color>")}\nHash: {(!VersionManager.CorrectHash ? "<color=red>NOT MATCHING!</color>" : "<color=green>Matching</color>")}</size>";
+            $"<size=22><b>UncomplicatedCustomRoles</b></size>\n<size=18>Authors: {Plugin.Instance.Author}\nVersion: {VersionManager.VersionInfo.Name}{(VersionManager.VersionInfo.CustomName is not null ? $" '{VersionManager.VersionInfo.CustomName}'" : string.Empty)}  ({Plugin.Instance.Version})\nSource: {source}\nPre release: {(VersionManager.VersionInfo.PreRelease != 0 ? "<color=red>TRUE</color>" : "<color=green>FALSE</color>")}\nForced debug: {(VersionManager.VersionInfo.ForceDebug != 0 ? "<color=red>TRUE</color>" : "<color=green>FALSE</color>")}\nHash: {(!VersionManager.CorrectHash ? "<color=red>NOT MATCHING!</color>" : "<color=green>Matching</color>")}</size>";
 
         if (!VersionManager.CorrectHash)
             response +=
