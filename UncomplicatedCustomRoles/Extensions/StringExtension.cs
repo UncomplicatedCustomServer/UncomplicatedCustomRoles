@@ -13,13 +13,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Extensions;
 
 public static class StringExtension
 {
-    public static readonly HashSet<char> _intChars =
+    public static readonly HashSet<char> INTChars =
     [
         '0',
         '1',
@@ -32,13 +33,20 @@ public static class StringExtension
         '8',
         '9'
     ];
+    
+    private static readonly Regex CustomInfoRejectedChars = new(@"[\[\]]|[^\p{L}\p{P}\p{Sc}\p{N} ^=+|~`<>\n]", RegexOptions.Compiled);
+    
+    public static string SanitizeCustomInfo(this string str)
+    {
+        return string.IsNullOrEmpty(str) ? str : CustomInfoRejectedChars.Replace(str, string.Empty);
+    }
 
     public static string ToInt(this string str, string separator = "")
     {
         List<char> result = [];
 
         foreach (var ch in str)
-            if (_intChars.Contains(ch))
+            if (INTChars.Contains(ch))
                 result.Add(ch);
 
         return string.Join(separator, result);

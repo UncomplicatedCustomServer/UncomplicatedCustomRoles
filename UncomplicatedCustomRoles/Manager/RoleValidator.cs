@@ -20,6 +20,7 @@ using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Integrations;
 
 namespace UncomplicatedCustomRoles.Manager;
@@ -94,9 +95,17 @@ internal static class RoleValidator
         if (string.IsNullOrWhiteSpace(role.Name))
             warnings.Add("'name' is empty; it is used to identify the role in logs and commands.");
 
-        if (!string.IsNullOrEmpty(role.CustomInfo)
-            && !NicknameSync.ValidateCustomInfo(role.CustomInfo, out var customInfoError))
-            warnings.Add($"'custom_info' will be rejected by the game: {customInfoError}");
+        if (!string.IsNullOrEmpty(role.CustomInfo))
+        {
+            var sanitized = role.CustomInfo.SanitizeCustomInfo();
+
+            if (sanitized != role.CustomInfo)
+                warnings.Add(
+                    "'custom_info' contains characters the game does not accept in a name tag (square brackets, emoji, ...); they are removed automatically, so the text will be shown without them.");
+
+            if (!NicknameSync.ValidateCustomInfo(sanitized, out var customInfoError))
+                warnings.Add($"'custom_info' will be rejected by the game: {customInfoError}");
+        }
 
         ValidatePlaceholders("nickname", role.Nickname, warnings);
         ValidatePlaceholders("custom_info", role.CustomInfo, warnings);

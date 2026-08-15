@@ -112,7 +112,8 @@ public class CustomInfo
             var rawInfo = Info;
             var rawRole = Role;
 
-            if (!NicknameSync.ValidateCustomInfo(Info, out var customInfoError) && !string.IsNullOrEmpty(Info))
+            if (!NicknameSync.ValidateCustomInfo(Info.SanitizeCustomInfo(), out var customInfoError) &&
+                !string.IsNullOrEmpty(Info))
             {
                 LogManager.Error(
                     $"CustomInfo is not correct, therefore the custom info part of player {player.PlayerId} won't be shown.\nCustomInfo: {Info}\nError: {customInfoError}");
@@ -120,7 +121,8 @@ public class CustomInfo
                 rawInfo = string.Empty;
             }
 
-            if (!NicknameSync.ValidateCustomInfo(Role, out var roleNameError) && !string.IsNullOrEmpty(Role))
+            if (!NicknameSync.ValidateCustomInfo(Role.SanitizeCustomInfo(), out var roleNameError) &&
+                !string.IsNullOrEmpty(Role))
             {
                 LogManager.Error(
                     $"RoleName is not correct, therefore the role name part of player {player.PlayerId} won't be shown.\nRoleName: {Role}\nError: {roleNameError}");
@@ -237,12 +239,30 @@ public class CustomInfo
     
     private static void ApplyCustomInfo(Player player, string composed)
     {
+        var cleaned = composed.SanitizeCustomInfo();
+
+        if (cleaned != composed)
+        {
+            LogManager.Debug(
+                $"Removed the characters the game does not accept in a name tag from the tag of player {player.PlayerId}.\nBefore: {composed}\nAfter: {cleaned}");
+            composed = cleaned;
+        }
+
+        if (!string.IsNullOrEmpty(composed) && composed.Length > 400)
+        {
+            LogManager.Error(
+                $"The name tag of player {player.PlayerId} is {composed.Length} characters long, but the game only accepts 400, so it won't be shown.\n" +
+                $"Composed tag: {composed}\n" +
+                "Shorten the 'custom_info' of the role, or the InfoTag layout building this tag.");
+            composed = string.Empty;
+        }
+
         if (!string.IsNullOrEmpty(composed) && !NicknameSync.ValidateCustomInfo(composed, out var error))
         {
             LogManager.Error(
                 $"The name tag of player {player.PlayerId} would be rejected by the game and won't be shown: {error}\n" +
                 $"Composed tag: {composed}\n" +
-                "Likely causes: a colour that isn't on the allowed list written inside 'custom_info', a '[' or ']' coming from a nickname, or a tag longer than 400 characters.");
+                "Likely causes: a colour that isn't on the allowed list written inside 'custom_info', or a rich text tag the game does not allow.");
             composed = string.Empty;
         }
 
