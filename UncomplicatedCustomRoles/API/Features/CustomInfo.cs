@@ -8,6 +8,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
 using LabApi.Features.Wrappers;
 using PlayerRoles;
@@ -21,9 +22,12 @@ namespace UncomplicatedCustomRoles.API.Features;
 
 public class CustomInfo
 {
+    private const string ColorPrefix = "<color=#FFFFFF></color>";
     private Player _lastOwner;
-
     private bool _detached;
+    private bool _nativeNickname = true;
+    private bool _nativeRole = true;
+    private bool _nativeUnit = true;
 
     public CustomInfo(string nickname, string role, string info)
     {
@@ -91,6 +95,27 @@ public class CustomInfo
         _lastOwner = null;
     }
 
+    internal PlayerInfoArea ApplyAreas(PlayerInfoArea value, PlayerInfoArea? original = null)
+    {
+        var restore = original ?? value;
+
+        value |= PlayerInfoArea.CustomInfo;
+
+        value = _nativeNickname
+            ? value | (restore & PlayerInfoArea.Nickname)
+            : value & ~PlayerInfoArea.Nickname;
+
+        value = _nativeRole
+            ? value | (restore & PlayerInfoArea.Role)
+            : value & ~PlayerInfoArea.Role;
+
+        value = _nativeUnit
+            ? value | (restore & PlayerInfoArea.UnitName)
+            : value & ~PlayerInfoArea.UnitName;
+
+        return value;
+    }
+
     public void UpdateInfo(Player player)
     {
         if (_detached)
@@ -102,12 +127,33 @@ public class CustomInfo
         SuppressExternalSync = true;
         try
         {
-            player.InfoArea |= PlayerInfoArea.CustomInfo;
-            player.InfoArea &= ~PlayerInfoArea.Role;
-            player.InfoArea &= ~PlayerInfoArea.Nickname;
-            player.InfoArea &= ~PlayerInfoArea.UnitName;
+            var hasCustomRole = player.TryGetSummonedInstance(out var summonedCustomRole);
 
-            var rawCustomInfo = "<color=#FFFFFF></color>%custominfo%%nickname%%rolename%";
+            InfoTag infoTag = null;
+            CustomInfoOrder customInfoOrderModule = null;
+            ColorfulNickname colorfulNickname = null;
+
+            if (hasCustomRole)
+            {
+                summonedCustomRole.TryGetModule(out infoTag);
+                summonedCustomRole.TryGetModule(out customInfoOrderModule);
+                summonedCustomRole.TryGetModule(out colorfulNickname);
+            }
+
+            var customLayout = infoTag is not null || customInfoOrderModule is not null;
+
+            _nativeRole = !customLayout && IsNativeRoleName(player, summonedCustomRole);
+
+            _nativeNickname = _nativeRole && colorfulNickname is null &&
+                              (string.IsNullOrEmpty(Nickname) || Nickname == player.DisplayName);
+
+            var hidesUnitName = hasCustomRole && summonedCustomRole.HasModule<NoUnitName>();
+
+            _nativeUnit = _nativeRole && !hidesUnitName;
+
+            player.InfoArea = ApplyAreas(player.InfoArea, summonedCustomRole?.PlayerInfoArea);
+
+            var rawCustomInfo = $"{ColorPrefix}%custominfo%%nickname%%rolename%";
             var rawNickname = Nickname;
             var rawInfo = Info;
             var rawRole = Role;
@@ -121,7 +167,7 @@ public class CustomInfo
                 rawInfo = string.Empty;
             }
 
-            if (!NicknameSync.ValidateCustomInfo(Role.SanitizeCustomInfo(), out var roleNameError) &&
+            if (!_nativeRole && !NicknameSync.ValidateCustomInfo(Role.SanitizeCustomInfo(), out var roleNameError) &&
                 !string.IsNullOrEmpty(Role))
             {
                 LogManager.Error(
@@ -130,7 +176,7 @@ public class CustomInfo
                 rawRole = string.Empty;
             }
 
-            if (player.TryGetSummonedInstance(out var summonedCustomRole))
+            if (hasCustomRole)
             {
                 rawInfo = PlaceholderManager.ApplyPlaceholders(rawInfo, player, summonedCustomRole.Role);
 
@@ -140,16 +186,15 @@ public class CustomInfo
 
                 var rawUnit = string.Empty;
                 var showUnit = false;
-                if (!string.IsNullOrEmpty(rawRole) && !summonedCustomRole.HasModule<NoUnitName>()
-                    && infoTeam is Team.FoundationForces
-                    && NamingRulesManager.TryGetNamingRule(infoTeam, out var infoUnitRule)
-                    && !string.IsNullOrEmpty(infoUnitRule.LastGeneratedName))
+
+                if (!_nativeUnit && !hidesUnitName && !string.IsNullOrEmpty(rawRole) &&
+                    TryGetUnitName(player, infoTeam, out var ownUnit))
                 {
                     showUnit = true;
-                    rawUnit = infoUnitRule.LastGeneratedName;
+                    rawUnit = ownUnit;
                 }
 
-                if (summonedCustomRole.TryGetModule(out InfoTag infoTag))
+                if (infoTag is not null)
                 {
                     if (infoTag.ShowBadge)
                         player.InfoArea |= PlayerInfoArea.Badge;
@@ -165,10 +210,10 @@ public class CustomInfo
                     return;
                 }
 
-                if (summonedCustomRole.TryGetModule(out CustomInfoOrder customInfoOrderModule))
-                    rawCustomInfo = $"<color=#FFFFFF></color>{customInfoOrderModule.Order}";
+                if (customInfoOrderModule is not null)
+                    rawCustomInfo = $"{ColorPrefix}{customInfoOrderModule.Order}";
 
-                if (summonedCustomRole.TryGetModule(out ColorfulNickname colorfulNickname))
+                if (colorfulNickname is not null)
                 {
                     LogManager.Debug(
                         $"Applying ColorfulNickname module to player {player.PlayerId} with color {colorfulNickname.Color} and nickname {Nickname}");
@@ -202,20 +247,25 @@ public class CustomInfo
                 rawInfo = PlaceholderManager.ApplyPlaceholders(rawInfo, player, null);
             }
 
+            if (_nativeNickname)
+            {
+                rawCustomInfo = rawCustomInfo.Replace("%nickname%", "");
+                rawNickname = string.Empty;
+            }
+
+            if (_nativeRole)
+            {
+                rawCustomInfo = rawCustomInfo.Replace("%rolename%", "");
+                rawRole = string.Empty;
+            }
+
             if (string.IsNullOrEmpty(rawInfo))
                 rawCustomInfo = rawCustomInfo.Replace("%custominfo%", "");
 
-            if (string.IsNullOrEmpty(rawNickname))
+            if (!_nativeNickname && string.IsNullOrEmpty(rawNickname))
                 rawNickname = player.Nickname;
 
-            if (string.IsNullOrEmpty(rawInfo) && string.IsNullOrEmpty(rawRole) && string.IsNullOrEmpty(player.Nickname))
-            {
-                player.InfoArea |= PlayerInfoArea.Nickname | PlayerInfoArea.Role | PlayerInfoArea.UnitName;
-                player.CustomInfo = string.Empty;
-                return;
-            }
-
-            ApplyCustomInfo(player, rawCustomInfo.Replace("%%", "%\n%").BulkReplace(new Dictionary<string, object>
+            var composed = rawCustomInfo.Replace("%%", "%\n%").BulkReplace(new Dictionary<string, object>
             {
                 {
                     "custominfo",
@@ -229,7 +279,15 @@ public class CustomInfo
                     "rolename",
                     rawRole
                 }
-            }, "%<val>%"));
+            }, "%<val>%");
+
+            if (string.IsNullOrWhiteSpace(composed.Replace(ColorPrefix, string.Empty)))
+            {
+                player.CustomInfo = string.Empty;
+                return;
+            }
+
+            ApplyCustomInfo(player, composed);
         }
         finally
         {
@@ -237,7 +295,40 @@ public class CustomInfo
         }
     }
     
-    private static void ApplyCustomInfo(Player player, string composed)
+    private bool IsNativeRoleName(Player player, SummonedCustomRole summonedCustomRole)
+    {
+        var shownRole = summonedCustomRole is null
+            ? player.Role
+            : summonedCustomRole.Appearance != RoleTypeId.None
+                ? summonedCustomRole.Appearance
+                : summonedCustomRole.Role.Role;
+
+        return string.Equals(Role, shownRole.GetFullName(), StringComparison.Ordinal);
+    }
+
+    private static bool TryGetUnitName(Player player, Team team, out string unitName)
+    {
+        unitName = string.Empty;
+
+        if (!NamingRulesManager.TryGetNamingRule(team, out var namingRule))
+            return false;
+
+        if (!DisguiseTeam.RoleBaseList.ContainsKey(player.PlayerId) && player.RoleBase is HumanRole humanRole &&
+            humanRole.Team == team)
+        {
+            var ownUnitName = NamingRulesManager.ClientFetchReceived(team, humanRole.UnitNameId);
+            if (!string.IsNullOrEmpty(ownUnitName))
+            {
+                unitName = ownUnitName;
+                return true;
+            }
+        }
+
+        unitName = namingRule.LastGeneratedName;
+        return !string.IsNullOrEmpty(unitName);
+    }
+
+    private void ApplyCustomInfo(Player player, string composed)
     {
         var cleaned = composed.SanitizeCustomInfo();
 
@@ -268,6 +359,10 @@ public class CustomInfo
 
         if (string.IsNullOrEmpty(composed))
         {
+            _nativeNickname = true;
+            _nativeRole = true;
+            _nativeUnit = true;
+
             player.InfoArea |= PlayerInfoArea.Nickname | PlayerInfoArea.Role | PlayerInfoArea.UnitName;
             player.CustomInfo = string.Empty;
         }
