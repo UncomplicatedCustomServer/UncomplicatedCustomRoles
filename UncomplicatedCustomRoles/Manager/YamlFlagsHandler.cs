@@ -25,8 +25,15 @@ internal class YamlFlagsHandler
     {
         get
         {
-            _modules ??= GetModules();
-            return _modules;
+            var cached = _modules;
+
+            if (cached is not null)
+                return cached;
+
+            cached = GetModules();
+            _modules = cached;
+
+            return cached;
         }
     }
 

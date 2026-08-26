@@ -12,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using LabApi.Loader;
 using UncomplicatedCustomRoles.API.Attributes;
 using UncomplicatedCustomRoles.API.Features;
@@ -23,7 +22,6 @@ namespace UncomplicatedCustomRoles.Manager;
 
 internal class ImportManager
 {
-    public const float WaitingTime = 5f;
     public static readonly List<LabApi.Loader.Features.Plugins.Plugin> ActivePlugins = [];
 
     public static readonly List<Assembly> AvailableAssemblies = [];
@@ -35,8 +33,7 @@ internal class ImportManager
         if (_alreadyLoaded)
             return;
 
-        // Call a delayed task
-        Task.Run(Actor);
+        Actor();
     }
 
     public static void Reload()

@@ -58,6 +58,7 @@ internal static class PluginImportManager
 
     private static void ImportCustomModules(Assembly assembly)
     {
-        ImportManager.AvailableAssemblies.Add(assembly); // Subscribe for the YamlFlagsHandler check-up
+        if (!ImportManager.AvailableAssemblies.Contains(assembly))
+            ImportManager.AvailableAssemblies.Add(assembly);
     }
 }
