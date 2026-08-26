@@ -97,9 +97,11 @@ public class CustomRole : ICustomRole
 
     /// <summary>
     ///     Gets or sets the the Role Appeareance for the player.<br></br>
-    ///     If it's equal to <see cref="Role" /> then won't be applied
+    ///     If it's equal to <see cref="Role" /> then won't be applied.<br></br>
+    ///     Leave it empty to keep the appearance of <see cref="Role" />: anything that is not a usable alive role
+    ///     falls back to it when the role is registered.
     /// </summary>
-    public virtual RoleTypeId RoleAppearance { get; set; } = RoleTypeId.ClassD;
+    public virtual RoleTypeId RoleAppearance { get; set; } = RoleTypeId.None;
 
     /// <summary>
     ///     Gets or sets the <see cref="Team" />(s) that will be "friends" with this custom role
@@ -424,6 +426,10 @@ public class CustomRole : ICustomRole
     internal static LoadStatusType InternalRegister(ICustomRole customRole)
     {
         FlagMigrator.Migrate(customRole);
+        
+        if (customRole.RoleAppearance is RoleTypeId.None ||
+            customRole.RoleAppearance.GetTeam() is PlayerRoles.Team.Dead)
+            customRole.RoleAppearance = customRole.Role;
         
         if (Plugin.Instance.Config.EnableValidator)
         {

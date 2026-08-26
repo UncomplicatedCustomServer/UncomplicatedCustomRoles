@@ -162,9 +162,9 @@ internal static class RoleValidator
             errors.Add(
                 $"'role' must be a valid role, got '{role.Role}'. Examples: ClassD, Scientist, NtfSergeant, Scp0492.");
 
-        if (role.RoleAppearance is RoleTypeId.None || role.RoleAppearance.GetTeam() is Team.Dead)
+        if (role.RoleAppearance is not RoleTypeId.None && role.RoleAppearance.GetTeam() is Team.Dead)
             warnings.Add(
-                $"'role_appearance' '{role.RoleAppearance}' is not a valid alive role; the appearance change will be skipped.");
+                $"'role_appearance' '{role.RoleAppearance}' is not a valid alive role; the role will keep the appearance of '{role.Role}'.");
     }
 
     private static void ValidateHealthLike(ICustomRole role, List<string> errors, List<string> warnings)

@@ -40,7 +40,7 @@ internal class BonolisCustomRole : IPreviousVersionRole
 
     public virtual Team? Team { get; set; } = null;
 
-    public virtual RoleTypeId RoleAppearance { get; set; } = RoleTypeId.ClassD;
+    public virtual RoleTypeId RoleAppearance { get; set; } = RoleTypeId.None;
 
     public virtual List<Team> IsFriendOf { get; set; } = [];
 
