@@ -43,7 +43,7 @@ internal class Plugin : Plugin<Config>
 
     public override string Author => "FoxWorn3365, Dr.Agenda, MedveMarci";
 
-    public override Version Version { get; } = new(9, 6, 0, 3);
+    public override Version Version { get; } = new(9, 6, 0);
 
     public override Version RequiredApiVersion => new(LabApiProperties.CompiledVersion);
 
