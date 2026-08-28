@@ -50,10 +50,16 @@ public abstract class CustomModule
     {
         get
         {
-            Dictionary<string, string> result = new(StringComparer.OrdinalIgnoreCase);
-            foreach (var kvp in Args)
-                result[kvp.Key] = kvp.Value?.ToString();
-            return result;
+            if (_stringArgs is not null)
+                return _stringArgs;
+
+            _stringArgs = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            if (Args is not null)
+                foreach (var kvp in Args)
+                    _stringArgs[kvp.Key] = kvp.Value?.ToString();
+
+            return _stringArgs;
         }
     }
 
@@ -69,12 +75,45 @@ public abstract class CustomModule
     /// </summary>
     public Player Player => CustomRole.Player;
 
+    private readonly Dictionary<ArgKey, object> _castedValues = [];
+
+    private readonly Dictionary<ArgKey, object> _castedLists = [];
+
+    private readonly HashSet<ArgKey> _unconvertibleValues = [];
+
+    private Dictionary<string, string> _stringArgs;
+
     internal void Initialize(SummonedCustomRole summonedCustomRole, Dictionary<string, object> args)
     {
         CustomRole = summonedCustomRole;
         Args = args is null
             ? new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
             : new Dictionary<string, object>(args, StringComparer.OrdinalIgnoreCase);
+
+        InvalidateArgsCache();
+    }
+    
+    public void InvalidateArgsCache()
+    {
+        _stringArgs = null;
+        _castedValues.Clear();
+        _castedLists.Clear();
+        _unconvertibleValues.Clear();
+    }
+    
+    public List<string> GetMissingArgs()
+    {
+        List<string> missing = [];
+
+        if (RequiredArgs is null)
+            return missing;
+
+        foreach (var arg in RequiredArgs)
+            if (Args is null || !Args.TryGetValue(arg, out var value) || value is null ||
+                (value is string text && string.IsNullOrWhiteSpace(text)))
+                missing.Add(arg);
+
+        return missing;
     }
 
     /// <summary>
@@ -129,7 +168,7 @@ public abstract class CustomModule
     /// <returns></returns>
     public object TryGetValue(string param, object def = null)
     {
-        return Args.TryGetValue(param, out var value) ? value : def;
+        return Args is not null && Args.TryGetValue(param, out var value) ? value : def;
     }
 
     /// <summary>
@@ -153,15 +192,23 @@ public abstract class CustomModule
     /// <returns></returns>
     public T TryGetCastedValue<T>(string param, T def = default)
     {
-        if (!Args.TryGetValue(param, out var value))
+        ArgKey key = new(param, typeof(T));
+
+        if (_castedValues.TryGetValue(key, out var cached))
+            return (T)cached;
+
+        if (_unconvertibleValues.Contains(key) || Args is null || !Args.TryGetValue(param, out var value))
             return def;
 
         try
         {
-            return (T)Convert.ChangeType(value, typeof(T));
+            var converted = (T)Convert.ChangeType(value, typeof(T));
+            _castedValues[key] = converted;
+            return converted;
         }
         catch
         {
+            _unconvertibleValues.Add(key);
             return def;
         }
     }
@@ -175,7 +222,20 @@ public abstract class CustomModule
     /// <returns></returns>
     public List<T> TryGetCastedListValue<T>(string param)
     {
-        if (!Args.TryGetValue(param, out var value) || value is null)
+        ArgKey key = new(param, typeof(T));
+
+        if (_castedLists.TryGetValue(key, out var cached))
+            return (List<T>)cached;
+
+        var list = BuildCastedList<T>(param);
+        _castedLists[key] = list;
+
+        return list;
+    }
+
+    private List<T> BuildCastedList<T>(string param)
+    {
+        if (Args is null || !Args.TryGetValue(param, out var value) || value is null)
             return [];
         switch (value)
         {
@@ -268,8 +328,7 @@ public abstract class CustomModule
         List<CustomModule> mods = [];
 
         foreach (var module in data)
-            if (InitializeCustomModule(module.Key, module.Value, YamlFlagsHandler.Modules, summonedCustomRole) is
-                CustomModule mod)
+            if (InitializeCustomModule(module.Key, module.Value, YamlFlagsHandler.Modules, summonedCustomRole) is { } mod)
                 mods.Add(mod);
 
         LogManager.Debug(
@@ -345,17 +404,15 @@ public abstract class CustomModule
 
     private static bool ValidateModule(CustomModule module, string name, SummonedCustomRole role)
     {
-        if (module.RequiredArgs is { Count: > 0 })
+        var missing = module.GetMissingArgs();
+
+        if (missing.Count > 0)
         {
-            List<string> missing = module.RequiredArgs.Where(arg => !module.Args.ContainsKey(arg)).ToList();
-            if (missing.Count > 0)
-            {
-                LogManager.Error(
-                    $"[CM Loader] CustomModule '{name}' on role {RoleLabel(role)} is missing required setting(s): {string.Join(", ", missing)}.\n" +
-                    $"Provided setting(s): {(module.Args.Count == 0 ? "(none)" : string.Join(", ", module.Args.Keys))}.\n" +
-                    "This flag will be skipped.", "CM0004");
-                return false;
-            }
+            LogManager.Error(
+                $"[CM Loader] CustomModule '{name}' on role {RoleLabel(role)} is missing required setting(s): {string.Join(", ", missing)}.\n" +
+                $"Provided setting(s): {(module.Args.Count == 0 ? "(none)" : string.Join(", ", module.Args.Keys))}.\n" +
+                "This flag will be skipped.", "CM0004");
+            return false;
         }
 
         if (!module.Validate(out var error))
@@ -372,5 +429,37 @@ public abstract class CustomModule
     private static string RoleLabel(SummonedCustomRole role)
     {
         return role?.Role is null ? "?" : $"{role.Role.Name} ({role.Role.Id})";
+    }
+    
+    private readonly struct ArgKey : IEquatable<ArgKey>
+    {
+        private readonly string _param;
+
+        private readonly Type _type;
+
+        internal ArgKey(string param, Type type)
+        {
+            _param = param;
+            _type = type;
+        }
+
+        public bool Equals(ArgKey other)
+        {
+            return _type == other._type && string.Equals(_param, other._param, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is ArgKey other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((_param is null ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(_param)) * 397) ^
+                       (_type?.GetHashCode() ?? 0);
+            }
+        }
     }
 }

@@ -533,8 +533,8 @@ internal static class RoleValidator
 
                 module.Initialize(null, flag.Value);
 
-                var missing = module.RequiredArgs?.Where(arg => !module.Args.ContainsKey(arg)).ToList();
-                if (missing is { Count: > 0 })
+                var missing = module.GetMissingArgs();
+                if (missing.Count > 0)
                 {
                     LogManager.Warn(
                         $"[Role Validator] {label}: custom flag '{type.Name}' is missing required setting(s): {string.Join(", ", missing)}; it will be skipped on spawn.");
