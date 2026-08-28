@@ -208,9 +208,10 @@ public static class MirrorExtensions
     /// <param name="skipJump">Whether to skip the little jump that works around an invisibility issue.</param>
     /// <param name="unitId">
     ///     The UnitNameId to use for the player's new role, if the player's new role uses unit names. (is
-    ///     NTF).
+    ///     NTF). If <see langword="null" /> the latest generated unit name of the role's team will be used.
     /// </param>
-    public static void ChangeAppearance(this Player player, RoleTypeId type, bool skipJump = false, byte unitId = 0)
+    public static void ChangeAppearance(this Player player, RoleTypeId type, bool skipJump = false,
+        byte? unitId = null)
     {
         player.ChangeAppearance(type, Player.ReadyList.Where(x => x != player), skipJump, unitId);
     }
@@ -225,10 +226,10 @@ public static class MirrorExtensions
     /// <param name="skipJump">Whether to skip the little jump that works around an invisibility issue.</param>
     /// <param name="unitId">
     ///     The UnitNameId to use for the player's new role, if the player's new role uses unit names. (is
-    ///     NTF).
+    ///     NTF). If <see langword="null" /> the latest generated unit name of the role's team will be used.
     /// </param>
     public static void ChangeAppearance(this Player player, RoleTypeId type, IEnumerable<Player> playersToAffect,
-        bool skipJump = false, byte unitId = 0)
+        bool skipJump = false, byte? unitId = null)
     {
         if (!player.Connection.isReady || !type.TryGetRoleBase(out var roleBase))
             return;
@@ -244,7 +245,10 @@ public static class MirrorExtensions
         {
             if (player.RoleBase is not HumanRole)
                 isRisky = true;
-            writer.WriteByte(unitId);
+
+            writer.WriteByte(unitId ?? (humanRole.Team.TryGetLatestUnitNameId(out var latestUnitId)
+                ? latestUnitId
+                : (byte)0));
         }
 
         if (roleBase is ZombieRole)

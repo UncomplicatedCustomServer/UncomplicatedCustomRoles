@@ -11,6 +11,7 @@
 using Footprinting;
 using PlayerRoles;
 using PlayerRoles.FirstPersonControl;
+using Respawning.NamingRules;
 using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Extensions;
@@ -50,6 +51,18 @@ public static class RoleExtension
     public static bool TryGetRoleBase<T>(this RoleTypeId roleType, out T roleBase) where T : PlayerRoleBase
     {
         return roleType.TryGetRoleTemplate(out roleBase);
+    }
+
+    public static bool TryGetLatestUnitNameId(this Team team, out byte unitNameId)
+    {
+        unitNameId = 0;
+
+        if (!NamingRulesManager.TryGetNamingRule(team, out _) ||
+            !NamingRulesManager.GeneratedNames.TryGetValue(team, out var names) || names.Count is 0)
+            return false;
+
+        unitNameId = (byte)Mathf.Min(names.Count - 1, byte.MaxValue);
+        return true;
     }
 
     public static Vector3 GetRandomSpawnLocation(this RoleTypeId roleType)

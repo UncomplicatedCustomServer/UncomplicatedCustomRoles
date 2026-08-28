@@ -12,8 +12,8 @@ using System;
 using HarmonyLib;
 using Mirror;
 using PlayerRoles;
-using Respawning.NamingRules;
 using UncomplicatedCustomRoles.API.Features;
+using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.Patches;
 
@@ -50,11 +50,8 @@ internal class SetRolePatch
         if (!UcrSpawnContext.Active || reason is not RoleChangeReason.Respawn)
             return;
 
-        if (__instance.CurrentRole is HumanRole humanRole
-            && NamingRulesManager.TryGetNamingRule(humanRole.Team, out _)
-            && NamingRulesManager.GeneratedNames.TryGetValue(humanRole.Team, out var names)
-            && names.Count > 0
-            && humanRole.UnitNameId >= names.Count)
-            humanRole.UnitNameId = (byte)(names.Count - 1);
+        if (__instance.CurrentRole is HumanRole { UsesUnitNames: true } humanRole
+            && humanRole.Team.TryGetLatestUnitNameId(out var unitNameId))
+            humanRole.UnitNameId = unitNameId;
     }
 }
