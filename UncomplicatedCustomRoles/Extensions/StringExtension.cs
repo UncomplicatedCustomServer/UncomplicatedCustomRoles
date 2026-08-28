@@ -55,8 +55,19 @@ public static class StringExtension
 
     public static string BulkReplace(this string str, Dictionary<string, object> replace, string matrix = null)
     {
-        foreach (var kvp in replace.Where(kvp => kvp.Value is not null))
-            str = str.Replace(matrix is null ? kvp.Key : matrix.Replace("<val>", kvp.Key), kvp.Value?.ToString());
+        if (string.IsNullOrEmpty(str) || replace is null)
+            return str ?? string.Empty;
+
+        foreach (var kvp in replace)
+        {
+            if (kvp.Value is null || string.IsNullOrEmpty(kvp.Key))
+                continue;
+
+            var placeholder = matrix is null ? kvp.Key : matrix.Replace("<val>", kvp.Key);
+
+            if (!string.IsNullOrEmpty(placeholder))
+                str = str.Replace(placeholder, kvp.Value.ToString());
+        }
 
         return str;
     }

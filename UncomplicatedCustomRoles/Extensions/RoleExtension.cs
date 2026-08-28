@@ -30,12 +30,12 @@ public static class RoleExtension
 
     public static Color GetColor(this RoleTypeId roleType)
     {
-        return roleType is RoleTypeId.None ? Color.white : roleType.GetRoleBase().RoleColor;
+        return roleType is RoleTypeId.None ? Color.white : roleType.GetRoleBase()?.RoleColor ?? Color.white;
     }
 
     public static string GetFullName(this RoleTypeId typeId)
     {
-        return typeId.GetRoleBase().RoleName;
+        return typeId.GetRoleBase()?.RoleName ?? string.Empty;
     }
 
     public static PlayerRoleBase GetRoleBase(this RoleTypeId roleType)

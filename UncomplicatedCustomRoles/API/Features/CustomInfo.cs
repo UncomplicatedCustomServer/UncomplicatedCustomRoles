@@ -59,7 +59,7 @@ public class CustomInfo
         get;
         set
         {
-            field = value;
+            field = value ?? string.Empty;;
             if (_lastOwner is not null)
                 UpdateInfo(_lastOwner);
         }
@@ -70,7 +70,7 @@ public class CustomInfo
         get;
         set
         {
-            field = value;
+            field = value ?? string.Empty;;
             if (_lastOwner is not null)
                 UpdateInfo(_lastOwner);
         }
@@ -81,7 +81,7 @@ public class CustomInfo
         get;
         set
         {
-            field = value;
+            field = value ?? string.Empty;;
             if (_lastOwner is not null)
                 UpdateInfo(_lastOwner);
         }
