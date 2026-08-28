@@ -107,7 +107,7 @@ internal class PlayerEventHandler : EventHandlerBase
             return;
 
         var playerId = ev.Player.PlayerId;
-        
+
         if (SummonedCustomRole.TryGet(ev.Player, out var customRole))
         {
             LogManager.Debug(
@@ -311,7 +311,7 @@ internal class PlayerEventHandler : EventHandlerBase
                 Hurting.IsAllowed = false;
                 return;
             }
-            
+
             if (Hurting.Attacker.TryGetSummonedInstance(out var attackerCustomRole))
             {
                 if (attackerCustomRole.Role.IsFriendOf is not null &&
@@ -431,7 +431,7 @@ internal class PlayerEventHandler : EventHandlerBase
                                                module.DropItems;
                         RespawnInventoryQueue[Escaping.Player.PlayerId] =
                             new Tuple<List<ItemType>, Dictionary<ItemType, ushort>, bool>(
-                                [..Escaping.Player.Items.Select(i => i.Type)],
+                                [.. Escaping.Player.Items.Select(i => i.Type)],
                                 new Dictionary<ItemType, ushort>(Escaping.Player.Ammo), dropOldInventory);
 
                         API.Features.Escape.AddBucket(Escaping.Player);

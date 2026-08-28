@@ -117,7 +117,7 @@ internal class SpawnPoint : IUCRCommand
                         spawnPoint.Destroy();
                         response = SpawnPointManager.Save()
                             ? "SpawnPoint successfully removed!"
-                            : $"SpawnPoint removed!\nThe SpawnPoint list has been updated but it could NOT be saved on the disk: check the server console!";
+                            : "SpawnPoint removed!\nThe SpawnPoint list has been updated but it could NOT be saved on the disk: check the server console!";
                     }
                     else
                     {

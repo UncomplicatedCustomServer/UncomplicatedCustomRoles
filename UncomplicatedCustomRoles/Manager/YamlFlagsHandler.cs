@@ -51,7 +51,6 @@ internal class YamlFlagsHandler
 
         foreach (var flag in flags)
             if (flag is Dictionary<object, object> str)
-            {
                 foreach (var res in str)
                     if (res.Value is Dictionary<object, object> dict)
                         result.Add(new KeyValuePair<string, Dictionary<string, object>?>(res.Key.ToString(),
@@ -61,11 +60,8 @@ internal class YamlFlagsHandler
                     else
                         LogManager.Warn(
                             $"[CM Loader] The custom flag '{res.Key}' has its settings written as '{res.Value}' instead of a list of 'setting: value' lines, so it can't be read and will be ignored.");
-            }
             else
-            {
                 result.Add(new KeyValuePair<string, Dictionary<string, object>?>(flag.ToString(), null));
-            }
 
         return result;
     }

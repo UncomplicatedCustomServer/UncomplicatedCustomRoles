@@ -29,7 +29,8 @@ public class SpawnBehaviour
     public int MaxPlayers { get; set; } = 10;
 
     /// <summary>
-    ///     Gets or sets the minimum number of players on the server that are required by the given <see cref="ICustomRole" /> to spawn
+    ///     Gets or sets the minimum number of players on the server that are required by the given <see cref="ICustomRole" />
+    ///     to spawn
     /// </summary>
     public int MinPlayers { get; set; } = 1;
 

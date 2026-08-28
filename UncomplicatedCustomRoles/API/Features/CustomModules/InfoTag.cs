@@ -8,6 +8,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using LabApi.Features.Wrappers;
@@ -32,9 +33,9 @@ public class InfoTag : CustomModule
     internal string UnitFormat => TryGetStringValue("unit_format", "({unit})");
 
     internal bool ShowUnitName => TryGetCastedValue("show_unitname", true);
-    
+
     internal bool ShowBadge => TryGetCastedValue("show_badge", true);
-    
+
     internal bool ShowPowerStatus => TryGetCastedValue("show_powerstatus", true);
 
     private (string Token, string Color, bool Bold)[] Parts =>
@@ -63,13 +64,13 @@ public class InfoTag : CustomModule
 
         var tokens = TokenRegex.Matches(Order).Cast<Match>().Select(m => m.Groups[1].Value).ToList();
 
-        var unknown = tokens.Where(t => !KnownTokens.Contains(t, System.StringComparer.OrdinalIgnoreCase)).Distinct()
+        var unknown = tokens.Where(t => !KnownTokens.Contains(t, StringComparer.OrdinalIgnoreCase)).Distinct()
             .ToList();
         if (unknown.Count > 0)
             LogManager.Warn(
                 $"[CustomModule] InfoTag 'order' contains unknown token(s): {string.Join(", ", unknown.Select(t => $"%{t}%"))}; they will be shown as-is. Valid tokens: %custominfo%, %nickname%, %rolename%, %unitname%.");
 
-        if (!tokens.Any(t => KnownTokens.Contains(t, System.StringComparer.OrdinalIgnoreCase)))
+        if (!tokens.Any(t => KnownTokens.Contains(t, StringComparer.OrdinalIgnoreCase)))
         {
             error =
                 "'order' must contain at least one of %custominfo%, %nickname%, %rolename% or %unitname%; otherwise the name tag would show static text only.";
@@ -79,7 +80,7 @@ public class InfoTag : CustomModule
         error = null!;
         return true;
     }
-    
+
     internal string Compose(Player player, string customInfoText, string nickname, string roleName, string unitName,
         bool showUnit)
     {

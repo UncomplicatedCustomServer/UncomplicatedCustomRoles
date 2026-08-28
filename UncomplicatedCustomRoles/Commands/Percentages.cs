@@ -41,7 +41,7 @@ public class Percentages : IUCRCommand
                 continue;
 
             var total = customRoles.Sum(r => r.SpawnSettings.SpawnChance);
-            
+
             var effective = Math.Min(total, 100);
             response +=
                 $"\n\n{(total >= 100 ? "<color=#ff0000>❗</color>" : "<color=#00ff00>✔️</color>")} <color={role.GetColor().ToHex()}><b>{role.GetFullName()}</b></color> ({customRoles.Count})";

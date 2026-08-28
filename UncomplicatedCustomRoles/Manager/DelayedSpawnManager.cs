@@ -22,7 +22,7 @@ namespace UncomplicatedCustomRoles.Manager;
 internal static class DelayedSpawnManager
 {
     private static readonly List<CoroutineHandle> Scheduled = [];
-    
+
     internal static void ScheduleAll()
     {
         Cancel();
@@ -39,7 +39,7 @@ internal static class DelayedSpawnManager
             Scheduled.Add(Timing.CallDelayed(delay, () => Execute(id)));
         }
     }
-    
+
     internal static void Cancel()
     {
         foreach (var handle in Scheduled.Where(handle => handle.IsRunning))

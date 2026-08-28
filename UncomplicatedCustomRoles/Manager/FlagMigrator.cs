@@ -19,9 +19,10 @@ namespace UncomplicatedCustomRoles.Manager;
 
 internal static class FlagMigrator
 {
+    private const string InfoTagDefaultOrder = "%custominfo%%nickname%%rolename%";
     private static readonly Regex RoleNameToken = new("%rolename%", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     internal static List<ICustomRole> Migrated { get; } = [];
-    
+
     internal static void Migrate(ICustomRole role)
     {
         if (role.CustomFlags is not { Count: > 0 } flags)
@@ -85,7 +86,7 @@ internal static class FlagMigrator
             infoArgs["show_unitname"] = false;
         else if (RoleNameToken.IsMatch(infoOrder))
             infoOrder = RoleNameToken.Replace(infoOrder, "%rolename% %unitname%");
-        
+
 
         infoArgs["order"] = infoOrder;
         if (hasColor && !string.IsNullOrEmpty(nickColor))
@@ -106,8 +107,6 @@ internal static class FlagMigrator
             "or replace those flags manually in your custom_flags with:\n" +
             RenderYaml(infoArgs));
     }
-
-    private const string InfoTagDefaultOrder = "%custominfo%%nickname%%rolename%";
 
     private static string DeprecatedList(bool order, bool color, bool noUnit)
     {

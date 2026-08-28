@@ -17,16 +17,15 @@ using LabApi.Features.Wrappers;
 using LabApi.Loader.Features.Paths;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features;
-using UncomplicatedCustomRoles.API.Interfaces;
 
 namespace UncomplicatedCustomRoles.Manager;
 
 internal static class SpawnPointManager
 {
     private static readonly JsonSerializerOptions SerializerOptions = new() { WriteIndented = true };
-    
+
     public static string FilePath => Path.Combine(PathManager.Configs.FullName, $".{Server.Port}-spawnpoints.json");
-    
+
     public static void Init()
     {
         if (!File.Exists(FilePath))
@@ -43,7 +42,7 @@ internal static class SpawnPointManager
 
         Load();
     }
-    
+
     public static int Load()
     {
         SpawnPoint.List.Clear();
@@ -96,7 +95,7 @@ internal static class SpawnPointManager
 
         return loaded.Count;
     }
-    
+
     public static bool Save()
     {
         try
@@ -112,7 +111,7 @@ internal static class SpawnPointManager
             return false;
         }
     }
-    
+
     private static void CustomRoleSpawnCompatibilityChecker()
     {
         foreach (var role in CustomRole.CustomRoles.Values.Where(role =>

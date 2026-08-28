@@ -46,7 +46,7 @@ public class SummonedCustomRole
     private static readonly ConcurrentDictionary<int, int> _cachedCountByRoleId = new();
 
     internal static int EventTriggeredModuleTotal;
-    
+
     private readonly int _playerId;
 
     private int _eventModuleCount;
@@ -325,14 +325,14 @@ public class SummonedCustomRole
         Remove();
         Untrack();
     }
-    
+
     internal void DestroyDetached()
     {
         LogManager.Silent($"Detaching instance {Id} of CR {Role.Id} because the player is gone");
         RemoveInternal(true);
         Untrack();
     }
-    
+
     private void Untrack()
     {
         if (!List.TryRemove(Id, out _))
@@ -358,7 +358,7 @@ public class SummonedCustomRole
     {
         RemoveInternal(false);
     }
-    
+
     private void RemoveInternal(bool detached)
     {
         try
@@ -394,7 +394,9 @@ public class SummonedCustomRole
             DisguiseTeam.Remove(_playerId);
 
             if (detached)
+            {
                 InventoryLimitOverride.ClearAll(_playerId);
+            }
             else
             {
                 // Reset ammo limit
@@ -815,7 +817,7 @@ public class SummonedCustomRole
             builder.AppendLine(Info.BuildInfo(role.Role));
         }
     }
-    
+
     internal static void ClearAll()
     {
         foreach (var role in List.Values.ToArray())

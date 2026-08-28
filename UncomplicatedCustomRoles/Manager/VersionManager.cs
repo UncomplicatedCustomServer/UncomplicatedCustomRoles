@@ -80,9 +80,9 @@ internal static class VersionManager
                 LogManager.Info(
                     $"You are using UncomplicatedCustomRoles v{VersionInfo.Name}{(VersionInfo.CustomName is not null ? $" '{VersionInfo.CustomName}'" : string.Empty)}!");
             }
-            
+
             CheckForUpdates();
-            
+
             var hash = HashFile(Plugin.Instance.FilePath);
             if (hash != VersionInfo.Hash)
                 HashNotMatchMessageSender(hash);
@@ -107,7 +107,7 @@ internal static class VersionManager
             LogManager.Debug(e.ToString());
         }
     }
-    
+
     public static void CheckForUpdates()
     {
         try

@@ -20,6 +20,14 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules;
 
 public abstract class CustomModule
 {
+    private readonly Dictionary<ArgKey, object> _castedLists = [];
+
+    private readonly Dictionary<ArgKey, object> _castedValues = [];
+
+    private readonly HashSet<ArgKey> _unconvertibleValues = [];
+
+    private Dictionary<string, string> _stringArgs;
+
     /// <summary>
     ///     Gets the display name of the given <see cref="CustomModule" />
     /// </summary>
@@ -75,14 +83,6 @@ public abstract class CustomModule
     /// </summary>
     public Player Player => CustomRole.Player;
 
-    private readonly Dictionary<ArgKey, object> _castedValues = [];
-
-    private readonly Dictionary<ArgKey, object> _castedLists = [];
-
-    private readonly HashSet<ArgKey> _unconvertibleValues = [];
-
-    private Dictionary<string, string> _stringArgs;
-
     internal void Initialize(SummonedCustomRole summonedCustomRole, Dictionary<string, object> args)
     {
         CustomRole = summonedCustomRole;
@@ -92,7 +92,7 @@ public abstract class CustomModule
 
         InvalidateArgsCache();
     }
-    
+
     public void InvalidateArgsCache()
     {
         _stringArgs = null;
@@ -100,7 +100,7 @@ public abstract class CustomModule
         _castedLists.Clear();
         _unconvertibleValues.Clear();
     }
-    
+
     public List<string> GetMissingArgs()
     {
         List<string> missing = [];
@@ -328,7 +328,8 @@ public abstract class CustomModule
         List<CustomModule> mods = [];
 
         foreach (var module in data)
-            if (InitializeCustomModule(module.Key, module.Value, YamlFlagsHandler.Modules, summonedCustomRole) is { } mod)
+            if (InitializeCustomModule(module.Key, module.Value, YamlFlagsHandler.Modules, summonedCustomRole) is
+                { } mod)
                 mods.Add(mod);
 
         LogManager.Debug(
@@ -430,7 +431,7 @@ public abstract class CustomModule
     {
         return role?.Role is null ? "?" : $"{role.Role.Name} ({role.Role.Id})";
     }
-    
+
     private readonly struct ArgKey : IEquatable<ArgKey>
     {
         private readonly string _param;

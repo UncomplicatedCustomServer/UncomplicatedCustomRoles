@@ -54,7 +54,7 @@ public class Version : IUCRCommand
 
         return true;
     }
-    
+
     private static string UpdateNotice()
     {
         if (VersionManager.UpdateTarget is null)

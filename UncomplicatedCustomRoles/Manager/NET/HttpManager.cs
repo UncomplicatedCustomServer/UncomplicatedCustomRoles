@@ -18,14 +18,14 @@ using LabApi.Features.Wrappers;
 using MEC;
 using UncomplicatedCustomRoles.API.Features.Messages;
 using UncomplicatedCustomRoles.API.Struct;
-using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.Manager.NET;
 #pragma warning disable IDE1006
 
 internal class HttpManager
 {
-    private const string GitHubReleases = "https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/releases";
+    private const string GitHubReleases =
+        "https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/releases";
 
     private const string GitHubLatestRelease = GitHubReleases + "/latest";
 
@@ -105,7 +105,7 @@ internal class HttpManager
     {
         ApplyCreditTag(ev.Player);
     }
-    
+
     public static void AddServerOwner(Player player, string discordId, Action<HttpResponse> callback)
     {
         WebQuery.Post(OwnersEndpoint, JsonSerializer.Serialize(new OwnerMessage(player, discordId)),
@@ -131,12 +131,12 @@ internal class HttpManager
 
         return rightPreRelease is 0 ? -1 : leftPreRelease.CompareTo(rightPreRelease);
     }
-    
+
     public bool IsPreReleaseVersion(Version version)
     {
         return TryGetVersionInfo(version, out var info) ? info.PreRelease != 0 : version.Revision > 0;
     }
-    
+
     public CoroutineHandle LoadVersions()
     {
         return Timing.RunCoroutine(LoadVersionsCoroutine(), "UCR_Http");
@@ -164,7 +164,8 @@ internal class HttpManager
         }
         catch
         {
-            LogManager.Debug($"Failed to load the version list from the UCS cloud ({response.Reason}): '{response.Body}'");
+            LogManager.Debug(
+                $"Failed to load the version list from the UCS cloud ({response.Reason}): '{response.Body}'");
             Versions = [];
             return;
         }
@@ -227,7 +228,7 @@ internal class HttpManager
             Version.TryParse(v.Name, out var parsed) && CompareReleases(parsed, version) is 0);
         return info is not null;
     }
-    
+
     private Version ResolveChannelTarget()
     {
         var target = LatestStableVersion;
@@ -258,10 +259,11 @@ internal class HttpManager
         {
             "discord" => $"Download it from our Discord server: {link ?? DiscordInvite}",
             "other" when link is not null => $"Download it from: {link}",
-            _ => $"Download it from GitHub: {link ?? (IsPreReleaseVersion(version) ? GitHubReleases : GitHubLatestRelease)}"
+            _ =>
+                $"Download it from GitHub: {link ?? (IsPreReleaseVersion(version) ? GitHubReleases : GitHubLatestRelease)}"
         };
     }
-    
+
     public void LoadCreditTags()
     {
         Credits = new Dictionary<string, Triplet<string, string, bool>>();
@@ -340,13 +342,13 @@ internal class HttpManager
             player.ReferenceHub.serverRoles.SetColor(tag.Second);
         }
     }
-    
+
     internal CoroutineHandle ShareLogs(string data, Action<HttpResponse> callback)
     {
         return WebQuery.Post($"{Endpoint}/{Prefix}/logs", JsonSerializer.Serialize(new ShareLogMessage(data)),
             "application/json", callback);
     }
-    
+
     internal CoroutineHandle VersionInfo(Action<HttpResponse> callback)
     {
         return WebQuery.Get($"{Endpoint}/{Prefix}/versions/{Plugin.Instance.Version}", callback);

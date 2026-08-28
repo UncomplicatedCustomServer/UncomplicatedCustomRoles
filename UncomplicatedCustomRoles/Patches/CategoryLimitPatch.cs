@@ -25,7 +25,7 @@ internal static class CategoryLimitByHubPatch
         if (TryGetCustomLimit(player, category, out var limit))
             __result = limit;
     }
-    
+
     internal static bool TryGetCustomLimit(ReferenceHub player, ItemCategory category, out sbyte limit)
     {
         limit = 0;

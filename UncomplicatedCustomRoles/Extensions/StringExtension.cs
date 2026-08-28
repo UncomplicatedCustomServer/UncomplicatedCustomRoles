@@ -33,9 +33,10 @@ public static class StringExtension
         '8',
         '9'
     ];
-    
-    private static readonly Regex CustomInfoRejectedChars = new(@"[\[\]]|[^\p{L}\p{P}\p{Sc}\p{N} ^=+|~`<>\n]", RegexOptions.Compiled);
-    
+
+    private static readonly Regex CustomInfoRejectedChars =
+        new(@"[\[\]]|[^\p{L}\p{P}\p{Sc}\p{N} ^=+|~`<>\n]", RegexOptions.Compiled);
+
     public static string SanitizeCustomInfo(this string str)
     {
         return string.IsNullOrEmpty(str) ? str : CustomInfoRejectedChars.Replace(str, string.Empty);

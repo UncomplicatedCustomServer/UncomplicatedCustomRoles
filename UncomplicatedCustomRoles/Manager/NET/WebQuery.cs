@@ -22,7 +22,7 @@ internal static class WebQuery
     {
         return Timing.RunCoroutine(Send(UnityWebRequest.Get(url), callback), "UCR_Http");
     }
-    
+
     public static CoroutineHandle Post(string url, string body, string contentType,
         Action<HttpResponse> callback = null)
     {

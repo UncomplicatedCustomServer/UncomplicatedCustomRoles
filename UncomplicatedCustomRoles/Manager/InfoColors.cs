@@ -44,9 +44,9 @@ internal static class InfoColors
         { "white", "FFFFFF" },
         { "black", "000000" }
     };
-    
+
     internal static IEnumerable<string> Names => NameToHex.Keys;
-    
+
     internal static bool TryResolve(string? input, out string hex)
     {
         hex = string.Empty;
@@ -54,7 +54,8 @@ internal static class InfoColors
         if (string.IsNullOrWhiteSpace(input))
             return false;
 
-        var raw = input!.Trim().TrimStart('#').Replace("_", string.Empty).Replace("-", string.Empty).Replace(" ", string.Empty);
+        var raw = input!.Trim().TrimStart('#').Replace("_", string.Empty).Replace("-", string.Empty)
+            .Replace(" ", string.Empty);
 
         if (NameToHex.TryGetValue(raw, out var mapped))
         {

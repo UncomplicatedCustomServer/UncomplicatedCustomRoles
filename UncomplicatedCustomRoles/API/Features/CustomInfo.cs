@@ -23,8 +23,8 @@ namespace UncomplicatedCustomRoles.API.Features;
 public class CustomInfo
 {
     private const string ColorPrefix = "<color=#FFFFFF></color>";
-    private Player _lastOwner;
     private bool _detached;
+    private Player _lastOwner;
     private bool _nativeNickname = true;
     private bool _nativeRole = true;
     private bool _nativeUnit = true;
@@ -294,7 +294,7 @@ public class CustomInfo
             SuppressExternalSync = previousSuppress;
         }
     }
-    
+
     private bool IsNativeRoleName(Player player, SummonedCustomRole summonedCustomRole)
     {
         var shownRole = summonedCustomRole is null

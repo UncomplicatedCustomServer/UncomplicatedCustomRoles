@@ -70,7 +70,7 @@ internal class LogManager
     {
         History.Add(new LogEntry(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "System", message));
     }
-    
+
     internal static IEnumerator<float> SendReport(bool online, Action<HttpStatusCode, string> callback)
     {
         if (History.Count < 1)

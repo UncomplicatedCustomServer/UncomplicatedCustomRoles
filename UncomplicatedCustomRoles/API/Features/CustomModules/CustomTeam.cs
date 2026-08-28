@@ -17,17 +17,18 @@ public class CustomTeam : CustomModule
 {
     public override List<string> RequiredArgs => ["team"];
     internal string Team => TryGetStringValue("team", string.Empty);
-    
+
     internal bool IsSameTeam(CustomTeam other)
     {
         return other is not null && !string.IsNullOrWhiteSpace(Team) &&
                string.Equals(Team, other.Team, StringComparison.OrdinalIgnoreCase);
     }
-    
+
     internal static bool SameTeam(ReferenceHub first, ReferenceHub second)
     {
         return first is not null && second is not null && first != second &&
-               SummonedCustomRole.TryGet(first, out var firstRole) && firstRole.TryGetModule(out CustomTeam firstTeam) &&
+               SummonedCustomRole.TryGet(first, out var firstRole) &&
+               firstRole.TryGetModule(out CustomTeam firstTeam) &&
                SummonedCustomRole.TryGet(second, out var secondRole) &&
                secondRole.TryGetModule(out CustomTeam secondTeam) &&
                firstTeam.IsSameTeam(secondTeam);

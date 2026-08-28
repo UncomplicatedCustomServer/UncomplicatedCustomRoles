@@ -426,11 +426,11 @@ public class CustomRole : ICustomRole
     internal static LoadStatusType InternalRegister(ICustomRole customRole)
     {
         FlagMigrator.Migrate(customRole);
-        
+
         if (customRole.RoleAppearance is RoleTypeId.None ||
             customRole.RoleAppearance.GetTeam() is PlayerRoles.Team.Dead)
             customRole.RoleAppearance = customRole.Role;
-        
+
         if (Plugin.Instance.Config.EnableValidator)
         {
             RoleValidator.Validate(customRole, out var errors, out var warnings);
