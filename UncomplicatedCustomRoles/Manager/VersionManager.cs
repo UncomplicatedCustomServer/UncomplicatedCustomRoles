@@ -9,6 +9,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Security.Cryptography;
@@ -26,15 +27,24 @@ internal static class VersionManager
     public static bool CorrectHash { get; private set; }
 
 #nullable enable
-    public static void Init()
+    public static Version? UpdateTarget { get; private set; }
+
+    public static IEnumerator<float> Init()
+    {
+        yield return Timing.WaitUntilDone(Plugin.HttpManager.LoadVersions());
+        yield return Timing.WaitUntilDone(Plugin.HttpManager.VersionInfo(LoadVersionInfo));
+    }
+
+    private static void LoadVersionInfo(HttpResponse response)
     {
         try
         {
-            var data = Plugin.HttpManager.VersionInfo();
+            var data = response.Body;
 
             if (string.IsNullOrWhiteSpace(data))
             {
-                LogManager.Silent("The UCS cloud gave us an empty answer while asking for the version info.");
+                LogManager.Silent(
+                    $"The UCS cloud gave us an empty answer while asking for the version info ({response.Reason}).");
                 return;
             }
 
@@ -70,7 +80,9 @@ internal static class VersionManager
                 LogManager.Info(
                     $"You are using UncomplicatedCustomRoles v{VersionInfo.Name}{(VersionInfo.CustomName is not null ? $" '{VersionInfo.CustomName}'" : string.Empty)}!");
             }
-
+            
+            CheckForUpdates();
+            
             var hash = HashFile(Plugin.Instance.FilePath);
             if (hash != VersionInfo.Hash)
                 HashNotMatchMessageSender(hash);
@@ -92,6 +104,26 @@ internal static class VersionManager
         catch (Exception e)
         {
             LogManager.Error("An error occurred while trying to fetch the version info from our central servers.");
+            LogManager.Debug(e.ToString());
+        }
+    }
+    
+    public static void CheckForUpdates()
+    {
+        try
+        {
+            UpdateTarget = Plugin.HttpManager.GetUpdateTarget();
+
+            if (UpdateTarget is null)
+                return;
+
+            LogManager.Warn(Plugin.HttpManager.IsPreReleaseVersion(UpdateTarget)
+                ? $"A newer PRE-RELEASE of UncomplicatedCustomRoles is available!\nCurrent: v{Plugin.Instance.Version} | Latest pre-release: v{UpdateTarget}\n{Plugin.HttpManager.GetDownloadHint(UpdateTarget)}"
+                : $"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Plugin.Instance.Version} | Latest available: v{UpdateTarget}\n{Plugin.HttpManager.GetDownloadHint(UpdateTarget)}");
+        }
+        catch (Exception e)
+        {
+            LogManager.Error("An error occurred while checking for a newer version of the plugin.");
             LogManager.Debug(e.ToString());
         }
     }

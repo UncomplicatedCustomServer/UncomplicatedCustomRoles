@@ -11,7 +11,6 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Threading.Tasks;
 using HarmonyLib;
 using LabApi.Features;
 using LabApi.Features.Wrappers;
@@ -72,16 +71,7 @@ internal class Plugin : Plugin<Config>
             new ScpEventHandler()
         });
 
-        Task.Run(delegate
-        {
-            var updateTarget = HttpManager.GetUpdateTarget();
-            if (updateTarget is not null)
-                LogManager.Warn(HttpManager.IsPreReleaseVersion(updateTarget)
-                    ? $"A newer PRE-RELEASE of UncomplicatedCustomRoles is available!\nCurrent: v{Version} | Latest pre-release: v{updateTarget}\n{HttpManager.GetDownloadHint(updateTarget)}"
-                    : $"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Version} | Latest available: v{updateTarget}\n{HttpManager.GetDownloadHint(updateTarget)}");
-
-            VersionManager.Init();
-        });
+        Timing.RunCoroutine(VersionManager.Init(), "UCR_Http");
 
         ImportManager.Unload();
 
@@ -109,6 +99,7 @@ internal class Plugin : Plugin<Config>
     public override void Disable()
     {
         Timing.KillCoroutines("UCR_Presence");
+        Timing.KillCoroutines("UCR_Http");
 
         ScriptedEvents.UnregisterCustomActions();
 

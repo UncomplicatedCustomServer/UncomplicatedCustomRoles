@@ -19,5 +19,5 @@ internal class PresenceMessage
 
     [JsonPropertyName("plugin")] public string PluginName => "UCR";
 
-    [JsonPropertyName("version")] public string Version { get; set; } = Plugin.Instance.Version.ToString(4);
+    [JsonPropertyName("version")] public string Version { get; set; } = Plugin.Instance.Version.ToString();
 }

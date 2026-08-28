@@ -28,7 +28,7 @@ public class Version : IUCRCommand
         if (VersionManager.VersionInfo is null)
         {
             response =
-                $"<size=22><b>UncomplicatedCustomRoles</b></size>\n<size=18>Authors: {Plugin.Instance.Author}\nVersion: {Plugin.Instance.Version}\n\n<color=yellow>The UCS cloud has no informations about this version, so it can't be verified.\nThis is expected on an unreleased build, otherwise check the server console for the reason.</color></size>";
+                $"<size=22><b>UncomplicatedCustomRoles</b></size>\n<size=18>Authors: {Plugin.Instance.Author}\nVersion: {Plugin.Instance.Version}\n\n<color=yellow>The UCS cloud has no informations about this version, so it can't be verified.\nThis is expected on an unreleased build, otherwise check the server console for the reason.</color></size>{UpdateNotice()}";
             return false;
         }
 
@@ -42,6 +42,8 @@ public class Version : IUCRCommand
         response =
             $"<size=22><b>UncomplicatedCustomRoles</b></size>\n<size=18>Authors: {Plugin.Instance.Author}\nVersion: {VersionManager.VersionInfo.Name}{(VersionManager.VersionInfo.CustomName is not null ? $" '{VersionManager.VersionInfo.CustomName}'" : string.Empty)}  ({Plugin.Instance.Version})\nSource: {source}\nPre release: {(VersionManager.VersionInfo.PreRelease != 0 ? "<color=red>TRUE</color>" : "<color=green>FALSE</color>")}\nForced debug: {(VersionManager.VersionInfo.ForceDebug != 0 ? "<color=red>TRUE</color>" : "<color=green>FALSE</color>")}\nHash: {(!VersionManager.CorrectHash ? "<color=red>NOT MATCHING!</color>" : "<color=green>Matching</color>")}</size>";
 
+        response += UpdateNotice();
+
         if (!VersionManager.CorrectHash)
             response +=
                 "\n\n<size=20><b><color=red>⚠ WARNING!</color></b></size>\n<size=18>You are using a <b>NON-OFFICIAL</b> version of the plugin!\nThis version might contain <b>viruses</b> and it's <b>NOT</b> ours!</size>";
@@ -51,5 +53,14 @@ public class Version : IUCRCommand
                 $"\n\n<size=20><b><color=red>⚠ WARNING!</color></b></size>\n<size=18>This version has been <b>RECALLED</b> due to the following reason:\n<size=16>{VersionManager.VersionInfo.RecallReason}</size>\nYou are <b>HIGHLY SUGGESTED</b> to update the plugin to the last stable target: {VersionManager.VersionInfo.RecallTarget} {(VersionManager.VersionInfo.RecallImportant ?? true ? "\n<color=red>You HAVE TO update it, otherwise bad things will happen!</color>" : string.Empty)}</size>";
 
         return true;
+    }
+    
+    private static string UpdateNotice()
+    {
+        if (VersionManager.UpdateTarget is null)
+            return string.Empty;
+
+        return
+            $"\n\n<size=20><b><color=yellow>⚠ UPDATE AVAILABLE</color></b></size>\n<size=18>v{VersionManager.UpdateTarget} has been released.\n{Plugin.HttpManager.GetDownloadHint(VersionManager.UpdateTarget)}</size>";
     }
 }

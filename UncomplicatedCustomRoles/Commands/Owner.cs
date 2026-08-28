@@ -9,10 +9,12 @@
  */
 
 using System.Collections.Generic;
+using System.Net;
 using CommandSystem;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Extensions;
+using UncomplicatedCustomRoles.Manager.NET;
 
 namespace UncomplicatedCustomRoles.Commands;
 
@@ -38,9 +40,22 @@ public class Owner : IUCRCommand
             return false;
         }
 
-        var code = Plugin.HttpManager.AddServerOwner(player, arguments[0]).GetStatusCode(out response);
+        HttpManager.AddServerOwner(player, arguments[0], answer => Answer(sender, answer));
 
-        response = $"{code} - {response}";
+        response = "Asking our central server to give you the 'Server Owner' role...";
         return true;
+    }
+
+    private static void Answer(ICommandSender sender, HttpResponse answer)
+    {
+        if (!answer.Completed)
+        {
+            sender.Respond($"Failed to reach the UCS Central Server: {answer.Reason}", false);
+            return;
+        }
+
+        var code = answer.Body.GetStatusCode(out var message);
+
+        sender.Respond($"{code} - {message}", code is HttpStatusCode.OK);
     }
 }

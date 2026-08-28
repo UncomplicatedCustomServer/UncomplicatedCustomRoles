@@ -81,10 +81,24 @@ public static class StringExtension
     public static HttpStatusCode GetStatusCode(this string str, out string message)
     {
         LogManager.Debug($"Parsing JSON for status code: {str}");
-        var doc = JsonDocument.Parse(str);
-        var root = doc.RootElement;
 
         message = null;
+
+        JsonDocument doc;
+
+        try
+        {
+            doc = JsonDocument.Parse(str);
+        }
+        catch (Exception e)
+        {
+            LogManager.Debug($"The answer is not a valid JSON ({e.Message}), returning HttpStatusCode.Unused");
+            message = str;
+            return HttpStatusCode.Unused;
+        }
+
+        var root = doc.RootElement;
+
         if (root.TryGetProperty("message", out var messageElement))
         {
             message = messageElement.GetString();

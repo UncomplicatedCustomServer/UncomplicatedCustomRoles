@@ -11,10 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Text.Json;
-using System.Threading.Tasks;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
@@ -34,6 +31,10 @@ internal class HttpManager
 
     private const string DiscordInvite = "https://discord.gg/5StRGu8EJV";
 
+    private const string CreditsEndpoint = "https://api.ucserver.it/credits.json";
+
+    private const string OwnersEndpoint = "https://api.ucserver.it/v3/owners";
+
     /// <summary>
     ///     Create a new istance of the HttpManager
     /// </summary>
@@ -42,29 +43,13 @@ internal class HttpManager
     {
         Prefix = prefix;
         RegisterEvents();
-        HttpClient = new HttpClient();
-        Task.Run(LoadCreditTags);
+        LoadCreditTags();
     }
-
-    /// <summary>
-    ///     Gets the <see cref="CoroutineHandle" /> of the presence coroutine.
-    /// </summary>
-    public CoroutineHandle PresenceCoroutine { get; internal set; }
-
-    /// <summary>
-    ///     Gets if the feature can be activated - missing library
-    /// </summary>
-    public bool IsAllowed { get; internal set; } = true;
 
     /// <summary>
     ///     Gets the prefix of the plugin for our APIs
     /// </summary>
     public string Prefix { get; }
-
-    /// <summary>
-    ///     Gets the <see cref="HttpClient" /> public istance
-    /// </summary>
-    public HttpClient HttpClient { get; }
 
     /// <summary>
     ///     Gets the UCS APIs endpoint
@@ -82,69 +67,29 @@ internal class HttpManager
     public List<string> IsJobRole { get; } = [];
 
     /// <summary>
-    ///     Gets every version of the plugin known by the UCS cloud
+    ///     Gets every version of the plugin known by the UCS cloud, empty until <see cref="LoadVersions" /> is done
     /// </summary>
-    public List<VersionInfo> Versions
-    {
-        get
-        {
-            if (_versions is null)
-                LoadVersions();
-            return _versions;
-        }
-    }
+    public List<VersionInfo> Versions { get; private set; } = [];
 
     /// <summary>
     ///     Gets the latest <see cref="Version" /> of the plugin, pre-releases included, loaded by the UCS cloud
     /// </summary>
-    public Version LatestVersion
-    {
-        get
-        {
-            if (_latestVersion is null)
-                LoadVersions();
-            return _latestVersion;
-        }
-    }
+    public Version LatestVersion { get; private set; } = new();
 
     /// <summary>
     ///     Gets the latest stable (non pre-release) <see cref="Version" /> of the plugin, loaded by the UCS cloud.
     /// </summary>
-    public Version LatestStableVersion
-    {
-        get
-        {
-            if (_latestStableVersion is null)
-                LoadVersions();
-            return _latestStableVersion;
-        }
-    }
+    public Version LatestStableVersion { get; private set; } = new();
 
     /// <summary>
     ///     Gets the latest pre-release <see cref="Version" /> of the plugin, loaded by the UCS cloud.
     /// </summary>
-    public Version LatestPreRelease
-    {
-        get
-        {
-            if (_latestPreRelease is null)
-                LoadVersions();
-            return _latestPreRelease;
-        }
-    }
+    public Version LatestPreRelease { get; private set; } = new();
 
     /// <summary>
     ///     Gets whether the running build is a pre-release
     /// </summary>
     public bool IsPreRelease => IsPreReleaseVersion(Plugin.Instance.Version);
-
-    private List<VersionInfo> _versions { get; set; }
-
-    private Version _latestVersion { get; set; }
-
-    private Version _latestStableVersion { get; set; }
-
-    private Version _latestPreRelease { get; set; }
 
     internal void RegisterEvents()
     {
@@ -160,11 +105,11 @@ internal class HttpManager
     {
         ApplyCreditTag(ev.Player);
     }
-
-    public string AddServerOwner(Player player, string discordId)
+    
+    public static void AddServerOwner(Player player, string discordId, Action<HttpResponse> callback)
     {
-        return HttpQuery.Post("https://api.ucserver.it/v3/owners",
-            JsonSerializer.Serialize(new OwnerMessage(player, discordId)), "application/json");
+        WebQuery.Post(OwnersEndpoint, JsonSerializer.Serialize(new OwnerMessage(player, discordId)),
+            "application/json", callback);
     }
 
     internal static int CompareReleases(Version left, Version right)
@@ -191,74 +136,85 @@ internal class HttpManager
     {
         return TryGetVersionInfo(version, out var info) ? info.PreRelease != 0 : version.Revision > 0;
     }
-
-    public void LoadVersions()
+    
+    public CoroutineHandle LoadVersions()
     {
-        _versions = [];
-        _latestVersion = new Version();
-        _latestStableVersion = new Version();
-        _latestPreRelease = new Version();
+        return Timing.RunCoroutine(LoadVersionsCoroutine(), "UCR_Http");
+    }
 
-        string answer = null;
+    private IEnumerator<float> LoadVersionsCoroutine()
+    {
+        Versions = [];
+        LatestVersion = new Version();
+        LatestStableVersion = new Version();
+        LatestPreRelease = new Version();
 
+        yield return Timing.WaitUntilDone(WebQuery.Get($"{Endpoint}/{Prefix}/versions", LoadVersionList));
+
+        if (Versions.Count is 0)
+            yield return Timing.WaitUntilDone(WebQuery.Get($"{Endpoint}/{Prefix}/versions/latest@text/plain",
+                LoadLatestVersionFallback));
+    }
+
+    private void LoadVersionList(HttpResponse response)
+    {
         try
         {
-            answer = HttpQuery.Get($"{Endpoint}/{Prefix}/versions");
-            _versions = JsonSerializer.Deserialize<List<VersionInfo>>(answer) ?? [];
+            Versions = JsonSerializer.Deserialize<List<VersionInfo>>(response.Body) ?? [];
         }
         catch
         {
-            LogManager.Debug($"Failed to load the version list from the UCS cloud: '{answer}'");
+            LogManager.Debug($"Failed to load the version list from the UCS cloud ({response.Reason}): '{response.Body}'");
+            Versions = [];
+            return;
         }
 
-        foreach (var version in _versions)
+        foreach (var version in Versions)
         {
             if (!Version.TryParse(version.Name, out var parsed))
                 continue;
 
-            if (CompareReleases(parsed, _latestVersion) > 0)
-                _latestVersion = parsed;
+            if (CompareReleases(parsed, LatestVersion) > 0)
+                LatestVersion = parsed;
 
             if (version.PreRelease == 0)
             {
-                if (CompareReleases(parsed, _latestStableVersion) > 0)
-                    _latestStableVersion = parsed;
+                if (CompareReleases(parsed, LatestStableVersion) > 0)
+                    LatestStableVersion = parsed;
             }
-            else if (CompareReleases(parsed, _latestPreRelease) > 0)
+            else if (CompareReleases(parsed, LatestPreRelease) > 0)
             {
-                _latestPreRelease = parsed;
+                LatestPreRelease = parsed;
             }
         }
-
-        if (_versions.Count is 0)
-            LoadLatestVersionFallback();
     }
 
     /// <summary>
     ///     Loads the latest version from the single-value endpoint, used when the version list is unavailable.
     /// </summary>
-    private void LoadLatestVersionFallback()
+    private void LoadLatestVersionFallback(HttpResponse response)
     {
-        string answer = null;
+        var answer = response.Body;
 
         try
         {
-            answer = HttpQuery.Get($"{Endpoint}/{Prefix}/versions/latest@text/plain");
-
             if (string.IsNullOrEmpty(answer) || !answer.Contains("."))
+            {
+                LogManager.Debug($"The UCS cloud gave us no latest version to fall back on ({response.Reason})");
                 return;
+            }
 
-            _latestVersion = new Version(answer.Trim());
+            LatestVersion = new Version(answer.Trim());
 
-            if (_latestVersion.Revision <= 0)
-                _latestStableVersion = _latestVersion;
+            if (LatestVersion.Revision <= 0)
+                LatestStableVersion = LatestVersion;
             else
-                _latestPreRelease = _latestVersion;
+                LatestPreRelease = LatestVersion;
         }
         catch
         {
             LogManager.Debug($"Failed to parse the latest version received from the UCS cloud: '{answer}'");
-            _latestVersion = new Version();
+            LatestVersion = new Version();
         }
     }
 
@@ -267,7 +223,8 @@ internal class HttpManager
     /// </summary>
     public bool TryGetVersionInfo(Version version, out VersionInfo info)
     {
-        info = Versions.FirstOrDefault(v => Version.TryParse(v.Name, out var parsed) && parsed == version);
+        info = Versions.FirstOrDefault(v =>
+            Version.TryParse(v.Name, out var parsed) && CompareReleases(parsed, version) is 0);
         return info is not null;
     }
     
@@ -304,15 +261,20 @@ internal class HttpManager
             _ => $"Download it from GitHub: {link ?? (IsPreReleaseVersion(version) ? GitHubReleases : GitHubLatestRelease)}"
         };
     }
-
+    
     public void LoadCreditTags()
     {
         Credits = new Dictionary<string, Triplet<string, string, bool>>();
         IsJobRole.Clear();
+
+        WebQuery.Get(CreditsEndpoint, LoadCreditTagList);
+    }
+
+    private void LoadCreditTagList(HttpResponse response)
+    {
         try
         {
-            var Data = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, JsonElement>>>(
-                HttpQuery.Get("https://api.ucserver.it/credits.json"));
+            var Data = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, JsonElement>>>(response.Body);
 
             if (Data is null)
             {
@@ -342,7 +304,7 @@ internal class HttpManager
         {
             LogManager.Error("An error occurred while loading the credit tags from the UCS Central Server!");
             LogManager.Debug(
-                $"Failed to act HttpManager::LoadCreditTags() - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
+                $"Failed to act HttpManager::LoadCreditTagList() ({response.Reason}) - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
         }
     }
 
@@ -359,7 +321,7 @@ internal class HttpManager
         if (!Plugin.Instance.Config.EnableCreditTags)
             return;
 
-        var Tag = GetCreditTag(player);
+        var tag = GetCreditTag(player);
 
         if (!string.IsNullOrEmpty(player.ReferenceHub.serverRoles.Network_myText))
         {
@@ -368,37 +330,25 @@ internal class HttpManager
                     k.Value.Second == player.ReferenceHub.serverRoles.Network_myColor))
                 return;
 
-            if (!Tag.Third)
+            if (!tag.Third)
                 return; // Do not override
         }
 
-        if (Tag.First is not null && Tag.Second is not null)
+        if (tag.First is not null && tag.Second is not null)
         {
-            player.ReferenceHub.serverRoles.SetText(Tag.First);
-            player.ReferenceHub.serverRoles.SetColor(Tag.Second);
+            player.ReferenceHub.serverRoles.SetText(tag.First);
+            player.ReferenceHub.serverRoles.SetColor(tag.Second);
         }
     }
-
-    public bool IsLatestVersion(out Version latest)
+    
+    internal CoroutineHandle ShareLogs(string data, Action<HttpResponse> callback)
     {
-        latest = ResolveChannelTarget();
-        return GetUpdateTarget() is null;
+        return WebQuery.Post($"{Endpoint}/{Prefix}/logs", JsonSerializer.Serialize(new ShareLogMessage(data)),
+            "application/json", callback);
     }
-
-    public bool IsLatestVersion()
+    
+    internal CoroutineHandle VersionInfo(Action<HttpResponse> callback)
     {
-        return GetUpdateTarget() is null;
-    }
-
-    internal HttpStatusCode ShareLogs(string data, out string content)
-    {
-        content = HttpQuery.Post($"{Endpoint}/{Prefix}/logs", JsonSerializer.Serialize(new ShareLogMessage(data)),
-            "application/json");
-        return content.GetStatusCode(out _);
-    }
-#nullable enable
-    internal string VersionInfo()
-    {
-        return HttpQuery.Get($"{Endpoint}/{Prefix}/versions/{Plugin.Instance.Version.ToString(4)}");
+        return WebQuery.Get($"{Endpoint}/{Prefix}/versions/{Plugin.Instance.Version}", callback);
     }
 }

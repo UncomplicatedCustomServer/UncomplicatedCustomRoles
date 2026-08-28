@@ -16,8 +16,10 @@ using Discord;
 using LabApi.Features.Console;
 using LabApi.Loader.Features.Paths;
 using LabApi.Loader.Features.Yaml;
+using MEC;
 using NorthwoodLib.Pools;
 using UncomplicatedCustomRoles.API.Features;
+using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.Manager;
 
@@ -68,13 +70,14 @@ internal class LogManager
     {
         History.Add(new LogEntry(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "System", message));
     }
-
-    internal static HttpStatusCode SendReport(out string content, bool online = true)
+    
+    internal static IEnumerator<float> SendReport(bool online, Action<HttpStatusCode, string> callback)
     {
-        content = null;
-
         if (History.Count < 1)
-            return HttpStatusCode.Forbidden;
+        {
+            callback?.Invoke(HttpStatusCode.Forbidden, null);
+            yield break;
+        }
 
         var builder = StringBuilderPool.Shared.Rent();
 
@@ -87,14 +90,19 @@ internal class LogManager
         foreach (var Role in CustomRole.CustomRoles.Values)
             builder.Append($"{YamlConfigParser.Serializer.Serialize(Role)}\n\n---\n\n");
 
-        var response = HttpStatusCode.OK;
-        if (online)
-            response = Plugin.HttpManager.ShareLogs(StringBuilderPool.Shared.ToStringReturn(builder), out content);
-        else
+        var report = StringBuilderPool.Shared.ToStringReturn(builder);
+
+        if (!online)
+        {
             File.WriteAllText(
                 Path.Combine(PathManager.Configs.FullName, $"UCR-Report-{DateTimeOffset.Now.ToUnixTimeSeconds()}.txt"),
-                StringBuilderPool.Shared.ToStringReturn(builder));
+                report);
+            callback?.Invoke(HttpStatusCode.OK, null);
+            yield break;
+        }
 
-        return response;
+        yield return Timing.WaitUntilDone(Plugin.HttpManager.ShareLogs(report,
+            response => callback?.Invoke(response.Completed ? response.Body.GetStatusCode(out _) : response.Status,
+                response.Body)));
     }
 }
