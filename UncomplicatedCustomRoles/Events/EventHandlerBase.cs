@@ -55,10 +55,8 @@ internal abstract class EventHandlerBase
     }
 
     internal virtual void OnRegistered()
-    {
-    }
+    { }
 
     internal virtual void OnUnregistered()
-    {
-    }
+    { }
 }

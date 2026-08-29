@@ -26,8 +26,7 @@ internal class LogEntry
     }
 
     public LogEntry(long time, LogLevel level, string content, string error = null) : this(time, level.ToString(), content, error)
-    {
-    }
+    { }
 
     /// <summary>
     ///     Gets the time in unix milliseconds of the message

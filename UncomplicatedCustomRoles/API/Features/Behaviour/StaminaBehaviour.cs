@@ -34,6 +34,5 @@ public class StaminaBehaviour
     /// </summary>
     /// <param name="_"></param>
     public void Apply(Player _)
-    {
-    }
+    { }
 }

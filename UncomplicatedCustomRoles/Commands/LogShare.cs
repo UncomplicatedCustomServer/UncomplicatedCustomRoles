@@ -33,8 +33,7 @@ internal class LogShare : ParentCommand
     public override string Description { get; } = "Share the UCR Debug logs with the developers";
 
     public override void LoadGeneratedCommands()
-    {
-    }
+    { }
 
     protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
     {

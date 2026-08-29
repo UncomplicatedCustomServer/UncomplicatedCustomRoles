@@ -235,16 +235,14 @@ public class CustomRole : ICustomRole
     /// </summary>
     /// <param name="role"></param>
     public virtual void OnSpawned(SummonedCustomRole role)
-    {
-    }
+    { }
 
     /// <summary>
     ///     Invoked when the custom role is removed from the player
     /// </summary>
     /// <param name="role"></param>
     public virtual void OnRemoved(SummonedCustomRole role)
-    {
-    }
+    { }
 
     public override string ToString()
     {

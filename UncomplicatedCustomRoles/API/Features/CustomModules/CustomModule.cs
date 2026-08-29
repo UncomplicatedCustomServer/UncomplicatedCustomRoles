@@ -118,8 +118,7 @@ public abstract class CustomModule
     /// </summary>
     /// <remarks>Invoked when the <see cref="CustomModule" /> has been added to the <see cref="SummonedCustomRole" /></remarks>
     public virtual void OnAdded()
-    {
-    }
+    { }
 
     /// <summary>
     ///     The removed event function
@@ -128,8 +127,7 @@ public abstract class CustomModule
     ///     Invoked when the <see cref="CustomModule" /> has been removed from the <see cref="SummonedCustomRole" />
     /// </remarks>
     public virtual void OnRemoved()
-    {
-    }
+    { }
 
     /// <summary>
     ///     The generic event function
@@ -153,8 +151,7 @@ public abstract class CustomModule
     /// </summary>
     /// <remark>This won't be invoked by UCR</remark>
     public virtual void Execute()
-    {
-    }
+    { }
 
     /// <summary>
     ///     Try to get a generic <see cref="object" /> value from the <see cref="Args" /> and if not present just return a

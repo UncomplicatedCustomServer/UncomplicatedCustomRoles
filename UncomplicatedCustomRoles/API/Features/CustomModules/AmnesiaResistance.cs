@@ -11,5 +11,4 @@
 namespace UncomplicatedCustomRoles.API.Features.CustomModules;
 
 internal class AmnesiaResistance : CustomModule
-{
-}
+{ }

@@ -70,8 +70,7 @@ public class CompatibilityManager
                     }
                 }
                 catch
-                {
-                }
+                { }
 
             if (role is null)
                 throw;
