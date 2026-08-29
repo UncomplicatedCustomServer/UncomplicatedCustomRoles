@@ -64,8 +64,10 @@ public abstract class CustomModule
             _stringArgs = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             if (Args is not null)
-                foreach (var kvp in Args)
+            {
+                foreach (KeyValuePair<string, object> kvp in Args)
                     _stringArgs[kvp.Key] = kvp.Value?.ToString();
+            }
 
             return _stringArgs;
         }
@@ -108,10 +110,12 @@ public abstract class CustomModule
         if (RequiredArgs is null)
             return missing;
 
-        foreach (var arg in RequiredArgs)
-            if (Args is null || !Args.TryGetValue(arg, out var value) || value is null ||
+        foreach (string arg in RequiredArgs)
+        {
+            if (Args is null || !Args.TryGetValue(arg, out object value) || value is null ||
                 (value is string text && string.IsNullOrWhiteSpace(text)))
                 missing.Add(arg);
+        }
 
         return missing;
     }
@@ -168,7 +172,7 @@ public abstract class CustomModule
     /// <returns></returns>
     public object TryGetValue(string param, object def = null)
     {
-        return Args is not null && Args.TryGetValue(param, out var value) ? value : def;
+        return Args is not null && Args.TryGetValue(param, out object value) ? value : def;
     }
 
     /// <summary>
@@ -179,7 +183,7 @@ public abstract class CustomModule
     /// <returns></returns>
     public string TryGetStringValue(string param, string def = null)
     {
-        return StringArgs.TryGetValue(param, out var value) ? value : def;
+        return StringArgs.TryGetValue(param, out string value) ? value : def;
     }
 
     /// <summary>
@@ -194,15 +198,15 @@ public abstract class CustomModule
     {
         ArgKey key = new(param, typeof(T));
 
-        if (_castedValues.TryGetValue(key, out var cached))
+        if (_castedValues.TryGetValue(key, out object cached))
             return (T)cached;
 
-        if (_unconvertibleValues.Contains(key) || Args is null || !Args.TryGetValue(param, out var value))
+        if (_unconvertibleValues.Contains(key) || Args is null || !Args.TryGetValue(param, out object value))
             return def;
 
         try
         {
-            var converted = (T)Convert.ChangeType(value, typeof(T));
+            T converted = (T)Convert.ChangeType(value, typeof(T));
             _castedValues[key] = converted;
             return converted;
         }
@@ -224,10 +228,10 @@ public abstract class CustomModule
     {
         ArgKey key = new(param, typeof(T));
 
-        if (_castedLists.TryGetValue(key, out var cached))
+        if (_castedLists.TryGetValue(key, out object cached))
             return (List<T>)cached;
 
-        var list = BuildCastedList<T>(param);
+        List<T> list = BuildCastedList<T>(param);
         _castedLists[key] = list;
 
         return list;
@@ -235,7 +239,7 @@ public abstract class CustomModule
 
     private List<T> BuildCastedList<T>(string param)
     {
-        if (Args is null || !Args.TryGetValue(param, out var value) || value is null)
+        if (Args is null || !Args.TryGetValue(param, out object value) || value is null)
             return [];
         switch (value)
         {
@@ -246,10 +250,13 @@ public abstract class CustomModule
             case IEnumerable<T> enumT:
                 return enumT.ToList();
             case IEnumerable nonGenericEnum:
-                var result = nonGenericEnum is ICollection col ? new List<T>(col.Count) : new List<T>();
-                foreach (var o in nonGenericEnum)
+                List<T> result = nonGenericEnum is ICollection col ? new List<T>(col.Count) : new List<T>();
+                foreach (object o in nonGenericEnum)
+                {
                     if (TryConvertTo(o, out T converted))
                         result.Add(converted);
+                }
+
                 return result;
             default:
                 return TryConvertTo(value, out T single) ? [single] : [];
@@ -272,7 +279,7 @@ public abstract class CustomModule
 
     protected List<string> GetRawListEntries(string param)
     {
-        if (Args is null || !Args.TryGetValue(param, out var value) || value is null)
+        if (Args is null || !Args.TryGetValue(param, out object value) || value is null)
             return [];
 
         if (value is string s)
@@ -281,9 +288,12 @@ public abstract class CustomModule
         if (value is IEnumerable enumerable)
         {
             List<string> result = [];
-            foreach (var o in enumerable)
+            foreach (object o in enumerable)
+            {
                 if (o is not null)
                     result.Add(o.ToString());
+            }
+
             return result;
         }
 
@@ -293,15 +303,18 @@ public abstract class CustomModule
     protected List<string> GetInvalidEnumEntries<T>(string param) where T : struct
     {
         List<string> invalid = [];
-        foreach (var raw in GetRawListEntries(param))
+        foreach (string raw in GetRawListEntries(param))
+        {
             if (!Enum.TryParse(raw, true, out T _))
                 invalid.Add(raw);
+        }
+
         return invalid;
     }
 
     private static T ConvertTo<T>(object o)
     {
-        var type = typeof(T);
+        Type type = typeof(T);
         if (!type.IsEnum)
             return (T)Convert.ChangeType(o, type);
         if (o is string s)
@@ -320,20 +333,20 @@ public abstract class CustomModule
 #nullable enable
     internal static List<CustomModule> Load(List<object> modules, SummonedCustomRole summonedCustomRole)
     {
-        LogManager.Silent(
-            $"[CM Loader] Initialize loading for {summonedCustomRole}\nPreloaded {YamlFlagsHandler.Modules.Length} modules...");
+        LogManager.Silent($"[CM Loader] Initialize loading for {summonedCustomRole}\nPreloaded {YamlFlagsHandler.Modules.Length} modules...");
 
-        var data = YamlFlagsHandler.Decode(modules) ?? [];
+        List<KeyValuePair<string, Dictionary<string, object>?>> data = YamlFlagsHandler.Decode(modules) ?? [];
 
         List<CustomModule> mods = [];
 
-        foreach (var module in data)
+        foreach (KeyValuePair<string, Dictionary<string, object>?> module in data)
+        {
             if (InitializeCustomModule(module.Key, module.Value, YamlFlagsHandler.Modules, summonedCustomRole) is
                 { } mod)
                 mods.Add(mod);
+        }
 
-        LogManager.Debug(
-            $"Successfully loaded {mods.Count} CustomModules for player {summonedCustomRole.Player.Nickname}!");
+        LogManager.Debug($"Successfully loaded {mods.Count} CustomModules for player {summonedCustomRole.Player.Nickname}!");
 
         return mods;
     }
@@ -365,7 +378,7 @@ public abstract class CustomModule
         {
             LogManager.Silent($"[CM Loader] Initialize loading module '{name}' for {summonedCustomRole}");
 
-            var type = types.FirstOrDefault(t => string.Equals(t.Name, name, StringComparison.OrdinalIgnoreCase));
+            Type? type = types.FirstOrDefault(t => string.Equals(t.Name, name, StringComparison.OrdinalIgnoreCase));
 
             if (type is null)
             {
@@ -396,8 +409,7 @@ public abstract class CustomModule
         }
         catch (Exception e)
         {
-            LogManager.Error(
-                $"[CM Loader] Unexpected error while enabling CustomModule '{name}' on role {RoleLabel(summonedCustomRole)}:\n{e}");
+            LogManager.Error($"[CM Loader] Unexpected error while enabling CustomModule '{name}' on role {RoleLabel(summonedCustomRole)}:\n{e}");
 
             return null;
         }
@@ -405,7 +417,7 @@ public abstract class CustomModule
 
     private static bool ValidateModule(CustomModule module, string name, SummonedCustomRole role)
     {
-        var missing = module.GetMissingArgs();
+        List<string> missing = module.GetMissingArgs();
 
         if (missing.Count > 0)
         {
@@ -416,7 +428,7 @@ public abstract class CustomModule
             return false;
         }
 
-        if (!module.Validate(out var error))
+        if (!module.Validate(out string? error))
         {
             LogManager.Error(
                 $"[CM Loader] CustomModule '{name}' on role {RoleLabel(role)} has an invalid setting: {error}\n" +

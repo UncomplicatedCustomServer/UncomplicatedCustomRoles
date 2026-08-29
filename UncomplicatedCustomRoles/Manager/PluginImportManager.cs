@@ -16,7 +16,7 @@ internal static class PluginImportManager
     {
         try
         {
-            var assembly = Assembly.Load(File.ReadAllBytes(file));
+            Assembly assembly = Assembly.Load(File.ReadAllBytes(file));
 
             List.Add(assembly, file);
 
@@ -36,14 +36,15 @@ internal static class PluginImportManager
 
     private static void ImportCustomRoles(Assembly assembly)
     {
-        foreach (var type in assembly.GetTypes())
+        foreach (Type type in assembly.GetTypes())
+        {
             try
             {
-                var attribs = type.GetCustomAttributes(typeof(PluginCustomRole), false);
+                object[] attribs = type.GetCustomAttributes(typeof(PluginCustomRole), false);
                 if (attribs != null && attribs.Length > 0 && typeof(ICustomRole).IsAssignableFrom(type) &&
                     !type.IsAbstract && !type.IsInterface)
                 {
-                    var Role = Activator.CreateInstance(type) as ICustomRole;
+                    ICustomRole Role = Activator.CreateInstance(type) as ICustomRole;
 
                     CustomRole.Register(Role);
                     LogManager.Info($"CustomRole {Role} imported from external UCR Plugin {List[assembly]}");
@@ -51,9 +52,9 @@ internal static class PluginImportManager
             }
             catch (Exception e)
             {
-                LogManager.Error(
-                    $"Error while registering CustomRole from class by Attribute:\nType: {type.FullName} [{List[assembly]}]\nException: {e}");
+                LogManager.Error($"Error while registering CustomRole from class by Attribute:\nType: {type.FullName} [{List[assembly]}]\nException: {e}");
             }
+        }
     }
 
     private static void ImportCustomModules(Assembly assembly)

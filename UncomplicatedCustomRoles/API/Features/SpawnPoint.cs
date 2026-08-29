@@ -168,7 +168,7 @@ public class SpawnPoint
     /// <param name="player">The player to be spawned. Cannot be <c>null</c>.</param>
     public void Spawn(Player player)
     {
-        var room = Room;
+        Room room = Room;
 
         if (room is not null)
             player.Position = room.Position - CorrectLocation(room);
@@ -180,8 +180,7 @@ public class SpawnPoint
 
     public override string ToString()
     {
-        return
-            $"SpawnPoint '{Name}' at {(Room != null ? Room.GameObject.name.Replace("Christmas", "").Replace("Halloween", "") : "RoomWasNotFound")} ({Position} @ {RoomRotation}) [{HasRoom}]";
+        return $"SpawnPoint '{Name}' at {(Room != null ? Room.GameObject.name.Replace("Christmas", "").Replace("Halloween", "") : "RoomWasNotFound")} ({Position} @ {RoomRotation}) [{HasRoom}]";
     }
 
     /// <summary>

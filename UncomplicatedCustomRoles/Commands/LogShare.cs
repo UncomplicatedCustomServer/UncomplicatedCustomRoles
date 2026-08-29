@@ -44,10 +44,10 @@ internal class LogShare : ParentCommand
             return false;
         }
 
-        var Start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        long Start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         response = "Loading the JSON content to share with the developers...";
 
-        var online = arguments.Count < 1;
+        bool online = arguments.Count < 1;
 
         Timing.RunCoroutine(
             LogManager.SendReport(online, (status, content) => OnReportSent(status, content, online, Start)),
@@ -79,7 +79,7 @@ internal class LogShare : ParentCommand
         try
         {
             LogManager.Debug($"Received content: {content}");
-            var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(content);
+            Dictionary<string, JsonElement> data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(content);
             LogManager.Info(
                 $"Successfully shared the UCR logs with the developers!\nSend this Id to the developers: {data["id"].GetString()}\n\nTook {DateTimeOffset.Now.ToUnixTimeMilliseconds() - start}ms");
         }

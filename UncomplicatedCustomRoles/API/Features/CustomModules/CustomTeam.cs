@@ -20,18 +20,16 @@ public class CustomTeam : CustomModule
 
     internal bool IsSameTeam(CustomTeam other)
     {
-        return other is not null && !string.IsNullOrWhiteSpace(Team) &&
-               string.Equals(Team, other.Team, StringComparison.OrdinalIgnoreCase);
+        return other is not null && !string.IsNullOrWhiteSpace(Team) && string.Equals(Team, other.Team, StringComparison.OrdinalIgnoreCase);
     }
 
     internal static bool SameTeam(ReferenceHub first, ReferenceHub second)
     {
         return first is not null && second is not null && first != second &&
-               SummonedCustomRole.TryGet(first, out var firstRole) &&
+               SummonedCustomRole.TryGet(first, out SummonedCustomRole firstRole) &&
                firstRole.TryGetModule(out CustomTeam firstTeam) &&
-               SummonedCustomRole.TryGet(second, out var secondRole) &&
-               secondRole.TryGetModule(out CustomTeam secondTeam) &&
-               firstTeam.IsSameTeam(secondTeam);
+               SummonedCustomRole.TryGet(second, out SummonedCustomRole secondRole) &&
+               secondRole.TryGetModule(out CustomTeam secondTeam) && firstTeam.IsSameTeam(secondTeam);
     }
 
     public override bool Validate(out string error)

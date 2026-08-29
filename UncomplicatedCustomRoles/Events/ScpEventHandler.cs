@@ -6,6 +6,7 @@ using LabApi.Events.Handlers;
 using PlayerRoles;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
+using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
 
@@ -48,7 +49,7 @@ internal class ScpEventHandler : EventHandlerBase
         if (!ev.IsAllowed)
             return;
 
-        if (ev.Target.TryGetSummonedInstance(out var summonedInstance))
+        if (ev.Target.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
         {
             if (ev.Target.ReferenceHub.GetTeam() is Team.SCPs)
                 ev.IsAllowed = false;
@@ -63,7 +64,7 @@ internal class ScpEventHandler : EventHandlerBase
 
     public void OnResurrectingBody(Scp049ResurrectingBodyEventArgs ev)
     {
-        var Role = SpawnManager.DoEvaluateSpawnForPlayer(ev.Target, RoleTypeId.Scp0492);
+        ICustomRole Role = SpawnManager.DoEvaluateSpawnForPlayer(ev.Target, RoleTypeId.Scp0492);
         LogManager.Silent($"{ev.Target} recalled by {ev.Player}, found {Role?.Id} {Role?.Name}");
 
         if (Role is not null)
@@ -78,13 +79,13 @@ internal class ScpEventHandler : EventHandlerBase
         if (!ev.IsAllowed)
             return;
 
-        if (SummonedCustomRole.TryGet(ev.Player, out var role))
+        if (SummonedCustomRole.TryGet(ev.Player, out SummonedCustomRole role))
             ev.AllowPunishment = ev.Uses > role.Role.MaxScp330Candies;
     }
 
     public void OnProcessedInventoryItem(Scp914ProcessedInventoryItemEventArgs ev)
     {
-        if (ev.Player.TryGetSummonedInstance(out var summonedInstance) &&
+        if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) &&
             summonedInstance.TryGetModule(out ItemBan itemBan) && itemBan.Items.Contains(ev.Item.Type))
             ev.Player.DropItem(ev.Item);
     }

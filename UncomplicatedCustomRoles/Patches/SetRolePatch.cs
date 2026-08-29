@@ -41,7 +41,7 @@ internal class SetRolePatch
     private static void Prefix(PlayerRoleManager __instance, RoleTypeId targetId, RoleChangeReason reason,
         RoleSpawnFlags spawnFlags = RoleSpawnFlags.All, NetworkReader data = null)
     {
-        if (SummonedCustomRole.TryGet(__instance.Hub, out var role))
+        if (SummonedCustomRole.TryGet(__instance.Hub, out SummonedCustomRole role))
             role.Destroy();
     }
 
@@ -51,7 +51,7 @@ internal class SetRolePatch
             return;
 
         if (__instance.CurrentRole is HumanRole { UsesUnitNames: true } humanRole
-            && humanRole.Team.TryGetLatestUnitNameId(out var unitNameId))
+            && humanRole.Team.TryGetLatestUnitNameId(out byte unitNameId))
             humanRole.UnitNameId = unitNameId;
     }
 }

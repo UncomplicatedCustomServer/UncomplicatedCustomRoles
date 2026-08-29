@@ -84,7 +84,7 @@ public class SummonedCustomRole
         EventHandler = new CustomRoleEventHandler(this);
         List[Id] = this;
         _cachedListByPlayerId[player.PlayerId] = this;
-        if (_cachedCountByRoleId.TryGetValue(role.Id, out var count))
+        if (_cachedCountByRoleId.TryGetValue(role.Id, out int count))
             _cachedCountByRoleId[role.Id] = count + 1;
         else
             _cachedCountByRoleId[role.Id] = 1;
@@ -94,22 +94,25 @@ public class SummonedCustomRole
 
         // Appearance handling
         if (Appearance != RoleTypeId.None)
+        {
             Timing.CallDelayed(0.75f, () =>
             {
                 if (!_internalValid || Player is null || !Player.IsAlive)
                     return;
 
-                LogManager.Debug(
-                    $"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
+                LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
 
                 if (LabApiExtensions.IsAvailable)
                     LabApiExtensions.AddFakeRole(Player, Role.RoleAppearance);
                 else
+                {
                     Player.ChangeAppearance(Role.RoleAppearance, SpawnManager.LoadAppearanceAffectedPlayers(Player),
                         true);
+                }
 
                 CustomInfo.Role = Role.RoleAppearance.GetFullName();
             });
+        }
     }
 
     /// <summary>
@@ -200,8 +203,7 @@ public class SummonedCustomRole
     ///     Gets whether the current <see cref="SummonedCustomRole" /> implements a coroutine for handling basic plugin
     ///     features
     /// </summary>
-    public bool IsDefaultCoroutineRole =>
-        (Role.HumeShield?.Maximum ?? 0) > 0 && (Role.HumeShield?.RegenerationAmount ?? 0) > 0;
+    public bool IsDefaultCoroutineRole => (Role.HumeShield?.Maximum ?? 0) > 0 && (Role.HumeShield?.RegenerationAmount ?? 0) > 0;
 
     /// <summary>
     ///     Gets if the current SummonedCustomRole is valid or not
@@ -238,20 +240,20 @@ public class SummonedCustomRole
     {
         try
         {
-            var originalRole = Player.RoleBase as FpcStandardRoleBase;
+            FpcStandardRoleBase originalRole = Player.RoleBase as FpcStandardRoleBase;
 
             if (Role.Team is null)
                 return;
 
             if (originalRole is null)
             {
-                LogManager.Error(
-                    "Failed to evaluate RoleBase for SummonedCustomRole::EvaluateRoleBase() - originalRole is null");
+                LogManager.Error("Failed to evaluate RoleBase for SummonedCustomRole::EvaluateRoleBase() - originalRole is null");
                 return;
             }
 
             if (Role.Team is Team.SCPs)
                 // ReSharper disable once Unity.IncorrectMonoBehaviourInstantiation
+            {
                 _roleBase = new FpcStandardScp
                 {
                     _roleTypeId = Role.Role,
@@ -267,8 +269,10 @@ public class SummonedCustomRole
                     RoleAvatar = originalRole.RoleAvatar,
                     SpectatorModule = originalRole.SpectatorModule
                 };
+            }
             else
                 // ReSharper disable once Unity.IncorrectMonoBehaviourInstantiation
+            {
                 _roleBase = new HumanRole
                 {
                     _roleId = Role.Role,
@@ -286,6 +290,7 @@ public class SummonedCustomRole
                     RoleAvatar = originalRole.RoleAvatar,
                     SpectatorModule = originalRole.SpectatorModule
                 };
+            }
 
             DisguiseTeam.Set(Player.PlayerId, Role.Team ?? Role.Role.GetTeam(), _roleBase);
 
@@ -310,8 +315,8 @@ public class SummonedCustomRole
     /// <returns></returns>
     private bool EvaluateCustomActions()
     {
-        var _result = true;
-        foreach (var func in CustomActions)
+        bool _result = true;
+        foreach (Func<SummonedCustomRole, bool> func in CustomActions)
             _result &= func(this);
         return _result;
     }
@@ -338,10 +343,10 @@ public class SummonedCustomRole
         if (!List.TryRemove(Id, out _))
             return;
 
-        if (_cachedListByPlayerId.TryGetValue(_playerId, out var cached) && cached == this)
+        if (_cachedListByPlayerId.TryGetValue(_playerId, out SummonedCustomRole cached) && cached == this)
             _cachedListByPlayerId.TryRemove(_playerId, out _);
 
-        if (_cachedCountByRoleId.TryGetValue(Role.Id, out var count) && count > 0)
+        if (_cachedCountByRoleId.TryGetValue(Role.Id, out int count) && count > 0)
         {
             count--;
             if (count == 0)
@@ -363,7 +368,7 @@ public class SummonedCustomRole
     {
         try
         {
-            foreach (var module in _customModules.ToArray())
+            foreach (CustomModule module in _customModules.ToArray())
             {
                 module.OnRemoved();
                 _customModules.Remove(module);
@@ -401,13 +406,17 @@ public class SummonedCustomRole
             {
                 // Reset ammo limit
                 if (Role.Ammo is { Count: > 0 })
-                    foreach (var ammo in Role.Ammo.Keys)
+                {
+                    foreach (ItemType ammo in Role.Ammo.Keys)
                         Player.ResetAmmoLimit(ammo);
+                }
 
                 // Reset category limit
                 if (Role.CustomInventoryLimits is { Count: > 0 })
-                    foreach (var category in Role.CustomInventoryLimits.Keys)
+                {
+                    foreach (ItemCategory category in Role.CustomInventoryLimits.Keys)
                         Player.ResetCategoryLimit(category);
+                }
 
                 // Clear the custom info last so nothing re-applies it afterwards
                 CustomInfo.SuppressExternalSync = true;
@@ -444,8 +453,7 @@ public class SummonedCustomRole
         }
         catch (Exception e)
         {
-            LogManager.Error(
-                $"Failed to act SummonedCustomRole::Remove(detached: {detached}) - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
+            LogManager.Error($"Failed to act SummonedCustomRole::Remove(detached: {detached}) - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
         }
 
         EventHandler?.Unload();
@@ -457,7 +465,7 @@ public class SummonedCustomRole
 
         _customModules.Clear();
 
-        var wasValid = _internalValid;
+        bool wasValid = _internalValid;
         _internalValid = false;
 
         if (wasValid)
@@ -617,7 +625,7 @@ public class SummonedCustomRole
         if (player is null)
             return null;
 
-        if (_cachedListByPlayerId.TryGetValue(player.PlayerId, out var role))
+        if (_cachedListByPlayerId.TryGetValue(player.PlayerId, out SummonedCustomRole role))
             return role;
 
         return null;
@@ -633,7 +641,7 @@ public class SummonedCustomRole
         if (player is null)
             return null;
 
-        if (_cachedListByPlayerId.TryGetValue(player.PlayerId, out var role))
+        if (_cachedListByPlayerId.TryGetValue(player.PlayerId, out SummonedCustomRole role))
             return role;
 
         return null;
@@ -646,7 +654,7 @@ public class SummonedCustomRole
     /// <returns></returns>
     public static SummonedCustomRole Get(string id)
     {
-        return id is not null && List.TryGetValue(id, out var role) ? role : null;
+        return id is not null && List.TryGetValue(id, out SummonedCustomRole role) ? role : null;
     }
 
     /// <summary>
@@ -685,7 +693,7 @@ public class SummonedCustomRole
     /// <returns></returns>
     public static int Count(ICustomRole role)
     {
-        return _cachedCountByRoleId.TryGetValue(role.Id, out var count) ? count : 0;
+        return _cachedCountByRoleId.TryGetValue(role.Id, out int count) ? count : 0;
     }
 
     /// <summary>
@@ -695,7 +703,7 @@ public class SummonedCustomRole
     /// <returns></returns>
     public static int Count(int id)
     {
-        return _cachedCountByRoleId.TryGetValue(id, out var count) ? count : 0;
+        return _cachedCountByRoleId.TryGetValue(id, out int count) ? count : 0;
     }
 
     /// <summary>
@@ -723,7 +731,7 @@ public class SummonedCustomRole
     /// <returns></returns>
     public static bool TryPatchCustomRole(ReferenceHub player, out Team team)
     {
-        if (player is not null && TryGet(player, out var customRole) && customRole.Role.Team is not null &&
+        if (player is not null && TryGet(player, out SummonedCustomRole customRole) && customRole.Role.Team is not null &&
             customRole.Role.Team != customRole.Role.Role.GetTeam())
         {
             team = (Team)customRole.Role.Team;
@@ -743,7 +751,7 @@ public class SummonedCustomRole
     /// <returns></returns>
     public static bool TryPatchRoleBase(ReferenceHub player, out PlayerRoleBase roleBase)
     {
-        if (player is not null && TryGet(player, out var customRole) && customRole._roleBase is not null)
+        if (player is not null && TryGet(player, out SummonedCustomRole customRole) && customRole._roleBase is not null)
         {
             roleBase = customRole._roleBase;
             return true;
@@ -762,7 +770,7 @@ public class SummonedCustomRole
     /// <returns></returns>
     public static bool TryCheckForCustomTeam(ReferenceHub player, Team teamCheck, out bool result)
     {
-        if (TryPatchCustomRole(player, out var customTeam))
+        if (TryPatchCustomRole(player, out Team customTeam))
         {
             result = customTeam == teamCheck;
             return true;
@@ -781,7 +789,7 @@ public class SummonedCustomRole
     /// <returns></returns>
     public static Team TryGetCustomTeam(ReferenceHub player, Team? def = null)
     {
-        if (TryGet(player, out var customRole) && customRole.Role.Team is not null &&
+        if (TryGet(player, out SummonedCustomRole customRole) && customRole.Role.Team is not null &&
             customRole.Role.Team != customRole.Role.Role.GetTeam())
             return (Team)customRole.Role.Team;
 
@@ -796,31 +804,28 @@ public class SummonedCustomRole
     /// <returns></returns>
     public static void TryParseRemoteAdmin(ReferenceHub player, StringBuilder builder) //REF
     {
-        if (Plugin.HttpManager.Credits.TryGetValue(player.authManager.UserId, out var tag) &&
+        if (Plugin.HttpManager.Credits.TryGetValue(player.authManager.UserId, out Triplet<string, string, bool> tag) &&
             !string.IsNullOrEmpty(tag.First) && !string.IsNullOrEmpty(tag.Second))
         {
-            if (!SpawnManager.ColorMap.TryGetValue(tag.Second, out var tagColor))
+            if (!SpawnManager.ColorMap.TryGetValue(tag.Second, out string tagColor))
                 tagColor = "white";
 
             if (Plugin.HttpManager.IsJobRole.Contains(player.authManager.UserId))
-                builder.AppendLine(
-                    $"\nUCS Status: <color=#0b55b0><b>[UCS EMPLOYEE]</b></color> <color={tagColor}>{tag.First}</color>");
+                builder.AppendLine($"\nUCS Status: <color=#0b55b0><b>[UCS EMPLOYEE]</b></color> <color={tagColor}>{tag.First}</color>");
             else
-                builder.AppendLine(
-                    $"\nUCS Status: <color=#c9ad2c><b>[UCS CONTRIBUTOR]</b></color> <color={tagColor}>{tag.First}</color>");
+                builder.AppendLine($"\nUCS Status: <color=#c9ad2c><b>[UCS CONTRIBUTOR]</b></color> <color={tagColor}>{tag.First}</color>");
         }
 
-        if (TryGet(player, out var role))
+        if (TryGet(player, out SummonedCustomRole role))
         {
-            builder.AppendLine(
-                $"\n<size=26><color=#1780e3><b>UncomplicatedCustomRoles</b> v{Plugin.Instance.Version}</color></size>");
+            builder.AppendLine($"\n<size=26><color=#1780e3><b>UncomplicatedCustomRoles</b> v{Plugin.Instance.Version}</color></size>");
             builder.AppendLine(Info.BuildInfo(role.Role));
         }
     }
 
     internal static void ClearAll()
     {
-        foreach (var role in List.Values.ToArray())
+        foreach (SummonedCustomRole role in List.Values.ToArray())
             role.DestroyDetached();
 
         List.Clear();
@@ -831,11 +836,10 @@ public class SummonedCustomRole
 
     public static void RemoveSpecificRole(int id)
     {
-        foreach (var role in List.Values.Where(scr => scr.Role.Id == id))
+        foreach (SummonedCustomRole role in List.Values.Where(scr => scr.Role.Id == id))
         {
             role.Destroy();
-            role.Player.SendBroadcast(
-                "Your Custom Role has been <color=red>removed</color> as it has been removed from the list!", 6);
+            role.Player.SendBroadcast("Your Custom Role has been <color=red>removed</color> as it has been removed from the list!", 6);
         }
     }
 
@@ -844,10 +848,14 @@ public class SummonedCustomRole
     /// </summary>
     internal static void InfiniteEffectActor()
     {
-        foreach (var Role in List.Values)
+        foreach (SummonedCustomRole Role in List.Values)
+        {
             if (Role.InfiniteEffects.Any())
-                foreach (var Effect in Role.InfiniteEffects)
+            {
+                foreach (IEffect Effect in Role.InfiniteEffects)
                     Role.Player.ReferenceHub.ForceApplyEffect(Effect.EffectType, Effect.Intensity, float.MaxValue);
+            }
+        }
     }
 
     public override string ToString()

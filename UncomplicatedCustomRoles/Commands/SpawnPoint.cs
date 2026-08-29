@@ -58,7 +58,7 @@ internal class SpawnPoint : IUCRCommand
 
     public bool Executor(List<string> arguments, ICommandSender sender, out string response)
     {
-        var player = Player.Get(sender);
+        Player player = Player.Get(sender);
 
         if (player is null)
         {
@@ -71,7 +71,7 @@ internal class SpawnPoint : IUCRCommand
         if (arguments.Count == 0)
         {
             response = CommandHeader;
-            foreach (var command in SubCommands)
+            foreach (KeyValuePair<string, KeyValuePair<string, string>> command in SubCommands)
                 response += $"{command.Key} {command.Value.Key}-> {command.Value.Value}\n";
         }
         else
@@ -79,10 +79,9 @@ internal class SpawnPoint : IUCRCommand
             switch (arguments[0])
             {
                 case "list":
-                    response =
-                        $"{CommandHeader}Currently registered SpawnPoints ({SpawnPointInstance.List.Count}):\n";
+                    response = $"{CommandHeader}Currently registered SpawnPoints ({SpawnPointInstance.List.Count}):\n";
 
-                    foreach (var SpawnPoint in SpawnPointInstance.List)
+                    foreach (SpawnPointInstance SpawnPoint in SpawnPointInstance.List)
                         response += $"- {SpawnPoint}\n";
 
                     break;
@@ -112,7 +111,7 @@ internal class SpawnPoint : IUCRCommand
                         return false;
                     }
 
-                    if (SpawnPointInstance.TryGet(arguments[1], out var spawnPoint))
+                    if (SpawnPointInstance.TryGet(arguments[1], out SpawnPointInstance spawnPoint))
                     {
                         spawnPoint.Destroy();
                         response = SpawnPointManager.Save()
@@ -138,7 +137,7 @@ internal class SpawnPoint : IUCRCommand
                         return false;
                     }
 
-                    if (SpawnPointInstance.TryGet(arguments[1], out var spawn))
+                    if (SpawnPointInstance.TryGet(arguments[1], out SpawnPointInstance spawn))
                     {
                         response = "Teleporting to spawnpoint...";
                         spawn.Spawn(player);

@@ -84,6 +84,7 @@ internal static class TeamPatchManager
         lock (Sync)
         {
             if (_harmony is not null && IsPatched)
+            {
                 try
                 {
                     _harmony.UnpatchCategory(Plugin.Assembly, Category);
@@ -92,6 +93,7 @@ internal static class TeamPatchManager
                 {
                     LogManager.Error($"Failed to remove the dynamic team patches during shutdown: {e}");
                 }
+            }
 
             _harmony = null;
             IsPatched = false;

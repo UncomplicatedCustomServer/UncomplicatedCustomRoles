@@ -20,8 +20,7 @@ internal static class UCI
     public static readonly Assembly Assembly = DynamicInvoke.GetLabAPIAssembly("UncomplicatedCustomItems") ??
                                                DynamicInvoke.GetExiledAssembly("UncomplicatedCustomItems");
 
-    public static readonly Type SummonedCustomItem =
-        Assembly?.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem");
+    public static readonly Type SummonedCustomItem = Assembly?.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem");
 
     public static bool HasCustomItem(uint id, out object customItem)
     {
@@ -60,10 +59,12 @@ internal static class UCI
 
         try
         {
-            if (HasCustomItem(id, out var customItem) && customItem is not null)
+            if (HasCustomItem(id, out object customItem) && customItem is not null)
+            {
                 SummonedCustomItem?.GetConstructor([
                     Assembly.GetType("UncomplicatedCustomItems.API.Interfaces.ICustomItem"), typeof(Player)
                 ]).Invoke([customItem, player]);
+            }
         }
         catch (Exception e)
         {

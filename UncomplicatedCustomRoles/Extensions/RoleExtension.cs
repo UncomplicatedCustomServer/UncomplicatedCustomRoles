@@ -8,10 +8,12 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Collections.Generic;
 using Footprinting;
 using PlayerRoles;
 using PlayerRoles.FirstPersonControl;
 using Respawning.NamingRules;
+using UncomplicatedCustomRoles.Patches;
 using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Extensions;
@@ -40,7 +42,7 @@ public static class RoleExtension
 
     public static PlayerRoleBase GetRoleBase(this RoleTypeId roleType)
     {
-        return roleType.TryGetRoleBase(out var roleBase) ? roleBase : null;
+        return roleType.TryGetRoleBase(out PlayerRoleBase roleBase) ? roleBase : null;
     }
 
     public static bool TryGetRoleBase(this RoleTypeId roleType, out PlayerRoleBase roleBase)
@@ -57,18 +59,25 @@ public static class RoleExtension
     {
         unitNameId = 0;
 
-        if (!NamingRulesManager.TryGetNamingRule(team, out _) ||
-            !NamingRulesManager.GeneratedNames.TryGetValue(team, out var names) || names.Count is 0)
+        if (!NamingRulesManager.TryGetNamingRule(team, out _))
             return false;
 
-        unitNameId = (byte)Mathf.Min(names.Count - 1, byte.MaxValue);
+        int count = NamingRulesManager.GeneratedNames.TryGetValue(team, out List<string> names) ? names.Count : 0;
+
+        if (PendingUnitNames.IsInFlight(team, count))
+            count++;
+
+        if (count is 0)
+            return false;
+
+        unitNameId = (byte)Mathf.Min(count - 1, byte.MaxValue);
         return true;
     }
 
     public static Vector3 GetRandomSpawnLocation(this RoleTypeId roleType)
     {
         if (roleType.TryGetRoleBase(out FpcStandardRoleBase fpcRole) && fpcRole.SpawnpointHandler != null &&
-            fpcRole.SpawnpointHandler.TryGetSpawnpoint(out var position, out var horizontalRotation))
+            fpcRole.SpawnpointHandler.TryGetSpawnpoint(out Vector3 position, out float horizontalRotation))
             return position;
 
         return Vector3.zero;

@@ -97,7 +97,7 @@ internal class SpawnManager
 
     public static void ClearCustomTypes(Player player)
     {
-        if (SummonedCustomRole.TryGet(player, out var role))
+        if (SummonedCustomRole.TryGet(player, out SummonedCustomRole role))
             role.Destroy();
     }
 
@@ -111,7 +111,7 @@ internal class SpawnManager
     {
         try
         {
-            if (!CustomRole.CustomRoles.TryGetValue(id, out var Role) || Role is null)
+            if (!CustomRole.CustomRoles.TryGetValue(id, out ICustomRole Role) || Role is null)
             {
                 LogManager.Warn(
                     $"Sorry but the role with the Id {id} is not registered inside UncomplicatedCustomRoles!",
@@ -134,7 +134,7 @@ internal class SpawnManager
                 return;
             }
 
-            var spawningArgs = new CustomRoleSpawningEventArgs(player, Role);
+            CustomRoleSpawningEventArgs spawningArgs = new(player, Role);
             CustomRoleEvents.OnSpawning(spawningArgs);
             if (!spawningArgs.IsAllowed)
             {
@@ -146,9 +146,9 @@ internal class SpawnManager
             // This will allow us to avoid the loop of another OnSpawning
             Spawn.Spawning.Add(player.PlayerId);
 
-            var BasicPosition = player.Position;
+            Vector3 BasicPosition = player.Position;
 
-            var SpawnFlag = RoleSpawnFlags.None;
+            RoleSpawnFlags SpawnFlag = RoleSpawnFlags.None;
 
             if (Role.SpawnSettings.Spawn == SpawnType.KeepRoleSpawn)
                 SpawnFlag = RoleSpawnFlags.UseSpawnpoint;
@@ -167,6 +167,7 @@ internal class SpawnManager
                 player.Position = BasicPosition;
 
             if (SpawnFlag == RoleSpawnFlags.None)
+            {
                 switch (Role.SpawnSettings.Spawn)
                 {
                     case SpawnType.ZoneSpawn:
@@ -178,8 +179,8 @@ internal class SpawnManager
                             break;
                         }
 
-                        var zone = Role.SpawnSettings.SpawnZones.RandomItem();
-                        var zoneRoom = Room.List.Where(room =>
+                        FacilityZone zone = Role.SpawnSettings.SpawnZones.RandomItem();
+                        Room zoneRoom = Room.List.Where(room =>
                             room.Zone == zone && room.GameObject.GetComponentInChildren<TeslaGate>() is null &&
                             room.Name is not RoomName.EzEvacShelter).RandomValue();
 
@@ -194,7 +195,7 @@ internal class SpawnManager
                         player.Position = zoneRoom.Position.AddY(1.5f);
                         break;
                     case SpawnType.CompleteRandomSpawn:
-                        var randomRoom = Room.List
+                        Room randomRoom = Room.List
                             .Where(room => room.GameObject.GetComponentInChildren<TeslaGate>() is null).RandomValue();
 
                         if (randomRoom is null)
@@ -214,15 +215,14 @@ internal class SpawnManager
                             break;
                         }
 
-                        var roomType = Role.SpawnSettings.SpawnRooms.RandomItem();
+                        string roomType = Role.SpawnSettings.SpawnRooms.RandomItem();
 
-                        var room = Room.List.Where(r =>
+                        Room room = Room.List.Where(r =>
                             r is not null && r.GameObject.name.RemoveBracketsOnEndOfName() == roomType).RandomValue();
 
                         if (room is null)
                         {
-                            LogManager.Error("Failed to load room with Room Name " + roomType +
-                                             "!\nMake sure it exists!");
+                            LogManager.Error("Failed to load room with Room Name " + roomType + "!\nMake sure it exists!");
                             player.Position = BasicPosition;
                             break;
                         }
@@ -232,7 +232,7 @@ internal class SpawnManager
                         break;
                     case SpawnType.SpawnPointSpawn:
                         if (Role.SpawnSettings.SpawnPoints is not null && Role.SpawnSettings.SpawnPoints.Count > 0 &&
-                            SpawnPoint.TryGet(Role.SpawnSettings.SpawnPoints.RandomItem(), out var spawn))
+                            SpawnPoint.TryGet(Role.SpawnSettings.SpawnPoints.RandomItem(), out SpawnPoint spawn))
                         {
                             spawn.Spawn(player);
                         }
@@ -256,10 +256,11 @@ internal class SpawnManager
                             break;
                         }
 
-                        var roleSpawn = Role.SpawnSettings.SpawnRoles.RandomItem().GetRandomSpawnLocation();
+                        Vector3 roleSpawn = Role.SpawnSettings.SpawnRoles.RandomItem().GetRandomSpawnLocation();
                         player.Position = roleSpawn != Vector3.zero ? roleSpawn : BasicPosition;
                         break;
                 }
+            }
 
             SummonSubclassApplier(player, Role, true);
         }
@@ -284,7 +285,7 @@ internal class SpawnManager
         {
             if (!spawningEventAlreadyFired)
             {
-                var spawningArgs = new CustomRoleSpawningEventArgs(Player, Role);
+                CustomRoleSpawningEventArgs spawningArgs = new(Player, Role);
                 CustomRoleEvents.OnSpawning(spawningArgs);
                 if (!spawningArgs.IsAllowed)
                 {
@@ -295,14 +296,19 @@ internal class SpawnManager
             }
 
             if (Role.CustomInventoryLimits is { Count: > 0 } inventoryLimits)
-                foreach (var category in inventoryLimits)
+            {
+                foreach (KeyValuePair<ItemCategory, sbyte> category in inventoryLimits)
                     Player.SetCategoryLimit(category.Key, category.Value);
+            }
 
             Player.ResetInventory(Role.Inventory);
 
             if (Role.CustomItemsInventory is { Count: > 0 })
-                foreach (var itemId in Role.CustomItemsInventory)
+            {
+                foreach (uint itemId in Role.CustomItemsInventory)
+                {
                     if (!Player.IsInventoryFull)
+                    {
                         try
                         {
                             if (UCI.HasCustomItem(itemId, out _))
@@ -318,45 +324,49 @@ internal class SpawnManager
                         }
                         catch (Exception ex)
                         {
-                            LogManager.Error(
-                                $"Failed to give the custom item {itemId} to player {Player.PlayerId} ({Player.Nickname})! Exception: {ex}");
+                            LogManager.Error($"Failed to give the custom item {itemId} to player {Player.PlayerId} ({Player.Nickname})! Exception: {ex}");
                         }
+                    }
+                }
+            }
 
             Player.ClearAmmo();
 
             if (Role.Ammo is { Count: > 0 })
-                foreach (var Ammo in Role.Ammo)
+            {
+                foreach (KeyValuePair<ItemType, ushort> Ammo in Role.Ammo)
                 {
                     if (Ammo.Value > Player.GetAmmoLimit(Ammo.Key))
                         Player.SetAmmoLimit(Ammo.Key, Ammo.Value);
 
                     Player.AddAmmo(Ammo.Key, Ammo.Value);
                 }
+            }
 
-            if (PlayerEventHandler.RespawnInventoryQueue.TryRemove(Player.PlayerId, out var oldInventory))
+            if (PlayerEventHandler.RespawnInventoryQueue.TryRemove(Player.PlayerId, out Tuple<List<ItemType>, Dictionary<ItemType, ushort>, bool> oldInventory))
             {
                 if (!oldInventory.Item3)
                 {
                     Player.ClearInventory();
                     Player.ClearAmmo();
 
-                    foreach (var item in oldInventory.Item1)
+                    foreach (ItemType item in oldInventory.Item1)
                         Player.AddItem(item);
 
-                    foreach (var ammo in oldInventory.Item2)
+                    foreach (KeyValuePair<ItemType, ushort> ammo in oldInventory.Item2)
                         Player.Inventory.ServerAddAmmo(ammo.Key, ammo.Value);
                 }
                 else
                 {
-                    foreach (var item in oldInventory.Item1)
+                    foreach (ItemType item in oldInventory.Item1)
                         Pickup.Create(item, Player.Position)?.Spawn();
 
-                    foreach (var ammo in oldInventory.Item2)
+                    foreach (KeyValuePair<ItemType, ushort> ammo in oldInventory.Item2)
                         Pickup.Create(ammo.Key, Player.Position)?.Spawn();
                 }
             }
 
-            var InfoArea = Player.ReferenceHub.nicknameSync.Network_playerInfoToShow;
+            PlayerInfoArea InfoArea = Player.ReferenceHub.nicknameSync.Network_playerInfoToShow;
 
             // Apply every required stats
             Role.Health?.Apply(Player);
@@ -369,6 +379,7 @@ internal class SpawnManager
 
             List<IEffect> PermanentEffects = [];
             if (Role.Effects != null && Role.Effects.Any())
+            {
                 foreach (IEffect effect in Role.Effects)
                 {
                     if (effect.Duration < 0)
@@ -380,10 +391,10 @@ internal class SpawnManager
                         continue;
                     }
 
-                    LogManager.Debug(
-                        $"Enabling effect {effect.EffectType} to {Player.Nickname} for {effect.Duration} (i:{effect.Intensity})");
+                    LogManager.Debug($"Enabling effect {effect.EffectType} to {Player.Nickname} for {effect.Duration} (i:{effect.Intensity})");
                     Player.ReferenceHub.ForceApplyEffect(effect.EffectType, effect.Intensity, effect.Duration);
                 }
+            }
 
             LogManager.Silent($"Found {PermanentEffects.Count} permament effects");
 
@@ -403,23 +414,24 @@ internal class SpawnManager
                 Badge = new Triplet<string, string, bool>(Player.ReferenceHub.serverRoles.Network_myText ?? "",
                     Player.ReferenceHub.serverRoles.Network_myColor ?? "",
                     Player.ReferenceHub.serverRoles.HasBadgeHidden);
-                LogManager.Debug(
-                    $"Badge detected, putting {Role.BadgeName}@{Role.BadgeColor} to player {Player.PlayerId}");
+                LogManager.Debug($"Badge detected, putting {Role.BadgeName}@{Role.BadgeColor} to player {Player.PlayerId}");
 
                 Player.ReferenceHub.serverRoles.SetText(Role.BadgeName.Replace("@hidden", ""));
                 Player.ReferenceHub.serverRoles.SetColor(Role.BadgeColor);
 
                 if (Role.BadgeName.Contains("@hidden"))
+                {
                     if (Player.ReferenceHub.serverRoles.TryHideTag())
                         LogManager.Debug("Tag successfully hidden!");
+                }
             }
 
             // Changing nickname if needed
-            var ChangedNick = false;
+            bool ChangedNick = false;
             string appliedNick = null;
             if (Plugin.Instance.Config.AllowNicknameEdit && !string.IsNullOrEmpty(Role.Nickname))
             {
-                var Nick = PlaceholderManager.ApplyPlaceholders(Role.Nickname, Player, Role);
+                string Nick = PlaceholderManager.ApplyPlaceholders(Role.Nickname, Player, Role);
 
                 appliedNick = Role.Nickname.Contains(",") ? Nick.Split(',').RandomItem().Trim() : Nick;
                 Player.DisplayName = appliedNick;
@@ -432,8 +444,7 @@ internal class SpawnManager
 
             LogManager.Debug($"{Player} successfully spawned as {Role.Name} ({Role.Id})!");
 
-            SummonedCustomRole roleInstance =
-                new(Player, Role, Badge, PermanentEffects, InfoArea, customInfo, ChangedNick);
+            SummonedCustomRole roleInstance = new(Player, Role, Badge, PermanentEffects, InfoArea, customInfo, ChangedNick);
 
             roleInstance.AppliedNickname = appliedNick;
 
@@ -443,13 +454,15 @@ internal class SpawnManager
             customInfo.UpdateInfo(Player);
 
             if (appliedNick is not null && Plugin.Instance.Config.OverrideRpNames)
+            {
                 roleInstance.NicknameReapplyCoroutine = Timing.CallDelayed(3f, () =>
                 {
                     if (roleInstance.IsValid && SummonedCustomRole.Get(roleInstance.Player) == roleInstance)
                         roleInstance.Player.DisplayName = appliedNick;
                 });
+            }
 
-            var escapeController = Player.GameObject.AddComponent<EscapeController>();
+            EscapeController escapeController = Player.GameObject.AddComponent<EscapeController>();
             escapeController.Init(roleInstance);
 
             if (Spawn.Spawning.Contains(Player.PlayerId))
@@ -477,16 +490,16 @@ internal class SpawnManager
         Dictionary<int, KeyValuePair<bool, object>?> AsCuffedByCustomRole = new();
         KeyValuePair<bool, object>? Default = new(false, RoleTypeId.Spectator);
 
-        foreach (var kvp in roleAfterEscape)
+        foreach (KeyValuePair<string, string> kvp in roleAfterEscape)
         {
-            var Data = ParseEscapeString(kvp.Value);
+            KeyValuePair<bool, object>? Data = ParseEscapeString(kvp.Value);
             if (kvp.Key is "default")
             {
                 Default = Data;
             }
             else
             {
-                var Elements = kvp.Key.Split(' ');
+                string[] Elements = kvp.Key.Split(' ');
 
                 if (Elements.Length != 4 || Elements[0] is not "cuffed" || Elements[1] is not "by")
                 {
@@ -498,14 +511,16 @@ internal class SpawnManager
                 if ((Elements[2] is "InternalTeam" || Elements[2] is "IT") && Enum.TryParse(Elements[3], out Team team))
                     AsCuffedByInternalTeam.TryAdd(team, Data);
                 else if ((Elements[2] is "CustomTeam" || Elements[2] is "CT") &&
-                         uint.TryParse(Elements[3], out var customTeam))
+                         uint.TryParse(Elements[3], out uint customTeam))
                     AsCuffedByCustomTeam.TryAdd(customTeam, Data);
                 else if ((Elements[2] is "CustomRole" || Elements[2] is "CR") &&
-                         int.TryParse(Elements[3], out var id) && CustomRole.CustomRoles.ContainsKey(id))
+                         int.TryParse(Elements[3], out int id) && CustomRole.CustomRoles.ContainsKey(id))
                     AsCuffedByCustomRole.TryAdd(id, Data);
                 else
+                {
                     LogManager.Warn(
                         $"Function SpawnManager::ParseEscapeRole[2](<...>) failed!\nPossible causes can be:\n- The source is not valid. Allowed: InternalTeam / IT / CustomRole / CR. Found: {Elements[2]}\n- The target is not a CustomRole / InternalRole. Found: {Elements[3]}");
+                }
             }
         }
 
@@ -513,17 +528,18 @@ internal class SpawnManager
         if (!player.IsDisarmed)
             return Default;
         if (player.IsDisarmed && player.DisarmedBy is not null)
-            if (player.DisarmedBy.TryGetSummonedInstance(out var role) &&
-                AsCuffedByCustomRole.TryGetValue(role.Role.Id, out var crEscapeRole))
+        {
+            if (player.DisarmedBy.TryGetSummonedInstance(out SummonedCustomRole role) &&
+                AsCuffedByCustomRole.TryGetValue(role.Role.Id, out KeyValuePair<bool, object>? crEscapeRole))
                 return crEscapeRole;
-            else if (UCT.TryGetCustomTeamId(player.DisarmedBy, out var uctTeamId) &&
-                     AsCuffedByCustomTeam.TryGetValue(uctTeamId, out var uctEscapeRole))
+            else if (UCT.TryGetCustomTeamId(player.DisarmedBy, out uint uctTeamId) &&
+                     AsCuffedByCustomTeam.TryGetValue(uctTeamId, out KeyValuePair<bool, object>? uctEscapeRole))
                 return uctEscapeRole;
-            else if (AsCuffedByInternalTeam.TryGetValue(player.DisarmedBy.Team, out var internalEscapeRole))
+            else if (AsCuffedByInternalTeam.TryGetValue(player.DisarmedBy.Team, out KeyValuePair<bool, object>? internalEscapeRole))
                 return internalEscapeRole;
+        }
 
-        LogManager.Silent(
-            $"Returing default type for escaping evaluation of player {player.PlayerId} who's cuffed by {player.DisarmedBy?.Team}");
+        LogManager.Silent($"Returing default type for escaping evaluation of player {player.PlayerId} who's cuffed by {player.DisarmedBy?.Team}");
         return Default;
     }
 
@@ -532,7 +548,7 @@ internal class SpawnManager
         if (escape is "Deny" or "deny" or "DENY")
             return null;
 
-        var Elements = escape.Split(' ').ToList();
+        List<string> Elements = escape.Split(' ').ToList();
         if (Elements.Count != 2)
         {
             LogManager.Warn(
@@ -540,7 +556,7 @@ internal class SpawnManager
             return new KeyValuePair<bool, object>(false, RoleTypeId.Spectator);
         }
 
-        if ((Elements[0] is "CustomRole" || Elements[0] is "CR") && int.TryParse(Elements[1], out var customRoleId))
+        if ((Elements[0] is "CustomRole" || Elements[0] is "CR") && int.TryParse(Elements[1], out int customRoleId))
             return new KeyValuePair<bool, object>(true, customRoleId);
         if ((Elements[0] is "InternalRole" || Elements[0] is "IR") && Enum.TryParse(Elements[1], out RoleTypeId role))
             return new KeyValuePair<bool, object>(false, role);
@@ -558,7 +574,7 @@ internal class SpawnManager
         if (role is null)
             return null;
 
-        var NewRole = (RoleTypeId)role;
+        RoleTypeId NewRole = (RoleTypeId)role;
 
         if (player.HasCustomRole())
         {
@@ -569,10 +585,11 @@ internal class SpawnManager
         if (!SpawnEvaluatedRoles.Contains(NewRole))
             return null;
 
-        var readyPlayers = Player.ReadyList.Count();
+        int readyPlayers = Player.ReadyList.Count();
         List<ICustomRole> candidates = [];
 
-        foreach (var Role in CustomRole.CustomRoles.Values)
+        foreach (ICustomRole Role in CustomRole.CustomRoles.Values)
+        {
             if (Role.SpawnSettings is not null && !Role.IgnoreSpawnSystem && Role.SpawnSettings.SpawnDelay <= 0 &&
                 Role.SpawnSettings.CanReplaceRoles is { } canReplaceRoles && canReplaceRoles.Contains(NewRole) &&
                 readyPlayers >= Role.SpawnSettings.MinPlayers &&
@@ -581,9 +598,10 @@ internal class SpawnManager
                 if (!HasRequiredPermission(player, Role))
                     continue;
 
-                for (var a = 0; a < Role.SpawnSettings.SpawnChance; a++)
+                for (int a = 0; a < Role.SpawnSettings.SpawnChance; a++)
                     candidates.Add(Role);
             }
+        }
 
         if (candidates.Count > 0 && Random.Range(0, 100) < candidates.Count)
             return candidates.RandomItem();
@@ -612,11 +630,11 @@ internal class SpawnManager
                     return [s];
                 case IEnumerable enumerable:
                 {
-                    var list = new List<string>();
-                    foreach (var item in enumerable)
+                    List<string> list = new();
+                    foreach (object? item in enumerable)
                     {
                         if (item is null) continue;
-                        var s = item.ToString();
+                        string s = item.ToString();
                         if (!string.IsNullOrWhiteSpace(s)) list.Add(s);
                     }
 
@@ -627,7 +645,7 @@ internal class SpawnManager
             }
         }
 
-        var permsList = ExtractPermissions(role.SpawnSettings.RequiredPermission).ToList();
+        List<string> permsList = ExtractPermissions(role.SpawnSettings.RequiredPermission).ToList();
         if (!permsList.Any())
             return true;
 
@@ -641,11 +659,12 @@ internal class SpawnManager
 
     public static void AnnounceScpTermination(ReferenceHub scp, DamageHandlerBase hit)
     {
-        var announcement1 = hit.CassieDeathAnnouncement.Announcement;
-        var subtitleParts1 = hit.CassieDeathAnnouncement.SubtitleParts;
+        string announcement1 = hit.CassieDeathAnnouncement.Announcement;
+        SubtitlePart[] subtitleParts1 = hit.CassieDeathAnnouncement.SubtitleParts;
         if (string.IsNullOrEmpty(announcement1))
             return;
-        foreach (var cassieAnnouncement in CassieAnnouncementDispatcher.AllAnnouncementsPreview)
+        foreach (CassieAnnouncement? cassieAnnouncement in CassieAnnouncementDispatcher.AllAnnouncementsPreview)
+        {
             if (cassieAnnouncement is CassieScpTerminationAnnouncement terminationAnnouncement &&
                 terminationAnnouncement._announcementTts == announcement1 &&
                 SubtitlePart.CheckEqualValues(terminationAnnouncement._subtitles, subtitleParts1))
@@ -654,24 +673,26 @@ internal class SpawnManager
                 terminationAnnouncement._remainingWait = 1f;
                 return;
             }
+        }
 
-        var ev = new CassieQueuingScpTerminationEventArgs(scp, announcement1, subtitleParts1, hit);
+        CassieQueuingScpTerminationEventArgs ev = new(scp, announcement1, subtitleParts1, hit);
         ServerEvents.OnCassieQueuingScpTermination(ev);
         if (!ev.IsAllowed)
             return;
-        var announcement2 = ev.Announcement;
-        var subtitleParts2 = ev.SubtitleParts;
+        string announcement2 = ev.Announcement;
+        SubtitlePart[] subtitleParts2 = ev.SubtitleParts;
         new CassieScpTerminationAnnouncement(new Footprint(scp), announcement2, subtitleParts2).AddToQueue();
-        ServerEvents.OnCassieQueuedScpTermination(
-            new CassieQueuedScpTerminationEventArgs(scp, announcement2, subtitleParts2, hit));
+        ServerEvents.OnCassieQueuedScpTermination(new CassieQueuedScpTerminationEventArgs(scp, announcement2, subtitleParts2, hit));
     }
 
     internal static IEnumerable<Player> LoadAppearanceAffectedPlayers(Player target)
     {
         List<Player> result = [];
-        foreach (var player in Player.ReadyList.Where(p => p.PlayerId != target.PlayerId))
-            if (!player.TryGetSummonedInstance(out var role) || !role.HasModule<NotAffectedByAppearance>())
+        foreach (Player? player in Player.ReadyList.Where(p => p.PlayerId != target.PlayerId))
+        {
+            if (!player.TryGetSummonedInstance(out SummonedCustomRole? role) || !role.HasModule<NotAffectedByAppearance>())
                 result.Add(player);
+        }
 
         return result;
     }

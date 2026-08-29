@@ -11,6 +11,7 @@
 using HarmonyLib;
 using InventorySystem.Configs;
 using InventorySystem.Items.Armor;
+using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
 
@@ -22,7 +23,7 @@ internal static class CategoryLimitByHubPatch
 {
     private static void Postfix(ItemCategory category, ReferenceHub player, ref sbyte __result)
     {
-        if (TryGetCustomLimit(player, category, out var limit))
+        if (TryGetCustomLimit(player, category, out sbyte limit))
             __result = limit;
     }
 
@@ -33,7 +34,7 @@ internal static class CategoryLimitByHubPatch
         if (player is null)
             return false;
 
-        if (player.TryGetSummonedInstance(out var role) &&
+        if (player.TryGetSummonedInstance(out SummonedCustomRole role) &&
             role.Role.CustomInventoryLimits is { Count: > 0 } limits && limits.TryGetValue(category, out limit))
             return true;
 
@@ -47,7 +48,7 @@ internal static class CategoryLimitByArmorPatch
 {
     private static void Postfix(BodyArmor armor, ItemCategory category, ref sbyte __result)
     {
-        if (armor is not null && CategoryLimitByHubPatch.TryGetCustomLimit(armor.Owner, category, out var limit))
+        if (armor is not null && CategoryLimitByHubPatch.TryGetCustomLimit(armor.Owner, category, out sbyte limit))
             __result = limit;
     }
 }

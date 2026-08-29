@@ -17,12 +17,13 @@ using UncomplicatedCustomRoles.API.Attributes;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Extensions;
+using LabApiPlugin = LabApi.Loader.Features.Plugins.Plugin;
 
 namespace UncomplicatedCustomRoles.Manager;
 
 internal class ImportManager
 {
-    public static readonly List<LabApi.Loader.Features.Plugins.Plugin> ActivePlugins = [];
+    public static readonly List<LabApiPlugin> ActivePlugins = [];
 
     public static readonly List<Assembly> AvailableAssemblies = [];
 
@@ -58,25 +59,25 @@ internal class ImportManager
         if (!AvailableAssemblies.Contains(Plugin.Assembly))
             AvailableAssemblies.Add(Plugin.Assembly);
 
-        foreach (var plugin in PluginLoader.Plugins.Where(plugin => plugin.Key.Name != Plugin.Instance.Name))
+        foreach (KeyValuePair<LabApiPlugin, Assembly> plugin in PluginLoader.Plugins.Where(plugin => plugin.Key.Name != Plugin.Instance.Name))
         {
             if (!AvailableAssemblies.Contains(plugin.Value))
                 AvailableAssemblies.Add(plugin.Value);
             LogManager.Silent($"[Import Manager] Passing plugin {plugin.Key.Name}");
-            foreach (var type in plugin.Value.GetTypes())
+            foreach (Type type in plugin.Value.GetTypes())
+            {
                 try
                 {
-                    var attribs = type.GetCustomAttributes(typeof(PluginCustomRole), false);
+                    object[] attribs = type.GetCustomAttributes(typeof(PluginCustomRole), false);
                     if (attribs != null && attribs.Length > 0 && typeof(ICustomRole).IsAssignableFrom(type) &&
                         !type.IsAbstract && !type.IsInterface)
                     {
                         ActivePlugins.TryAdd(plugin.Key);
 
-                        var Role = Activator.CreateInstance(type) as ICustomRole;
+                        ICustomRole Role = Activator.CreateInstance(type) as ICustomRole;
 
                         CustomRole.Register(Role);
-                        LogManager.Info(
-                            $"CustomRole {Role} imported from external plugin {plugin.Key.Name} (v{plugin.Key.Version.ToString(3)})");
+                        LogManager.Info($"CustomRole {Role} imported from external plugin {plugin.Key.Name} (v{plugin.Key.Version.ToString(3)})");
                     }
                 }
                 catch (Exception e)
@@ -84,6 +85,7 @@ internal class ImportManager
                     LogManager.Error(
                         $"Error while registering CustomRole from class by Attribute:\nType: {type.FullName} [{plugin.Key.Name}]\nException: {e}");
                 }
+            }
         }
 
         YamlFlagsHandler.InvalidateCache();

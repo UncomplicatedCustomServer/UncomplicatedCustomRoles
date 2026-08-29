@@ -21,8 +21,8 @@ public class ColorfulRaName : CustomModule
 
     public override bool Validate(out string error)
     {
-        var raw = TryGetStringValue("color", string.Empty);
-        var hex = raw.StartsWith("#") ? raw : "#" + raw;
+        string raw = TryGetStringValue("color", string.Empty);
+        string hex = raw.StartsWith("#") ? raw : "#" + raw;
 
         if (!ColorUtility.TryParseHtmlString(hex, out _))
         {

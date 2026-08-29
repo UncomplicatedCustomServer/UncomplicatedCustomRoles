@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Text;
 using Discord;
 using LabApi.Features.Console;
 using LabApi.Loader.Features.Paths;
@@ -19,6 +20,7 @@ using LabApi.Loader.Features.Yaml;
 using MEC;
 using NorthwoodLib.Pools;
 using UncomplicatedCustomRoles.API.Features;
+using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.Manager;
@@ -79,18 +81,18 @@ internal class LogManager
             yield break;
         }
 
-        var builder = StringBuilderPool.Shared.Rent();
+        StringBuilder builder = StringBuilderPool.Shared.Rent();
 
-        foreach (var Element in History)
+        foreach (LogEntry Element in History)
             builder.Append($"{Element}\n");
 
         // Now let's add the separator
         builder.Append("\n======== BEGIN CUSTOM ROLES ========\n");
 
-        foreach (var Role in CustomRole.CustomRoles.Values)
+        foreach (ICustomRole Role in CustomRole.CustomRoles.Values)
             builder.Append($"{YamlConfigParser.Serializer.Serialize(Role)}\n\n---\n\n");
 
-        var report = StringBuilderPool.Shared.ToStringReturn(builder);
+        string report = StringBuilderPool.Shared.ToStringReturn(builder);
 
         if (!online)
         {

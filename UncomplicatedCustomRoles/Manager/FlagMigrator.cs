@@ -30,15 +30,15 @@ internal static class FlagMigrator
 
         string? order = null;
         string? nickColor = null;
-        var hasOrder = false;
-        var hasColor = false;
-        var hasNoUnit = false;
-        var hasInfoTag = false;
+        bool hasOrder = false;
+        bool hasColor = false;
+        bool hasNoUnit = false;
+        bool hasInfoTag = false;
         List<object> deprecated = [];
 
-        foreach (var flag in flags)
+        foreach (object flag in flags)
         {
-            var (name, args) = Parse(flag);
+            (string? name, Dictionary<string, object>? args) = Parse(flag);
             switch (name?.ToLowerInvariant())
             {
                 case "infotag":
@@ -47,13 +47,13 @@ internal static class FlagMigrator
                 case "custominfoorder":
                     hasOrder = true;
                     deprecated.Add(flag);
-                    if (args is not null && args.TryGetValue("order", out var o))
+                    if (args is not null && args.TryGetValue("order", out object? o))
                         order = o?.ToString();
                     break;
                 case "colorfulnickname":
                     hasColor = true;
                     deprecated.Add(flag);
-                    if (args is not null && args.TryGetValue("color", out var c))
+                    if (args is not null && args.TryGetValue("color", out object? c))
                         nickColor = c?.ToString();
                     break;
                 case "nounitname":
@@ -66,11 +66,11 @@ internal static class FlagMigrator
         if (deprecated.Count == 0)
             return;
 
-        var used = DeprecatedList(hasOrder, hasColor, hasNoUnit);
+        string used = DeprecatedList(hasOrder, hasColor, hasNoUnit);
 
         if (hasInfoTag)
         {
-            foreach (var flag in deprecated)
+            foreach (object flag in deprecated)
                 flags.Remove(flag);
 
             LogManager.Warn(
@@ -79,8 +79,8 @@ internal static class FlagMigrator
             return;
         }
 
-        var infoOrder = string.IsNullOrEmpty(order) ? InfoTagDefaultOrder : order!;
-        var infoArgs = new Dictionary<object, object>();
+        string infoOrder = string.IsNullOrEmpty(order) ? InfoTagDefaultOrder : order!;
+        Dictionary<object, object> infoArgs = new();
 
         if (hasNoUnit)
             infoArgs["show_unitname"] = false;
@@ -92,7 +92,7 @@ internal static class FlagMigrator
         if (hasColor && !string.IsNullOrEmpty(nickColor))
             infoArgs["nickname_color"] = nickColor!;
 
-        foreach (var flag in deprecated)
+        foreach (object flag in deprecated)
             flags.Remove(flag);
 
         flags.Add(new Dictionary<object, object> { ["InfoTag"] = infoArgs });
@@ -124,9 +124,9 @@ internal static class FlagMigrator
             case string s:
                 return (s, null);
             case Dictionary<object, object> d:
-                foreach (var kv in d)
+                foreach (KeyValuePair<object, object> kv in d)
                 {
-                    var args = kv.Value as Dictionary<object, object>;
+                    Dictionary<object, object>? args = kv.Value as Dictionary<object, object>;
                     return (kv.Key?.ToString(),
                         args?.ToDictionary(x => x.Key.ToString(), x => x.Value));
                 }
@@ -139,12 +139,12 @@ internal static class FlagMigrator
 
     private static string RenderYaml(Dictionary<object, object> infoArgs)
     {
-        var sb = new StringBuilder();
+        StringBuilder sb = new();
         sb.AppendLine("custom_flags:");
         sb.AppendLine("- InfoTag:");
-        foreach (var kv in infoArgs)
+        foreach (KeyValuePair<object, object> kv in infoArgs)
         {
-            var value = kv.Value is bool b ? b ? "true" : "false" : $"\"{kv.Value}\"";
+            string value = kv.Value is bool b ? b ? "true" : "false" : $"\"{kv.Value}\"";
             sb.AppendLine($"    {kv.Key}: {value}");
         }
 

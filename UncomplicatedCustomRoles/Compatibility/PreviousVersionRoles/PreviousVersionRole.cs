@@ -72,8 +72,7 @@ internal class PreviousVersionRole : IPreviousVersionRole
 
     public virtual Vector3 Scale { get; set; } = Vector3.one;
 
-    public virtual string SpawnBroadcast { get; set; } =
-        "You are a <color=orange><b>Janitor</b></color>!\nClean the Light Containment Zone!";
+    public virtual string SpawnBroadcast { get; set; } = "You are a <color=orange><b>Janitor</b></color>!\nClean the Light Containment Zone!";
 
     public virtual ushort SpawnBroadcastDuration { get; set; } = 5;
 
@@ -89,11 +88,7 @@ internal class PreviousVersionRole : IPreviousVersionRole
         }
     };
 
-    public virtual List<ItemType> Inventory { get; set; } =
-    [
-        ItemType.Flashlight,
-        ItemType.KeycardJanitor
-    ];
+    public virtual List<ItemType> Inventory { get; set; } = [ItemType.Flashlight, ItemType.KeycardJanitor];
 
     public virtual List<uint> CustomItemsInventory { get; set; } = [];
 
@@ -158,8 +153,10 @@ internal class PreviousVersionRole : IPreviousVersionRole
 
         List<object> flags = [];
         foreach (CustomFlags flag in Enum.GetValues(typeof(CustomFlags)))
+        {
             if ((CustomFlags & flag) == flag)
                 flags.Add(flag.ToString());
+        }
 
         flags.Remove("None");
         return flags;

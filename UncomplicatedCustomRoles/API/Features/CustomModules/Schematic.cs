@@ -40,7 +40,7 @@ internal class Schematic : CustomModule
             return;
         }
 
-        var controller = CustomRole.Player.GameObject.AddComponent<SchematicController>();
+        SchematicController controller = CustomRole.Player.GameObject.AddComponent<SchematicController>();
         controller.Init(TargetName);
     }
 

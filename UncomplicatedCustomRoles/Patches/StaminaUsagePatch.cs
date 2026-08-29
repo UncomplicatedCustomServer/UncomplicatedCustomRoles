@@ -10,6 +10,7 @@
 
 using HarmonyLib;
 using InventorySystem;
+using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.Patches;
@@ -19,7 +20,7 @@ public class StaminaUsagePatch
 {
     public static void Postfix(Inventory __instance, ref float __result)
     {
-        if (!__instance._hub.TryGetSummonedInstance(out var role))
+        if (!__instance._hub.TryGetSummonedInstance(out SummonedCustomRole role))
             return;
         __result *= role.Role.Stamina.Infinite ? 0 : role.Role.Stamina.UsageMultiplier;
     }
@@ -30,7 +31,7 @@ public class StaminaRegenPatch
 {
     public static void Postfix(Inventory __instance, ref float __result)
     {
-        if (!__instance._hub.TryGetSummonedInstance(out var role))
+        if (!__instance._hub.TryGetSummonedInstance(out SummonedCustomRole role))
             return;
         __result *= role.Role.Stamina.RegenMultiplier;
     }

@@ -9,6 +9,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using LabApi.Features.Wrappers;
@@ -48,13 +49,14 @@ public class InfoTag : CustomModule
 
     public override bool Validate(out string error)
     {
-        foreach (var (token, color, _) in Parts)
+        foreach ((string? token, string? color, bool _) in Parts)
+        {
             if (!string.IsNullOrWhiteSpace(color) && !InfoColors.TryResolve(color, out _))
             {
-                error =
-                    $"'{token}_color' '{color}' is not a colour the game allows on the name tag. Allowed names: {string.Join(", ", InfoColors.Names)} (or an accepted hex code).";
+                error = $"'{token}_color' '{color}' is not a colour the game allows on the name tag. Allowed names: {string.Join(", ", InfoColors.Names)} (or an accepted hex code).";
                 return false;
             }
+        }
 
         if (UnitFormat.Contains("[") || UnitFormat.Contains("]"))
         {
@@ -62,18 +64,19 @@ public class InfoTag : CustomModule
             return false;
         }
 
-        var tokens = TokenRegex.Matches(Order).Cast<Match>().Select(m => m.Groups[1].Value).ToList();
+        List<string> tokens = TokenRegex.Matches(Order).Cast<Match>().Select(m => m.Groups[1].Value).ToList();
 
-        var unknown = tokens.Where(t => !KnownTokens.Contains(t, StringComparer.OrdinalIgnoreCase)).Distinct()
+        List<string> unknown = tokens.Where(t => !KnownTokens.Contains(t, StringComparer.OrdinalIgnoreCase)).Distinct()
             .ToList();
         if (unknown.Count > 0)
+        {
             LogManager.Warn(
                 $"[CustomModule] InfoTag 'order' contains unknown token(s): {string.Join(", ", unknown.Select(t => $"%{t}%"))}; they will be shown as-is. Valid tokens: %custominfo%, %nickname%, %rolename%, %unitname%.");
+        }
 
         if (!tokens.Any(t => KnownTokens.Contains(t, StringComparer.OrdinalIgnoreCase)))
         {
-            error =
-                "'order' must contain at least one of %custominfo%, %nickname%, %rolename% or %unitname%; otherwise the name tag would show static text only.";
+            error = "'order' must contain at least one of %custominfo%, %nickname%, %rolename% or %unitname%; otherwise the name tag would show static text only.";
             return false;
         }
 
@@ -84,10 +87,10 @@ public class InfoTag : CustomModule
     internal string Compose(Player player, string customInfoText, string nickname, string roleName, string unitName,
         bool showUnit)
     {
-        var parts = Parts.ToDictionary(p => p.Token, p => (p.Color, p.Bold));
+        Dictionary<string, (string Color, bool Bold)> parts = Parts.ToDictionary(p => p.Token, p => (p.Color, p.Bold));
 
-        var template = Order.Replace("%%", "%\n%");
-        var result = TokenRegex.Replace(template, m => Render(m.Groups[1].Value.ToLowerInvariant()));
+        string template = Order.Replace("%%", "%\n%");
+        string result = TokenRegex.Replace(template, m => Render(m.Groups[1].Value.ToLowerInvariant()));
 
         result = MultiNewline.Replace(result, "\n").Trim('\n', ' ');
 
@@ -95,7 +98,7 @@ public class InfoTag : CustomModule
 
         string Render(string token)
         {
-            var content = token switch
+            string content = token switch
             {
                 "custominfo" => customInfoText,
                 "nickname" => string.IsNullOrEmpty(nickname) ? player.Nickname : nickname,
@@ -106,13 +109,13 @@ public class InfoTag : CustomModule
                 _ => $"%{token}%"
             };
 
-            if (string.IsNullOrEmpty(content) || !parts.TryGetValue(token, out var style))
+            if (string.IsNullOrEmpty(content) || !parts.TryGetValue(token, out (string Color, bool Bold) style))
                 return content;
 
             if (style.Bold)
                 content = $"<b>{content}</b>";
 
-            if (!string.IsNullOrWhiteSpace(style.Color) && InfoColors.TryResolve(style.Color, out var hex))
+            if (!string.IsNullOrWhiteSpace(style.Color) && InfoColors.TryResolve(style.Color, out string? hex))
                 content = $"<color=#{hex}>{content}</color>";
 
             return content;

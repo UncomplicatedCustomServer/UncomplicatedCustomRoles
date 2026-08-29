@@ -17,6 +17,7 @@ using LabApi.Features.Wrappers;
 using LabApi.Loader.Features.Paths;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features;
+using UncomplicatedCustomRoles.API.Interfaces;
 
 namespace UncomplicatedCustomRoles.Manager;
 
@@ -29,6 +30,7 @@ internal static class SpawnPointManager
     public static void Init()
     {
         if (!File.Exists(FilePath))
+        {
             try
             {
                 File.WriteAllText(FilePath, JsonSerializer.Serialize(Array.Empty<SpawnPoint>(), SerializerOptions));
@@ -39,6 +41,7 @@ internal static class SpawnPointManager
                 LogManager.Debug($"SpawnPointManager::Init() failed - {e}");
                 return;
             }
+        }
 
         Load();
     }
@@ -81,8 +84,7 @@ internal static class SpawnPointManager
 
         if (loaded is null)
         {
-            LogManager.Warn(
-                $"Failed to load the SpawnPoints: the content of {FilePath} is not a valid SpawnPoint list!");
+            LogManager.Warn($"Failed to load the SpawnPoints: the content of {FilePath} is not a valid SpawnPoint list!");
             return 0;
         }
 
@@ -114,12 +116,16 @@ internal static class SpawnPointManager
 
     private static void CustomRoleSpawnCompatibilityChecker()
     {
-        foreach (var role in CustomRole.CustomRoles.Values.Where(role =>
+        foreach (ICustomRole role in CustomRole.CustomRoles.Values.Where(role =>
                      role.SpawnSettings is not null && role.SpawnSettings.SpawnPoints is not null &&
                      role.SpawnSettings.Spawn is SpawnType.SpawnPointSpawn))
-        foreach (var spawnPoint in role.SpawnSettings.SpawnPoints)
+        foreach (string spawnPoint in role.SpawnSettings.SpawnPoints)
+        {
             if (!SpawnPoint.Exists(spawnPoint))
+            {
                 LogManager.Warn(
                     $"CustomRole {role.Name} ({role.Id}) has an invalid SpawnPoint '{spawnPoint}' inside its configuration: the selected SpawnPoint does not exist!");
+            }
+        }
     }
 }

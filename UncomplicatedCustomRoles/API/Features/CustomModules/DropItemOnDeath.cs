@@ -20,7 +20,7 @@ public class DropItemOnDeath : CustomModule
     public override List<string> RequiredArgs => ["item"];
 
     public ItemType? Item =>
-        StringArgs.TryGetValue("item", out var rawItem) && Enum.TryParse(rawItem, true, out ItemType item) &&
+        StringArgs.TryGetValue("item", out string rawItem) && Enum.TryParse(rawItem, true, out ItemType item) &&
         item is not ItemType.None
             ? item
             : null;
@@ -29,8 +29,7 @@ public class DropItemOnDeath : CustomModule
     {
         if (Item is null)
         {
-            error =
-                $"'item' value '{TryGetStringValue("item")}' is not a valid ItemType. Examples: Medkit, KeycardScientist, GunCOM15, Coin.";
+            error = $"'item' value '{TryGetStringValue("item")}' is not a valid ItemType. Examples: Medkit, KeycardScientist, GunCOM15, Coin.";
             return false;
         }
 
@@ -41,10 +40,12 @@ public class DropItemOnDeath : CustomModule
     public override void OnRemoved()
     {
         if (Item is ItemType item)
+        {
             Timing.CallDelayed(0.5f, () =>
             {
-                var pickup = Pickup.Create(item, CustomRole.Player.Position);
+                Pickup pickup = Pickup.Create(item, CustomRole.Player.Position);
                 pickup?.Spawn();
             });
+        }
     }
 }

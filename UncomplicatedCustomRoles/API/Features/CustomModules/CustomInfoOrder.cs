@@ -9,6 +9,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using MEC;
@@ -27,21 +28,22 @@ public class CustomInfoOrder : CustomModule
 
     public override bool Validate(out string error)
     {
-        var tokens = TokenRegex.Matches(Order).Cast<Match>().Select(m => m.Groups[1].Value).ToList();
+        List<string> tokens = TokenRegex.Matches(Order).Cast<Match>().Select(m => m.Groups[1].Value).ToList();
 
-        var unknown = tokens
+        List<string> unknown = tokens
             .Where(t => !KnownTokens.Contains(t, StringComparer.OrdinalIgnoreCase))
             .Distinct()
             .ToList();
 
         if (unknown.Count > 0)
+        {
             LogManager.Warn(
                 $"[CustomModule] CustomInfoOrder 'order' contains unknown token(s): {string.Join(", ", unknown.Select(t => $"%{t}%"))}; they will be shown as-is. Valid tokens: %custominfo%, %nickname%, %rolename%.");
+        }
 
         if (!tokens.Any(t => KnownTokens.Contains(t, StringComparer.OrdinalIgnoreCase)))
         {
-            error =
-                "'order' must contain at least one of %custominfo%, %nickname% or %rolename%; otherwise the custom info would show static text only.";
+            error = "'order' must contain at least one of %custominfo%, %nickname% or %rolename%; otherwise the custom info would show static text only.";
             return false;
         }
 

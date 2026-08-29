@@ -10,6 +10,7 @@
 
 using HarmonyLib;
 using PlayerRoles.FirstPersonControl.Thirdperson;
+using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.Extensions;
 
@@ -20,7 +21,7 @@ internal class MakingNoise
 {
     private static bool Prefix(AnimatedCharacterModel __instance)
     {
-        if (__instance.OwnerHub.TryGetSummonedInstance(out var summonedInstance) &&
+        if (__instance.OwnerHub.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) &&
             summonedInstance.HasModule<SilentWalker>())
             return false;
 

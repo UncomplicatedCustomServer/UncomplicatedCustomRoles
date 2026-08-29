@@ -13,6 +13,7 @@ using System.Linq;
 using LabApi.Features.Wrappers;
 using MEC;
 using UncomplicatedCustomRoles.API.Features;
+using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Extensions;
 using Random = UnityEngine.Random;
@@ -27,13 +28,13 @@ internal static class DelayedSpawnManager
     {
         Cancel();
 
-        foreach (var role in CustomRole.CustomRoles.Values)
+        foreach (ICustomRole role in CustomRole.CustomRoles.Values)
         {
             if (role?.SpawnSettings is null || role.IgnoreSpawnSystem || role.SpawnSettings.SpawnDelay <= 0)
                 continue;
 
-            var id = role.Id;
-            var delay = role.SpawnSettings.SpawnDelay;
+            int id = role.Id;
+            float delay = role.SpawnSettings.SpawnDelay;
 
             LogManager.Debug($"Scheduling the delayed spawn of {role.Name} ({id}) in {delay} second(s)");
             Scheduled.Add(Timing.CallDelayed(delay, () => Execute(id)));
@@ -42,7 +43,7 @@ internal static class DelayedSpawnManager
 
     internal static void Cancel()
     {
-        foreach (var handle in Scheduled.Where(handle => handle.IsRunning))
+        foreach (CoroutineHandle handle in Scheduled.Where(handle => handle.IsRunning))
             Timing.KillCoroutines(handle);
 
         Scheduled.Clear();
@@ -50,7 +51,7 @@ internal static class DelayedSpawnManager
 
     private static void Execute(int id)
     {
-        if (!CustomRole.CustomRoles.TryGetValue(id, out var role) || role?.SpawnSettings is null)
+        if (!CustomRole.CustomRoles.TryGetValue(id, out ICustomRole role) || role?.SpawnSettings is null)
         {
             LogManager.Debug($"The delayed spawn of the role {id} fired but the role is no longer registered");
             return;
@@ -62,9 +63,9 @@ internal static class DelayedSpawnManager
             return;
         }
 
-        var settings = role.SpawnSettings;
+        SpawnBehaviour settings = role.SpawnSettings;
 
-        var readyPlayers = Player.ReadyList.Count();
+        int readyPlayers = Player.ReadyList.Count();
         if (readyPlayers < settings.MinPlayers)
         {
             LogManager.Debug(
@@ -72,15 +73,14 @@ internal static class DelayedSpawnManager
             return;
         }
 
-        var slots = settings.MaxPlayers - SummonedCustomRole.Count(role);
+        int slots = settings.MaxPlayers - SummonedCustomRole.Count(role);
         if (slots < 1)
         {
-            LogManager.Debug(
-                $"Skipping the delayed spawn of {role.Name} ({id}): max_players ({settings.MaxPlayers}) is already reached");
+            LogManager.Debug($"Skipping the delayed spawn of {role.Name} ({id}): max_players ({settings.MaxPlayers}) is already reached");
             return;
         }
 
-        var candidates = Player.ReadyList.Where(player => IsEligible(player, role)).ToList();
+        List<Player> candidates = Player.ReadyList.Where(player => IsEligible(player, role)).ToList();
         if (candidates.Count == 0)
         {
             LogManager.Debug(
@@ -90,8 +90,8 @@ internal static class DelayedSpawnManager
 
         candidates.ShuffleList();
 
-        var spawned = 0;
-        foreach (var player in candidates)
+        int spawned = 0;
+        foreach (Player player in candidates)
         {
             if (spawned >= slots)
                 break;
@@ -103,8 +103,7 @@ internal static class DelayedSpawnManager
             spawned++;
         }
 
-        LogManager.Debug(
-            $"The delayed spawn of {role.Name} ({id}) spawned {spawned} player(s) out of {candidates.Count} candidate(s)");
+        LogManager.Debug($"The delayed spawn of {role.Name} ({id}) spawned {spawned} player(s) out of {candidates.Count} candidate(s)");
     }
 
     private static bool IsEligible(Player player, ICustomRole role)

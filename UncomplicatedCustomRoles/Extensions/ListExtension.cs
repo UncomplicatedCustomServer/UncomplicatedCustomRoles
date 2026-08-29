@@ -31,10 +31,9 @@ public static class ListExtension
         if (list is null)
             return "null value";
 
-        var data =
-            $"[{list.GetType().FullName}] List<{list.GetType().GetGenericArguments()[0].FullName}> ({list.Count}) [\n";
+        string data = $"[{list.GetType().FullName}] List<{list.GetType().GetGenericArguments()[0].FullName}> ({list.Count}) [\n";
 
-        foreach (var element in list)
+        foreach (T element in list)
             data += $"{element},\n";
 
         data += "];";
@@ -44,7 +43,7 @@ public static class ListExtension
 
     public static T RandomValue<T>(this IEnumerable<T> list)
     {
-        var enumerable = list as IList<T> ?? list.ToList();
+        IList<T> enumerable = list as IList<T> ?? list.ToList();
         return enumerable.Count < 1 ? default : enumerable[Random.Range(0, enumerable.Count)];
     }
 }

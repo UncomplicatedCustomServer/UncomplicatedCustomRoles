@@ -14,6 +14,7 @@ using System.Linq;
 using System.Reflection;
 using CommandSystem;
 using LabApi.Features.Wrappers;
+using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Extensions;
 
@@ -39,7 +40,7 @@ public class Debug : IUCRCommand
         }
 
         object obj = null;
-        var target = args[0] is "static" ? Plugin.Assembly.GetType(args[1]) : null;
+        Type target = args[0] is "static" ? Plugin.Assembly.GetType(args[1]) : null;
 
         if (target is null && args[0] is "static")
         {
@@ -47,7 +48,7 @@ public class Debug : IUCRCommand
             return false;
         }
 
-        var player = Player.Get(sender);
+        Player player = Player.Get(sender);
 
         if (args[0] is "plugin" or "pl")
             obj = Plugin.Instance;
@@ -55,15 +56,15 @@ public class Debug : IUCRCommand
             obj = player.GetSummonedInstance();
         else if (args[0] is "current_player" or "cp" && player is not null)
             obj = player;
-        else if (args[0].StartsWith("player_") && int.TryParse(args[0].Replace("player_", string.Empty), out var id) &&
-                 Player.TryGet(id, out var player3))
+        else if (args[0].StartsWith("player_") && int.TryParse(args[0].Replace("player_", string.Empty), out int id) &&
+                 Player.TryGet(id, out Player player3))
             obj = player3;
         else if (args[0].StartsWith("player_scr_") &&
-                 int.TryParse(args[0].Replace("player_scr_", string.Empty), out var id2) &&
-                 Player.TryGet(id2, out var player4))
+                 int.TryParse(args[0].Replace("player_scr_", string.Empty), out int id2) &&
+                 Player.TryGet(id2, out Player player4))
             obj = player4.GetSummonedInstance();
         else if (args[0].StartsWith("current_player_cm_") && player is not null &&
-                 player.TryGetSummonedInstance(out var role) &&
+                 player.TryGetSummonedInstance(out SummonedCustomRole role) &&
                  role.CustomModules.FirstOrDefault(cm => cm.Name == args[0].Replace("current_player_cm_", "")) is not
                      null)
             obj = role.CustomModules.FirstOrDefault(cm => cm.Name == args[0].Replace("current_player_cm_", ""));
@@ -81,21 +82,19 @@ public class Debug : IUCRCommand
 
         if (obj is not null && target is not null && obj.GetType() != target)
         {
-            response =
-                $"Failed to start debug: Given target of debug {target.FullName} is not equal to the found object {obj.GetType().FullName}!";
+            response = $"Failed to start debug: Given target of debug {target.FullName} is not equal to the found object {obj.GetType().FullName}!";
             return false;
         }
 
         if (obj is null && target is null)
         {
-            response =
-                "Failed to start debug: Both target and object cannot be null!\nIn order to start the debug of a static element, PLEASE give the target (Location) of it!";
+            response = "Failed to start debug: Both target and object cannot be null!\nIn order to start the debug of a static element, PLEASE give the target (Location) of it!";
             return false;
         }
 
         target ??= obj.GetType();
 
-        if (HandleProperty(obj, target, args[2], out var value))
+        if (HandleProperty(obj, target, args[2], out string value))
             response = $"Required value is:\n{value}";
         else if (HandleField(obj, target, args[2], out value))
             response = $"Required value is:\n{value}";
@@ -112,8 +111,10 @@ public class Debug : IUCRCommand
         PropertyInfo property;
 
         if (obj is null)
+        {
             property = target.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
                 .FirstOrDefault(p => p.Name == name && p.CanRead);
+        }
         else
             property = target.GetProperties().FirstOrDefault(p => p.Name == name && p.CanRead);
 

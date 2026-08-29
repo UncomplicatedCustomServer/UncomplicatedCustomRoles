@@ -50,41 +50,43 @@ public class Spawn : IUCRCommand
         else if (arguments[0] is "all")
             players = Player.ReadyList.Select(p => new Tuple<string, Player>(null, p)).ToList();
         else if (arguments[0] is "spectators" or "spect")
+        {
             players = Player.ReadyList.Where(p => p.Role is RoleTypeId.Spectator or RoleTypeId.None)
                 .Select(p => new Tuple<string, Player>(null, p)).ToList();
+        }
         else if (arguments[0] is "alive" or "al")
+        {
             players = Player.ReadyList.Where(p => p.Role is not (RoleTypeId.Spectator or RoleTypeId.None))
                 .Select(p => new Tuple<string, Player>(null, p)).ToList();
+        }
         else
             players = [Resolve(arguments[0])];
 
-        if (!int.TryParse(arguments[1], out var id))
+        if (!int.TryParse(arguments[1], out int id))
         {
-            response =
-                $"'{arguments[1]}' is not a valid Role Id! It must be a number - use 'ucr list' to see every registered role.";
+            response = $"'{arguments[1]}' is not a valid Role Id! It must be a number - use 'ucr list' to see every registered role.";
             return false;
         }
 
-        var result = string.Empty;
-        var sync = arguments.Count > 2 && arguments[2] == "sync";
+        string result = string.Empty;
+        bool sync = arguments.Count > 2 && arguments[2] == "sync";
 
-        foreach (var player in players)
+        foreach (Tuple<string, Player> player in players)
             result += $"{SpawnPlayer(player, id, sync)}\n";
 
-        response =
-            $"Spawning {players.Count} players as CustomRole {(sync ? "synchronously" : "asynchronously")}\n{result}";
+        response = $"Spawning {players.Count} players as CustomRole {(sync ? "synchronously" : "asynchronously")}\n{result}";
         return true;
 
         static Tuple<string, Player> Resolve(string idOrName)
         {
             return new Tuple<string, Player>(idOrName,
-                int.TryParse(idOrName, out var playerId) ? Player.Get(playerId) : null);
+                int.TryParse(idOrName, out int playerId) ? Player.Get(playerId) : null);
         }
     }
 
     private static string SpawnPlayer(Tuple<string, Player> rawPlayer, int id, bool sync)
     {
-        var player = rawPlayer.Item2;
+        Player player = rawPlayer.Item2;
 
         if (player is null)
             return $"Player '{rawPlayer.Item1}' not found!";

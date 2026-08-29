@@ -58,10 +58,9 @@ internal class CommandParent : ParentCommand
         if (!arguments.Any())
         {
             // Help page
-            response =
-                $"\n>> UncomplicatedCustomRoles v{Plugin.Instance.Version}{(VersionManager.VersionInfo?.CustomName is not null ? $" '{VersionManager.VersionInfo.CustomName}'" : string.Empty)} <<\nby {Plugin.Instance.Author}\n\nAvailable commands:";
+            response = $"\n>> UncomplicatedCustomRoles v{Plugin.Instance.Version}{(VersionManager.VersionInfo?.CustomName is not null ? $" '{VersionManager.VersionInfo.CustomName}'" : string.Empty)} <<\nby {Plugin.Instance.Author}\n\nAvailable commands:";
 
-            foreach (var Command in RegisteredCommands)
+            foreach (IUCRCommand Command in RegisteredCommands)
                 response += $"\n• <b>ucr {Command.Name.GenerateWithBuffer(12)}</b> → {Command.Description}";
 
             response += "\n<size=1>OwO</size>";
@@ -70,21 +69,22 @@ internal class CommandParent : ParentCommand
         }
 
         {
-            var Arguments = arguments.Skip(1).ToList();
+            List<string> Arguments = arguments.Skip(1).ToList();
 
-            var Command = RegisteredCommands.FirstOrDefault(command => command.Name == arguments.At(0));
+            IUCRCommand Command = RegisteredCommands.FirstOrDefault(command => command.Name == arguments.At(0));
 
             if (Command is not null)
+            {
                 if (sender.HasPermissions(Command.RequiredPermission))
                 {
                     return Command.Executor(Arguments, sender, out response);
                 }
                 else
                 {
-                    response =
-                        $"You don't have enough permission(s) to execute that command!\nNeeded: {Command.RequiredPermission}";
+                    response = $"You don't have enough permission(s) to execute that command!\nNeeded: {Command.RequiredPermission}";
                     return false;
                 }
+            }
 
             response = "Command not found!";
             return false;

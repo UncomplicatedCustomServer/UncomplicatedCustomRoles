@@ -54,10 +54,10 @@ internal static class InfoColors
         if (string.IsNullOrWhiteSpace(input))
             return false;
 
-        var raw = input!.Trim().TrimStart('#').Replace("_", string.Empty).Replace("-", string.Empty)
+        string raw = input!.Trim().TrimStart('#').Replace("_", string.Empty).Replace("-", string.Empty)
             .Replace(" ", string.Empty);
 
-        if (NameToHex.TryGetValue(raw, out var mapped))
+        if (NameToHex.TryGetValue(raw, out string? mapped))
         {
             hex = mapped;
             return true;

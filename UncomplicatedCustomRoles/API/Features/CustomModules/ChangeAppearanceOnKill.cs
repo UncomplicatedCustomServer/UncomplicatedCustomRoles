@@ -18,8 +18,7 @@ internal class ChangeAppearanceOnKill : CustomModule
 {
     public override List<string> RequiredArgs => ["new_appearance"];
 
-    public RoleTypeId NewAppearance =>
-        Enum.TryParse(TryGetStringValue("new_appearance", "None"), true, out RoleTypeId role) ? role : RoleTypeId.None;
+    public RoleTypeId NewAppearance => Enum.TryParse(TryGetStringValue("new_appearance", "None"), true, out RoleTypeId role) ? role : RoleTypeId.None;
 
     public uint Duration => TryGetCastedValue<uint>("duration");
 
@@ -29,23 +28,22 @@ internal class ChangeAppearanceOnKill : CustomModule
 
     public override bool Validate(out string error)
     {
-        var raw = TryGetStringValue("new_appearance");
+        string raw = TryGetStringValue("new_appearance");
         if (NewAppearance is RoleTypeId.None)
         {
-            error =
-                $"'new_appearance' value '{raw}' is not a valid role. Examples: Scientist, ClassD, NtfSergeant, Scp0492.";
+            error = $"'new_appearance' value '{raw}' is not a valid role. Examples: Scientist, ClassD, NtfSergeant, Scp0492.";
             return false;
         }
 
-        if (Args.TryGetValue("duration", out var rawDuration) && rawDuration is not null
-                                                              && !uint.TryParse(rawDuration.ToString(), out _))
+        if (Args.TryGetValue("duration", out object rawDuration) && rawDuration is not null
+                                                                 && !uint.TryParse(rawDuration.ToString(), out _))
         {
             error = $"'duration' must be a whole number of seconds (0 or greater), got '{rawDuration}'.";
             return false;
         }
 
-        if (Args.TryGetValue("forever", out var rawForever) && rawForever is not null
-                                                            && !bool.TryParse(rawForever.ToString(), out _))
+        if (Args.TryGetValue("forever", out object rawForever) && rawForever is not null
+                                                               && !bool.TryParse(rawForever.ToString(), out _))
         {
             error = $"'forever' must be true or false, got '{rawForever}'.";
             return false;

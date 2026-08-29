@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CustomPlayerEffects;
 using InventorySystem.Configs;
 using LabApi.Features.Wrappers;
 using MEC;
@@ -19,6 +20,7 @@ using PlayerRoles;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Manager;
+using UnityEngine;
 
 namespace UncomplicatedCustomRoles.Extensions;
 
@@ -42,7 +44,7 @@ public static class PlayerExtension
     /// <returns><see cref="true" /> if the player is playing the given custom role.</returns>
     public static bool HasCustomRole(this Player player, int id)
     {
-        return SummonedCustomRole.TryGet(player, out var summoned) && summoned.Role.Id == id;
+        return SummonedCustomRole.TryGet(player, out SummonedCustomRole summoned) && summoned.Role.Id == id;
     }
 
     /// <summary>
@@ -70,7 +72,7 @@ public static class PlayerExtension
     internal static void ForceApplyEffect(this ReferenceHub hub, string effectName, byte intensity, float duration,
         bool addDuration = false)
     {
-        if (hub is null || !hub.playerEffectsController.TryGetEffect(effectName, out var effect))
+        if (hub is null || !hub.playerEffectsController.TryGetEffect(effectName, out StatusEffectBase effect))
             return;
 
         effect.ForceIntensity(intensity);
@@ -100,7 +102,7 @@ public static class PlayerExtension
     /// <returns>The created <see cref="SummonedCustomRole" /> instance or <see cref="null" /> if the spawn failed.</returns>
     public static SummonedCustomRole SetCustomRoleSync(this Player player, int role)
     {
-        return CustomRole.TryGet(role, out var customRole) ? player.SetCustomRoleSync(customRole) : null;
+        return CustomRole.TryGet(role, out ICustomRole customRole) ? player.SetCustomRoleSync(customRole) : null;
     }
 
     /// <summary>
@@ -189,14 +191,14 @@ public static class PlayerExtension
     /// <returns>True if success</returns>
     public static bool TryRemoveCustomRole(this Player player, bool doResetRole = false)
     {
-        if (SummonedCustomRole.TryGet(player, out var result))
+        if (SummonedCustomRole.TryGet(player, out SummonedCustomRole result))
         {
-            var Role = result.Role.Role;
+            RoleTypeId Role = result.Role.Role;
             result.Destroy();
 
             if (doResetRole)
             {
-                var OriginalPosition = player.Position;
+                Vector3 OriginalPosition = player.Position;
 
                 player.SetRole(Role, RoleChangeReason.Destroyed, RoleSpawnFlags.AssignInventory);
 
@@ -242,8 +244,8 @@ public static class PlayerExtension
     {
         InventoryLimitOverride.Clear(player.PlayerId, category);
 
-        var config = ServerConfigSynchronizer.Singleton;
-        var index = (int)category;
+        ServerConfigSynchronizer config = ServerConfigSynchronizer.Singleton;
+        int index = (int)category;
         if (config is null || index < 0 || index >= config.CategoryLimits.Count)
             return;
 
@@ -252,8 +254,8 @@ public static class PlayerExtension
 
     private static void SendCategoryLimit(Player player, ItemCategory category, sbyte limit)
     {
-        var config = ServerConfigSynchronizer.Singleton;
-        var index = (int)category;
+        ServerConfigSynchronizer config = ServerConfigSynchronizer.Singleton;
+        int index = (int)category;
         if (config is null || index < 0 || index >= config.CategoryLimits.Count)
             return;
 
@@ -273,7 +275,7 @@ public static class PlayerExtension
             return;
 
         player.ClearInventory();
-        foreach (var item in items)
+        foreach (ItemType item in items)
             player.AddItem(item);
     }
 
@@ -289,7 +291,7 @@ public static class PlayerExtension
     // REF https://gitlab.com/exmod-team/EXILED/-/blob/master/EXILED/Exiled.API/Features/Player.cs?ref_type=heads#L2479
     internal static void SetAmmoLimit(this Player player, ItemType type, ushort limit)
     {
-        var index = ServerConfigSynchronizer.Singleton.AmmoLimitsSync.FindIndex(x => x.AmmoType == type);
+        int index = ServerConfigSynchronizer.Singleton.AmmoLimitsSync.FindIndex(x => x.AmmoType == type);
         MirrorExtensions.SendFakeSyncObject(player, ServerConfigSynchronizer.Singleton.netIdentity,
             typeof(ServerConfigSynchronizer), writer =>
             {
@@ -304,7 +306,7 @@ public static class PlayerExtension
     // REF https://gitlab.com/exmod-team/EXILED/-/blob/master/EXILED/Exiled.API/Features/Player.cs?ref_type=heads#L2499
     internal static void ResetAmmoLimit(this Player player, ItemType type)
     {
-        var index = ServerConfigSynchronizer.Singleton.AmmoLimitsSync.FindIndex(x => x.AmmoType == type);
+        int index = ServerConfigSynchronizer.Singleton.AmmoLimitsSync.FindIndex(x => x.AmmoType == type);
         MirrorExtensions.SendFakeSyncObject(player, ServerConfigSynchronizer.Singleton.netIdentity,
             typeof(ServerConfigSynchronizer), writer =>
             {

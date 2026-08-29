@@ -84,8 +84,7 @@ internal class DamageResistance : CustomModule
         { DeathTranslations.Scp1509, DamageType.Scp1509 }
     };
 
-    private static readonly Dictionary<byte, DamageType> TranslationIdConversion =
-        TranslationConversion.ToDictionary(x => x.Key.Id, x => x.Value);
+    private static readonly Dictionary<byte, DamageType> TranslationIdConversion = TranslationConversion.ToDictionary(x => x.Key.Id, x => x.Value);
 
     private Dictionary<DamageType, uint> _damageTypes;
     public override List<string> RequiredArgs => ["damages"];
@@ -106,7 +105,7 @@ internal class DamageResistance : CustomModule
     {
         error = null;
 
-        if (!Args.TryGetValue("damages", out var raw) || raw is null)
+        if (!Args.TryGetValue("damages", out object raw) || raw is null)
         {
             error = "'damages' is missing. Provide a mapping like 'Firearm: 50' (50% less firearm damage).";
             return null;
@@ -117,23 +116,21 @@ internal class DamageResistance : CustomModule
 
         if (raw is not IDictionary map)
         {
-            error =
-                $"'damages' must be a mapping of DamageType: reduction%, e.g. 'Firearm: 50'. Got a {raw.GetType().Name}.";
+            error = $"'damages' must be a mapping of DamageType: reduction%, e.g. 'Firearm: 50'. Got a {raw.GetType().Name}.";
             return null;
         }
 
         Dictionary<DamageType, uint> result = new();
         foreach (DictionaryEntry entry in map)
         {
-            var key = entry.Key?.ToString();
+            string key = entry.Key?.ToString();
             if (!Enum.TryParse(key, true, out DamageType damageType))
             {
-                error =
-                    $"'{key}' is not a valid DamageType. Valid values: {string.Join(", ", Enum.GetNames(typeof(DamageType)))}.";
+                error = $"'{key}' is not a valid DamageType. Valid values: {string.Join(", ", Enum.GetNames(typeof(DamageType)))}.";
                 return null;
             }
 
-            if (!uint.TryParse(entry.Value?.ToString(), out var reduction) || reduction > 100)
+            if (!uint.TryParse(entry.Value?.ToString(), out uint reduction) || reduction > 100)
             {
                 error = $"the reduction for '{key}' must be a whole number between 0 and 100, got '{entry.Value}'.";
                 return null;
@@ -156,8 +153,8 @@ internal class DamageResistance : CustomModule
         if (hurting.DamageHandler is not StandardDamageHandler standardDamageHandler)
             return true;
 
-        var damageType = GetDamageType(hurting.DamageHandler);
-        if (_damageTypes.TryGetValue(damageType, out var reduction))
+        DamageType damageType = GetDamageType(hurting.DamageHandler);
+        if (_damageTypes.TryGetValue(damageType, out uint reduction))
             standardDamageHandler.Damage *= (100f - reduction) / 100f;
 
         return true;
@@ -215,26 +212,26 @@ internal class DamageResistance : CustomModule
                     _ => DamageType.Unknown
                 };
             case FirearmDamageHandler firearmDamageHandler:
-                return ItemConversion.TryGetValue(firearmDamageHandler.WeaponType, out var value)
+                return ItemConversion.TryGetValue(firearmDamageHandler.WeaponType, out DamageType value)
                     ? value
                     : DamageType.Firearm;
 
             case ScpDamageHandler scpDamageHandler:
             {
-                var translation = DeathTranslations.TranslationsById[scpDamageHandler._translationId];
+                DeathTranslation translation = DeathTranslations.TranslationsById[scpDamageHandler._translationId];
                 if (translation.Id == DeathTranslations.PocketDecay.Id)
                     return DamageType.Scp106;
 
-                return TranslationIdConversion.TryGetValue(translation.Id, out var value1)
+                return TranslationIdConversion.TryGetValue(translation.Id, out DamageType value1)
                     ? value1
                     : DamageType.Scp;
             }
 
             case UniversalDamageHandler universal:
             {
-                var translation = DeathTranslations.TranslationsById[universal.TranslationId];
+                DeathTranslation translation = DeathTranslations.TranslationsById[universal.TranslationId];
 
-                return TranslationIdConversion.TryGetValue(translation.Id, out var damageType)
+                return TranslationIdConversion.TryGetValue(translation.Id, out DamageType damageType)
                     ? damageType
                     : DamageType.Unknown;
             }

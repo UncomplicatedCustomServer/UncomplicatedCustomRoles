@@ -72,8 +72,7 @@ internal class BonolisCustomRole : IPreviousVersionRole
 
     public virtual Vector3 Scale { get; set; } = Vector3.one;
 
-    public virtual string SpawnBroadcast { get; set; } =
-        "You are a <color=orange><b>Janitor</b></color>!\nClean the Light Containment Zone!";
+    public virtual string SpawnBroadcast { get; set; } = "You are a <color=orange><b>Janitor</b></color>!\nClean the Light Containment Zone!";
 
     public virtual ushort SpawnBroadcastDuration { get; set; } = 5;
 
@@ -83,11 +82,7 @@ internal class BonolisCustomRole : IPreviousVersionRole
 
     public virtual Dictionary<ItemCategory, sbyte> CustomInventoryLimits { get; set; } = new();
 
-    public virtual List<ItemType> Inventory { get; set; } =
-    [
-        ItemType.Flashlight,
-        ItemType.KeycardJanitor
-    ];
+    public virtual List<ItemType> Inventory { get; set; } = [ItemType.Flashlight, ItemType.KeycardJanitor];
 
     public virtual List<uint> CustomItemsInventory { get; set; } = [];
 

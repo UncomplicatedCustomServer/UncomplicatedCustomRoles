@@ -26,19 +26,23 @@ internal class EscapeController : MonoBehaviour
         if (_role is null || PlayerEventHandler.Instance is null)
             return;
 
-        var inZone = false;
-        foreach (var escapeZone in global::Escape.EscapeZones)
+        bool inZone = false;
+        foreach (Bounds escapeZone in global::Escape.EscapeZones)
+        {
             if (escapeZone.Contains(_role.Player.Position))
             {
                 inZone = true;
 
                 if (!_wasInEscapeZone)
+                {
                     PlayerEventHandler.Instance.OnEscaping(new PlayerEscapingEventArgs(_role.Player.ReferenceHub,
                         _role.Player.Role, RoleTypeId.ChaosConscript, global::Escape.EscapeScenarioType.Custom,
                         escapeZone));
+                }
 
                 break;
             }
+        }
 
         _wasInEscapeZone = inZone;
     }

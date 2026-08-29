@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using LabApi.Features.Permissions;
+using LabApi.Features.Wrappers;
 
 namespace UncomplicatedCustomRoles.API.Features.CustomModules;
 
@@ -18,7 +19,7 @@ public class CustomPermissions : CustomModule
 {
     public override List<string> RequiredArgs => ["permissions"];
 
-    private string[] Permissions => StringArgs.TryGetValue("permissions", out var permissions)
+    private string[] Permissions => StringArgs.TryGetValue("permissions", out string permissions)
         ? permissions.Replace(" ", string.Empty).Split([','], StringSplitOptions.RemoveEmptyEntries)
         : [];
 
@@ -36,15 +37,15 @@ public class CustomPermissions : CustomModule
 
     public override void OnAdded()
     {
-        var player = CustomRole.Player;
-        foreach (var permission in Permissions) player?.AddPermissions(permission);
+        Player player = CustomRole.Player;
+        foreach (string permission in Permissions) player?.AddPermissions(permission);
         base.OnAdded();
     }
 
     public override void OnRemoved()
     {
-        var player = CustomRole.Player;
-        foreach (var permission in Permissions) player?.RemovePermissions(permission);
+        Player player = CustomRole.Player;
+        foreach (string permission in Permissions) player?.RemovePermissions(permission);
         base.OnRemoved();
     }
 }

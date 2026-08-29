@@ -35,7 +35,7 @@ public class Info : IUCRCommand
             return false;
         }
 
-        if (!int.TryParse(arguments[0], out var id) || !CustomRole.TryGet(id, out var role))
+        if (!int.TryParse(arguments[0], out int id) || !CustomRole.TryGet(id, out ICustomRole role))
         {
             response = $"Custom Role {arguments[0]} not found!";
             return false;
@@ -58,7 +58,7 @@ public class Info : IUCRCommand
             { "<color=#757575>👤</color> Role:", $"<color={role.Role.GetColor().ToHex()}><b>{role.Role}</b></color>" },
             {
                 "<color=#459426>💳</color> Badge:",
-                $"<color={(role.BadgeColor != null && SpawnManager.ColorMap.TryGetValue(role.BadgeColor, out var value) ? value : "white")}>{(role.BadgeName != null ? role.BadgeName.Replace("@hidden", string.Empty) : string.Empty)}</color>{(role.BadgeName != null && role.BadgeName.EndsWith("@hidden") ? " [HIDDEN]" : string.Empty)}"
+                $"<color={(role.BadgeColor != null && SpawnManager.ColorMap.TryGetValue(role.BadgeColor, out string value) ? value : "white")}>{(role.BadgeName != null ? role.BadgeName.Replace("@hidden", string.Empty) : string.Empty)}</color>{(role.BadgeName != null && role.BadgeName.EndsWith("@hidden") ? " [HIDDEN]" : string.Empty)}"
             },
             { "<color=#ff0000>❤️</color> Health:", $"<b>{role?.Health.Amount ?? 0}</b>/{role?.Health.Maximum ?? 0}" },
             { "<color=#00ff00>💉</color> AHP:", $"<b>{role?.Ahp.Amount ?? 0}</b>/{role?.Ahp.Limit ?? 0}" },
@@ -70,34 +70,44 @@ public class Info : IUCRCommand
             }
         };
 
-        var response = string.Empty;
+        string response = string.Empty;
 
         if (role.SpawnSettings != null)
         {
             if (role.SpawnSettings.SpawnDelay > 0)
+            {
                 data.Add("<color=#ffff00>⏱️</color> Spawn delay:",
                     $"<b>{role.SpawnSettings.SpawnDelay}s</b> after the round starts");
+            }
 
             if (role.SpawnSettings.Spawn is SpawnType.RoomsSpawn)
+            {
                 data.Add("<color=#632300>🚪</color> Spawn rooms:",
                     string.Join(", ", role.SpawnSettings?.SpawnRooms ?? []));
+            }
             else if (role.SpawnSettings.Spawn is SpawnType.ZoneSpawn)
+            {
                 data.Add("<color=#632300>🚪</color> Spawn zones:",
                     string.Join(", ", role.SpawnSettings?.SpawnZones ?? []));
+            }
             else if (role.SpawnSettings.Spawn is SpawnType.SpawnPointSpawn)
+            {
                 data.Add("<color=#632300>🚪</color> Spawn points:",
                     string.Join(", ", role.SpawnSettings?.SpawnPoints ?? []));
+            }
         }
 
         if (role.CustomFlags is { Count: > 0 })
         {
-            var decodedFlags = YamlFlagsHandler.Decode(role.CustomFlags);
+            List<KeyValuePair<string, Dictionary<string, object>>> decodedFlags = YamlFlagsHandler.Decode(role.CustomFlags);
             if (decodedFlags != null)
+            {
                 data.Add("<color=#bf4eb6>🧩</color> Custom flags:",
                     string.Join(", ", decodedFlags.Select(f => f.Key)));
+            }
         }
 
-        foreach (var kvp in data)
+        foreach (KeyValuePair<string, string> kvp in data)
             response += $"\n{kvp.Key.GenerateWithBuffer(40)} {kvp.Value}";
 
         return response;

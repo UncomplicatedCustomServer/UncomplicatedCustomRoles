@@ -8,6 +8,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Reflection;
 using UncomplicatedCustomRoles.Integrations;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
@@ -37,24 +38,22 @@ internal class SchematicController : MonoBehaviour
     public void Init(string schematicName)
     {
         // Generate the schematic
-        var method = DynamicInvoke.GetMethod("MapEditorReborn",
+        MethodInfo method = DynamicInvoke.GetMethod("MapEditorReborn",
             "MapEditorReborn.API.Features.ObjectSpawner.SpawnSchematic", methodCounter: 2);
         method ??= DynamicInvoke.GetMethod("ProjectMER", "ProjectMER.Features.ObjectSpawner.SpawnSchematic", true, 2);
 
-        var schematic = method?.Invoke(null, [schematicName, Vector3.zero]);
+        object schematic = method?.Invoke(null, [schematicName, Vector3.zero]);
 
         if (method is null)
         {
-            LogManager.Error(
-                $"[MER Extension] Failed to import MER or ProjectMER schematic {schematicName}!\nMethod not found!");
+            LogManager.Error($"[MER Extension] Failed to import MER or ProjectMER schematic {schematicName}!\nMethod not found!");
             Destroy(this);
             return;
         }
 
         if (method is null)
         {
-            LogManager.Error(
-                $"[MER Extension] Failed to import MER or ProjectMER schematic {schematicName}!\nSchematic not found!");
+            LogManager.Error($"[MER Extension] Failed to import MER or ProjectMER schematic {schematicName}!\nSchematic not found!");
             Destroy(this);
             return;
         }

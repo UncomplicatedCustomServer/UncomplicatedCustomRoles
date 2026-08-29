@@ -13,6 +13,7 @@ using System.Linq;
 using CommandSystem;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.Compatibility;
 using UncomplicatedCustomRoles.Extensions;
 
 namespace UncomplicatedCustomRoles.Commands;
@@ -27,35 +28,33 @@ public class List : IUCRCommand
 
     public bool Executor(List<string> arguments, ICommandSender sender, out string response)
     {
-        var list = CustomRole.CustomRoles.ToList();
+        List<KeyValuePair<int, ICustomRole>> list = CustomRole.CustomRoles.ToList();
         if (arguments.Count > 0 && arguments[0].Length > 1)
             list = list.Where(r => r.Value.Name.ToLower().Contains(arguments[0].ToLower())).ToList();
 
         response = "List of all registered CustomRoles:";
 
-        foreach (var kvp in list)
+        foreach (KeyValuePair<int, ICustomRole> kvp in list)
+        {
             if (kvp.Value is not null)
+            {
                 if (CustomRole.OutdatedRoles.FirstOrDefault(r => r.CustomRole.Id == kvp.Key) is not null)
-                    response +=
-                        $"\n<color=#ed9609>✔</color> [{kvp.Key}] <color={kvp.Value.Role.GetColor().ToHex()}>{kvp.Value?.Name}</color>";
+                    response += $"\n<color=#ed9609>✔</color> [{kvp.Key}] <color={kvp.Value.Role.GetColor().ToHex()}>{kvp.Value?.Name}</color>";
                 else
-                    response +=
-                        $"\n<color=#00ff00>✔</color> [{kvp.Key}] <color={kvp.Value.Role.GetColor().ToHex()}>{kvp.Value?.Name}</color>";
+                    response += $"\n<color=#00ff00>✔</color> [{kvp.Key}] <color={kvp.Value.Role.GetColor().ToHex()}>{kvp.Value?.Name}</color>";
+            }
+        }
 
-        foreach (var errorCustomRole in CustomRole.NotLoadedRoles)
-            response +=
-                $"\n<color=#ff0000>❌</color> [{errorCustomRole?.Id}] <u><color={errorCustomRole?.Role.GetColor().ToHex() ?? "white"}>{errorCustomRole?.Name}</color></u>";
+        foreach (ErrorCustomRole errorCustomRole in CustomRole.NotLoadedRoles)
+            response += $"\n<color=#ff0000>❌</color> [{errorCustomRole?.Id}] <u><color={errorCustomRole?.Role.GetColor().ToHex() ?? "white"}>{errorCustomRole?.Name}</color></u>";
 
-        response +=
-            $"\n\n<color=#00ffff>🔢</color> Showing <b>{list.Count}</b> of {CustomRole.CustomRoles.Count} CustomRoles";
+        response += $"\n\n<color=#00ffff>🔢</color> Showing <b>{list.Count}</b> of {CustomRole.CustomRoles.Count} CustomRoles";
 
         if (CustomRole.OutdatedRoles.Count > 0)
-            response +=
-                $"\n<color=#ffff00>⚠️</color> There {(CustomRole.OutdatedRoles.Count > 1 ? "are" : "is")} <b>{CustomRole.OutdatedRoles.Count}</b> CustomRole{(CustomRole.OutdatedRoles.Count > 1 ? "s" : string.Empty)} that are made for a previous version of the plugin!";
+            response += $"\n<color=#ffff00>⚠️</color> There {(CustomRole.OutdatedRoles.Count > 1 ? "are" : "is")} <b>{CustomRole.OutdatedRoles.Count}</b> CustomRole{(CustomRole.OutdatedRoles.Count > 1 ? "s" : string.Empty)} that are made for a previous version of the plugin!";
 
         if (CustomRole.NotLoadedRoles.Count > 0)
-            response +=
-                $"\n<color=#ff0000>❗</color> There {(CustomRole.NotLoadedRoles.Count > 1 ? "are" : "is")} <b>{CustomRole.NotLoadedRoles.Count}</b> CustomRole{(CustomRole.NotLoadedRoles.Count > 1 ? "s" : string.Empty)} not loaded!";
+            response += $"\n<color=#ff0000>❗</color> There {(CustomRole.NotLoadedRoles.Count > 1 ? "are" : "is")} <b>{CustomRole.NotLoadedRoles.Count}</b> CustomRole{(CustomRole.NotLoadedRoles.Count > 1 ? "s" : string.Empty)} not loaded!";
 
         response += "\n<size=1>OwO</size>";
 

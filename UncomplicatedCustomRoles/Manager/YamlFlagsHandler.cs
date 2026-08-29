@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
 using UncomplicatedCustomRoles.Extensions;
 
@@ -25,7 +26,7 @@ internal class YamlFlagsHandler
     {
         get
         {
-            var cached = _modules;
+            Type[]? cached = _modules;
 
             if (cached is not null)
                 return cached;
@@ -49,19 +50,29 @@ internal class YamlFlagsHandler
 
         List<KeyValuePair<string, Dictionary<string, object>?>> result = [];
 
-        foreach (var flag in flags)
+        foreach (object flag in flags)
+        {
             if (flag is Dictionary<object, object> str)
-                foreach (var res in str)
+            {
+                foreach (KeyValuePair<object, object> res in str)
+                {
                     if (res.Value is Dictionary<object, object> dict)
+                    {
                         result.Add(new KeyValuePair<string, Dictionary<string, object>?>(res.Key.ToString(),
                             dict.ConvertKeyToString()));
+                    }
                     else if (res.Value is null)
                         result.Add(new KeyValuePair<string, Dictionary<string, object>?>(res.Key.ToString(), null));
                     else
+                    {
                         LogManager.Warn(
                             $"[CM Loader] The custom flag '{res.Key}' has its settings written as '{res.Value}' instead of a list of 'setting: value' lines, so it can't be read and will be ignored.");
+                    }
+                }
+            }
             else
                 result.Add(new KeyValuePair<string, Dictionary<string, object>?>(flag.ToString(), null));
+        }
 
         return result;
     }
@@ -70,8 +81,8 @@ internal class YamlFlagsHandler
     {
         List<Type> types = [];
 
-        foreach (var assembly in ImportManager.AvailableAssemblies)
-        foreach (var type in assembly.GetTypes()
+        foreach (Assembly? assembly in ImportManager.AvailableAssemblies)
+        foreach (Type? type in assembly.GetTypes()
                      .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(CustomModule))))
             types.Add(type);
 

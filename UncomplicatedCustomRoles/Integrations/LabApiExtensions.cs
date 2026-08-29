@@ -19,8 +19,7 @@ internal static class LabApiExtensions
 {
     private const string PluginName = "LabApiExtensions";
 
-    public static bool IsAvailable =>
-        DynamicInvoke.GetMethod(PluginName, "LabApiExtensions.Managers.FakeRoleManager.AddFakeRole", false, 2) != null;
+    public static bool IsAvailable => DynamicInvoke.GetMethod(PluginName, "LabApiExtensions.Managers.FakeRoleManager.AddFakeRole", false, 2) != null;
 
     public static void AddFakeRole(Player player, RoleTypeId roleType)
     {

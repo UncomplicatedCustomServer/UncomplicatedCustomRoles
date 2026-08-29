@@ -16,14 +16,14 @@ public class LifeStealer : CustomModule
 {
     public override List<string> RequiredArgs => ["percentage"];
 
-    public int Percentage => StringArgs.TryGetValue("percentage", out var perc) && int.TryParse(perc, out var numPerc)
+    public int Percentage => StringArgs.TryGetValue("percentage", out string perc) && int.TryParse(perc, out int numPerc)
         ? numPerc
         : 0;
 
     public override bool Validate(out string error)
     {
-        var raw = TryGetStringValue("percentage");
-        if (!int.TryParse(raw, out var perc))
+        string raw = TryGetStringValue("percentage");
+        if (!int.TryParse(raw, out int perc))
         {
             error = $"'percentage' must be a whole number between 0 and 100 (e.g. 75 for 75%), got '{raw}'.";
             return false;

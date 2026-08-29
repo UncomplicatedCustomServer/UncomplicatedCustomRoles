@@ -35,13 +35,13 @@ internal static class FileConfigs
     {
         LoadAction(localDir);
 
-        foreach (var dir in Directory.GetDirectories(Path.Combine(Dir, localDir)))
+        foreach (string dir in Directory.GetDirectories(Path.Combine(Dir, localDir)))
         {
-            var name = dir.Replace(Dir, string.Empty);
+            string name = dir.Replace(Dir, string.Empty);
             if (name[0] is '/' or '\\')
                 name = name.Remove(0, 1);
 
-            if (int.TryParse(name, out var num) && num < 990000)
+            if (int.TryParse(name, out int num) && num < 990000)
                 continue;
 
             if (name is "")
@@ -53,7 +53,8 @@ internal static class FileConfigs
 
     public static void LoadAction(string localDir = "")
     {
-        foreach (var FileName in List(localDir))
+        foreach (string FileName in List(localDir))
+        {
             try
             {
                 if (Directory.Exists(FileName))
@@ -85,14 +86,19 @@ internal static class FileConfigs
                 CustomRole.NotLoadedRoles.Add(new ErrorCustomRole(FileName, fileLines, ex));
 
                 if (!Plugin.Instance.Config.Debug)
+                {
                     LogManager.Error(
                         $"Failed to parse {FileName}:\n{CompatibilityManager.HandleErrorString(ex, true)}\nNotice: This YAML error has been caused by this configuration and it's not a bug of the whole plugin!",
                         "SR0001");
+                }
                 else
+                {
                     LogManager.Error(
                         $"Failed to parse {FileName}. YAML Exception: {ex.Message}.\nStack trace: {ex.StackTrace}\nThis is a YAML error that YOU CAUSED and therefore >>YOU<< NEED TO FIX IT!\nDON'T COME TO US WITH THIS ERROR!",
                         "SR0001");
+                }
             }
+        }
     }
 
     public static void Welcome(string localDir = "")

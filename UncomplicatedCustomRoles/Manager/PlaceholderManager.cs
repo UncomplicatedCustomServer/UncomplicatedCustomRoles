@@ -32,7 +32,7 @@ public class PlaceholderManager
             { "unitid", player.UnitId },
             {
                 "unitname",
-                NamingRulesManager.TryGetNamingRule(player.Team, out var namingRule)
+                NamingRulesManager.TryGetNamingRule(player.Team, out UnitNamingRule? namingRule)
                     ? namingRule.LastGeneratedName
                     : string.Empty
             },
@@ -51,7 +51,7 @@ public class PlaceholderManager
 
     private static string ResolveDisplayName(Player player)
     {
-        if (SummonedCustomRole.TryGet(player, out var summoned) && !string.IsNullOrEmpty(summoned.AppliedNickname))
+        if (SummonedCustomRole.TryGet(player, out SummonedCustomRole? summoned) && !string.IsNullOrEmpty(summoned.AppliedNickname))
             return summoned.AppliedNickname!;
 
         return player.DisplayName;

@@ -13,6 +13,7 @@ using System.IO;
 using CommandSystem;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.Compatibility;
 using YamlDotNet.Core;
 
 namespace UncomplicatedCustomRoles.Commands;
@@ -35,17 +36,15 @@ public class Errors : IUCRCommand
 
         response = string.Empty;
 
-        foreach (var errorCustomRole in CustomRole.NotLoadedRoles)
+        foreach (ErrorCustomRole errorCustomRole in CustomRole.NotLoadedRoles)
         {
             response += $"\n<color=#FFFFFF>📄</color> <b>File:</b> {Path.GetFileName(errorCustomRole.Path)}";
 
             if (errorCustomRole.Exception is YamlException yamlException)
-                response +=
-                    $"\n<color=#00FFFF>🔢</color> Line: {yamlException.Start.Line}, Column: {yamlException.Start.Column}";
+                response += $"\n<color=#00FFFF>🔢</color> Line: {yamlException.Start.Line}, Column: {yamlException.Start.Column}";
 
             response += $"\n<color=red>❌</color> Error: {errorCustomRole.Message}";
-            response +=
-                $"\n<color=#FFFF00>💡</color> Suggestion: {(errorCustomRole.Exception is not null && errorCustomRole.Exception.Message is not null ? GetSuggestionFromMessage(errorCustomRole.Exception.Message) : string.Empty)}\n";
+            response += $"\n<color=#FFFF00>💡</color> Suggestion: {(errorCustomRole.Exception is not null && errorCustomRole.Exception.Message is not null ? GetSuggestionFromMessage(errorCustomRole.Exception.Message) : string.Empty)}\n";
         }
 
         return true;
@@ -59,8 +58,7 @@ public class Errors : IUCRCommand
             return "Make sure there is a space after the colon (e.g., `name: GOC` instead of `name:GOC`).";
 
         if (message.Contains("expected 'mappingstart', got 'sequencestart'"))
-            return
-                "Your YAML file begins with a list (`- item`) but should begin with a mapping. Try adding a top-level key like `teams:` before your list.";
+            return "Your YAML file begins with a list (`- item`) but should begin with a mapping. Try adding a top-level key like `teams:` before your list.";
 
         if (message.Contains("while parsing a block mapping"))
             return "Check indentation and YAML structure — something might be misaligned or nested incorrectly.";
@@ -69,8 +67,7 @@ public class Errors : IUCRCommand
             return "Possibly missing a `-` for a list item or the element ends prematurely.";
 
         if (message.Contains("did not find expected key"))
-            return
-                "A key may be missing or misaligned — ensure all keys are followed by colons and correctly indented.";
+            return "A key may be missing or misaligned — ensure all keys are followed by colons and correctly indented.";
 
         if (message.Contains("unexpected end of stream"))
             return "The file might be cut off unexpectedly — check for missing closing brackets or incomplete blocks.";
@@ -79,8 +76,7 @@ public class Errors : IUCRCommand
             return "You may have defined the same key twice in the same block — YAML requires keys to be unique.";
 
         if (message.Contains("found character that cannot start any token"))
-            return
-                "There's probably an illegal character or wrong symbol — double-check for stray tabs or weird characters.";
+            return "There's probably an illegal character or wrong symbol — double-check for stray tabs or weird characters.";
 
         if (message.Contains("found unexpected ':'"))
             return "There might be a colon `:` in a value that should be quoted — try wrapping the value in quotes.";
@@ -92,8 +88,7 @@ public class Errors : IUCRCommand
             return "YAML alias (*) points to something that doesn't exist — check spelling or anchor placement.";
 
         if (message.Contains("cannot convert") && message.Contains("to"))
-            return
-                "A value might be of the wrong type — make sure it's in the correct format (e.g., number vs string).";
+            return "A value might be of the wrong type — make sure it's in the correct format (e.g., number vs string).";
 
         if (message.Contains("sequence entries are not allowed here"))
             return "You're probably using a list (`- item`) in an invalid place — check indentation and nesting.";

@@ -9,6 +9,7 @@
  */
 
 using System.Collections.Generic;
+using System.Text;
 using Cassie;
 using HarmonyLib;
 using NorthwoodLib.Pools;
@@ -32,7 +33,7 @@ internal class AnnounceScpTerminationPatch
 {
     private static bool Prefix(ReferenceHub scp, DamageHandlerBase hit)
     {
-        if (scp.GetTeam() is Team.SCPs && SummonedCustomRole.TryGet(scp, out var role))
+        if (scp.GetTeam() is Team.SCPs && SummonedCustomRole.TryGet(scp, out SummonedCustomRole role))
         {
             if (role.HasModule<SilentAnnouncer>())
                 return false;
@@ -52,13 +53,13 @@ internal class OnStartedPlayingPatch
 {
     private static bool Prefix(CassieScpTerminationAnnouncement __instance)
     {
-        var stringBuilder = StringBuilderPool.Shared.Rent();
+        StringBuilder stringBuilder = StringBuilderPool.Shared.Rent();
         List<SubtitlePart> subtitlePartList = [];
-        for (var index = 0; index < __instance.Victims.Count; ++index)
+        for (int index = 0; index < __instance.Victims.Count; ++index)
         {
             string withoutSpace;
             string withSpace;
-            if (Announcer.SavedCustomAnnouncements.TryGetValue(__instance.Victims[index].PlayerId, out var value))
+            if (Announcer.SavedCustomAnnouncements.TryGetValue(__instance.Victims[index].PlayerId, out string value))
             {
                 CassieScpTerminationAnnouncement.ConvertSCP(value, out withoutSpace, out withSpace);
                 Announcer.SavedCustomAnnouncements.Remove(__instance.Victims[index].PlayerId);

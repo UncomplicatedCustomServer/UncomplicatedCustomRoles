@@ -27,8 +27,7 @@ internal abstract class EventHandlerBase
 
     internal static HashSet<int> FirstRoundPlayers { get; } = [];
 
-    internal static ConcurrentDictionary<int, Tuple<CustomScpAnnouncer, DateTimeOffset>> TerminationQueue { get; } =
-        new();
+    internal static ConcurrentDictionary<int, Tuple<CustomScpAnnouncer, DateTimeOffset>> TerminationQueue { get; } = new();
 
     internal static bool Started { get; set; } = false;
 
@@ -40,7 +39,7 @@ internal abstract class EventHandlerBase
 
     public static void Register(IEnumerable<EventHandlerBase> e)
     {
-        foreach (var eventHandlerBase in e)
+        foreach (EventHandlerBase eventHandlerBase in e)
             Register(eventHandlerBase);
     }
 
@@ -52,7 +51,7 @@ internal abstract class EventHandlerBase
 
     public static void UnregisterAll()
     {
-        foreach (var e in _list.ToList())
+        foreach (EventHandlerBase e in _list.ToList())
             Unregister(e);
     }
 

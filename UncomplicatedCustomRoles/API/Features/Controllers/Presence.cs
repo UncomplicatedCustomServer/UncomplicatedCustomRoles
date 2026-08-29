@@ -16,7 +16,7 @@ internal static class Presence
     {
         while (true)
         {
-            var payload = BuildPayload();
+            string payload = BuildPayload();
 
             if (payload is not null)
                 yield return Timing.WaitUntilDone(WebQuery.Post(Endpoint, payload, "application/json", OnAnswer));

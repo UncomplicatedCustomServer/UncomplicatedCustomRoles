@@ -24,7 +24,7 @@ public class ColorfulNickname : CustomModule
     {
         get
         {
-            var raw = TryGetStringValue("color", string.Empty).TrimStart('#');
+            string raw = TryGetStringValue("color", string.Empty).TrimStart('#');
             return Misc.AcceptedColours.FirstOrDefault(c =>
                 string.Equals(c, raw, StringComparison.OrdinalIgnoreCase)) ?? raw;
         }
@@ -32,11 +32,10 @@ public class ColorfulNickname : CustomModule
 
     public override bool Validate(out string error)
     {
-        var raw = TryGetStringValue("color", string.Empty).TrimStart('#');
+        string raw = TryGetStringValue("color", string.Empty).TrimStart('#');
         if (!Misc.AcceptedColours.Any(c => string.Equals(c, raw, StringComparison.OrdinalIgnoreCase)))
         {
-            error =
-                $"'color' '{raw}' is not a color the game allows for nicknames. Allowed colors: {string.Join(", ", Misc.AcceptedColours)}.";
+            error = $"'color' '{raw}' is not a color the game allows for nicknames. Allowed colors: {string.Join(", ", Misc.AcceptedColours)}.";
             return false;
         }
 

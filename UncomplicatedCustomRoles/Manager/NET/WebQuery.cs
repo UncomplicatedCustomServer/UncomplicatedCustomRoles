@@ -43,7 +43,7 @@ internal static class WebQuery
         {
             request.timeout = 10;
 
-            if (!TrySend(request, out var error))
+            if (!TrySend(request, out string error))
             {
                 Answer(callback, new HttpResponse(0, null, error));
                 yield break;
@@ -67,8 +67,7 @@ internal static class WebQuery
         catch (Exception e)
         {
             error = e.Message;
-            LogManager.Debug(
-                $"Failed to send the {request.method} request to {request.url} - {e.GetType().FullName}: {e.Message}");
+            LogManager.Debug($"Failed to send the {request.method} request to {request.url} - {e.GetType().FullName}: {e.Message}");
             return false;
         }
     }
@@ -82,8 +81,7 @@ internal static class WebQuery
         }
         catch (Exception e)
         {
-            LogManager.Debug(
-                $"Failed to read the answer of {request.url} - {e.GetType().FullName}: {e.Message}");
+            LogManager.Debug($"Failed to read the answer of {request.url} - {e.GetType().FullName}: {e.Message}");
             return new HttpResponse(0, null, e.Message);
         }
     }

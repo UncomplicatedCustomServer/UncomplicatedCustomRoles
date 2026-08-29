@@ -22,7 +22,7 @@ internal class CustomPlayerInfoSyncPatch
         if (CustomInfo.SuppressExternalSync)
             return true;
 
-        if (__instance._hub is not null && __instance._hub.TryGetSummonedInstance(out var role) &&
+        if (__instance._hub is not null && __instance._hub.TryGetSummonedInstance(out SummonedCustomRole role) &&
             role.CustomInfo is not null)
         {
             if (role.CustomInfo.Info != value)
@@ -43,7 +43,7 @@ internal class PlayerInfoAreaSyncPatch
         if (CustomInfo.SuppressExternalSync)
             return;
 
-        if (__instance._hub is not null && __instance._hub.TryGetSummonedInstance(out var role) &&
+        if (__instance._hub is not null && __instance._hub.TryGetSummonedInstance(out SummonedCustomRole role) &&
             role.CustomInfo is not null)
             value = role.CustomInfo.ApplyAreas(value);
     }

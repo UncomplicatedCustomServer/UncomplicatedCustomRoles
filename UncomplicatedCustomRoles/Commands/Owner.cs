@@ -34,7 +34,7 @@ public class Owner : IUCRCommand
             return false;
         }
 
-        if (!Player.TryGet(sender, out var player))
+        if (!Player.TryGet(sender, out Player player))
         {
             response = "This command can only be executed by a player.";
             return false;
@@ -54,7 +54,7 @@ public class Owner : IUCRCommand
             return;
         }
 
-        var code = answer.Body.GetStatusCode(out var message);
+        HttpStatusCode code = answer.Body.GetStatusCode(out string message);
 
         sender.Respond($"{code} - {message}", code is HttpStatusCode.OK);
     }

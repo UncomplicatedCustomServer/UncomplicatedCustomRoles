@@ -39,34 +39,31 @@ internal static class VersionManager
     {
         try
         {
-            var data = response.Body;
+            string data = response.Body;
 
             if (string.IsNullOrWhiteSpace(data))
             {
-                LogManager.Silent(
-                    $"The UCS cloud gave us an empty answer while asking for the version info ({response.Reason}).");
+                LogManager.Silent($"The UCS cloud gave us an empty answer while asking for the version info ({response.Reason}).");
                 return;
             }
 
-            var status = data.GetStatusCode(out var msg);
+            HttpStatusCode status = data.GetStatusCode(out string? msg);
             if (status is not HttpStatusCode.Unused)
             {
-                LogManager.Silent(
-                    $"The UCS cloud has no info about v{Plugin.Instance.Version} - HTTP {(int)status}: {msg ?? "Message is null"}");
+                LogManager.Silent($"The UCS cloud has no info about v{Plugin.Instance.Version} - HTTP {(int)status}: {msg ?? "Message is null"}");
                 return;
             }
 
             VersionInfo = JsonSerializer.Deserialize<VersionInfo>(data);
             if (VersionInfo is null)
             {
-                LogManager.Silent(
-                    $"Failed to convert API endpoint answer to VersionInfo.\nContent: {msg ?? "Message is null"}");
+                LogManager.Silent($"Failed to convert API endpoint answer to VersionInfo.\nContent: {msg ?? "Message is null"}");
                 return;
             }
 
             if (VersionInfo.PreRelease != 0)
             {
-                var latestStable = Plugin.HttpManager.LatestStableVersion;
+                Version latestStable = Plugin.HttpManager.LatestStableVersion;
                 LogManager.Info(
                     $"\nNOTICE!\nYou are currently using the version v{Plugin.Instance.Version}, who's a PRE-RELEASE or an EXPERIMENTAL RELESE of UncomplicatedCustomRoles!\nLatest stable release: {(latestStable > new Version() ? $"v{latestStable}" : "unknown")}\nNOTE: This is NOT a stable version, so there can be bugs and malfunctions, for this reason we do not recommend use in production.");
                 if (VersionInfo.ForceDebug != 0 && !(Plugin.Instance.Config?.Debug ?? true))
@@ -83,7 +80,7 @@ internal static class VersionManager
 
             CheckForUpdates();
 
-            var hash = HashFile(Plugin.Instance.FilePath);
+            string hash = HashFile(Plugin.Instance.FilePath);
             if (hash != VersionInfo.Hash)
                 HashNotMatchMessageSender(hash);
 
@@ -137,7 +134,7 @@ internal static class VersionManager
 
     public static void RecallMessageSender()
     {
-        var download = Version.TryParse(VersionInfo.RecallTarget, out var target)
+        string download = Version.TryParse(VersionInfo.RecallTarget, out Version? target)
             ? $"\n{Plugin.HttpManager.GetDownloadHint(target)}"
             : string.Empty;
 
@@ -148,8 +145,8 @@ internal static class VersionManager
     public static string HashFile(string path)
     {
         using FileStream file = new(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-        using var sha = SHA256.Create();
-        var bytes = sha.ComputeHash(file);
+        using SHA256 sha = SHA256.Create();
+        byte[] bytes = sha.ComputeHash(file);
 
         return BitConverter.ToString(bytes).Replace("-", string.Empty);
     }

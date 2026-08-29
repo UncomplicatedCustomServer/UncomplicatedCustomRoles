@@ -52,10 +52,9 @@ public static class DictionaryExtension
         if (dictionary is null)
             return string.Empty;
 
-        var Data =
-            $"[{dictionary.GetType().FullName}] Dictionary<{dictionary.GetType().GetGenericArguments()[0].FullName}, {dictionary.GetType().GetGenericArguments()[1].FullName}> ({dictionary.Count}) [\n";
+        string Data = $"[{dictionary.GetType().FullName}] Dictionary<{dictionary.GetType().GetGenericArguments()[0].FullName}, {dictionary.GetType().GetGenericArguments()[1].FullName}> ({dictionary.Count}) [\n";
 
-        foreach (var kvp in dictionary)
+        foreach (KeyValuePair<TKey, TValue> kvp in dictionary)
             Data += $"{kvp.Key}: {kvp.Value},\n";
 
         Data += "];";
@@ -68,7 +67,7 @@ public static class DictionaryExtension
     {
         Dictionary<string, object> result = new();
 
-        foreach (var kvp in dictionary)
+        foreach (KeyValuePair<TKey, TValue> kvp in dictionary)
             result.Add(kvp.Key.ToString(), kvp.Value);
 
         return result;
@@ -78,7 +77,7 @@ public static class DictionaryExtension
     {
         Dictionary<string, string> result = new();
 
-        foreach (var kvp in dictionary)
+        foreach (KeyValuePair<TKey, TValue> kvp in dictionary)
             result.Add(kvp.Key.ToString(), kvp.Value.ToString());
 
         return result;
@@ -88,7 +87,7 @@ public static class DictionaryExtension
     {
         Dictionary<TKey, TValue> newDictionary = new();
 
-        foreach (var kvp in dictionary)
+        foreach (KeyValuePair<TKey, TValue> kvp in dictionary)
             newDictionary.Add(kvp.Key, kvp.Value);
 
         return newDictionary;
@@ -99,7 +98,7 @@ public static class DictionaryExtension
     {
         ConcurrentDictionary<TKey, TValue> newDictionary = new();
 
-        foreach (var kvp in dictionary)
+        foreach (KeyValuePair<TKey, TValue> kvp in dictionary)
             newDictionary[kvp.Key] = kvp.Value;
 
         return newDictionary;

@@ -12,6 +12,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using LabApi.Loader.Features.Yaml;
 using NorthwoodLib.Pools;
 using UncomplicatedCustomRoles.API.Enums;
@@ -43,7 +45,7 @@ public class CompatibilityManager
 
     public static void ParseAndLoadCustomRole(string file)
     {
-        var content = File.ReadAllText(file);
+        string content = File.ReadAllText(file);
         CustomRole role = null;
 
         try
@@ -56,10 +58,11 @@ public class CompatibilityManager
         catch (Exception)
         {
             // Try to decode older roles in order to make everything work
-            foreach (var kvp in previousVersionRoles)
+            foreach (KeyValuePair<Type, Version> kvp in previousVersionRoles)
+            {
                 try
                 {
-                    var data = YamlConfigParser.Deserializer.Deserialize(content, kvp.Key);
+                    object data = YamlConfigParser.Deserializer.Deserialize(content, kvp.Key);
                     if (data is IPreviousVersionRole prevRole)
                     {
                         role = prevRole.ToCustomRole();
@@ -70,6 +73,7 @@ public class CompatibilityManager
                 catch
                 {
                 }
+            }
 
             if (role is null)
                 throw;
@@ -81,12 +85,12 @@ public class CompatibilityManager
 
     public static LoadStatusType RegisterCustomRole(ICustomRole role)
     {
-        var status = CustomRole.InternalRegister(role);
+        LoadStatusType status = CustomRole.InternalRegister(role);
 
         if (status is LoadStatusType.SameId && Plugin.Instance.Config.UseIdFixer &&
-            RolePaths.TryGetValue(role, out var rolePath))
+            RolePaths.TryGetValue(role, out string rolePath))
         {
-            var roleId = GetRoleFileElement(File.ReadAllLines(rolePath), "id:");
+            string roleId = GetRoleFileElement(File.ReadAllLines(rolePath), "id:");
             role.Id = int.Parse(roleId);
             LogManager.Info($"Updated ID for role at {rolePath} - New id: {role.Id} ({roleId})",
                 ConsoleColor.DarkMagenta);
@@ -100,7 +104,7 @@ public class CompatibilityManager
         }
         else if (status is LoadStatusType.ValidatorError)
         {
-            CustomRole.Validate(role, out var error);
+            CustomRole.Validate(role, out string error);
             LogManager.Error($"{prefix}Failed to load CustomRole {role}: failed to validate the CustomRole\n{error}",
                 "RL0001");
         }
@@ -110,21 +114,25 @@ public class CompatibilityManager
                 $"{prefix}Failed to load CustomRole {role}: there's already another CustomRole with the same Id!",
                 "RL0002");
 
-            if (!RolePaths.TryGetValue(role, out var path))
+            if (!RolePaths.TryGetValue(role, out string path))
                 path = null;
 
             if (path is not null)
+            {
                 CustomRole.NotLoadedRoles.Add(new ErrorCustomRole(path, File.ReadAllLines(path), null,
                     $"There's already another CustomRole with the Id {role.Id}"));
+            }
         }
 
-        if (status is not LoadStatusType.SameId && outdatedCustomRoles.TryGetValue(role, out var version))
+        if (status is not LoadStatusType.SameId && outdatedCustomRoles.TryGetValue(role, out Version version))
+        {
             LogManager.Info(
                 $"{prefix}The loaded CustomRole is made for UCR v{version.ToString(3)}. Consider updating it :)",
                 ConsoleColor.Gray);
+        }
 
-        if (status is LoadStatusType.Success && outdatedCustomRoles.TryGetValue(role, out var version2) &&
-            RolePaths.TryGetValue(role, out var path2))
+        if (status is LoadStatusType.Success && outdatedCustomRoles.TryGetValue(role, out Version version2) &&
+            RolePaths.TryGetValue(role, out string path2))
             CustomRole.OutdatedRoles.Add(new OutdatedCustomRole(role, version2, path2));
 
         return status;
@@ -138,7 +146,7 @@ public class CompatibilityManager
 
     public static string GetRoleFileElement(string[] pieces, string rowPart, bool removeSpaces = true)
     {
-        var el = pieces.FirstOrDefault(l => l.Contains(rowPart)) ?? "N/D";
+        string el = pieces.FirstOrDefault(l => l.Contains(rowPart)) ?? "N/D";
 
         if (removeSpaces)
             el = el.Replace(" ", string.Empty);
@@ -148,7 +156,7 @@ public class CompatibilityManager
 
     public static string HandleErrorString(Exception ex, bool showErrorName = false)
     {
-        var message = (showErrorName ? $"{ex.GetType().Name} " : string.Empty) + ex.Message;
+        string message = (showErrorName ? $"{ex.GetType().Name} " : string.Empty) + ex.Message;
 
         if (ex.InnerException is not null)
             message += $" -> {ex.InnerException.Message}";
@@ -170,15 +178,14 @@ public class CompatibilityManager
     private static bool TypeCheck(string content, out string error)
     {
         error = null;
-        var data = YamlConfigParser.Deserializer.Deserialize<Dictionary<string, object>>(content);
+        Dictionary<string, object> data = YamlConfigParser.Deserializer.Deserialize<Dictionary<string, object>>(content);
 
-        foreach (var property in typeof(CustomRole).GetProperties()
+        foreach (PropertyInfo property in typeof(CustomRole).GetProperties()
                      .Where(p => p.CanWrite && p is not null && p.GetType() is not null))
         {
-            var snakeCaseName = ToSnakeCase(property.Name);
+            string snakeCaseName = ToSnakeCase(property.Name);
             if (!data.ContainsKey(snakeCaseName))
-                error =
-                    $"Given CustomRole doesn't contain the required property '{snakeCaseName}' ({ToSnakeCase(property.PropertyType.Name)})";
+                error = $"Given CustomRole doesn't contain the required property '{snakeCaseName}' ({ToSnakeCase(property.PropertyType.Name)})";
 
             if (error is not null)
                 break;
@@ -192,10 +199,10 @@ public class CompatibilityManager
         if (string.IsNullOrEmpty(name))
             return name;
 
-        var result = StringBuilderPool.Shared.Rent();
-        for (var i = 0; i < name.Length; i++)
+        StringBuilder result = StringBuilderPool.Shared.Rent();
+        for (int i = 0; i < name.Length; i++)
         {
-            var c = name[i];
+            char c = name[i];
             if (char.IsUpper(c))
             {
                 if (i > 0)

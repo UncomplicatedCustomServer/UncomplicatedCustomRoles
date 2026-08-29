@@ -166,8 +166,7 @@ public class CustomRole : ICustomRole
     /// <summary>
     ///     Gets or sets the broadcast that will be shown to the player when spawned
     /// </summary>
-    public virtual string SpawnBroadcast { get; set; } =
-        "You are a <color=orange><b>Janitor</b></color>!\nClean the Light Containment Zone!";
+    public virtual string SpawnBroadcast { get; set; } = "You are a <color=orange><b>Janitor</b></color>!\nClean the Light Containment Zone!";
 
     /// <summary>
     ///     Gets or sets the broadcast duration
@@ -192,11 +191,7 @@ public class CustomRole : ICustomRole
     /// <summary>
     ///     Gets or sets the inventory of the player
     /// </summary>
-    public virtual List<ItemType> Inventory { get; set; } =
-    [
-        ItemType.Flashlight,
-        ItemType.KeycardJanitor
-    ];
+    public virtual List<ItemType> Inventory { get; set; } = [ItemType.Flashlight, ItemType.KeycardJanitor];
 
     /// <summary>
     ///     Gets or sets the custom items inventory of the player
@@ -282,12 +277,14 @@ public class CustomRole : ICustomRole
         if (string.IsNullOrEmpty(name))
             return false;
 
-        foreach (var role in CustomRoles.Values)
+        foreach (ICustomRole role in CustomRoles.Values)
+        {
             if (string.Equals(role.Name, name, StringComparison.OrdinalIgnoreCase))
             {
                 customRole = role;
                 return true;
             }
+        }
 
         return false;
     }
@@ -312,7 +309,7 @@ public class CustomRole : ICustomRole
     /// <returns>The <see cref="ICustomRole" /> with the given Id or <see cref="null" /> if not found.</returns>
     public static ICustomRole Get(int id)
     {
-        if (TryGet(id, out var customRole))
+        if (TryGet(id, out ICustomRole customRole))
             return customRole;
 
         return null;
@@ -325,7 +322,7 @@ public class CustomRole : ICustomRole
     /// <returns>The first <see cref="ICustomRole" /> with the given name or <see cref="null" /> if not found.</returns>
     public static ICustomRole Get(string name)
     {
-        return TryGet(name, out var customRole) ? customRole : null;
+        return TryGet(name, out ICustomRole customRole) ? customRole : null;
     }
 
     /// <summary>
@@ -335,7 +332,7 @@ public class CustomRole : ICustomRole
     /// <returns>The first role of the given type or <see cref="null" /> if not found.</returns>
     public static T Get<T>() where T : class, ICustomRole
     {
-        return TryGet<T>(out var customRole) ? customRole : null;
+        return TryGet(out T customRole) ? customRole : null;
     }
 
     /// <summary>
@@ -393,12 +390,14 @@ public class CustomRole : ICustomRole
     /// <returns><see cref="true" /> if the role was registered and has been removed.</returns>
     public static bool Unregister(int id, bool removeFromPlayers = false)
     {
-        if (!CustomRoles.TryRemove(id, out var customRole))
+        if (!CustomRoles.TryRemove(id, out ICustomRole customRole))
             return false;
 
         if (removeFromPlayers)
-            foreach (var summoned in SummonedCustomRole.List.Values.Where(scr => scr.Role.Id == id).ToList())
+        {
+            foreach (SummonedCustomRole summoned in SummonedCustomRole.List.Values.Where(scr => scr.Role.Id == id).ToList())
                 summoned.Destroy();
+        }
 
         CustomRoleEvents.OnUnregistered(new CustomRoleUnregisteredEventArgs(customRole));
         return true;
@@ -433,16 +432,16 @@ public class CustomRole : ICustomRole
 
         if (Plugin.Instance.Config.EnableValidator)
         {
-            RoleValidator.Validate(customRole, out var errors, out var warnings);
+            RoleValidator.Validate(customRole, out List<string> errors, out List<string> warnings);
 
-            foreach (var warning in warnings)
+            foreach (string warning in warnings)
                 LogManager.Warn($"[Role Validator] {customRole}: {warning}");
 
             if (errors.Count > 0)
                 return LoadStatusType.ValidatorError;
         }
 
-        var registeringArgs = new CustomRoleRegisteringEventArgs(customRole);
+        CustomRoleRegisteringEventArgs registeringArgs = new(customRole);
         CustomRoleEvents.OnRegistering(registeringArgs);
         if (!registeringArgs.IsAllowed)
             return LoadStatusType.Denied;

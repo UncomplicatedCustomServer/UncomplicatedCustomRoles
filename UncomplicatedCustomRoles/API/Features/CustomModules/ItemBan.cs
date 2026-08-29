@@ -20,11 +20,10 @@ public class ItemBan : CustomModule
 
     public override bool Validate(out string error)
     {
-        var invalid = GetInvalidEnumEntries<ItemType>("item_type");
+        List<string> invalid = GetInvalidEnumEntries<ItemType>("item_type");
         if (invalid.Count > 0)
         {
-            error =
-                $"'item_type' contains invalid ItemType value(s): {string.Join(", ", invalid)}. Examples: GunAK, Medkit, KeycardO5.";
+            error = $"'item_type' contains invalid ItemType value(s): {string.Join(", ", invalid)}. Examples: GunAK, Medkit, KeycardO5.";
             return false;
         }
 

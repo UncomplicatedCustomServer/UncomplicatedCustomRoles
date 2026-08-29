@@ -31,7 +31,7 @@ public class Reload : IUCRCommand
 
     public bool Executor(List<string> arguments, ICommandSender sender, out string response)
     {
-        var oldRoles = CustomRole.CustomRoles.Clone();
+        ConcurrentDictionary<int, ICustomRole> oldRoles = CustomRole.CustomRoles.Clone();
 
         CustomRole.CustomRoles = new ConcurrentDictionary<int, ICustomRole>();
         CustomRole.NotLoadedRoles.Clear();
@@ -43,20 +43,21 @@ public class Reload : IUCRCommand
         FileConfigs.LoadAll(Server.Port.ToString());
         ImportManager.Reload();
 
-        foreach (var oldRole in oldRoles)
+        foreach (KeyValuePair<int, ICustomRole> oldRole in oldRoles)
+        {
             if (!CustomRole.CustomRoles.ContainsKey(oldRole.Key) &&
                 !CompatibilityManager.RolePaths.ContainsKey(oldRole.Value))
                 CustomRole.Register(oldRole.Value);
+        }
 
-        var removedRoles = oldRoles.Keys.Except(CustomRole.CustomRoles.Keys).ToList();
+        List<int> removedRoles = oldRoles.Keys.Except(CustomRole.CustomRoles.Keys).ToList();
 
-        foreach (var role in removedRoles)
+        foreach (int role in removedRoles)
             SummonedCustomRole.RemoveSpecificRole(role);
 
-        var added = CustomRole.CustomRoles.Keys.Except(oldRoles.Keys).Count();
+        int added = CustomRole.CustomRoles.Keys.Except(oldRoles.Keys).Count();
 
-        response =
-            $"\nSuccessfully reloaded UncomplicatedCustomRoles\n<color=#5db30c>➕</color> Added <b>{added}</b> Custom Roles\n<color=#c23636>➖</color> Removed <b>{removedRoles.Count}</b> Custom Roles\n<color=#00ffff>🔢</color> Loaded a total of <b>{CustomRole.CustomRoles.Count}</b> Custom Roles\n<color=#ffff00>⚠️</color> If you have changed some stats of the Custom Roles such as health and inventory the changes won't take place on already spawned players with these custom roles!";
+        response = $"\nSuccessfully reloaded UncomplicatedCustomRoles\n<color=#5db30c>➕</color> Added <b>{added}</b> Custom Roles\n<color=#c23636>➖</color> Removed <b>{removedRoles.Count}</b> Custom Roles\n<color=#00ffff>🔢</color> Loaded a total of <b>{CustomRole.CustomRoles.Count}</b> Custom Roles\n<color=#ffff00>⚠️</color> If you have changed some stats of the Custom Roles such as health and inventory the changes won't take place on already spawned players with these custom roles!";
         return true;
     }
 }

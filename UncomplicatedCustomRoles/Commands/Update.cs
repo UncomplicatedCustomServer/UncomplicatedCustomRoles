@@ -24,8 +24,7 @@ public class Update : IUCRCommand
 {
     public string Name { get; } = "update";
 
-    public string Description { get; } =
-        "Rewrite one or more loaded CustomRole config files to the latest format (outdated roles and deprecated flags)";
+    public string Description { get; } = "Rewrite one or more loaded CustomRole config files to the latest format (outdated roles and deprecated flags)";
 
     public string RequiredPermission { get; } = "ucr.update";
 
@@ -38,22 +37,26 @@ public class Update : IUCRCommand
             return false;
         }
 
-        var updated = 0;
+        int updated = 0;
 
         if (arguments[0].ToLower() is "all")
         {
-            foreach (var role in CustomRole.OutdatedRoles.ToList())
+            foreach (OutdatedCustomRole role in CustomRole.OutdatedRoles.ToList())
+            {
                 if (UpdateRole(role))
                     updated++;
+            }
 
-            foreach (var role in FlagMigrator.Migrated.ToList())
+            foreach (ICustomRole role in FlagMigrator.Migrated.ToList())
+            {
                 if (PersistMigrated(role))
                     updated++;
+            }
         }
-        else if (int.TryParse(arguments[0], out var id))
+        else if (int.TryParse(arguments[0], out int id))
         {
-            var outdated = CustomRole.OutdatedRoles.FirstOrDefault(r => r.CustomRole.Id == id);
-            var migrated = FlagMigrator.Migrated.FirstOrDefault(r => r.Id == id);
+            OutdatedCustomRole outdated = CustomRole.OutdatedRoles.FirstOrDefault(r => r.CustomRole.Id == id);
+            ICustomRole migrated = FlagMigrator.Migrated.FirstOrDefault(r => r.Id == id);
 
             if (outdated is not null && UpdateRole(outdated))
                 updated++;
@@ -85,7 +88,7 @@ public class Update : IUCRCommand
 
     private static bool PersistMigrated(ICustomRole role)
     {
-        if (!CompatibilityManager.RolePaths.TryGetValue(role, out var path) || string.IsNullOrEmpty(path))
+        if (!CompatibilityManager.RolePaths.TryGetValue(role, out string path) || string.IsNullOrEmpty(path))
             return false;
 
         File.WriteAllText(path, YamlConfigParser.Serializer.Serialize(role));

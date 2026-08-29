@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CommandSystem;
 using LabApi.Features.Wrappers;
+using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Extensions;
 
@@ -35,16 +36,15 @@ public class Role : IUCRCommand
 
         if (arguments.Count == 1)
         {
-            if (!Player.TryGet(arguments[0], out var player))
+            if (!Player.TryGet(arguments[0], out Player player))
             {
                 response = $"Sorry but the player {arguments[0]} does not exists!";
                 return false;
             }
 
-            if (player.TryGetSummonedInstance(out var summoned))
+            if (player.TryGetSummonedInstance(out SummonedCustomRole summoned))
             {
-                response =
-                    $"Player {player.Nickname} {player.UserId} [{player.PlayerId}] is the custom role {summoned.Role.Name} [{summoned.Role.Id}]";
+                response = $"Player {player.Nickname} {player.UserId} [{player.PlayerId}] is the custom role {summoned.Role.Name} [{summoned.Role.Id}]";
                 return true;
             }
 
@@ -53,12 +53,14 @@ public class Role : IUCRCommand
         }
 
         response = "Custom roles of every player:";
-        foreach (var Player in Player.ReadyList.Where(p => !p.IsHost))
-            if (Player.TryGetSummonedInstance(out var summoned))
-                response +=
-                    $"\n - Player {Player.Nickname} {Player.UserId} [{Player.PlayerId}] is the custom role {summoned.Role.Name} [{summoned.Role.Id}]";
+        foreach (Player Player in Player.ReadyList.Where(p => !p.IsHost))
+        {
+            if (Player.TryGetSummonedInstance(out SummonedCustomRole summoned))
+                response += $"\n - Player {Player.Nickname} {Player.UserId} [{Player.PlayerId}] is the custom role {summoned.Role.Name} [{summoned.Role.Id}]";
             else
                 response += $"\n - Player {Player.Nickname} {Player.UserId} [{Player.PlayerId}] is not a custom role!";
+        }
+
         return true;
     }
 }

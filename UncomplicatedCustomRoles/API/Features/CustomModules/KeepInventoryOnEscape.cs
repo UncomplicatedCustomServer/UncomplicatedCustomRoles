@@ -16,7 +16,7 @@ internal class KeepInventoryOnEscape : CustomModule
 
     public override bool Validate(out string error)
     {
-        if (Args.TryGetValue("drop", out var raw) && raw is not null && !bool.TryParse(raw.ToString(), out _))
+        if (Args.TryGetValue("drop", out object raw) && raw is not null && !bool.TryParse(raw.ToString(), out _))
         {
             error = $"'drop' must be true or false, got '{raw}'.";
             return false;

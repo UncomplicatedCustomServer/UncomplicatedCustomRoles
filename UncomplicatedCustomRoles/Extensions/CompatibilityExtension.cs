@@ -34,7 +34,7 @@ public static class CompatibilityExtension
     {
         List<ItemType> items = [];
 
-        foreach (var ammoType in types)
+        foreach (ExiledAmmoType ammoType in types)
             items.Add(ammoType.GetItemType());
 
         return items;
@@ -44,7 +44,7 @@ public static class CompatibilityExtension
     {
         Dictionary<ItemType, T> items = new();
 
-        foreach (var item in data)
+        foreach (KeyValuePair<ExiledAmmoType, T> item in data)
             items.Add(item.Key.GetItemType(), item.Value);
 
         return items;
@@ -124,7 +124,7 @@ public static class CompatibilityExtension
     {
         List<string> result = [];
 
-        foreach (var type in types)
+        foreach (ExiledRoomType type in types)
             result.Add(type.GetRoomType());
 
         return result;
@@ -149,7 +149,7 @@ public static class CompatibilityExtension
     {
         List<FacilityZone> result = [];
 
-        foreach (var type in types)
+        foreach (ExiledZoneType type in types)
             result.Add(type.GetFacilityZone());
 
         return result;

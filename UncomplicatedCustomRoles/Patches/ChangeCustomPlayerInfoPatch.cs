@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using CommandSystem;
 using CommandSystem.Commands.RemoteAdmin;
 using HarmonyLib;
 using LabApi.Features.Wrappers;
 using NorthwoodLib.Pools;
+using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Extensions;
 using Utils;
 
@@ -23,14 +26,13 @@ internal class ChangeCustomPlayerInfoPatch
 
         if (arguments.Count < 1)
         {
-            response =
-                $"To execute this command provide at least 1 argument!\nUsage: {arguments.Array[0]} {__instance.DisplayCommandUsage()}";
+            response = $"To execute this command provide at least 1 argument!\nUsage: {arguments.Array[0]} {__instance.DisplayCommandUsage()}";
             __result = false;
             return false;
         }
 
         string[] newargs;
-        var referenceHubList = RAUtils.ProcessPlayerIdOrNamesList(arguments, 0, out newargs);
+        List<ReferenceHub> referenceHubList = RAUtils.ProcessPlayerIdOrNamesList(arguments, 0, out newargs);
         if (referenceHubList == null)
         {
             response = "Cannot find player! Try using the player ID!";
@@ -38,18 +40,18 @@ internal class ChangeCustomPlayerInfoPatch
             return false;
         }
 
-        var str = newargs == null ? null : string.Join(" ", newargs);
-        var stringBuilder = StringBuilderPool.Shared.Rent();
-        foreach (var me in referenceHubList)
+        string str = newargs == null ? null : string.Join(" ", newargs);
+        StringBuilder stringBuilder = StringBuilderPool.Shared.Rent();
+        foreach (ReferenceHub me in referenceHubList)
         {
-            var player = Player.Get(me);
+            Player player = Player.Get(me);
             if (str == null)
             {
                 ServerLogs.AddLog(ServerLogs.Modules.Administrative,
                     $"{sender.LogName} cleared custom info of player {me.PlayerId} ({me.nicknameSync.MyNick}).",
                     ServerLogs.ServerLogType.RemoteAdminActivity_GameChanging);
                 stringBuilder.AppendFormat("Reset {0}'s custom info.\n", me.LoggedNameFromRefHub());
-                if (player.TryGetSummonedInstance(out var summonedInstance))
+                if (player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
                     summonedInstance.CustomInfo.Info = string.Empty;
                 else
                     me.nicknameSync.CustomPlayerInfo = null;
@@ -60,7 +62,7 @@ internal class ChangeCustomPlayerInfoPatch
                     $"{sender.LogName} set custom info of player {me.PlayerId} ({me.nicknameSync.MyNick}) to \"{str}\".",
                     ServerLogs.ServerLogType.RemoteAdminActivity_GameChanging);
                 stringBuilder.AppendFormat("Set {0}'s custom info to: {1}\n", me.LoggedNameFromRefHub(), str);
-                if (player.TryGetSummonedInstance(out var summonedInstance))
+                if (player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
                     summonedInstance.CustomInfo.Info = str;
                 else
                     me.nicknameSync.CustomPlayerInfo = str;

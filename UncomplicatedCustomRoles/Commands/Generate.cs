@@ -34,20 +34,19 @@ internal class Generate : IUCRCommand
             return false;
         }
 
-        var port = -1;
+        int port = -1;
         if (arguments.Count == 2)
         {
-            if (!uint.TryParse(arguments[1], out var parsedPort))
+            if (!uint.TryParse(arguments[1], out uint parsedPort))
             {
-                response =
-                    $"'{arguments[1]}' is not a valid server port!\nUsage: ucr generate (FileName) (Server-port)";
+                response = $"'{arguments[1]}' is not a valid server port!\nUsage: ucr generate (FileName) (Server-port)";
                 return false;
             }
 
             port = (int)parsedPort;
         }
 
-        var path = FileConfigs.Dir;
+        string path = FileConfigs.Dir;
         if (port > 0)
             path = Path.Combine(path, port.ToString());
 

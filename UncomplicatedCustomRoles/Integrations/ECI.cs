@@ -9,6 +9,7 @@
  */
 
 using System;
+using System.Reflection;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomRoles.Manager;
 
@@ -25,41 +26,37 @@ internal static class ECI
         {
             if (PluginInstance is null)
             {
-                LogManager.Error(
-                    $"Failed to run Exiled.CustomItems.GiveCustomItem({id}): Instance of the plugin not found!");
+                LogManager.Error($"Failed to run Exiled.CustomItems.GiveCustomItem({id}): Instance of the plugin not found!");
                 return;
             }
 
-            var tryGiveMethod = DynamicInvoke.GetMethod("Exiled.CustomItems",
+            MethodInfo tryGiveMethod = DynamicInvoke.GetMethod("Exiled.CustomItems",
                 "Exiled.CustomItems.API.Features.CustomItem.TryGive",
                 false, 3, ["id"]);
 
             if (tryGiveMethod is null)
             {
-                LogManager.Error(
-                    $"Failed to run Exiled.CustomItems.TryGiveCustomItem({id}): CustomItems.TryGive method not found!");
+                LogManager.Error($"Failed to run Exiled.CustomItems.TryGiveCustomItem({id}): CustomItems.TryGive method not found!");
                 return;
             }
 
-            var exiledPlayerMethod = DynamicInvoke.GetMethod("Exiled.API", "Exiled.API.Features.Player.Get", false, 1,
+            MethodInfo exiledPlayerMethod = DynamicInvoke.GetMethod("Exiled.API", "Exiled.API.Features.Player.Get", false, 1,
                 ["apiPlayer"]);
             if (exiledPlayerMethod is null)
             {
-                LogManager.Error(
-                    $"Failed to run Exiled.CustomItems.TryGiveCustomItem({id}): Exiled Player.Get method not found!");
+                LogManager.Error($"Failed to run Exiled.CustomItems.TryGiveCustomItem({id}): Exiled Player.Get method not found!");
                 return;
             }
 
-            var exiledPlayer = exiledPlayerMethod.Invoke(null, [player]);
+            object exiledPlayer = exiledPlayerMethod.Invoke(null, [player]);
 
-            var result = tryGiveMethod.Invoke(PluginInstance, [exiledPlayer, id, true]);
+            object result = tryGiveMethod.Invoke(PluginInstance, [exiledPlayer, id, true]);
 
 
             if (result is true)
                 LogManager.Silent($"Gave custom item id {id} to player {player?.Nickname} via CustomItems.TryGive.");
             else
-                LogManager.Warn(
-                    $"Failed to give custom item id {id} to player {player?.Nickname}. Check if the CustomItem exists");
+                LogManager.Warn($"Failed to give custom item id {id} to player {player?.Nickname}. Check if the CustomItem exists");
         }
         catch (Exception e)
         {

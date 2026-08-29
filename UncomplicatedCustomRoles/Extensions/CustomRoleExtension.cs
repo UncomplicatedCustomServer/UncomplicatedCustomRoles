@@ -41,7 +41,7 @@ public static class CustomRoleExtension
     /// <returns><see cref="true" /> if the player was playing this role, and it has been removed.</returns>
     public static bool RemoveFrom(this ICustomRole role, Player player)
     {
-        if (role is null || !SummonedCustomRole.TryGet(player, out var summoned) || summoned.Role.Id != role.Id)
+        if (role is null || !SummonedCustomRole.TryGet(player, out SummonedCustomRole summoned) || summoned.Role.Id != role.Id)
             return false;
 
         summoned.Destroy();

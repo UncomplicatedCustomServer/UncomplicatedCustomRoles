@@ -23,18 +23,16 @@ public class FullCandyBag : CustomModule
 
     public override bool Validate(out string error)
     {
-        var invalid = GetInvalidEnumEntries<CandyKindID>("candies");
+        List<string> invalid = GetInvalidEnumEntries<CandyKindID>("candies");
         if (invalid.Count > 0)
         {
-            error =
-                $"'candies' contains invalid candy value(s): {string.Join(", ", invalid)}. Valid values: {string.Join(", ", Enum.GetNames(typeof(CandyKindID)))}.";
+            error = $"'candies' contains invalid candy value(s): {string.Join(", ", invalid)}. Valid values: {string.Join(", ", Enum.GetNames(typeof(CandyKindID)))}.";
             return false;
         }
 
         if (Kinds.Count == 0)
         {
-            error =
-                $"'candies' must list at least one valid candy. Valid values: {string.Join(", ", Enum.GetNames(typeof(CandyKindID)))}.";
+            error = $"'candies' must list at least one valid candy. Valid values: {string.Join(", ", Enum.GetNames(typeof(CandyKindID)))}.";
             return false;
         }
 
@@ -44,7 +42,7 @@ public class FullCandyBag : CustomModule
 
     public override void OnAdded()
     {
-        foreach (var kind in Kinds)
+        foreach (CandyKindID kind in Kinds)
             CustomRole.Player.GiveCandy(kind, ItemAddReason.AdminCommand);
     }
 }

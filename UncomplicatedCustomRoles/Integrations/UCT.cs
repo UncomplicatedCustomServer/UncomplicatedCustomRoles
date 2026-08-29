@@ -23,14 +23,14 @@ internal static class UCT
         teamId = 0;
         try
         {
-            var summonedTeam = DynamicInvoke.GetMethod(PluginName,
+            object summonedTeam = DynamicInvoke.GetMethod(PluginName,
                     "UncomplicatedCustomTeams.API.TeamExtensions.GetCustomTeam", true)?
                 .Invoke(null, [player]);
 
             if (summonedTeam is null)
                 return false;
 
-            var definition = DynamicInvoke.GetMethod(PluginName,
+            object definition = DynamicInvoke.GetMethod(PluginName,
                     "UncomplicatedCustomTeams.API.Features.Runtime.SummonedTeam.Definition_get", true)?
                 .Invoke(summonedTeam, null);
 

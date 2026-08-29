@@ -24,8 +24,7 @@ namespace UncomplicatedCustomRoles.Manager.NET;
 
 internal class HttpManager
 {
-    private const string GitHubReleases =
-        "https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/releases";
+    private const string GitHubReleases = "https://github.com/UncomplicatedCustomServer/UncomplicatedCustomRoles/releases";
 
     private const string GitHubLatestRelease = GitHubReleases + "/latest";
 
@@ -114,14 +113,14 @@ internal class HttpManager
 
     internal static int CompareReleases(Version left, Version right)
     {
-        var release = new Version(left.Major, left.Minor, Math.Max(left.Build, 0))
+        int release = new Version(left.Major, left.Minor, Math.Max(left.Build, 0))
             .CompareTo(new Version(right.Major, right.Minor, Math.Max(right.Build, 0)));
 
         if (release != 0)
             return release;
 
-        var leftPreRelease = Math.Max(left.Revision, 0);
-        var rightPreRelease = Math.Max(right.Revision, 0);
+        int leftPreRelease = Math.Max(left.Revision, 0);
+        int rightPreRelease = Math.Max(right.Revision, 0);
 
         if (leftPreRelease == rightPreRelease)
             return 0;
@@ -134,7 +133,7 @@ internal class HttpManager
 
     public bool IsPreReleaseVersion(Version version)
     {
-        return TryGetVersionInfo(version, out var info) ? info.PreRelease != 0 : version.Revision > 0;
+        return TryGetVersionInfo(version, out VersionInfo info) ? info.PreRelease != 0 : version.Revision > 0;
     }
 
     public CoroutineHandle LoadVersions()
@@ -152,8 +151,10 @@ internal class HttpManager
         yield return Timing.WaitUntilDone(WebQuery.Get($"{Endpoint}/{Prefix}/versions", LoadVersionList));
 
         if (Versions.Count is 0)
+        {
             yield return Timing.WaitUntilDone(WebQuery.Get($"{Endpoint}/{Prefix}/versions/latest@text/plain",
                 LoadLatestVersionFallback));
+        }
     }
 
     private void LoadVersionList(HttpResponse response)
@@ -164,15 +165,14 @@ internal class HttpManager
         }
         catch
         {
-            LogManager.Debug(
-                $"Failed to load the version list from the UCS cloud ({response.Reason}): '{response.Body}'");
+            LogManager.Debug($"Failed to load the version list from the UCS cloud ({response.Reason}): '{response.Body}'");
             Versions = [];
             return;
         }
 
-        foreach (var version in Versions)
+        foreach (VersionInfo version in Versions)
         {
-            if (!Version.TryParse(version.Name, out var parsed))
+            if (!Version.TryParse(version.Name, out Version parsed))
                 continue;
 
             if (CompareReleases(parsed, LatestVersion) > 0)
@@ -195,7 +195,7 @@ internal class HttpManager
     /// </summary>
     private void LoadLatestVersionFallback(HttpResponse response)
     {
-        var answer = response.Body;
+        string answer = response.Body;
 
         try
         {
@@ -225,13 +225,13 @@ internal class HttpManager
     public bool TryGetVersionInfo(Version version, out VersionInfo info)
     {
         info = Versions.FirstOrDefault(v =>
-            Version.TryParse(v.Name, out var parsed) && CompareReleases(parsed, version) is 0);
+            Version.TryParse(v.Name, out Version parsed) && CompareReleases(parsed, version) is 0);
         return info is not null;
     }
 
     private Version ResolveChannelTarget()
     {
-        var target = LatestStableVersion;
+        Version target = LatestStableVersion;
 
         if (IsPreRelease && CompareReleases(LatestPreRelease, target) > 0)
             target = LatestPreRelease;
@@ -245,15 +245,15 @@ internal class HttpManager
     /// </summary>
     public Version GetUpdateTarget()
     {
-        var target = ResolveChannelTarget();
+        Version target = ResolveChannelTarget();
         return CompareReleases(target, Plugin.Instance.Version) > 0 ? target : null;
     }
 
     public string GetDownloadHint(Version version)
     {
-        TryGetVersionInfo(version, out var info);
+        TryGetVersionInfo(version, out VersionInfo info);
 
-        var link = string.IsNullOrWhiteSpace(info?.SourceLink) ? null : info.SourceLink.Trim();
+        string link = string.IsNullOrWhiteSpace(info?.SourceLink) ? null : info.SourceLink.Trim();
 
         return info?.Source?.Trim().ToLowerInvariant() switch
         {
@@ -276,7 +276,7 @@ internal class HttpManager
     {
         try
         {
-            var Data = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, JsonElement>>>(response.Body);
+            Dictionary<string, Dictionary<string, JsonElement>> Data = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, JsonElement>>>(response.Body);
 
             if (Data is null)
             {
@@ -284,19 +284,19 @@ internal class HttpManager
                 return;
             }
 
-            foreach (var kvp in Data.Where(kvp =>
+            foreach (KeyValuePair<string, Dictionary<string, JsonElement>> kvp in Data.Where(kvp =>
                          kvp.Value is not null && kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") &&
                          kvp.Value.ContainsKey("override") && kvp.Value.ContainsKey("job")))
             {
-                var role = kvp.Value["role"].GetString();
-                var color = kvp.Value["color"].GetString();
-                var overrideStr = kvp.Value["override"].ValueKind switch
+                string role = kvp.Value["role"].GetString();
+                string color = kvp.Value["color"].GetString();
+                bool overrideStr = kvp.Value["override"].ValueKind switch
                 {
                     JsonValueKind.String => bool.Parse(kvp.Value["override"].GetString() ?? string.Empty),
                     JsonValueKind.True => true,
                     _ => false
                 };
-                var isJob = kvp.Value["job"].ValueKind == JsonValueKind.True;
+                bool isJob = kvp.Value["job"].ValueKind == JsonValueKind.True;
                 Credits[kvp.Key] = new Triplet<string, string, bool>(role, color, overrideStr);
                 if (isJob)
                     IsJobRole.Add(kvp.Key);
@@ -305,14 +305,13 @@ internal class HttpManager
         catch (Exception e)
         {
             LogManager.Error("An error occurred while loading the credit tags from the UCS Central Server!");
-            LogManager.Debug(
-                $"Failed to act HttpManager::LoadCreditTagList() ({response.Reason}) - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
+            LogManager.Debug($"Failed to act HttpManager::LoadCreditTagList() ({response.Reason}) - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
         }
     }
 
     public Triplet<string, string, bool> GetCreditTag(Player player)
     {
-        if (Credits.TryGetValue(player.UserId, out var tag))
+        if (Credits.TryGetValue(player.UserId, out Triplet<string, string, bool> tag))
             return tag;
 
         return new Triplet<string, string, bool>(null, null, false);
@@ -323,7 +322,7 @@ internal class HttpManager
         if (!Plugin.Instance.Config.EnableCreditTags)
             return;
 
-        var tag = GetCreditTag(player);
+        Triplet<string, string, bool> tag = GetCreditTag(player);
 
         if (!string.IsNullOrEmpty(player.ReferenceHub.serverRoles.Network_myText))
         {

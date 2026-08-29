@@ -110,6 +110,8 @@ internal class Plugin : Plugin<Config>
             _harmony = null;
         }
 
+        PendingUnitNames.Clear();
+
         TeamPatchManager.Shutdown();
 
         EventHandlerBase.UnregisterAll();

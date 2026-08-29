@@ -11,6 +11,7 @@
 using System.Collections.Generic;
 using CommandSystem;
 using LabApi.Features.Wrappers;
+using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
@@ -29,24 +30,23 @@ internal class CustomInfo : IUCRCommand
     {
         if (arguments.Count < 3)
         {
-            response =
-                "To execute this command provide at least 1 argument!\nUsage: ucr cinfo <Player ID> <nick|role|info> (content)";
+            response = "To execute this command provide at least 1 argument!\nUsage: ucr cinfo <Player ID> <nick|role|info> (content)";
             return false;
         }
 
-        if (!Player.TryGet(arguments[0], out var player))
+        if (!Player.TryGet(arguments[0], out Player player))
         {
             response = "Cannot find player! Check the Player ID and try again!";
             return false;
         }
 
-        if (!player.TryGetSummonedInstance(out var summonedInstance))
+        if (!player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
         {
             response = $"Player {player.PlayerId} is not a Custom Role!";
             return false;
         }
 
-        var content = PlaceholderManager.ApplyPlaceholders(string.Join(" ", arguments.GetRange(2, arguments.Count - 2)),
+        string content = PlaceholderManager.ApplyPlaceholders(string.Join(" ", arguments.GetRange(2, arguments.Count - 2)),
             player, summonedInstance.Role);
 
         switch (arguments[1])

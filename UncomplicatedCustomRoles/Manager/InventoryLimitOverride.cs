@@ -24,7 +24,7 @@ internal static class InventoryLimitOverride
 
     internal static void Clear(int playerId, ItemCategory category)
     {
-        if (!Categories.TryGetValue(playerId, out var map))
+        if (!Categories.TryGetValue(playerId, out Dictionary<ItemCategory, sbyte> map))
             return;
 
         map.Remove(category);
@@ -45,6 +45,6 @@ internal static class InventoryLimitOverride
     internal static bool TryGet(int playerId, ItemCategory category, out sbyte limit)
     {
         limit = 0;
-        return Categories.TryGetValue(playerId, out var map) && map.TryGetValue(category, out limit);
+        return Categories.TryGetValue(playerId, out Dictionary<ItemCategory, sbyte> map) && map.TryGetValue(category, out limit);
     }
 }

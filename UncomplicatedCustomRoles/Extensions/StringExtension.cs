@@ -10,7 +10,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -34,8 +33,7 @@ public static class StringExtension
         '9'
     ];
 
-    private static readonly Regex CustomInfoRejectedChars =
-        new(@"[\[\]]|[^\p{L}\p{P}\p{Sc}\p{N} ^=+|~`<>\n]", RegexOptions.Compiled);
+    private static readonly Regex CustomInfoRejectedChars = new(@"[\[\]]|[^\p{L}\p{P}\p{Sc}\p{N} ^=+|~`<>\n]", RegexOptions.Compiled);
 
     public static string SanitizeCustomInfo(this string str)
     {
@@ -46,9 +44,11 @@ public static class StringExtension
     {
         List<char> result = [];
 
-        foreach (var ch in str)
+        foreach (char ch in str)
+        {
             if (INTChars.Contains(ch))
                 result.Add(ch);
+        }
 
         return string.Join(separator, result);
     }
@@ -58,12 +58,12 @@ public static class StringExtension
         if (string.IsNullOrEmpty(str) || replace is null)
             return str ?? string.Empty;
 
-        foreach (var kvp in replace)
+        foreach (KeyValuePair<string, object> kvp in replace)
         {
             if (kvp.Value is null || string.IsNullOrEmpty(kvp.Key))
                 continue;
 
-            var placeholder = matrix is null ? kvp.Key : matrix.Replace("<val>", kvp.Key);
+            string placeholder = matrix is null ? kvp.Key : matrix.Replace("<val>", kvp.Key);
 
             if (!string.IsNullOrEmpty(placeholder))
                 str = str.Replace(placeholder, kvp.Value.ToString());
@@ -74,7 +74,7 @@ public static class StringExtension
 
     public static string GenerateWithBuffer(this string str, int bufferSize)
     {
-        for (var a = str.Length; a < bufferSize; a++)
+        for (int a = str.Length; a < bufferSize; a++)
             str += " ";
 
         return str;
@@ -82,7 +82,7 @@ public static class StringExtension
 
     public static string RemoveBracketsOnEndOfName(this string name)
     {
-        var bracketStart = name.IndexOf('(');
+        int bracketStart = name.IndexOf('(');
 
         if (bracketStart > 0)
             name = name.Remove(bracketStart, name.Length - bracketStart);
@@ -109,15 +109,15 @@ public static class StringExtension
             return HttpStatusCode.Unused;
         }
 
-        var root = doc.RootElement;
+        JsonElement root = doc.RootElement;
 
-        if (root.TryGetProperty("message", out var messageElement))
+        if (root.TryGetProperty("message", out JsonElement messageElement))
         {
             message = messageElement.GetString();
             LogManager.Debug($"Extracted message: {message}");
         }
 
-        if (root.TryGetProperty("status", out var status) &&
+        if (root.TryGetProperty("status", out JsonElement status) &&
             Enum.TryParse(status.ToString(), out HttpStatusCode statusCode))
         {
             LogManager.Debug($"Extracted status code: {statusCode}");

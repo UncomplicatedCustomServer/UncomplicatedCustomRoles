@@ -9,6 +9,7 @@
  */
 
 using System.Linq;
+using System.Reflection;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomRoles.Manager;
 
@@ -16,8 +17,7 @@ namespace UncomplicatedCustomRoles.Integrations;
 
 internal static class SLWardobe
 {
-    public static object PluginInstance { get; } =
-        DynamicInvoke.GetMethod("SLWardrobe", "SLWardrobe.SLWardrobe.Instance_get")?.Invoke(null, null);
+    public static object PluginInstance { get; } = DynamicInvoke.GetMethod("SLWardrobe", "SLWardrobe.SLWardrobe.Instance_get")?.Invoke(null, null);
 
     public static void ApplySuit(Player player, string suitName)
     {
@@ -27,7 +27,7 @@ internal static class SLWardobe
             return;
         }
 
-        var method = DynamicInvoke.GetMethod("SLWardrobe", "SLWardrobe.SLWardrobe.ApplySuit");
+        MethodInfo method = DynamicInvoke.GetMethod("SLWardrobe", "SLWardrobe.SLWardrobe.ApplySuit");
 
         if (method is null)
         {
@@ -35,7 +35,7 @@ internal static class SLWardobe
             return;
         }
 
-        var exiledPlayerMethod = DynamicInvoke.GetMethod("Exiled.API", "Exiled.API.Features.Player.Get", false, 1,
+        MethodInfo exiledPlayerMethod = DynamicInvoke.GetMethod("Exiled.API", "Exiled.API.Features.Player.Get", false, 1,
             ["apiPlayer"]);
 
         if (exiledPlayerMethod is null)
@@ -44,7 +44,7 @@ internal static class SLWardobe
             return;
         }
 
-        var exiledPlayer = exiledPlayerMethod.Invoke(null, [player]);
+        object exiledPlayer = exiledPlayerMethod.Invoke(null, [player]);
         LogManager.Silent(
             $"ArgsCounter_ {method.GetParameters().Length} for 2 - expected: {string.Join(", ", method.GetParameters().Select(p => p.ParameterType.FullName))} - found: {exiledPlayer?.GetType().FullName}, {suitName.GetType().FullName}");
         method.Invoke(PluginInstance, [exiledPlayer, suitName]);
@@ -58,7 +58,7 @@ internal static class SLWardobe
             return;
         }
 
-        var method = DynamicInvoke.GetMethod("SLWardrobe", "SLWardrobe.SuitBinder.RemoveSuit");
+        MethodInfo method = DynamicInvoke.GetMethod("SLWardrobe", "SLWardrobe.SuitBinder.RemoveSuit");
 
         if (method is null)
         {
@@ -66,7 +66,7 @@ internal static class SLWardobe
             return;
         }
 
-        var exiledPlayerMethod = DynamicInvoke.GetMethod("Exiled.API", "Exiled.API.Features.Player.Get", false, 1,
+        MethodInfo exiledPlayerMethod = DynamicInvoke.GetMethod("Exiled.API", "Exiled.API.Features.Player.Get", false, 1,
             ["apiPlayer"]);
 
         if (exiledPlayerMethod is null)
@@ -75,7 +75,7 @@ internal static class SLWardobe
             return;
         }
 
-        var exiledPlayer = exiledPlayerMethod.Invoke(null, [player]);
+        object exiledPlayer = exiledPlayerMethod.Invoke(null, [player]);
         LogManager.Silent(
             $"ArgsCounter_ {method.GetParameters().Length} for 1 - expected: {string.Join(", ", method.GetParameters().Select(p => p.ParameterType.FullName))} - found: {exiledPlayer?.GetType().FullName}");
         method.Invoke(PluginInstance, [exiledPlayer]);

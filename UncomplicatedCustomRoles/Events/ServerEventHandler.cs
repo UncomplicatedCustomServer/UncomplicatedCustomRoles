@@ -1,10 +1,12 @@
 ﻿using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Events.Arguments.WarheadEvents;
 using LabApi.Events.Handlers;
+using LabApi.Features.Wrappers;
 using PlayerRoles;
 using PlayerRoles.RoleAssign;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Manager;
+using UncomplicatedCustomRoles.Patches;
 using Announcer = UncomplicatedCustomRoles.Patches.Announcer;
 
 namespace UncomplicatedCustomRoles.Events;
@@ -77,14 +79,17 @@ internal class ServerEventHandler : EventHandlerBase
         Spawn.Spawning.Clear();
         API.Features.Escape.Bucket.Clear();
         InventoryLimitOverride.ClearAll();
+        PendingUnitNames.Clear();
     }
 
     public void OnWaveRespawning(WaveRespawningEventArgs ev)
     {
         LogManager.Silent("Respawning wave");
         if (Spawn.DoHandleWave)
-            foreach (var player in ev.SpawningPlayers)
+        {
+            foreach (Player player in ev.SpawningPlayers)
                 Spawn.SpawnQueue.Add(player.PlayerId);
+        }
         else
             Spawn.DoHandleWave = true;
     }

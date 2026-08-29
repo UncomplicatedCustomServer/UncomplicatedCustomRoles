@@ -11,6 +11,7 @@
 using LabApi.Features.Wrappers;
 using PlayerRoles;
 using PlayerRoles.Spectating;
+using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
@@ -34,7 +35,7 @@ internal static class RespawnTimer
 
     public static string GetPublicCustomRoleName(ICustomRole role, Player watcherPlayer)
     {
-        if (!Plugin.Instance.Config.HiddenRolesId.TryGetValue(role.Id, out var information))
+        if (!Plugin.Instance.Config.HiddenRolesId.TryGetValue(role.Id, out HiddenRoleInformation information))
             return role.Name;
 
 
@@ -50,12 +51,12 @@ internal static class RespawnTimer
         if (player.RoleBase is not SpectatorRole spectator)
             return Plugin.Instance.Config.RespawnTimerContentEmpty;
 
-        var spectated = Player.Get(spectator.SyncedSpectatedNetId);
+        Player spectated = Player.Get(spectator.SyncedSpectatedNetId);
 
         if (spectated is null)
             return string.Empty;
 
-        if (spectated.TryGetSummonedInstance(out var summoned))
+        if (spectated.TryGetSummonedInstance(out SummonedCustomRole summoned))
             return GetPublicCustomRoleName(summoned.Role, player);
 
         return Plugin.Instance.Config.RespawnTimerContentEmpty;

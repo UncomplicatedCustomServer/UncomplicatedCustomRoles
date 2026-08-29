@@ -21,6 +21,7 @@ using InventorySystem.Disarming;
 using InventorySystem.Items;
 using InventorySystem.Items.ThrowableProjectiles;
 using InventorySystem.Searching;
+using MapGeneration.Distributors;
 using Mirror;
 using PlayerRoles;
 using PlayerRoles.PlayableScps.HumanTracker;
@@ -41,8 +42,8 @@ internal class PlayerRoleManagerPatch
 {
     private static bool Prefix(PlayerRoleManager __instance, ref PlayerRoleBase __result)
     {
-        var hub = __instance.Hub;
-        if (hub is null || !DisguiseTeam.RoleBaseList.TryGetValue(hub.PlayerId, out var role) || role is null)
+        ReferenceHub hub = __instance.Hub;
+        if (hub is null || !DisguiseTeam.RoleBaseList.TryGetValue(hub.PlayerId, out PlayerRoleBase role) || role is null)
             return true;
 
         if (RoleSerializationContext.Active)
@@ -125,10 +126,10 @@ internal class PlayerRolesUtilsPatch
         if (hub == null || !TeamFakeContext.Active)
             return true;
 
-        if (!DisguiseTeam.List.TryGetValue(hub.PlayerId, out var team))
+        if (!DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team team))
             return true;
 
-        if (_roleTeam.TryGetValue(team, out var fakeRole))
+        if (_roleTeam.TryGetValue(team, out RoleTypeId fakeRole))
         {
             __result = fakeRole;
             return false;
@@ -139,8 +140,8 @@ internal class PlayerRolesUtilsPatch
 
     internal static RoleTypeId GetCombatRoleId(ReferenceHub hub)
     {
-        if (hub != null && DisguiseTeam.List.TryGetValue(hub.PlayerId, out var team) &&
-            _roleTeam.TryGetValue(team, out var fakeRole))
+        if (hub != null && DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team team) &&
+            _roleTeam.TryGetValue(team, out RoleTypeId fakeRole))
             return fakeRole;
 
         return hub.GetRoleId();
@@ -154,12 +155,14 @@ internal class ProcessDamageRolePatch
     private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
     {
         List<CodeInstruction> code = new(instructions);
-        var original = Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetRoleId), [typeof(ReferenceHub)]);
-        var replacement = Method(typeof(PlayerRolesUtilsPatch), nameof(PlayerRolesUtilsPatch.GetCombatRoleId));
+        MethodInfo original = Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetRoleId), [typeof(ReferenceHub)]);
+        MethodInfo replacement = Method(typeof(PlayerRolesUtilsPatch), nameof(PlayerRolesUtilsPatch.GetCombatRoleId));
 
-        foreach (var instruction in code)
+        foreach (CodeInstruction instruction in code)
+        {
             if (instruction.opcode == OpCodes.Call && instruction.operand is MethodInfo method && method == original)
                 instruction.operand = replacement;
+        }
 
         return code;
     }
@@ -222,9 +225,10 @@ internal class GrenadeTranspiler
     private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
     {
         List<CodeInstruction> newInstructions = new(instructions);
-        var index = -1;
+        int index = -1;
 
-        for (var i = 0; i < newInstructions.Count; i++)
+        for (int i = 0; i < newInstructions.Count; i++)
+        {
             if (newInstructions[i].opcode == OpCodes.Call && newInstructions[i].operand is MethodInfo method &&
                 method == Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetRoleId),
                     [typeof(ReferenceHub)]))
@@ -232,6 +236,7 @@ internal class GrenadeTranspiler
                 index = i;
                 break;
             }
+        }
 
         if (index is -1 || index + 1 >= newInstructions.Count)
         {
@@ -254,7 +259,7 @@ public class PickupSearchCompletorPatch
 {
     private static bool Prefix(PickupSearchCompletor __instance, ref bool __result)
     {
-        if (!DisguiseTeam.List.TryGetValue(__instance.Hub.PlayerId, out var team) || team != Team.SCPs ||
+        if (!DisguiseTeam.List.TryGetValue(__instance.Hub.PlayerId, out Team team) || team != Team.SCPs ||
             __instance.Hub.roleManager.CurrentRole.RoleTypeId.GetTeam() == Team.SCPs) return true;
         __result = !__instance.TargetPickup.Info.Locked && !__instance.Hub.inventory.IsDisarmed() &&
                    !__instance.Hub.interCoordinator.AnyBlocker(BlockedInteraction.GrabItems);
@@ -283,7 +288,7 @@ public class DoorPermissionsPolicyPatch
             return false;
         }
 
-        var isFakedScp = DisguiseTeam.List.TryGetValue(hub.PlayerId, out var team) && team == Team.SCPs;
+        bool isFakedScp = DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team team) && team == Team.SCPs;
 
         if (isFakedScp && __instance.CheckPermissions(DoorPermissionFlags.ScpOverride))
         {
@@ -297,9 +302,8 @@ public class DoorPermissionsPolicyPatch
             return false;
         }
 
-        var curInstance = hub.inventory.CurInstance;
-        __result = curInstance != null && curInstance is IDoorPermissionProvider provider &&
-                   __instance.CheckPermissions(provider, requester, out callback);
+        ItemBase curInstance = hub.inventory.CurInstance;
+        __result = curInstance != null && curInstance is IDoorPermissionProvider provider && __instance.CheckPermissions(provider, requester, out callback);
         return false;
     }
 }
@@ -322,13 +326,13 @@ public class DoorPermissionsPolicyExtensionsPatch
             return false;
         }
 
-        var isFakedScp = DisguiseTeam.List.TryGetValue(hub.PlayerId, out var team) && team == Team.SCPs;
-        var combinedPermissions = DoorPermissionFlags.None;
+        bool isFakedScp = DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team team) && team == Team.SCPs;
+        DoorPermissionFlags combinedPermissions = DoorPermissionFlags.None;
 
         if (hub.roleManager.CurrentRole is IDoorPermissionProvider currentRole && !isFakedScp)
             combinedPermissions |= currentRole.GetPermissions(requester);
 
-        var curInstance = hub.inventory.CurInstance;
+        ItemBase curInstance = hub.inventory.CurInstance;
         if (curInstance != null && curInstance is IDoorPermissionProvider permissionProvider)
             combinedPermissions |= permissionProvider.GetPermissions(requester);
 
@@ -346,7 +350,7 @@ internal class IsScpPatch
 {
     private static bool Prefix(ReferenceHub hub, ref bool __result)
     {
-        if (hub == null || !DisguiseTeam.List.TryGetValue(hub.PlayerId, out var team))
+        if (hub == null || !DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team team))
             return true;
 
         __result = team == Team.SCPs;
@@ -360,7 +364,7 @@ internal class IsHumanPatch
 {
     private static bool Prefix(ReferenceHub hub, ref bool __result)
     {
-        if (hub == null || !DisguiseTeam.List.TryGetValue(hub.PlayerId, out var team))
+        if (hub == null || !DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team team))
             return true;
 
         __result = team != Team.SCPs && team != Team.Dead && team != Team.Flamingos;
@@ -375,8 +379,8 @@ public class Scp079RecontainerPatch
     private static bool Prefix(Scp079Recontainer __instance, ReferenceHub hub, RoleTypeId newRole,
         RoleChangeReason reason)
     {
-        var team = hub.GetRoleId().GetTeam();
-        if (DisguiseTeam.List.TryGetValue(hub.PlayerId, out var t))
+        Team team = hub.GetRoleId().GetTeam();
+        if (DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team t))
             team = t;
         if (newRole != RoleTypeId.Spectator || !IsScpButNot079(hub.GetRoleId(), team) ||
             Scp079Role.ActiveInstances.Count == 0 ||
@@ -385,8 +389,8 @@ public class Scp079RecontainerPatch
                 if (x == hub)
                     return false;
 
-                var effectiveTeam = x.GetRoleId().GetTeam();
-                if (DisguiseTeam.List.TryGetValue(x.PlayerId, out var fakeTeam))
+                Team effectiveTeam = x.GetRoleId().GetTeam();
+                if (DisguiseTeam.List.TryGetValue(x.PlayerId, out Team fakeTeam))
                     effectiveTeam = fakeTeam;
 
                 return IsScpButNot079(x.GetRoleId(), effectiveTeam);
@@ -394,7 +398,7 @@ public class Scp079RecontainerPatch
             return false;
         __instance.SetContainmentDoors(true, true);
         __instance.Recontain(true);
-        foreach (var allGenerator in Scp079Recontainer.AllGenerators)
+        foreach (Scp079Generator allGenerator in Scp079Recontainer.AllGenerators)
             allGenerator.Engaged = true;
         return false;
     }

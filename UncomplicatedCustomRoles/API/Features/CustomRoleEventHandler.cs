@@ -49,17 +49,17 @@ public class CustomRoleEventHandler
         {
             if (Role is EventCustomRole customRoleEventsRole)
             {
-                var baseType = typeof(EventCustomRole);
-                var declaredType = customRoleEventsRole.GetType();
+                Type baseType = typeof(EventCustomRole);
+                Type declaredType = customRoleEventsRole.GetType();
 
-                foreach (var method in declaredType
+                foreach (MethodInfo method in declaredType
                              .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic |
                                          BindingFlags.DeclaredOnly).Where(m =>
                                  m.GetBaseDefinition().DeclaringType == baseType && !m.IsSpecialName &&
                                  m.Name is not "OnSpawned"))
                 {
-                    var derivedMethod = declaredType.GetMethod(method.Name);
-                    var isOverride = derivedMethod != null && derivedMethod.DeclaringType != baseType;
+                    MethodInfo derivedMethod = declaredType.GetMethod(method.Name);
+                    bool isOverride = derivedMethod != null && derivedMethod.DeclaringType != baseType;
 
                     if (isOverride && derivedMethod.GetParameters().Length > 0)
                     {
@@ -73,8 +73,7 @@ public class CustomRoleEventHandler
         }
         catch (Exception e)
         {
-            LogManager.Error(
-                $"Failed to act CustomRoleEventHandler::LoadListeners() - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
+            LogManager.Error($"Failed to act CustomRoleEventHandler::LoadListeners() - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
         }
     }
 
@@ -86,13 +85,15 @@ public class CustomRoleEventHandler
         if (playerEvent is ICancellableEvent { IsAllowed: false })
             return;
 
-        var eventType = playerEvent.GetType();
-        foreach (var listener in Listeners)
+        Type eventType = playerEvent.GetType();
+        foreach (Listener listener in Listeners)
+        {
             if (listener.Event == eventType)
             {
                 listener.Method.Invoke(listener.Instance, [playerEvent]);
                 return;
             }
+        }
     }
 
     internal static void InvokeAll(IPlayerEvent ev)
@@ -100,7 +101,7 @@ public class CustomRoleEventHandler
         if (_activeListeners == 0)
             return;
 
-        foreach (var pair in SummonedCustomRole.List)
+        foreach (KeyValuePair<string, SummonedCustomRole> pair in SummonedCustomRole.List)
             pair.Value.EventHandler?.InvokeSafely(ev);
     }
 }
