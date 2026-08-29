@@ -21,8 +21,7 @@ internal class MakingNoise
 {
     private static bool Prefix(AnimatedCharacterModel __instance)
     {
-        if (__instance.OwnerHub.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) &&
-            summonedInstance.HasModule<SilentWalker>())
+        if (__instance.OwnerHub.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) && summonedInstance.HasModule<SilentWalker>())
             return false;
 
         return true;

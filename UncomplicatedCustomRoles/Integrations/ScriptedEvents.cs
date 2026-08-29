@@ -41,8 +41,7 @@ internal static class ScriptedEvents
                 return field;
             try
             {
-                field = (Version)(DynamicInvoke.GetMethod("ScriptedEvents", "ScriptedEvents.MainPlugin.Version_get")
-                    ?.Invoke(MainPlugin, []) ?? new Version(0, 0, 0));
+                field = (Version)(DynamicInvoke.GetMethod("ScriptedEvents", "ScriptedEvents.MainPlugin.Version_get")?.Invoke(MainPlugin, []) ?? new Version(0, 0, 0));
             }
             catch
             {
@@ -68,14 +67,11 @@ internal static class ScriptedEvents
     /// </summary>
     /// <param name="name"></param>
     /// <param name="action"></param>
-    public static void RegisterCustomAction(string name,
-        Func<Tuple<string[], object>, Tuple<bool, string, object[]>> action)
+    public static void RegisterCustomAction(string name, Func<Tuple<string[], object>, Tuple<bool, string, object[]>> action)
     {
         try
         {
-            DynamicInvoke.GetMethod("ScriptedEvents", "ScriptedEvents.API.Features.ApiHelper.RegisterCustomAction")
-                ?.Invoke(null,
-                    [name, action]);
+            DynamicInvoke.GetMethod("ScriptedEvents", "ScriptedEvents.API.Features.ApiHelper.RegisterCustomAction")?.Invoke(null, [name, action]);
             CustomActions.Add(name);
             LogManager.Debug($"Successfully registered the ScriptedEvents CustomAction for UCR with the name '{name}'");
         }
@@ -98,9 +94,7 @@ internal static class ScriptedEvents
             if (Version == new Version(0, 0, 0))
                 return;
 
-            LogManager.Warn(
-                "The ScriptedEvents integration of UCR can't be enabled as your version of ScriptedEvents is OUTDATED!\nRequired: >= 3.1.6 - Found: " +
-                Version);
+            LogManager.Warn("The ScriptedEvents integration of UCR can't be enabled as your version of ScriptedEvents is OUTDATED!\nRequired: >= 3.1.6 - Found: " + Version);
             return;
         }
 
@@ -108,30 +102,18 @@ internal static class ScriptedEvents
         RegisterCustomAction("SET_UCR_ROLE", args =>
         {
             if (args.Item1.Length < 2)
-            {
-                return new Tuple<bool, string, object[]>(false,
-                    "Error: the function SET_UCR_ROLE requires 2 args: SET_UCR_ROLE <PlayerId> <RoleId>", null);
-            }
+                return new Tuple<bool, string, object[]>(false, "Error: the function SET_UCR_ROLE requires 2 args: SET_UCR_ROLE <PlayerId> <RoleId>", null);
 
             Player Player = GetPlayerFromArgs(args);
 
             if (Player is null)
-            {
-                return new Tuple<bool, string, object[]>(false,
-                    $"Error: the given Player ({args.Item1.ElementAt(0)}) does not exists!", null);
-            }
+                return new Tuple<bool, string, object[]>(false, $"Error: the given Player ({args.Item1.ElementAt(0)}) does not exists!", null);
 
             if (!int.TryParse(args.Item1[1], out int roleId))
-            {
-                return new Tuple<bool, string, object[]>(false,
-                    $"Error: the given CustomRole Id ({args.Item1[1]}) is not a number!", null);
-            }
+                return new Tuple<bool, string, object[]>(false, $"Error: the given CustomRole Id ({args.Item1[1]}) is not a number!", null);
 
             if (!CustomRole.CustomRoles.TryGetValue(roleId, out ICustomRole Role))
-            {
-                return new Tuple<bool, string, object[]>(false,
-                    $"Error: the given CustomRole ({roleId}) does not exists!", null);
-            }
+                return new Tuple<bool, string, object[]>(false, $"Error: the given CustomRole ({roleId}) does not exists!", null);
 
             Player.SetCustomRoleSync(Role);
 
@@ -142,18 +124,12 @@ internal static class ScriptedEvents
         RegisterCustomAction("REMOVE_UCR_ROLE", args =>
         {
             if (args.Item1.Length < 1)
-            {
-                return new Tuple<bool, string, object[]>(false,
-                    "Error: the function REMOVE_UCR_ROLE requires 1 args: REMOVE_UCR_ROLE <PlayerId>", null);
-            }
+                return new Tuple<bool, string, object[]>(false, "Error: the function REMOVE_UCR_ROLE requires 1 args: REMOVE_UCR_ROLE <PlayerId>", null);
 
             Player Player = GetPlayerFromArgs(args);
 
             if (Player is null)
-            {
-                return new Tuple<bool, string, object[]>(false,
-                    $"Error: the given Player ({args.Item1.ElementAt(0)}) does not exists!", null);
-            }
+                return new Tuple<bool, string, object[]>(false, $"Error: the given Player ({args.Item1.ElementAt(0)}) does not exists!", null);
 
             if (Player.HasCustomRole())
                 Player.TryRemoveCustomRole();
@@ -164,18 +140,12 @@ internal static class ScriptedEvents
         RegisterCustomAction("GET_UCR_ROLE", args =>
         {
             if (args.Item1.Length < 1)
-            {
-                return new Tuple<bool, string, object[]>(false,
-                    "Error: the function GET_UCR_ROLE requires 1 args: GET_UCR_ROLE <PlayerId>", null);
-            }
+                return new Tuple<bool, string, object[]>(false, "Error: the function GET_UCR_ROLE requires 1 args: GET_UCR_ROLE <PlayerId>", null);
 
             Player Player = GetPlayerFromArgs(args);
 
             if (Player is null)
-            {
-                return new Tuple<bool, string, object[]>(false,
-                    $"Error: the given Player ({args.Item1.ElementAt(0)}) does not exists!", null);
-            }
+                return new Tuple<bool, string, object[]>(false, $"Error: the given Player ({args.Item1.ElementAt(0)}) does not exists!", null);
 
             if (Player.TryGetSummonedInstance(out SummonedCustomRole role))
                 return new Tuple<bool, string, object[]>(true, string.Empty, [role.Role.Id.ToString()]);
@@ -192,11 +162,7 @@ internal static class ScriptedEvents
     public static void UnregisterCustomActions()
     {
         foreach (string Name in CustomActions)
-        {
-            DynamicInvoke.GetMethod("ScriptedEvents", "ScriptedEvents.API.Features.ApiHelper.UnregisterCustomAction")
-                ?.Invoke(null,
-                    [Name]);
-        }
+            DynamicInvoke.GetMethod("ScriptedEvents", "ScriptedEvents.API.Features.ApiHelper.UnregisterCustomAction")?.Invoke(null, [Name]);
 
         CustomActions.Clear();
     }
@@ -210,9 +176,7 @@ internal static class ScriptedEvents
     /// <returns></returns>
     internal static Player GetPlayer(string input, object script)
     {
-        return ((Player[])DynamicInvoke.GetMethod("ScriptedEvents", "ScriptedEvents.API.Features.ApiHelper.GetPlayers")
-            ?.Invoke(null,
-                [input, script, 1])).FirstOrDefault();
+        return ((Player[])DynamicInvoke.GetMethod("ScriptedEvents", "ScriptedEvents.API.Features.ApiHelper.GetPlayers")?.Invoke(null, [input, script, 1])).FirstOrDefault();
     }
 
     /// <summary>

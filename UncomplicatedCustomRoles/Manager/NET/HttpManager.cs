@@ -107,14 +107,12 @@ internal class HttpManager
 
     public static void AddServerOwner(Player player, string discordId, Action<HttpResponse> callback)
     {
-        WebQuery.Post(OwnersEndpoint, JsonSerializer.Serialize(new OwnerMessage(player, discordId)),
-            "application/json", callback);
+        WebQuery.Post(OwnersEndpoint, JsonSerializer.Serialize(new OwnerMessage(player, discordId)), "application/json", callback);
     }
 
     internal static int CompareReleases(Version left, Version right)
     {
-        int release = new Version(left.Major, left.Minor, Math.Max(left.Build, 0))
-            .CompareTo(new Version(right.Major, right.Minor, Math.Max(right.Build, 0)));
+        int release = new Version(left.Major, left.Minor, Math.Max(left.Build, 0)).CompareTo(new Version(right.Major, right.Minor, Math.Max(right.Build, 0)));
 
         if (release != 0)
             return release;
@@ -151,10 +149,7 @@ internal class HttpManager
         yield return Timing.WaitUntilDone(WebQuery.Get($"{Endpoint}/{Prefix}/versions", LoadVersionList));
 
         if (Versions.Count is 0)
-        {
-            yield return Timing.WaitUntilDone(WebQuery.Get($"{Endpoint}/{Prefix}/versions/latest@text/plain",
-                LoadLatestVersionFallback));
-        }
+            yield return Timing.WaitUntilDone(WebQuery.Get($"{Endpoint}/{Prefix}/versions/latest@text/plain", LoadLatestVersionFallback));
     }
 
     private void LoadVersionList(HttpResponse response)
@@ -224,8 +219,7 @@ internal class HttpManager
     /// </summary>
     public bool TryGetVersionInfo(Version version, out VersionInfo info)
     {
-        info = Versions.FirstOrDefault(v =>
-            Version.TryParse(v.Name, out Version parsed) && CompareReleases(parsed, version) is 0);
+        info = Versions.FirstOrDefault(v => Version.TryParse(v.Name, out Version parsed) && CompareReleases(parsed, version) is 0);
         return info is not null;
     }
 
@@ -259,8 +253,7 @@ internal class HttpManager
         {
             "discord" => $"Download it from our Discord server: {link ?? DiscordInvite}",
             "other" when link is not null => $"Download it from: {link}",
-            _ =>
-                $"Download it from GitHub: {link ?? (IsPreReleaseVersion(version) ? GitHubReleases : GitHubLatestRelease)}"
+            _ => $"Download it from GitHub: {link ?? (IsPreReleaseVersion(version) ? GitHubReleases : GitHubLatestRelease)}"
         };
     }
 
@@ -284,9 +277,7 @@ internal class HttpManager
                 return;
             }
 
-            foreach (KeyValuePair<string, Dictionary<string, JsonElement>> kvp in Data.Where(kvp =>
-                         kvp.Value is not null && kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") &&
-                         kvp.Value.ContainsKey("override") && kvp.Value.ContainsKey("job")))
+            foreach (KeyValuePair<string, Dictionary<string, JsonElement>> kvp in Data.Where(kvp => kvp.Value is not null && kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") && kvp.Value.ContainsKey("override") && kvp.Value.ContainsKey("job")))
             {
                 string role = kvp.Value["role"].GetString();
                 string color = kvp.Value["color"].GetString();
@@ -326,9 +317,7 @@ internal class HttpManager
 
         if (!string.IsNullOrEmpty(player.ReferenceHub.serverRoles.Network_myText))
         {
-            if (Credits.Any(k =>
-                    k.Value.First == player.ReferenceHub.serverRoles.Network_myText &&
-                    k.Value.Second == player.ReferenceHub.serverRoles.Network_myColor))
+            if (Credits.Any(k => k.Value.First == player.ReferenceHub.serverRoles.Network_myText && k.Value.Second == player.ReferenceHub.serverRoles.Network_myColor))
                 return;
 
             if (!tag.Third)
@@ -344,8 +333,7 @@ internal class HttpManager
 
     internal CoroutineHandle ShareLogs(string data, Action<HttpResponse> callback)
     {
-        return WebQuery.Post($"{Endpoint}/{Prefix}/logs", JsonSerializer.Serialize(new ShareLogMessage(data)),
-            "application/json", callback);
+        return WebQuery.Post($"{Endpoint}/{Prefix}/logs", JsonSerializer.Serialize(new ShareLogMessage(data)), "application/json", callback);
     }
 
     internal CoroutineHandle VersionInfo(Action<HttpResponse> callback)

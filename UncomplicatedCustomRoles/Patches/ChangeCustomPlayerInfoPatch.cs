@@ -15,8 +15,7 @@ namespace UncomplicatedCustomRoles.Patches;
 [HarmonyPatch(typeof(ChangeCustomPlayerInfoCommand), nameof(ChangeCustomPlayerInfoCommand.Execute))]
 internal class ChangeCustomPlayerInfoPatch
 {
-    private static bool Prefix(ChangeCustomPlayerInfoCommand __instance, ArraySegment<string> arguments,
-        ICommandSender sender, out string response, ref bool __result)
+    private static bool Prefix(ChangeCustomPlayerInfoCommand __instance, ArraySegment<string> arguments, ICommandSender sender, out string response, ref bool __result)
     {
         if (!sender.CheckPermission(PlayerPermissions.PlayersManagement, out response))
         {
@@ -47,9 +46,7 @@ internal class ChangeCustomPlayerInfoPatch
             Player player = Player.Get(me);
             if (str == null)
             {
-                ServerLogs.AddLog(ServerLogs.Modules.Administrative,
-                    $"{sender.LogName} cleared custom info of player {me.PlayerId} ({me.nicknameSync.MyNick}).",
-                    ServerLogs.ServerLogType.RemoteAdminActivity_GameChanging);
+                ServerLogs.AddLog(ServerLogs.Modules.Administrative, $"{sender.LogName} cleared custom info of player {me.PlayerId} ({me.nicknameSync.MyNick}).", ServerLogs.ServerLogType.RemoteAdminActivity_GameChanging);
                 stringBuilder.AppendFormat("Reset {0}'s custom info.\n", me.LoggedNameFromRefHub());
                 if (player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
                     summonedInstance.CustomInfo.Info = string.Empty;
@@ -58,9 +55,7 @@ internal class ChangeCustomPlayerInfoPatch
             }
             else
             {
-                ServerLogs.AddLog(ServerLogs.Modules.Administrative,
-                    $"{sender.LogName} set custom info of player {me.PlayerId} ({me.nicknameSync.MyNick}) to \"{str}\".",
-                    ServerLogs.ServerLogType.RemoteAdminActivity_GameChanging);
+                ServerLogs.AddLog(ServerLogs.Modules.Administrative, $"{sender.LogName} set custom info of player {me.PlayerId} ({me.nicknameSync.MyNick}) to \"{str}\".", ServerLogs.ServerLogType.RemoteAdminActivity_GameChanging);
                 stringBuilder.AppendFormat("Set {0}'s custom info to: {1}\n", me.LoggedNameFromRefHub(), str);
                 if (player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance))
                     summonedInstance.CustomInfo.Info = str;

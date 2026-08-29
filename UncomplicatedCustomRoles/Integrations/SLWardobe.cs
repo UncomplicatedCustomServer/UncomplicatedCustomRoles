@@ -35,8 +35,7 @@ internal static class SLWardobe
             return;
         }
 
-        MethodInfo exiledPlayerMethod = DynamicInvoke.GetMethod("Exiled.API", "Exiled.API.Features.Player.Get", false, 1,
-            ["apiPlayer"]);
+        MethodInfo exiledPlayerMethod = DynamicInvoke.GetMethod("Exiled.API", "Exiled.API.Features.Player.Get", false, 1, ["apiPlayer"]);
 
         if (exiledPlayerMethod is null)
         {
@@ -45,8 +44,7 @@ internal static class SLWardobe
         }
 
         object exiledPlayer = exiledPlayerMethod.Invoke(null, [player]);
-        LogManager.Silent(
-            $"ArgsCounter_ {method.GetParameters().Length} for 2 - expected: {string.Join(", ", method.GetParameters().Select(p => p.ParameterType.FullName))} - found: {exiledPlayer?.GetType().FullName}, {suitName.GetType().FullName}");
+        LogManager.Silent($"ArgsCounter_ {method.GetParameters().Length} for 2 - expected: {string.Join(", ", method.GetParameters().Select(p => p.ParameterType.FullName))} - found: {exiledPlayer?.GetType().FullName}, {suitName.GetType().FullName}");
         method.Invoke(PluginInstance, [exiledPlayer, suitName]);
     }
 
@@ -66,8 +64,7 @@ internal static class SLWardobe
             return;
         }
 
-        MethodInfo exiledPlayerMethod = DynamicInvoke.GetMethod("Exiled.API", "Exiled.API.Features.Player.Get", false, 1,
-            ["apiPlayer"]);
+        MethodInfo exiledPlayerMethod = DynamicInvoke.GetMethod("Exiled.API", "Exiled.API.Features.Player.Get", false, 1, ["apiPlayer"]);
 
         if (exiledPlayerMethod is null)
         {
@@ -76,8 +73,7 @@ internal static class SLWardobe
         }
 
         object exiledPlayer = exiledPlayerMethod.Invoke(null, [player]);
-        LogManager.Silent(
-            $"ArgsCounter_ {method.GetParameters().Length} for 1 - expected: {string.Join(", ", method.GetParameters().Select(p => p.ParameterType.FullName))} - found: {exiledPlayer?.GetType().FullName}");
+        LogManager.Silent($"ArgsCounter_ {method.GetParameters().Length} for 1 - expected: {string.Join(", ", method.GetParameters().Select(p => p.ParameterType.FullName))} - found: {exiledPlayer?.GetType().FullName}");
         method.Invoke(PluginInstance, [exiledPlayer]);
     }
 }

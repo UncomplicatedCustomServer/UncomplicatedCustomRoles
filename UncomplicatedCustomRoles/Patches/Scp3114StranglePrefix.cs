@@ -25,16 +25,14 @@ internal class Scp3114StranglePrefix
         if (player.roleManager.CurrentRole is null)
             return true;
 
-        if (SummonedCustomRole.TryGet(player, out SummonedCustomRole playerRole) && playerRole.Role.IsFriendOf is not null &&
-            playerRole.Role.IsFriendOf.Contains(__instance.Owner.roleManager.CurrentRole.Team))
+        if (SummonedCustomRole.TryGet(player, out SummonedCustomRole playerRole) && playerRole.Role.IsFriendOf is not null && playerRole.Role.IsFriendOf.Contains(__instance.Owner.roleManager.CurrentRole.Team))
         {
             // Attacked player can't be strangled by SCP-3114 as it's his friend :)
             __result = false;
             return false; // Skip
         }
 
-        if (SummonedCustomRole.TryGet(__instance.Owner, out SummonedCustomRole scpRole) && scpRole.Role.IsFriendOf is not null &&
-            scpRole.Role.IsFriendOf.Contains(player.roleManager.CurrentRole.Team))
+        if (SummonedCustomRole.TryGet(__instance.Owner, out SummonedCustomRole scpRole) && scpRole.Role.IsFriendOf is not null && scpRole.Role.IsFriendOf.Contains(player.roleManager.CurrentRole.Team))
         {
             // Attacked player can't be strangled by SCP-3114 as it's his friend :)
             __result = false;

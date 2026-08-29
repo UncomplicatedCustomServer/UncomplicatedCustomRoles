@@ -30,16 +30,10 @@ public class CustomInfoOrder : CustomModule
     {
         List<string> tokens = TokenRegex.Matches(Order).Cast<Match>().Select(m => m.Groups[1].Value).ToList();
 
-        List<string> unknown = tokens
-            .Where(t => !KnownTokens.Contains(t, StringComparer.OrdinalIgnoreCase))
-            .Distinct()
-            .ToList();
+        List<string> unknown = tokens.Where(t => !KnownTokens.Contains(t, StringComparer.OrdinalIgnoreCase)).Distinct().ToList();
 
         if (unknown.Count > 0)
-        {
-            LogManager.Warn(
-                $"[CustomModule] CustomInfoOrder 'order' contains unknown token(s): {string.Join(", ", unknown.Select(t => $"%{t}%"))}; they will be shown as-is. Valid tokens: %custominfo%, %nickname%, %rolename%.");
-        }
+            LogManager.Warn($"[CustomModule] CustomInfoOrder 'order' contains unknown token(s): {string.Join(", ", unknown.Select(t => $"%{t}%"))}; they will be shown as-is. Valid tokens: %custominfo%, %nickname%, %rolename%.");
 
         if (!tokens.Any(t => KnownTokens.Contains(t, StringComparer.OrdinalIgnoreCase)))
         {

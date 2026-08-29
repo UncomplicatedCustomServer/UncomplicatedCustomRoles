@@ -39,8 +39,7 @@ internal static class RespawnTimer
             return role.Name;
 
 
-        if ((information.OnlyVisibleOnOverwatch && watcherPlayer.Role == RoleTypeId.Overwatch) ||
-            watcherPlayer.RemoteAdminAccess)
+        if ((information.OnlyVisibleOnOverwatch && watcherPlayer.Role == RoleTypeId.Overwatch) || watcherPlayer.RemoteAdminAccess)
             return Plugin.Instance.Config.RespawnTimerContent.Replace("%customrole%", role.Name);
 
         return information.RoleNameWhenHidden;

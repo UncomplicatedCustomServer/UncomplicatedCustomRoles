@@ -16,9 +16,7 @@ namespace UncomplicatedCustomRoles.Manager.NET;
 internal class VersionInfo
 {
     [JsonConstructor]
-    public VersionInfo(string name, string source, string? sourceLink, string? customName, int preRelease,
-        int forceDebug, string message, int recall, string? recallTarget, string? recallReason, bool? recallImportant,
-        string hash)
+    public VersionInfo(string name, string source, string? sourceLink, string? customName, int preRelease, int forceDebug, string message, int recall, string? recallTarget, string? recallReason, bool? recallImportant, string hash)
     {
         Name = name;
         Source = source;

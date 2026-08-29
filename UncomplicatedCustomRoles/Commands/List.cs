@@ -35,7 +35,6 @@ public class List : IUCRCommand
         response = "List of all registered CustomRoles:";
 
         foreach (KeyValuePair<int, ICustomRole> kvp in list)
-        {
             if (kvp.Value is not null)
             {
                 if (CustomRole.OutdatedRoles.FirstOrDefault(r => r.CustomRole.Id == kvp.Key) is not null)
@@ -43,7 +42,6 @@ public class List : IUCRCommand
                 else
                     response += $"\n<color=#00ff00>✔</color> [{kvp.Key}] <color={kvp.Value.Role.GetColor().ToHex()}>{kvp.Value?.Name}</color>";
             }
-        }
 
         foreach (ErrorCustomRole errorCustomRole in CustomRole.NotLoadedRoles)
             response += $"\n<color=#ff0000>❌</color> [{errorCustomRole?.Id}] <u><color={errorCustomRole?.Role.GetColor().ToHex() ?? "white"}>{errorCustomRole?.Name}</color></u>";

@@ -212,9 +212,7 @@ internal class DamageResistance : CustomModule
                     _ => DamageType.Unknown
                 };
             case FirearmDamageHandler firearmDamageHandler:
-                return ItemConversion.TryGetValue(firearmDamageHandler.WeaponType, out DamageType value)
-                    ? value
-                    : DamageType.Firearm;
+                return ItemConversion.TryGetValue(firearmDamageHandler.WeaponType, out DamageType value) ? value : DamageType.Firearm;
 
             case ScpDamageHandler scpDamageHandler:
             {
@@ -222,18 +220,14 @@ internal class DamageResistance : CustomModule
                 if (translation.Id == DeathTranslations.PocketDecay.Id)
                     return DamageType.Scp106;
 
-                return TranslationIdConversion.TryGetValue(translation.Id, out DamageType value1)
-                    ? value1
-                    : DamageType.Scp;
+                return TranslationIdConversion.TryGetValue(translation.Id, out DamageType value1) ? value1 : DamageType.Scp;
             }
 
             case UniversalDamageHandler universal:
             {
                 DeathTranslation translation = DeathTranslations.TranslationsById[universal.TranslationId];
 
-                return TranslationIdConversion.TryGetValue(translation.Id, out DamageType damageType)
-                    ? damageType
-                    : DamageType.Unknown;
+                return TranslationIdConversion.TryGetValue(translation.Id, out DamageType damageType) ? damageType : DamageType.Unknown;
             }
         }
 

@@ -65,12 +65,10 @@ internal class ImportManager
                 AvailableAssemblies.Add(plugin.Value);
             LogManager.Silent($"[Import Manager] Passing plugin {plugin.Key.Name}");
             foreach (Type type in plugin.Value.GetTypes())
-            {
                 try
                 {
                     object[] attribs = type.GetCustomAttributes(typeof(PluginCustomRole), false);
-                    if (attribs != null && attribs.Length > 0 && typeof(ICustomRole).IsAssignableFrom(type) &&
-                        !type.IsAbstract && !type.IsInterface)
+                    if (attribs != null && attribs.Length > 0 && typeof(ICustomRole).IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface)
                     {
                         ActivePlugins.TryAdd(plugin.Key);
 
@@ -82,10 +80,8 @@ internal class ImportManager
                 }
                 catch (Exception e)
                 {
-                    LogManager.Error(
-                        $"Error while registering CustomRole from class by Attribute:\nType: {type.FullName} [{plugin.Key.Name}]\nException: {e}");
+                    LogManager.Error($"Error while registering CustomRole from class by Attribute:\nType: {type.FullName} [{plugin.Key.Name}]\nException: {e}");
                 }
-            }
         }
 
         YamlFlagsHandler.InvalidateCache();

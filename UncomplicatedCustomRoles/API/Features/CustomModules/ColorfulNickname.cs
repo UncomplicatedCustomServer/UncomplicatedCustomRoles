@@ -25,8 +25,7 @@ public class ColorfulNickname : CustomModule
         get
         {
             string raw = TryGetStringValue("color", string.Empty).TrimStart('#');
-            return Misc.AcceptedColours.FirstOrDefault(c =>
-                string.Equals(c, raw, StringComparison.OrdinalIgnoreCase)) ?? raw;
+            return Misc.AcceptedColours.FirstOrDefault(c => string.Equals(c, raw, StringComparison.OrdinalIgnoreCase)) ?? raw;
         }
     }
 

@@ -68,8 +68,7 @@ internal static class DelayedSpawnManager
         int readyPlayers = Player.ReadyList.Count();
         if (readyPlayers < settings.MinPlayers)
         {
-            LogManager.Debug(
-                $"Skipping the delayed spawn of {role.Name} ({id}): min_players is {settings.MinPlayers} but only {readyPlayers} player(s) are on the server");
+            LogManager.Debug($"Skipping the delayed spawn of {role.Name} ({id}): min_players is {settings.MinPlayers} but only {readyPlayers} player(s) are on the server");
             return;
         }
 
@@ -83,8 +82,7 @@ internal static class DelayedSpawnManager
         List<Player> candidates = Player.ReadyList.Where(player => IsEligible(player, role)).ToList();
         if (candidates.Count == 0)
         {
-            LogManager.Debug(
-                $"Skipping the delayed spawn of {role.Name} ({id}): nobody currently holds one of its can_replace_roles ({string.Join(", ", settings.CanReplaceRoles ?? [])})");
+            LogManager.Debug($"Skipping the delayed spawn of {role.Name} ({id}): nobody currently holds one of its can_replace_roles ({string.Join(", ", settings.CanReplaceRoles ?? [])})");
             return;
         }
 

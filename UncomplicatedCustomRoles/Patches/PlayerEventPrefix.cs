@@ -34,8 +34,7 @@ internal class PlayerEventPrefix
         {
             CustomRoleEventHandler.InvokeAll(ev);
 
-            if (SummonedCustomRole.EventTriggeredModuleTotal > 0
-                && ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole))
+            if (SummonedCustomRole.EventTriggeredModuleTotal > 0 && ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole))
             {
                 Type eventType = ev.GetType();
                 if (!EventNameCache.TryGetValue(eventType, out string name))
@@ -45,13 +44,9 @@ internal class PlayerEventPrefix
                 }
 
                 foreach (CustomModule module in customRole.CustomModules)
-                {
                     if (module.TriggerOnEvents.Contains(name))
-                    {
                         if (!module.OnEvent(name, ev) && ev is ICancellableEvent deniableEvent)
                             deniableEvent.IsAllowed = false;
-                    }
-                }
             }
         }
         catch (Exception ex)
@@ -64,9 +59,7 @@ internal class PlayerEventPrefix
     {
         HarmonyMethod prefixMethod = new(typeof(PlayerEventPrefix).GetMethod("Prefix", BindingFlags.Static | BindingFlags.NonPublic));
 
-        _patchedMethods = typeof(PlayerEvents).GetMethods().Where(m =>
-            m.Name.StartsWith("On") && m.GetParameters().Length > 0 &&
-            typeof(IPlayerEvent).IsAssignableFrom(m.GetParameters()[0].ParameterType)).ToList();
+        _patchedMethods = typeof(PlayerEvents).GetMethods().Where(m => m.Name.StartsWith("On") && m.GetParameters().Length > 0 && typeof(IPlayerEvent).IsAssignableFrom(m.GetParameters()[0].ParameterType)).ToList();
 
         foreach (MethodInfo method in _patchedMethods)
             harmony.Patch(method, prefixMethod);

@@ -96,15 +96,11 @@ internal class LogManager
 
         if (!online)
         {
-            File.WriteAllText(
-                Path.Combine(PathManager.Configs.FullName, $"UCR-Report-{DateTimeOffset.Now.ToUnixTimeSeconds()}.txt"),
-                report);
+            File.WriteAllText(Path.Combine(PathManager.Configs.FullName, $"UCR-Report-{DateTimeOffset.Now.ToUnixTimeSeconds()}.txt"), report);
             callback?.Invoke(HttpStatusCode.OK, null);
             yield break;
         }
 
-        yield return Timing.WaitUntilDone(Plugin.HttpManager.ShareLogs(report,
-            response => callback?.Invoke(response.Completed ? response.Body.GetStatusCode(out _) : response.Status,
-                response.Body)));
+        yield return Timing.WaitUntilDone(Plugin.HttpManager.ShareLogs(report, response => callback?.Invoke(response.Completed ? response.Body.GetStatusCode(out _) : response.Status, response.Body)));
     }
 }

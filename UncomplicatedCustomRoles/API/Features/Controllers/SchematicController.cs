@@ -38,8 +38,7 @@ internal class SchematicController : MonoBehaviour
     public void Init(string schematicName)
     {
         // Generate the schematic
-        MethodInfo method = DynamicInvoke.GetMethod("MapEditorReborn",
-            "MapEditorReborn.API.Features.ObjectSpawner.SpawnSchematic", methodCounter: 2);
+        MethodInfo method = DynamicInvoke.GetMethod("MapEditorReborn", "MapEditorReborn.API.Features.ObjectSpawner.SpawnSchematic", methodCounter: 2);
         method ??= DynamicInvoke.GetMethod("ProjectMER", "ProjectMER.Features.ObjectSpawner.SpawnSchematic", true, 2);
 
         object schematic = method?.Invoke(null, [schematicName, Vector3.zero]);
@@ -60,8 +59,7 @@ internal class SchematicController : MonoBehaviour
 
         if (schematic is not MonoBehaviour monoSchematic)
         {
-            LogManager.Error(
-                $"[MER Extension] Failed to import MER or ProjectMER schematic {schematicName}!\nThe schematic object was not MonoBehaviour but {schematic.GetType().FullName}!");
+            LogManager.Error($"[MER Extension] Failed to import MER or ProjectMER schematic {schematicName}!\nThe schematic object was not MonoBehaviour but {schematic.GetType().FullName}!");
             Destroy(this);
             return;
         }

@@ -44,11 +44,8 @@ public class Reload : IUCRCommand
         ImportManager.Reload();
 
         foreach (KeyValuePair<int, ICustomRole> oldRole in oldRoles)
-        {
-            if (!CustomRole.CustomRoles.ContainsKey(oldRole.Key) &&
-                !CompatibilityManager.RolePaths.ContainsKey(oldRole.Value))
+            if (!CustomRole.CustomRoles.ContainsKey(oldRole.Key) && !CompatibilityManager.RolePaths.ContainsKey(oldRole.Value))
                 CustomRole.Register(oldRole.Value);
-        }
 
         List<int> removedRoles = oldRoles.Keys.Except(CustomRole.CustomRoles.Keys).ToList();
 

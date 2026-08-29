@@ -54,12 +54,10 @@ public class Role : IUCRCommand
 
         response = "Custom roles of every player:";
         foreach (Player Player in Player.ReadyList.Where(p => !p.IsHost))
-        {
             if (Player.TryGetSummonedInstance(out SummonedCustomRole summoned))
                 response += $"\n - Player {Player.Nickname} {Player.UserId} [{Player.PlayerId}] is the custom role {summoned.Role.Name} [{summoned.Role.Id}]";
             else
                 response += $"\n - Player {Player.Nickname} {Player.UserId} [{Player.PlayerId}] is not a custom role!";
-        }
 
         return true;
     }

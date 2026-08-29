@@ -34,8 +34,7 @@ public static class DynamicInvoke
     /// <param name="address"></param>
     /// <param name="isLabapi"></param>
     /// <returns></returns>
-    public static MethodInfo GetMethod(string plugin, string address, bool isLabapi = false, int methodCounter = -1,
-        string[] requiredParamNames = null)
+    public static MethodInfo GetMethod(string plugin, string address, bool isLabapi = false, int methodCounter = -1, string[] requiredParamNames = null)
     {
         if (_methods.TryGetValue(address, out MethodInfo method))
             return method;
@@ -83,8 +82,7 @@ public static class DynamicInvoke
 
             if (resultMethod is null)
             {
-                LogManager.Warn(
-                    $"[DynamicInvoke] Failed to locate method _get() or _set() in property {stringProperty} in type {stringType} in assembly {assembly.FullName}!");
+                LogManager.Warn($"[DynamicInvoke] Failed to locate method _get() or _set() in property {stringProperty} in type {stringType} in assembly {assembly.FullName}!");
                 return null;
             }
 
@@ -104,14 +102,11 @@ public static class DynamicInvoke
                     filtered = filtered.Where(m => m.GetParameters().Length == methodCounter);
 
                 if (requiredParamNames is not null && requiredParamNames.Length > 0)
-                {
                     filtered = filtered.Where(m =>
                     {
                         string[] paramNames = m.GetParameters().Select(p => p.Name).ToArray();
-                        return requiredParamNames.All(rpn =>
-                            paramNames.Contains(rpn, StringComparer.OrdinalIgnoreCase));
+                        return requiredParamNames.All(rpn => paramNames.Contains(rpn, StringComparer.OrdinalIgnoreCase));
                     });
-                }
 
                 resultMethod = filtered.FirstOrDefault();
             }
@@ -153,8 +148,7 @@ public static class DynamicInvoke
     {
         try
         {
-            Assembly assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(p =>
-                p.FullName.Contains(pluginName, StringComparison.CurrentCultureIgnoreCase));
+            Assembly assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(p => p.FullName.Contains(pluginName, StringComparison.CurrentCultureIgnoreCase));
             return assembly;
         }
         catch (Exception e)

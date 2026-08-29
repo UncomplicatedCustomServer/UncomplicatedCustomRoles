@@ -116,8 +116,7 @@ public class EventCustomRole : CustomRole
     ///     Called after a <see cref="LabApi.Features.Wrappers.Player" /> interacted with something.
     /// </summary>
     /// <param name="ev">The <see cref="InteractedEventArgs" /> instance.</param>
-    [Obsolete(
-        "The generic interaction event is not available in LabAPI, please handle every interaction in a separate method.")]
+    [Obsolete("The generic interaction event is not available in LabAPI, please handle every interaction in a separate method.")]
     public virtual void OnInteracted(object ev)
     {
     }

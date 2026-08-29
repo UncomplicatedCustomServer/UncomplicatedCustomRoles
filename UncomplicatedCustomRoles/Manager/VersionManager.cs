@@ -64,8 +64,7 @@ internal static class VersionManager
             if (VersionInfo.PreRelease != 0)
             {
                 Version latestStable = Plugin.HttpManager.LatestStableVersion;
-                LogManager.Info(
-                    $"\nNOTICE!\nYou are currently using the version v{Plugin.Instance.Version}, who's a PRE-RELEASE or an EXPERIMENTAL RELESE of UncomplicatedCustomRoles!\nLatest stable release: {(latestStable > new Version() ? $"v{latestStable}" : "unknown")}\nNOTE: This is NOT a stable version, so there can be bugs and malfunctions, for this reason we do not recommend use in production.");
+                LogManager.Info($"\nNOTICE!\nYou are currently using the version v{Plugin.Instance.Version}, who's a PRE-RELEASE or an EXPERIMENTAL RELESE of UncomplicatedCustomRoles!\nLatest stable release: {(latestStable > new Version() ? $"v{latestStable}" : "unknown")}\nNOTE: This is NOT a stable version, so there can be bugs and malfunctions, for this reason we do not recommend use in production.");
                 if (VersionInfo.ForceDebug != 0 && !(Plugin.Instance.Config?.Debug ?? true))
                 {
                     LogManager.Info("Debug logs have been activated!");
@@ -74,8 +73,7 @@ internal static class VersionManager
             }
             else
             {
-                LogManager.Info(
-                    $"You are using UncomplicatedCustomRoles v{VersionInfo.Name}{(VersionInfo.CustomName is not null ? $" '{VersionInfo.CustomName}'" : string.Empty)}!");
+                LogManager.Info($"You are using UncomplicatedCustomRoles v{VersionInfo.Name}{(VersionInfo.CustomName is not null ? $" '{VersionInfo.CustomName}'" : string.Empty)}!");
             }
 
             CheckForUpdates();
@@ -90,8 +88,7 @@ internal static class VersionManager
             if (VersionInfo.Message is not null)
                 LogManager.Info(VersionInfo.Message);
 
-            if (VersionInfo.Recall != 0 && VersionInfo.RecallTarget is not null &&
-                VersionInfo.RecallImportant is not null && VersionInfo.RecallReason is not null)
+            if (VersionInfo.Recall != 0 && VersionInfo.RecallTarget is not null && VersionInfo.RecallImportant is not null && VersionInfo.RecallReason is not null)
             {
                 RecallMessageSender();
                 if ((bool)VersionInfo.RecallImportant)
@@ -114,9 +111,7 @@ internal static class VersionManager
             if (UpdateTarget is null)
                 return;
 
-            LogManager.Warn(Plugin.HttpManager.IsPreReleaseVersion(UpdateTarget)
-                ? $"A newer PRE-RELEASE of UncomplicatedCustomRoles is available!\nCurrent: v{Plugin.Instance.Version} | Latest pre-release: v{UpdateTarget}\n{Plugin.HttpManager.GetDownloadHint(UpdateTarget)}"
-                : $"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Plugin.Instance.Version} | Latest available: v{UpdateTarget}\n{Plugin.HttpManager.GetDownloadHint(UpdateTarget)}");
+            LogManager.Warn(Plugin.HttpManager.IsPreReleaseVersion(UpdateTarget) ? $"A newer PRE-RELEASE of UncomplicatedCustomRoles is available!\nCurrent: v{Plugin.Instance.Version} | Latest pre-release: v{UpdateTarget}\n{Plugin.HttpManager.GetDownloadHint(UpdateTarget)}" : $"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Plugin.Instance.Version} | Latest available: v{UpdateTarget}\n{Plugin.HttpManager.GetDownloadHint(UpdateTarget)}");
         }
         catch (Exception e)
         {
@@ -127,19 +122,14 @@ internal static class VersionManager
 
     public static void HashNotMatchMessageSender(string hash)
     {
-        LogManager.Error(
-            $"\nIMPORTANT ERROR!\nFAILED TO VERIFY THE PLUGIN FILE!\nThe hash of the current executable file DOES NOT MATCH the hash of that version in our database!\nOfficial hash: {VersionInfo.Hash}\nCurrent hash: {hash}",
-            "CS0102");
+        LogManager.Error($"\nIMPORTANT ERROR!\nFAILED TO VERIFY THE PLUGIN FILE!\nThe hash of the current executable file DOES NOT MATCH the hash of that version in our database!\nOfficial hash: {VersionInfo.Hash}\nCurrent hash: {hash}", "CS0102");
     }
 
     public static void RecallMessageSender()
     {
-        string download = Version.TryParse(VersionInfo.RecallTarget, out Version? target)
-            ? $"\n{Plugin.HttpManager.GetDownloadHint(target)}"
-            : string.Empty;
+        string download = Version.TryParse(VersionInfo.RecallTarget, out Version? target) ? $"\n{Plugin.HttpManager.GetDownloadHint(target)}" : string.Empty;
 
-        LogManager.Warn(
-            $"\n>>> IMPORTANT NOTICE <<<\nThe current version of the plugin ({VersionInfo.Name}) HAS BEEN RECALLED FOR THE FOLLOWING REASON:\n| {VersionInfo.RecallReason?.Replace(Environment.NewLine, $"{Environment.NewLine}| ")}\nFor that reason we are asking you to PLEASE update to the next stable version, who's the {VersionInfo.RecallTarget}!{download}\nThis version CONTAINS IMPORTANT BUGS and for that reason SWITCHING TO THE NEWER ONE IS ESSENTIAL!");
+        LogManager.Warn($"\n>>> IMPORTANT NOTICE <<<\nThe current version of the plugin ({VersionInfo.Name}) HAS BEEN RECALLED FOR THE FOLLOWING REASON:\n| {VersionInfo.RecallReason?.Replace(Environment.NewLine, $"{Environment.NewLine}| ")}\nFor that reason we are asking you to PLEASE update to the next stable version, who's the {VersionInfo.RecallTarget}!{download}\nThis version CONTAINS IMPORTANT BUGS and for that reason SWITCHING TO THE NEWER ONE IS ESSENTIAL!");
     }
 
     public static string HashFile(string path)

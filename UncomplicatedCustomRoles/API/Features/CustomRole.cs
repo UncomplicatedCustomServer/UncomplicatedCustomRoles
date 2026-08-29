@@ -278,13 +278,11 @@ public class CustomRole : ICustomRole
             return false;
 
         foreach (ICustomRole role in CustomRoles.Values)
-        {
             if (string.Equals(role.Name, name, StringComparison.OrdinalIgnoreCase))
             {
                 customRole = role;
                 return true;
             }
-        }
 
         return false;
     }
@@ -394,10 +392,8 @@ public class CustomRole : ICustomRole
             return false;
 
         if (removeFromPlayers)
-        {
             foreach (SummonedCustomRole summoned in SummonedCustomRole.List.Values.Where(scr => scr.Role.Id == id).ToList())
                 summoned.Destroy();
-        }
 
         CustomRoleEvents.OnUnregistered(new CustomRoleUnregisteredEventArgs(customRole));
         return true;
@@ -426,8 +422,7 @@ public class CustomRole : ICustomRole
     {
         FlagMigrator.Migrate(customRole);
 
-        if (customRole.RoleAppearance is RoleTypeId.None ||
-            customRole.RoleAppearance.GetTeam() is PlayerRoles.Team.Dead)
+        if (customRole.RoleAppearance is RoleTypeId.None || customRole.RoleAppearance.GetTeam() is PlayerRoles.Team.Dead)
             customRole.RoleAppearance = customRole.Role;
 
         if (Plugin.Instance.Config.EnableValidator)

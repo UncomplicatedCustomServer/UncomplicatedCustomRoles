@@ -16,9 +16,7 @@ public class LifeStealer : CustomModule
 {
     public override List<string> RequiredArgs => ["percentage"];
 
-    public int Percentage => StringArgs.TryGetValue("percentage", out string perc) && int.TryParse(perc, out int numPerc)
-        ? numPerc
-        : 0;
+    public int Percentage => StringArgs.TryGetValue("percentage", out string perc) && int.TryParse(perc, out int numPerc) ? numPerc : 0;
 
     public override bool Validate(out string error)
     {

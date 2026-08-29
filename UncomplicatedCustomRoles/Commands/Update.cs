@@ -42,16 +42,12 @@ public class Update : IUCRCommand
         if (arguments[0].ToLower() is "all")
         {
             foreach (OutdatedCustomRole role in CustomRole.OutdatedRoles.ToList())
-            {
                 if (UpdateRole(role))
                     updated++;
-            }
 
             foreach (ICustomRole role in FlagMigrator.Migrated.ToList())
-            {
                 if (PersistMigrated(role))
                     updated++;
-            }
         }
         else if (int.TryParse(arguments[0], out int id))
         {
@@ -71,9 +67,7 @@ public class Update : IUCRCommand
             response = $"CustomRole {arguments[0]} not found!";
         }
 
-        response ??= updated > 0
-            ? $"Successfully updated {updated} CustomRole config file(s)!"
-            : "Nothing to update.";
+        response ??= updated > 0 ? $"Successfully updated {updated} CustomRole config file(s)!" : "Nothing to update.";
         return true;
     }
 

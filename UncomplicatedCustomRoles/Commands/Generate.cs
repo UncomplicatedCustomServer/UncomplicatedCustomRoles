@@ -52,8 +52,7 @@ internal class Generate : IUCRCommand
 
         Directory.CreateDirectory(path);
 
-        File.WriteAllText(Path.Combine(path, $"{arguments[0].Replace(".yml", "")}.yml"),
-            YamlConfigParser.Serializer.Serialize(new CustomRole()));
+        File.WriteAllText(Path.Combine(path, $"{arguments[0].Replace(".yml", "")}.yml"), YamlConfigParser.Serializer.Serialize(new CustomRole()));
 
         response = $"New default role generated at {path} but has not been loaded!";
         return true;

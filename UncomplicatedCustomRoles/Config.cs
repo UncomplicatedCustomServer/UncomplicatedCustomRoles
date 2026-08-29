@@ -18,12 +18,10 @@ internal class Config
     [Description("Is the debug mode enabled?")]
     public bool Debug { get; set; } = false;
 
-    [Description(
-        "Ignore spawns that are not included in waves and initial spawn? So when you do a forcelass an UCR role won't spawn in any case")]
+    [Description("Ignore spawns that are not included in waves and initial spawn? So when you do a forcelass an UCR role won't spawn in any case")]
     public bool AllowOnlyNaturalSpawns { get; set; } = true;
 
-    [Description(
-        "If true the plugin will apply the 'nickname' param in each role config to every player. Disable this if you encounter problems or bugs!")]
+    [Description("If true the plugin will apply the 'nickname' param in each role config to every player. Disable this if you encounter problems or bugs!")]
     public bool AllowNicknameEdit { get; set; } = true;
 
     [Description("If true UCR will override the name given by RPNames")]
@@ -32,8 +30,7 @@ internal class Config
     [Description("Do enable the basic UCR logs?")]
     public bool EnableBasicLogs { get; set; } = true;
 
-    [Description(
-        "If true the UCS credit tag system won't be activated. PLEASE DON'T DEACTIVATE IT as LOTS OF PEOPLE WORKED ON THIS PLUGIN completly for FREE!")]
+    [Description("If true the UCS credit tag system won't be activated. PLEASE DON'T DEACTIVATE IT as LOTS OF PEOPLE WORKED ON THIS PLUGIN completly for FREE!")]
     public bool EnableCreditTags { get; set; } = true;
 
     [Description("If true the plugin will send anonymous data to our central server every 60 sec.")]
@@ -48,12 +45,10 @@ internal class Config
     [Description("Enable the role validator. It shows warnings and errors in the console about the roles.")]
     public bool EnableValidator { get; set; } = true;
 
-    [Description(
-        "The content that will be replaced instead of {CUSTOM_ROLE} on your RespawnTimer display config if the current spectated player is a custom role. %customrole% is the role name")]
+    [Description("The content that will be replaced instead of {CUSTOM_ROLE} on your RespawnTimer display config if the current spectated player is a custom role. %customrole% is the role name")]
     public string RespawnTimerContent { get; set; } = "Player has custom role %customrole%";
 
-    [Description(
-        "The content that will be replaced instead of {CUSTOM_ROLE} on your RespawnTimer display config if the current spectated player is not a custom role.")]
+    [Description("The content that will be replaced instead of {CUSTOM_ROLE} on your RespawnTimer display config if the current spectated player is not a custom role.")]
     public string RespawnTimerContentEmpty { get; set; } = "Player has no custom role";
 
     [Description("If the role Id is here UCR won't take the role name but the following config")]

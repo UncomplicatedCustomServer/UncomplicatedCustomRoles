@@ -46,8 +46,7 @@ internal class CustomInfo : IUCRCommand
             return false;
         }
 
-        string content = PlaceholderManager.ApplyPlaceholders(string.Join(" ", arguments.GetRange(2, arguments.Count - 2)),
-            player, summonedInstance.Role);
+        string content = PlaceholderManager.ApplyPlaceholders(string.Join(" ", arguments.GetRange(2, arguments.Count - 2)), player, summonedInstance.Role);
 
         switch (arguments[1])
         {

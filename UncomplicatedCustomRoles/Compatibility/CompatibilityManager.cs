@@ -59,7 +59,6 @@ public class CompatibilityManager
         {
             // Try to decode older roles in order to make everything work
             foreach (KeyValuePair<Type, Version> kvp in previousVersionRoles)
-            {
                 try
                 {
                     object data = YamlConfigParser.Deserializer.Deserialize(content, kvp.Key);
@@ -73,7 +72,6 @@ public class CompatibilityManager
                 catch
                 {
                 }
-            }
 
             if (role is null)
                 throw;
@@ -87,13 +85,11 @@ public class CompatibilityManager
     {
         LoadStatusType status = CustomRole.InternalRegister(role);
 
-        if (status is LoadStatusType.SameId && Plugin.Instance.Config.UseIdFixer &&
-            RolePaths.TryGetValue(role, out string rolePath))
+        if (status is LoadStatusType.SameId && Plugin.Instance.Config.UseIdFixer && RolePaths.TryGetValue(role, out string rolePath))
         {
             string roleId = GetRoleFileElement(File.ReadAllLines(rolePath), "id:");
             role.Id = int.Parse(roleId);
-            LogManager.Info($"Updated ID for role at {rolePath} - New id: {role.Id} ({roleId})",
-                ConsoleColor.DarkMagenta);
+            LogManager.Info($"Updated ID for role at {rolePath} - New id: {role.Id} ({roleId})", ConsoleColor.DarkMagenta);
 
             status = CustomRole.InternalRegister(role);
         }
@@ -105,34 +101,23 @@ public class CompatibilityManager
         else if (status is LoadStatusType.ValidatorError)
         {
             CustomRole.Validate(role, out string error);
-            LogManager.Error($"{prefix}Failed to load CustomRole {role}: failed to validate the CustomRole\n{error}",
-                "RL0001");
+            LogManager.Error($"{prefix}Failed to load CustomRole {role}: failed to validate the CustomRole\n{error}", "RL0001");
         }
         else if (status is LoadStatusType.SameId)
         {
-            LogManager.Error(
-                $"{prefix}Failed to load CustomRole {role}: there's already another CustomRole with the same Id!",
-                "RL0002");
+            LogManager.Error($"{prefix}Failed to load CustomRole {role}: there's already another CustomRole with the same Id!", "RL0002");
 
             if (!RolePaths.TryGetValue(role, out string path))
                 path = null;
 
             if (path is not null)
-            {
-                CustomRole.NotLoadedRoles.Add(new ErrorCustomRole(path, File.ReadAllLines(path), null,
-                    $"There's already another CustomRole with the Id {role.Id}"));
-            }
+                CustomRole.NotLoadedRoles.Add(new ErrorCustomRole(path, File.ReadAllLines(path), null, $"There's already another CustomRole with the Id {role.Id}"));
         }
 
         if (status is not LoadStatusType.SameId && outdatedCustomRoles.TryGetValue(role, out Version version))
-        {
-            LogManager.Info(
-                $"{prefix}The loaded CustomRole is made for UCR v{version.ToString(3)}. Consider updating it :)",
-                ConsoleColor.Gray);
-        }
+            LogManager.Info($"{prefix}The loaded CustomRole is made for UCR v{version.ToString(3)}. Consider updating it :)", ConsoleColor.Gray);
 
-        if (status is LoadStatusType.Success && outdatedCustomRoles.TryGetValue(role, out Version version2) &&
-            RolePaths.TryGetValue(role, out string path2))
+        if (status is LoadStatusType.Success && outdatedCustomRoles.TryGetValue(role, out Version version2) && RolePaths.TryGetValue(role, out string path2))
             CustomRole.OutdatedRoles.Add(new OutdatedCustomRole(role, version2, path2));
 
         return status;
@@ -140,8 +125,7 @@ public class CompatibilityManager
 
     public static string GetRoleFileElement(string content, string rowPart, bool removeSpaces = true)
     {
-        return GetRoleFileElement(content.Split(
-            [Environment.NewLine], StringSplitOptions.None), rowPart, removeSpaces);
+        return GetRoleFileElement(content.Split([Environment.NewLine], StringSplitOptions.None), rowPart, removeSpaces);
     }
 
     public static string GetRoleFileElement(string[] pieces, string rowPart, bool removeSpaces = true)
@@ -180,8 +164,7 @@ public class CompatibilityManager
         error = null;
         Dictionary<string, object> data = YamlConfigParser.Deserializer.Deserialize<Dictionary<string, object>>(content);
 
-        foreach (PropertyInfo property in typeof(CustomRole).GetProperties()
-                     .Where(p => p.CanWrite && p is not null && p.GetType() is not null))
+        foreach (PropertyInfo property in typeof(CustomRole).GetProperties().Where(p => p.CanWrite && p is not null && p.GetType() is not null))
         {
             string snakeCaseName = ToSnakeCase(property.Name);
             if (!data.ContainsKey(snakeCaseName))

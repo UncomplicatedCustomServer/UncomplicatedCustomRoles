@@ -85,8 +85,7 @@ internal class ScpEventHandler : EventHandlerBase
 
     public void OnProcessedInventoryItem(Scp914ProcessedInventoryItemEventArgs ev)
     {
-        if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) &&
-            summonedInstance.TryGetModule(out ItemBan itemBan) && itemBan.Items.Contains(ev.Item.Type))
+        if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) && summonedInstance.TryGetModule(out ItemBan itemBan) && itemBan.Items.Contains(ev.Item.Type))
             ev.Player.DropItem(ev.Item);
     }
 }

@@ -50,15 +50,9 @@ public class Spawn : IUCRCommand
         else if (arguments[0] is "all")
             players = Player.ReadyList.Select(p => new Tuple<string, Player>(null, p)).ToList();
         else if (arguments[0] is "spectators" or "spect")
-        {
-            players = Player.ReadyList.Where(p => p.Role is RoleTypeId.Spectator or RoleTypeId.None)
-                .Select(p => new Tuple<string, Player>(null, p)).ToList();
-        }
+            players = Player.ReadyList.Where(p => p.Role is RoleTypeId.Spectator or RoleTypeId.None).Select(p => new Tuple<string, Player>(null, p)).ToList();
         else if (arguments[0] is "alive" or "al")
-        {
-            players = Player.ReadyList.Where(p => p.Role is not (RoleTypeId.Spectator or RoleTypeId.None))
-                .Select(p => new Tuple<string, Player>(null, p)).ToList();
-        }
+            players = Player.ReadyList.Where(p => p.Role is not (RoleTypeId.Spectator or RoleTypeId.None)).Select(p => new Tuple<string, Player>(null, p)).ToList();
         else
             players = [Resolve(arguments[0])];
 
@@ -79,8 +73,7 @@ public class Spawn : IUCRCommand
 
         static Tuple<string, Player> Resolve(string idOrName)
         {
-            return new Tuple<string, Player>(idOrName,
-                int.TryParse(idOrName, out int playerId) ? Player.Get(playerId) : null);
+            return new Tuple<string, Player>(idOrName, int.TryParse(idOrName, out int playerId) ? Player.Get(playerId) : null);
         }
     }
 

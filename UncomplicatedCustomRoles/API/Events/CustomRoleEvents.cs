@@ -84,16 +84,13 @@ public static class CustomRoleEvents
             return;
 
         foreach (Delegate handler in ev.GetInvocationList())
-        {
             try
             {
                 ((Action<T>)handler)(args);
             }
             catch (Exception e)
             {
-                LogManager.Error(
-                    $"An exception has been thrown by an external handler of the event CustomRoleEvents.{name} ({handler.Method?.DeclaringType?.FullName}::{handler.Method?.Name}): {e}");
+                LogManager.Error($"An exception has been thrown by an external handler of the event CustomRoleEvents.{name} ({handler.Method?.DeclaringType?.FullName}::{handler.Method?.Name}): {e}");
             }
-        }
     }
 }

@@ -21,9 +21,7 @@ namespace UncomplicatedCustomRoles.API.Features;
 public class SpawnPoint
 {
     [JsonConstructor]
-    internal SpawnPoint(string name, string roomId, Triplet<float, float, float> positionBase,
-        Quadruple<float, float, float, float> rotationBase, Triplet<float, float, float> roomRotationBase,
-        bool sync = true, bool @fixed = false)
+    internal SpawnPoint(string name, string roomId, Triplet<float, float, float> positionBase, Quadruple<float, float, float, float> rotationBase, Triplet<float, float, float> roomRotationBase, bool sync = true, bool @fixed = false)
     {
         Name = name;
         RoomId = roomId.Replace("Christmas", "").Replace("Halloween", "");
@@ -39,11 +37,7 @@ public class SpawnPoint
             List.Add(this);
     }
 
-    internal SpawnPoint(string name, Player player) : this(name, player.Room?.GameObject.name ?? string.Empty,
-        (player.Room is not null ? player.Room.Position - player.Position : player.Position).ToTriplet(),
-        new Quadruple<float, float, float, float>(player.Rotation.x, player.Rotation.y, player.Rotation.z,
-            player.Rotation.w),
-        player.Room?.Rotation.eulerAngles.ToTriplet() ?? new Triplet<float, float, float>(0f, 0f, 0f))
+    internal SpawnPoint(string name, Player player) : this(name, player.Room?.GameObject.name ?? string.Empty, (player.Room is not null ? player.Room.Position - player.Position : player.Position).ToTriplet(), new Quadruple<float, float, float, float>(player.Rotation.x, player.Rotation.y, player.Rotation.z, player.Rotation.w), player.Room?.Rotation.eulerAngles.ToTriplet() ?? new Triplet<float, float, float>(0f, 0f, 0f))
     {
     }
 
@@ -117,10 +111,7 @@ public class SpawnPoint
     ///     Gets the <see cref="Room" /> linked to the <see cref="SpawnPoint" />, or null if not found
     /// </summary>
     [JsonIgnore]
-    public Room Room => RoomId != ""
-        ? Room.List.FirstOrDefault(room =>
-            room.GameObject.name.Replace("Christmas", "").Replace("Halloween", "") == RoomId)
-        : null;
+    public Room Room => RoomId != "" ? Room.List.FirstOrDefault(room => room.GameObject.name.Replace("Christmas", "").Replace("Halloween", "") == RoomId) : null;
 
     /// <summary>
     ///     Gets a value indicating whether the <see cref="Room" /> property is not <see langword="null" />.
@@ -192,8 +183,7 @@ public class SpawnPoint
     /// <param name="rotationBase">The base rotation of the spawn point, specified as a quadruple representing rotation values.</param>
     /// <param name="roomRotationBase">The base rotation of the room, specified as a triplet of rotation values.</param>
     /// <returns>A <see cref="SpawnPoint" /> instance that is not stored on the disk.</returns>
-    public static SpawnPoint CreateNotSync(string name, string roomId, Triplet<float, float, float> positionBase,
-        Quadruple<float, float, float, float> rotationBase, Triplet<float, float, float> roomRotationBase)
+    public static SpawnPoint CreateNotSync(string name, string roomId, Triplet<float, float, float> positionBase, Quadruple<float, float, float, float> rotationBase, Triplet<float, float, float> roomRotationBase)
     {
         return new SpawnPoint(name, roomId, positionBase, rotationBase, roomRotationBase, false);
     }
@@ -210,9 +200,7 @@ public class SpawnPoint
     /// </returns>
     public static SpawnPoint CreateFixed(string name, Vector3 positionBase, Quaternion rotationBase)
     {
-        return new SpawnPoint(name, "", Triplet<float, float, float>.FromVector3(positionBase),
-            Quadruple<float, float, float, float>.FromQuaternion(rotationBase),
-            new Triplet<float, float, float>(0f, 0f, 0f), false, true);
+        return new SpawnPoint(name, "", Triplet<float, float, float>.FromVector3(positionBase), Quadruple<float, float, float, float>.FromQuaternion(rotationBase), new Triplet<float, float, float>(0f, 0f, 0f), false, true);
     }
 
     public static SpawnPoint Get(string name)

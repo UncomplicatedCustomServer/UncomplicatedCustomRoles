@@ -35,8 +35,7 @@ public static class MirrorExtensions
 
     private static readonly ReadOnlyDictionary<Type, MethodInfo> ReadOnlyWriterExtensionsValue = new(WriterExtensionsValue);
 
-    private static readonly ReadOnlyDictionary<string, ulong>
-        ReadOnlySyncVarDirtyBitsValue = new(SyncVarDirtyBitsValue);
+    private static readonly ReadOnlyDictionary<string, ulong> ReadOnlySyncVarDirtyBitsValue = new(SyncVarDirtyBitsValue);
 
     private static readonly ReadOnlyDictionary<string, string> ReadOnlyRpcFullNamesValue = new(RpcFullNamesValue);
     private static MethodInfo setDirtyBitsMethodInfoValue;
@@ -51,33 +50,16 @@ public static class MirrorExtensions
         {
             if (WriterExtensionsValue.Count == 0)
             {
-                foreach (MethodInfo method in typeof(NetworkWriterExtensions).GetMethods().Where(x =>
-                             !x.IsGenericMethod && x.GetCustomAttribute(typeof(ObsoleteAttribute)) == null &&
-                             x.GetParameters()?.Length == 2))
-                {
-                    WriterExtensionsValue.Add(
-                        method.GetParameters().First(x => x.ParameterType != typeof(NetworkWriter)).ParameterType,
-                        method);
-                }
+                foreach (MethodInfo method in typeof(NetworkWriterExtensions).GetMethods().Where(x => !x.IsGenericMethod && x.GetCustomAttribute(typeof(ObsoleteAttribute)) == null && x.GetParameters()?.Length == 2))
+                    WriterExtensionsValue.Add(method.GetParameters().First(x => x.ParameterType != typeof(NetworkWriter)).ParameterType, method);
 
                 Type fuckNorthwood = Assembly.GetAssembly(typeof(RoleTypeId)).GetType("Mirror.GeneratedNetworkCode");
-                foreach (MethodInfo method in fuckNorthwood.GetMethods().Where(x =>
-                             !x.IsGenericMethod && x.GetParameters()?.Length == 2 && x.ReturnType == typeof(void)))
-                {
-                    WriterExtensionsValue.Add(
-                        method.GetParameters().First(x => x.ParameterType != typeof(NetworkWriter)).ParameterType,
-                        method);
-                }
+                foreach (MethodInfo method in fuckNorthwood.GetMethods().Where(x => !x.IsGenericMethod && x.GetParameters()?.Length == 2 && x.ReturnType == typeof(void)))
+                    WriterExtensionsValue.Add(method.GetParameters().First(x => x.ParameterType != typeof(NetworkWriter)).ParameterType, method);
 
-                foreach (Type serializer in typeof(ServerConsole).Assembly.GetTypes()
-                             .Where(x => x.Name.EndsWith("Serializer")))
-                foreach (MethodInfo method in serializer.GetMethods()
-                             .Where(x => x.ReturnType == typeof(void) && x.Name.StartsWith("Write")))
-                {
-                    WriterExtensionsValue.Add(
-                        method.GetParameters().First(x => x.ParameterType != typeof(NetworkWriter)).ParameterType,
-                        method);
-                }
+                foreach (Type serializer in typeof(ServerConsole).Assembly.GetTypes().Where(x => x.Name.EndsWith("Serializer")))
+                foreach (MethodInfo method in serializer.GetMethods().Where(x => x.ReturnType == typeof(void) && x.Name.StartsWith("Write")))
+                    WriterExtensionsValue.Add(method.GetParameters().First(x => x.ParameterType != typeof(NetworkWriter)).ParameterType, method);
             }
 
             return ReadOnlyWriterExtensionsValue;
@@ -92,10 +74,7 @@ public static class MirrorExtensions
         get
         {
             if (SyncVarDirtyBitsValue.Count == 0)
-            {
-                foreach (PropertyInfo property in typeof(ServerConsole).Assembly.GetTypes()
-                             .SelectMany(x => x.GetProperties())
-                             .Where(m => m.Name.StartsWith("Network")))
+                foreach (PropertyInfo property in typeof(ServerConsole).Assembly.GetTypes().SelectMany(x => x.GetProperties()).Where(m => m.Name.StartsWith("Network")))
                 {
                     MethodInfo setMethod = property.GetSetMethod();
 
@@ -110,12 +89,8 @@ public static class MirrorExtensions
                     byte[] bytecodes = methodBody.GetILAsByteArray();
 
                     if (!SyncVarDirtyBitsValue.ContainsKey($"{property.ReflectedType.Name}.{property.Name}"))
-                    {
-                        SyncVarDirtyBitsValue.Add($"{property.ReflectedType.Name}.{property.Name}",
-                            bytecodes[Array.LastIndexOf(bytecodes, (byte)OpCodes.Ldc_I8.Value) + 1]);
-                    }
+                        SyncVarDirtyBitsValue.Add($"{property.ReflectedType.Name}.{property.Name}", bytecodes[Array.LastIndexOf(bytecodes, (byte)OpCodes.Ldc_I8.Value) + 1]);
                 }
-            }
 
             return ReadOnlySyncVarDirtyBitsValue;
         }
@@ -130,12 +105,7 @@ public static class MirrorExtensions
         get
         {
             if (RpcFullNamesValue.Count == 0)
-            {
-                foreach (MethodInfo method in typeof(ServerConsole).Assembly.GetTypes()
-                             .SelectMany(x =>
-                                 x.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-                             .Where(m => m.GetCustomAttributes(typeof(ClientRpcAttribute), false).Length > 0 ||
-                                         m.GetCustomAttributes(typeof(TargetRpcAttribute), false).Length > 0))
+                foreach (MethodInfo method in typeof(ServerConsole).Assembly.GetTypes().SelectMany(x => x.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)).Where(m => m.GetCustomAttributes(typeof(ClientRpcAttribute), false).Length > 0 || m.GetCustomAttributes(typeof(TargetRpcAttribute), false).Length > 0))
                 {
                     MethodBody methodBody = method.GetMethodBody();
 
@@ -145,13 +115,8 @@ public static class MirrorExtensions
                     byte[] bytecodes = methodBody.GetILAsByteArray();
 
                     if (!RpcFullNamesValue.ContainsKey($"{method.ReflectedType.Name}.{method.Name}"))
-                    {
-                        RpcFullNamesValue.Add($"{method.ReflectedType.Name}.{method.Name}",
-                            method.Module.ResolveString(BitConverter.ToInt32(bytecodes,
-                                Array.IndexOf(bytecodes, (byte)OpCodes.Ldstr.Value) + 1)));
-                    }
+                        RpcFullNamesValue.Add($"{method.ReflectedType.Name}.{method.Name}", method.Module.ResolveString(BitConverter.ToInt32(bytecodes, Array.IndexOf(bytecodes, (byte)OpCodes.Ldstr.Value) + 1)));
                 }
-            }
 
             return ReadOnlyRpcFullNamesValue;
         }
@@ -173,8 +138,7 @@ public static class MirrorExtensions
     /// <param name="player">Target to play sound to.</param>
     public static void PlayBeepSound(this Player player)
     {
-        SendFakeTargetRpc(player, ReferenceHub._hostHub.networkIdentity, typeof(AmbientSoundPlayer),
-            nameof(AmbientSoundPlayer.RpcPlaySound), 7);
+        SendFakeTargetRpc(player, ReferenceHub._hostHub.networkIdentity, typeof(AmbientSoundPlayer), nameof(AmbientSoundPlayer.RpcPlaySound), 7);
     }
 
     /// <summary>
@@ -186,8 +150,7 @@ public static class MirrorExtensions
     /// <param name="info">Setting info.</param>
     public static void SetPlayerInfoForTargetOnly(this Player player, Player target, string info)
     {
-        player.SendFakeSyncVar(target.ReferenceHub.networkIdentity, typeof(NicknameSync),
-            nameof(NicknameSync.Network_customPlayerInfoString), info);
+        player.SendFakeSyncVar(target.ReferenceHub.networkIdentity, typeof(NicknameSync), nameof(NicknameSync.Network_customPlayerInfoString), info);
     }
 
     /// <summary>
@@ -197,8 +160,7 @@ public static class MirrorExtensions
     /// <param name="text">Text displayed to the player.</param>
     public static void SetIntercomDisplayTextForTargetOnly(this Player target, string text)
     {
-        target.SendFakeSyncVar(IntercomDisplay._singleton.netIdentity, typeof(IntercomDisplay),
-            nameof(IntercomDisplay.Network_overrideText), text);
+        target.SendFakeSyncVar(IntercomDisplay._singleton.netIdentity, typeof(IntercomDisplay), nameof(IntercomDisplay.Network_overrideText), text);
     }
 
     /// <summary>
@@ -206,8 +168,7 @@ public static class MirrorExtensions
     /// </summary>
     public static void ResetIntercomDisplayText()
     {
-        ResyncSyncVar(IntercomDisplay._singleton.netIdentity, typeof(IntercomDisplay),
-            nameof(IntercomDisplay.Network_overrideText));
+        ResyncSyncVar(IntercomDisplay._singleton.netIdentity, typeof(IntercomDisplay), nameof(IntercomDisplay.Network_overrideText));
     }
 
     /// <summary>
@@ -221,8 +182,7 @@ public static class MirrorExtensions
     ///     The UnitNameId to use for the player's new role, if the player's new role uses unit names. (is
     ///     NTF). If <see langword="null" /> the latest generated unit name of the role's team will be used.
     /// </param>
-    public static void ChangeAppearance(this Player player, RoleTypeId type, bool skipJump = false,
-        byte? unitId = null)
+    public static void ChangeAppearance(this Player player, RoleTypeId type, bool skipJump = false, byte? unitId = null)
     {
         player.ChangeAppearance(type, Player.ReadyList.Where(x => x != player), skipJump, unitId);
     }
@@ -239,8 +199,7 @@ public static class MirrorExtensions
     ///     The UnitNameId to use for the player's new role, if the player's new role uses unit names. (is
     ///     NTF). If <see langword="null" /> the latest generated unit name of the role's team will be used.
     /// </param>
-    public static void ChangeAppearance(this Player player, RoleTypeId type, IEnumerable<Player> playersToAffect,
-        bool skipJump = false, byte? unitId = null)
+    public static void ChangeAppearance(this Player player, RoleTypeId type, IEnumerable<Player> playersToAffect, bool skipJump = false, byte? unitId = null)
     {
         if (!player.Connection.isReady || !type.TryGetRoleBase(out PlayerRoleBase roleBase))
             return;
@@ -257,9 +216,7 @@ public static class MirrorExtensions
             if (player.RoleBase is not HumanRole)
                 isRisky = true;
 
-            writer.WriteByte(unitId ?? (humanRole.Team.TryGetLatestUnitNameId(out byte latestUnitId)
-                ? latestUnitId
-                : (byte)0));
+            writer.WriteByte(unitId ?? (humanRole.Team.TryGetLatestUnitNameId(out byte latestUnitId) ? latestUnitId : (byte)0));
         }
 
         if (roleBase is ZombieRole)
@@ -267,8 +224,7 @@ public static class MirrorExtensions
             if (player.RoleBase is not ZombieRole)
                 isRisky = true;
 
-            writer.WriteUShort((ushort)Mathf.Clamp(Mathf.CeilToInt(player.MaxHealth), ushort.MinValue,
-                ushort.MaxValue));
+            writer.WriteUShort((ushort)Mathf.Clamp(Mathf.CeilToInt(player.MaxHealth), ushort.MinValue, ushort.MaxValue));
             writer.WriteBool(true);
         }
 
@@ -294,12 +250,10 @@ public static class MirrorExtensions
         }
 
         foreach (Player target in playersToAffect)
-        {
             if (target != player || !isRisky)
                 target.Connection.Send(writer.ToArraySegment());
             else
                 Logger.Error($"Prevent Seld-Desync of {player.Nickname} with {type}");
-        }
 
         NetworkWriterPool.Return(writer);
 
@@ -444,8 +398,7 @@ public static class MirrorExtensions
     /// <param name="targetType"><see cref="NetworkBehaviour" />'s type.</param>
     /// <param name="propertyName">Property name starting with Network.</param>
     /// <param name="value">Value of send to target.</param>
-    public static void SendFakeSyncVar<T>(this Player target, NetworkIdentity behaviorOwner, Type targetType,
-        string propertyName, T value)
+    public static void SendFakeSyncVar<T>(this Player target, NetworkIdentity behaviorOwner, Type targetType, string propertyName, T value)
     {
         if (!target.Connection.isReady)
             return;
@@ -477,8 +430,7 @@ public static class MirrorExtensions
     /// <param name="propertyName">Property name starting with Network.</param>
     public static void ResyncSyncVar(NetworkIdentity behaviorOwner, Type targetType, string propertyName)
     {
-        SetDirtyBitsMethodInfo.Invoke(behaviorOwner.gameObject.GetComponent(targetType),
-            [SyncVarDirtyBits[$"{targetType.Name}.{propertyName}"]]);
+        SetDirtyBitsMethodInfo.Invoke(behaviorOwner.gameObject.GetComponent(targetType), [SyncVarDirtyBits[$"{targetType.Name}.{propertyName}"]]);
     }
 
     /// <summary>
@@ -489,8 +441,7 @@ public static class MirrorExtensions
     /// <param name="targetType"><see cref="NetworkBehaviour" />'s type.</param>
     /// <param name="rpcName">Property name starting with Rpc.</param>
     /// <param name="values">Values of send to target.</param>
-    public static void SendFakeTargetRpc(Player target, NetworkIdentity behaviorOwner, Type targetType, string rpcName,
-        params object[] values)
+    public static void SendFakeTargetRpc(Player target, NetworkIdentity behaviorOwner, Type targetType, string rpcName, params object[] values)
     {
         if (!target.Connection.isReady)
             return;
@@ -531,8 +482,7 @@ public static class MirrorExtensions
     ///  });
     /// </code>
     /// </example>
-    public static void SendFakeSyncObject(Player target, NetworkIdentity behaviorOwner, Type targetType,
-        Action<NetworkWriter> customAction)
+    public static void SendFakeSyncObject(Player target, NetworkIdentity behaviorOwner, Type targetType, Action<NetworkWriter> customAction)
     {
         if (!target.Connection.isReady)
             return;
@@ -540,8 +490,7 @@ public static class MirrorExtensions
         NetworkWriterPooled writer = NetworkWriterPool.Get();
         NetworkWriterPooled writer2 = NetworkWriterPool.Get();
         MakeCustomSyncWriter(behaviorOwner, targetType, customAction, null, writer, writer2);
-        target.ReferenceHub.networkIdentity.connectionToClient.Send(new EntityStateMessage
-            { netId = behaviorOwner.netId, payload = writer.ToArraySegment() });
+        target.ReferenceHub.networkIdentity.connectionToClient.Send(new EntityStateMessage { netId = behaviorOwner.netId, payload = writer.ToArraySegment() });
         NetworkWriterPool.Return(writer);
         NetworkWriterPool.Return(writer2);
     }
@@ -574,23 +523,19 @@ public static class MirrorExtensions
     }
 
     // Make custom writer(private)
-    private static void MakeCustomSyncWriter(NetworkIdentity behaviorOwner, Type targetType,
-        Action<NetworkWriter> customSyncObject, Action<NetworkWriter> customSyncVar, NetworkWriter owner,
-        NetworkWriter observer)
+    private static void MakeCustomSyncWriter(NetworkIdentity behaviorOwner, Type targetType, Action<NetworkWriter> customSyncObject, Action<NetworkWriter> customSyncVar, NetworkWriter owner, NetworkWriter observer)
     {
         ulong value = 0;
         NetworkBehaviour behaviour = null;
 
         // Get NetworkBehaviors index (behaviorDirty use index)
         for (int i = 0; i < behaviorOwner.NetworkBehaviours.Length; i++)
-        {
             if (behaviorOwner.NetworkBehaviours[i].GetType() == targetType)
             {
                 behaviour = behaviorOwner.NetworkBehaviours[i];
                 value = 1UL << (i & 31);
                 break;
             }
-        }
 
         // Write target NetworkBehavior's dirty
         Compression.CompressVarUInt(owner, value);

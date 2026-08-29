@@ -35,15 +35,13 @@ internal class ChangeAppearanceOnKill : CustomModule
             return false;
         }
 
-        if (Args.TryGetValue("duration", out object rawDuration) && rawDuration is not null
-                                                                 && !uint.TryParse(rawDuration.ToString(), out _))
+        if (Args.TryGetValue("duration", out object rawDuration) && rawDuration is not null && !uint.TryParse(rawDuration.ToString(), out _))
         {
             error = $"'duration' must be a whole number of seconds (0 or greater), got '{rawDuration}'.";
             return false;
         }
 
-        if (Args.TryGetValue("forever", out object rawForever) && rawForever is not null
-                                                               && !bool.TryParse(rawForever.ToString(), out _))
+        if (Args.TryGetValue("forever", out object rawForever) && rawForever is not null && !bool.TryParse(rawForever.ToString(), out _))
         {
             error = $"'forever' must be true or false, got '{rawForever}'.";
             return false;

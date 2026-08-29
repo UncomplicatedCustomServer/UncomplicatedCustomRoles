@@ -51,8 +51,7 @@ public class SummonedCustomRole
 
     private int _eventModuleCount;
 
-    internal SummonedCustomRole(Player player, ICustomRole role, Triplet<string, string, bool>? badge,
-        List<IEffect> infiniteEffects, PlayerInfoArea playerInfo, CustomInfo customInfo, bool isCustomNickname = false)
+    internal SummonedCustomRole(Player player, ICustomRole role, Triplet<string, string, bool>? badge, List<IEffect> infiniteEffects, PlayerInfoArea playerInfo, CustomInfo customInfo, bool isCustomNickname = false)
     {
         Id = Guid.NewGuid().ToString();
         Player = player;
@@ -94,7 +93,6 @@ public class SummonedCustomRole
 
         // Appearance handling
         if (Appearance != RoleTypeId.None)
-        {
             Timing.CallDelayed(0.75f, () =>
             {
                 if (!_internalValid || Player is null || !Player.IsAlive)
@@ -105,14 +103,10 @@ public class SummonedCustomRole
                 if (LabApiExtensions.IsAvailable)
                     LabApiExtensions.AddFakeRole(Player, Role.RoleAppearance);
                 else
-                {
-                    Player.ChangeAppearance(Role.RoleAppearance, SpawnManager.LoadAppearanceAffectedPlayers(Player),
-                        true);
-                }
+                    Player.ChangeAppearance(Role.RoleAppearance, SpawnManager.LoadAppearanceAffectedPlayers(Player), true);
 
                 CustomInfo.Role = Role.RoleAppearance.GetFullName();
             });
-        }
     }
 
     /// <summary>
@@ -253,7 +247,6 @@ public class SummonedCustomRole
 
             if (Role.Team is Team.SCPs)
                 // ReSharper disable once Unity.IncorrectMonoBehaviourInstantiation
-            {
                 _roleBase = new FpcStandardScp
                 {
                     _roleTypeId = Role.Role,
@@ -269,10 +262,8 @@ public class SummonedCustomRole
                     RoleAvatar = originalRole.RoleAvatar,
                     SpectatorModule = originalRole.SpectatorModule
                 };
-            }
             else
                 // ReSharper disable once Unity.IncorrectMonoBehaviourInstantiation
-            {
                 _roleBase = new HumanRole
                 {
                     _roleId = Role.Role,
@@ -290,7 +281,6 @@ public class SummonedCustomRole
                     RoleAvatar = originalRole.RoleAvatar,
                     SpectatorModule = originalRole.SpectatorModule
                 };
-            }
 
             DisguiseTeam.Set(Player.PlayerId, Role.Team ?? Role.Role.GetTeam(), _roleBase);
 
@@ -406,17 +396,13 @@ public class SummonedCustomRole
             {
                 // Reset ammo limit
                 if (Role.Ammo is { Count: > 0 })
-                {
                     foreach (ItemType ammo in Role.Ammo.Keys)
                         Player.ResetAmmoLimit(ammo);
-                }
 
                 // Reset category limit
                 if (Role.CustomInventoryLimits is { Count: > 0 })
-                {
                     foreach (ItemCategory category in Role.CustomInventoryLimits.Keys)
                         Player.ResetCategoryLimit(category);
-                }
 
                 // Clear the custom info last so nothing re-applies it afterwards
                 CustomInfo.SuppressExternalSync = true;
@@ -480,9 +466,7 @@ public class SummonedCustomRole
     {
         while (_internalValid && Player.IsAlive && IsDefaultCoroutineRole)
         {
-            if (EvaluateCustomActions() && Player.HumeShield < Role.HumeShield.Maximum &&
-                DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.RegenerationDelay &&
-                !_isRegeneratingHume)
+            if (EvaluateCustomActions() && Player.HumeShield < Role.HumeShield.Maximum && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.RegenerationDelay && !_isRegeneratingHume)
                 Timing.RunCoroutine(HumeShieldCoroutine());
 
             yield return Timing.WaitForSeconds(TickDuration);
@@ -496,13 +480,10 @@ public class SummonedCustomRole
     public IEnumerator<float> HumeShieldCoroutine()
     {
         _isRegeneratingHume = true;
-        while (_internalValid && Player.IsAlive && Player.HumeShield < Role.HumeShield.Maximum &&
-               DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.RegenerationDelay)
+        while (_internalValid && Player.IsAlive && Player.HumeShield < Role.HumeShield.Maximum && DateTimeOffset.UtcNow.ToUnixTimeSeconds() - LastDamageTime >= Role.HumeShield.RegenerationDelay)
         {
             Player.HumeShield += Role.HumeShield.RegenerationAmount;
-            yield return Role.HumeShield.RegenerationSpeed == 0
-                ? Timing.WaitForOneFrame
-                : Timing.WaitForSeconds(Role.HumeShield.RegenerationSpeed);
+            yield return Role.HumeShield.RegenerationSpeed == 0 ? Timing.WaitForOneFrame : Timing.WaitForSeconds(Role.HumeShield.RegenerationSpeed);
         }
 
         _isRegeneratingHume = false;
@@ -528,9 +509,7 @@ public class SummonedCustomRole
         if (_customModules.Count == 0)
             return [];
 
-        return _customModules
-            .OfType<T>()
-            .ToArray();
+        return _customModules.OfType<T>().ToArray();
     }
 
     /// <summary>
@@ -731,8 +710,7 @@ public class SummonedCustomRole
     /// <returns></returns>
     public static bool TryPatchCustomRole(ReferenceHub player, out Team team)
     {
-        if (player is not null && TryGet(player, out SummonedCustomRole customRole) && customRole.Role.Team is not null &&
-            customRole.Role.Team != customRole.Role.Role.GetTeam())
+        if (player is not null && TryGet(player, out SummonedCustomRole customRole) && customRole.Role.Team is not null && customRole.Role.Team != customRole.Role.Role.GetTeam())
         {
             team = (Team)customRole.Role.Team;
             return true;
@@ -789,8 +767,7 @@ public class SummonedCustomRole
     /// <returns></returns>
     public static Team TryGetCustomTeam(ReferenceHub player, Team? def = null)
     {
-        if (TryGet(player, out SummonedCustomRole customRole) && customRole.Role.Team is not null &&
-            customRole.Role.Team != customRole.Role.Role.GetTeam())
+        if (TryGet(player, out SummonedCustomRole customRole) && customRole.Role.Team is not null && customRole.Role.Team != customRole.Role.Role.GetTeam())
             return (Team)customRole.Role.Team;
 
         return def ?? player.GetRoleId().GetTeam();
@@ -804,8 +781,7 @@ public class SummonedCustomRole
     /// <returns></returns>
     public static void TryParseRemoteAdmin(ReferenceHub player, StringBuilder builder) //REF
     {
-        if (Plugin.HttpManager.Credits.TryGetValue(player.authManager.UserId, out Triplet<string, string, bool> tag) &&
-            !string.IsNullOrEmpty(tag.First) && !string.IsNullOrEmpty(tag.Second))
+        if (Plugin.HttpManager.Credits.TryGetValue(player.authManager.UserId, out Triplet<string, string, bool> tag) && !string.IsNullOrEmpty(tag.First) && !string.IsNullOrEmpty(tag.Second))
         {
             if (!SpawnManager.ColorMap.TryGetValue(tag.Second, out string tagColor))
                 tagColor = "white";
@@ -849,13 +825,9 @@ public class SummonedCustomRole
     internal static void InfiniteEffectActor()
     {
         foreach (SummonedCustomRole Role in List.Values)
-        {
             if (Role.InfiniteEffects.Any())
-            {
                 foreach (IEffect Effect in Role.InfiniteEffects)
                     Role.Player.ReferenceHub.ForceApplyEffect(Effect.EffectType, Effect.Intensity, float.MaxValue);
-            }
-        }
     }
 
     public override string ToString()

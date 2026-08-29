@@ -41,8 +41,7 @@ internal class SpawnPoint : IUCRCommand
         },
         {
             "reload",
-            new KeyValuePair<string, string>("",
-                "Reload the SpawnPoint list from the local file, discarding every unsaved change")
+            new KeyValuePair<string, string>("", "Reload the SpawnPoint list from the local file, discarding every unsaved change")
         },
         {
             "path",
@@ -100,9 +99,7 @@ internal class SpawnPoint : IUCRCommand
 
                     new SpawnPointInstance(arguments[1], player);
 
-                    response = SpawnPointManager.Save()
-                        ? $"SpawnPoint {arguments[1]} successfully created!"
-                        : $"SpawnPoint {arguments[1]} created!\nThe SpawnPoint list has been updated but it could NOT be saved on the disk: check the server console!";
+                    response = SpawnPointManager.Save() ? $"SpawnPoint {arguments[1]} successfully created!" : $"SpawnPoint {arguments[1]} created!\nThe SpawnPoint list has been updated but it could NOT be saved on the disk: check the server console!";
                     break;
                 case "delete":
                     if (arguments.Count != 2)
@@ -114,9 +111,7 @@ internal class SpawnPoint : IUCRCommand
                     if (SpawnPointInstance.TryGet(arguments[1], out SpawnPointInstance spawnPoint))
                     {
                         spawnPoint.Destroy();
-                        response = SpawnPointManager.Save()
-                            ? "SpawnPoint successfully removed!"
-                            : "SpawnPoint removed!\nThe SpawnPoint list has been updated but it could NOT be saved on the disk: check the server console!";
+                        response = SpawnPointManager.Save() ? "SpawnPoint successfully removed!" : "SpawnPoint removed!\nThe SpawnPoint list has been updated but it could NOT be saved on the disk: check the server console!";
                     }
                     else
                     {

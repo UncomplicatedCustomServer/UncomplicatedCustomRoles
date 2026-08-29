@@ -75,36 +75,21 @@ public class Info : IUCRCommand
         if (role.SpawnSettings != null)
         {
             if (role.SpawnSettings.SpawnDelay > 0)
-            {
-                data.Add("<color=#ffff00>⏱️</color> Spawn delay:",
-                    $"<b>{role.SpawnSettings.SpawnDelay}s</b> after the round starts");
-            }
+                data.Add("<color=#ffff00>⏱️</color> Spawn delay:", $"<b>{role.SpawnSettings.SpawnDelay}s</b> after the round starts");
 
             if (role.SpawnSettings.Spawn is SpawnType.RoomsSpawn)
-            {
-                data.Add("<color=#632300>🚪</color> Spawn rooms:",
-                    string.Join(", ", role.SpawnSettings?.SpawnRooms ?? []));
-            }
+                data.Add("<color=#632300>🚪</color> Spawn rooms:", string.Join(", ", role.SpawnSettings?.SpawnRooms ?? []));
             else if (role.SpawnSettings.Spawn is SpawnType.ZoneSpawn)
-            {
-                data.Add("<color=#632300>🚪</color> Spawn zones:",
-                    string.Join(", ", role.SpawnSettings?.SpawnZones ?? []));
-            }
+                data.Add("<color=#632300>🚪</color> Spawn zones:", string.Join(", ", role.SpawnSettings?.SpawnZones ?? []));
             else if (role.SpawnSettings.Spawn is SpawnType.SpawnPointSpawn)
-            {
-                data.Add("<color=#632300>🚪</color> Spawn points:",
-                    string.Join(", ", role.SpawnSettings?.SpawnPoints ?? []));
-            }
+                data.Add("<color=#632300>🚪</color> Spawn points:", string.Join(", ", role.SpawnSettings?.SpawnPoints ?? []));
         }
 
         if (role.CustomFlags is { Count: > 0 })
         {
             List<KeyValuePair<string, Dictionary<string, object>>> decodedFlags = YamlFlagsHandler.Decode(role.CustomFlags);
             if (decodedFlags != null)
-            {
-                data.Add("<color=#bf4eb6>🧩</color> Custom flags:",
-                    string.Join(", ", decodedFlags.Select(f => f.Key)));
-            }
+                data.Add("<color=#bf4eb6>🧩</color> Custom flags:", string.Join(", ", decodedFlags.Select(f => f.Key)));
         }
 
         foreach (KeyValuePair<string, string> kvp in data)

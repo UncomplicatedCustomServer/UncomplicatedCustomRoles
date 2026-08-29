@@ -17,8 +17,7 @@ using UncomplicatedCustomRoles.Manager;
 
 namespace UncomplicatedCustomRoles.Patches;
 
-[HarmonyPatch(typeof(InventoryLimits), nameof(InventoryLimits.GetCategoryLimit), typeof(ItemCategory),
-    typeof(ReferenceHub))]
+[HarmonyPatch(typeof(InventoryLimits), nameof(InventoryLimits.GetCategoryLimit), typeof(ItemCategory), typeof(ReferenceHub))]
 internal static class CategoryLimitByHubPatch
 {
     private static void Postfix(ItemCategory category, ReferenceHub player, ref sbyte __result)
@@ -34,16 +33,14 @@ internal static class CategoryLimitByHubPatch
         if (player is null)
             return false;
 
-        if (player.TryGetSummonedInstance(out SummonedCustomRole role) &&
-            role.Role.CustomInventoryLimits is { Count: > 0 } limits && limits.TryGetValue(category, out limit))
+        if (player.TryGetSummonedInstance(out SummonedCustomRole role) && role.Role.CustomInventoryLimits is { Count: > 0 } limits && limits.TryGetValue(category, out limit))
             return true;
 
         return InventoryLimitOverride.TryGet(player.PlayerId, category, out limit);
     }
 }
 
-[HarmonyPatch(typeof(InventoryLimits), nameof(InventoryLimits.GetCategoryLimit), typeof(BodyArmor),
-    typeof(ItemCategory))]
+[HarmonyPatch(typeof(InventoryLimits), nameof(InventoryLimits.GetCategoryLimit), typeof(BodyArmor), typeof(ItemCategory))]
 internal static class CategoryLimitByArmorPatch
 {
     private static void Postfix(BodyArmor armor, ItemCategory category, ref sbyte __result)

@@ -32,9 +32,7 @@ public class PlaceholderManager
             { "unitid", player.UnitId },
             {
                 "unitname",
-                NamingRulesManager.TryGetNamingRule(player.Team, out UnitNamingRule? namingRule)
-                    ? namingRule.LastGeneratedName
-                    : string.Empty
+                NamingRulesManager.TryGetNamingRule(player.Team, out UnitNamingRule? namingRule) ? namingRule.LastGeneratedName : string.Empty
             },
             { "rolename", player.Role.GetFullName() },
             { "customrolename", role?.Name ?? string.Empty },

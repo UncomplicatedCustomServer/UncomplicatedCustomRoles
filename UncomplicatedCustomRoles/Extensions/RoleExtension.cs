@@ -76,8 +76,7 @@ public static class RoleExtension
 
     public static Vector3 GetRandomSpawnLocation(this RoleTypeId roleType)
     {
-        if (roleType.TryGetRoleBase(out FpcStandardRoleBase fpcRole) && fpcRole.SpawnpointHandler != null &&
-            fpcRole.SpawnpointHandler.TryGetSpawnpoint(out Vector3 position, out float horizontalRotation))
+        if (roleType.TryGetRoleBase(out FpcStandardRoleBase fpcRole) && fpcRole.SpawnpointHandler != null && fpcRole.SpawnpointHandler.TryGetSpawnpoint(out Vector3 position, out float horizontalRotation))
             return position;
 
         return Vector3.zero;

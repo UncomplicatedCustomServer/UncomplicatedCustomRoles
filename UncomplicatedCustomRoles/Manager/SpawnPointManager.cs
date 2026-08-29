@@ -30,7 +30,6 @@ internal static class SpawnPointManager
     public static void Init()
     {
         if (!File.Exists(FilePath))
-        {
             try
             {
                 File.WriteAllText(FilePath, JsonSerializer.Serialize(Array.Empty<SpawnPoint>(), SerializerOptions));
@@ -41,7 +40,6 @@ internal static class SpawnPointManager
                 LogManager.Debug($"SpawnPointManager::Init() failed - {e}");
                 return;
             }
-        }
 
         Load();
     }
@@ -76,8 +74,7 @@ internal static class SpawnPointManager
         catch (Exception e)
         {
             SpawnPoint.List.Clear();
-            LogManager.Warn(
-                $"Failed to parse the SpawnPoints stored in {FilePath}: {e.Message}\nThe file is not a valid SpawnPoint list, fix it or delete it to start over.");
+            LogManager.Warn($"Failed to parse the SpawnPoints stored in {FilePath}: {e.Message}\nThe file is not a valid SpawnPoint list, fix it or delete it to start over.");
             LogManager.Debug($"SpawnPointManager::Load() failed - {e}");
             return 0;
         }
@@ -102,8 +99,7 @@ internal static class SpawnPointManager
     {
         try
         {
-            File.WriteAllText(FilePath, JsonSerializer.Serialize(SpawnPoint.List.Where(s => s.Sync),
-                SerializerOptions));
+            File.WriteAllText(FilePath, JsonSerializer.Serialize(SpawnPoint.List.Where(s => s.Sync), SerializerOptions));
             return true;
         }
         catch (Exception e)
@@ -116,16 +112,9 @@ internal static class SpawnPointManager
 
     private static void CustomRoleSpawnCompatibilityChecker()
     {
-        foreach (ICustomRole role in CustomRole.CustomRoles.Values.Where(role =>
-                     role.SpawnSettings is not null && role.SpawnSettings.SpawnPoints is not null &&
-                     role.SpawnSettings.Spawn is SpawnType.SpawnPointSpawn))
+        foreach (ICustomRole role in CustomRole.CustomRoles.Values.Where(role => role.SpawnSettings is not null && role.SpawnSettings.SpawnPoints is not null && role.SpawnSettings.Spawn is SpawnType.SpawnPointSpawn))
         foreach (string spawnPoint in role.SpawnSettings.SpawnPoints)
-        {
             if (!SpawnPoint.Exists(spawnPoint))
-            {
-                LogManager.Warn(
-                    $"CustomRole {role.Name} ({role.Id}) has an invalid SpawnPoint '{spawnPoint}' inside its configuration: the selected SpawnPoint does not exist!");
-            }
-        }
+                LogManager.Warn($"CustomRole {role.Name} ({role.Id}) has an invalid SpawnPoint '{spawnPoint}' inside its configuration: the selected SpawnPoint does not exist!");
     }
 }

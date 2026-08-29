@@ -19,9 +19,7 @@ public class CustomPermissions : CustomModule
 {
     public override List<string> RequiredArgs => ["permissions"];
 
-    private string[] Permissions => StringArgs.TryGetValue("permissions", out string permissions)
-        ? permissions.Replace(" ", string.Empty).Split([','], StringSplitOptions.RemoveEmptyEntries)
-        : [];
+    private string[] Permissions => StringArgs.TryGetValue("permissions", out string permissions) ? permissions.Replace(" ", string.Empty).Split([','], StringSplitOptions.RemoveEmptyEntries) : [];
 
     public override bool Validate(out string error)
     {

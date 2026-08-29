@@ -41,8 +41,7 @@ internal static class PendingUnitNames
 
     internal static void Reserve(Team team)
     {
-        Generated[team] = new GeneratedName(Time.frameCount,
-            NamingRulesManager.GeneratedNames.TryGetValue(team, out List<string> names) ? names.Count : 0);
+        Generated[team] = new GeneratedName(Time.frameCount, NamingRulesManager.GeneratedNames.TryGetValue(team, out List<string> names) ? names.Count : 0);
     }
 
     private readonly struct GeneratedName

@@ -45,10 +45,8 @@ public static class StringExtension
         List<char> result = [];
 
         foreach (char ch in str)
-        {
             if (INTChars.Contains(ch))
                 result.Add(ch);
-        }
 
         return string.Join(separator, result);
     }
@@ -117,8 +115,7 @@ public static class StringExtension
             LogManager.Debug($"Extracted message: {message}");
         }
 
-        if (root.TryGetProperty("status", out JsonElement status) &&
-            Enum.TryParse(status.ToString(), out HttpStatusCode statusCode))
+        if (root.TryGetProperty("status", out JsonElement status) && Enum.TryParse(status.ToString(), out HttpStatusCode statusCode))
         {
             LogManager.Debug($"Extracted status code: {statusCode}");
             return statusCode;

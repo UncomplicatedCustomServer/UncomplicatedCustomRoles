@@ -50,13 +50,11 @@ public class InfoTag : CustomModule
     public override bool Validate(out string error)
     {
         foreach ((string? token, string? color, bool _) in Parts)
-        {
             if (!string.IsNullOrWhiteSpace(color) && !InfoColors.TryResolve(color, out _))
             {
                 error = $"'{token}_color' '{color}' is not a colour the game allows on the name tag. Allowed names: {string.Join(", ", InfoColors.Names)} (or an accepted hex code).";
                 return false;
             }
-        }
 
         if (UnitFormat.Contains("[") || UnitFormat.Contains("]"))
         {
@@ -66,13 +64,9 @@ public class InfoTag : CustomModule
 
         List<string> tokens = TokenRegex.Matches(Order).Cast<Match>().Select(m => m.Groups[1].Value).ToList();
 
-        List<string> unknown = tokens.Where(t => !KnownTokens.Contains(t, StringComparer.OrdinalIgnoreCase)).Distinct()
-            .ToList();
+        List<string> unknown = tokens.Where(t => !KnownTokens.Contains(t, StringComparer.OrdinalIgnoreCase)).Distinct().ToList();
         if (unknown.Count > 0)
-        {
-            LogManager.Warn(
-                $"[CustomModule] InfoTag 'order' contains unknown token(s): {string.Join(", ", unknown.Select(t => $"%{t}%"))}; they will be shown as-is. Valid tokens: %custominfo%, %nickname%, %rolename%, %unitname%.");
-        }
+            LogManager.Warn($"[CustomModule] InfoTag 'order' contains unknown token(s): {string.Join(", ", unknown.Select(t => $"%{t}%"))}; they will be shown as-is. Valid tokens: %custominfo%, %nickname%, %rolename%, %unitname%.");
 
         if (!tokens.Any(t => KnownTokens.Contains(t, StringComparer.OrdinalIgnoreCase)))
         {
@@ -84,8 +78,7 @@ public class InfoTag : CustomModule
         return true;
     }
 
-    internal string Compose(Player player, string customInfoText, string nickname, string roleName, string unitName,
-        bool showUnit)
+    internal string Compose(Player player, string customInfoText, string nickname, string roleName, string unitName, bool showUnit)
     {
         Dictionary<string, (string Color, bool Bold)> parts = Parts.ToDictionary(p => p.Token, p => (p.Color, p.Bold));
 
@@ -103,9 +96,7 @@ public class InfoTag : CustomModule
                 "custominfo" => customInfoText,
                 "nickname" => string.IsNullOrEmpty(nickname) ? player.Nickname : nickname,
                 "rolename" => roleName,
-                "unitname" => showUnit && ShowUnitName && !string.IsNullOrEmpty(unitName)
-                    ? UnitFormat.Replace("{unit}", unitName)
-                    : string.Empty,
+                "unitname" => showUnit && ShowUnitName && !string.IsNullOrEmpty(unitName) ? UnitFormat.Replace("{unit}", unitName) : string.Empty,
                 _ => $"%{token}%"
             };
 

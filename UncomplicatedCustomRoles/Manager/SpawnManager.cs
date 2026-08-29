@@ -113,24 +113,19 @@ internal class SpawnManager
         {
             if (!CustomRole.CustomRoles.TryGetValue(id, out ICustomRole Role) || Role is null)
             {
-                LogManager.Warn(
-                    $"Sorry but the role with the Id {id} is not registered inside UncomplicatedCustomRoles!",
-                    "CR0092");
+                LogManager.Warn($"Sorry but the role with the Id {id} is not registered inside UncomplicatedCustomRoles!", "CR0092");
                 return;
             }
 
             if (Role.SpawnSettings is null)
             {
-                LogManager.Warn(
-                    $"Tried to spawn a custom role without spawn_settings, aborting the SummonCustomSubclass(...) action!\nRole: {Role.Name} ({Role.Id})",
-                    "CR0093");
+                LogManager.Warn($"Tried to spawn a custom role without spawn_settings, aborting the SummonCustomSubclass(...) action!\nRole: {Role.Name} ({Role.Id})", "CR0093");
                 return;
             }
 
             if (!doBypassRoleOverwrite && !Role.SpawnSettings.CanReplaceRoles.Contains(player.Role))
             {
-                LogManager.Debug(
-                    $"Can't spawn the player {player.Nickname} as UCR custom role {Role.Name} because it's role is not in the overwrittable list of custom role!\nStrange because this should be managed correctly by the plugin!");
+                LogManager.Debug($"Can't spawn the player {player.Nickname} as UCR custom role {Role.Name} because it's role is not in the overwrittable list of custom role!\nStrange because this should be managed correctly by the plugin!");
                 return;
             }
 
@@ -138,8 +133,7 @@ internal class SpawnManager
             CustomRoleEvents.OnSpawning(spawningArgs);
             if (!spawningArgs.IsAllowed)
             {
-                LogManager.Debug(
-                    $"Spawn of player {player.Nickname} as CustomRole {Role.Name} ({Role.Id}) denied by an external plugin through CustomRoleEvents.Spawning");
+                LogManager.Debug($"Spawn of player {player.Nickname} as CustomRole {Role.Name} ({Role.Id}) denied by an external plugin through CustomRoleEvents.Spawning");
                 return;
             }
 
@@ -167,27 +161,22 @@ internal class SpawnManager
                 player.Position = BasicPosition;
 
             if (SpawnFlag == RoleSpawnFlags.None)
-            {
                 switch (Role.SpawnSettings.Spawn)
                 {
                     case SpawnType.ZoneSpawn:
                         if (Role.SpawnSettings.SpawnZones is null || Role.SpawnSettings.SpawnZones.Count is 0)
                         {
-                            LogManager.Warn(
-                                $"Failed to spawn player {player.Nickname} ({player.PlayerId}) as CustomRole {Role.Name} ({Role.Id}): spawn is ZoneSpawn but spawn_zones is empty, keeping the previous position...");
+                            LogManager.Warn($"Failed to spawn player {player.Nickname} ({player.PlayerId}) as CustomRole {Role.Name} ({Role.Id}): spawn is ZoneSpawn but spawn_zones is empty, keeping the previous position...");
                             player.Position = BasicPosition;
                             break;
                         }
 
                         FacilityZone zone = Role.SpawnSettings.SpawnZones.RandomItem();
-                        Room zoneRoom = Room.List.Where(room =>
-                            room.Zone == zone && room.GameObject.GetComponentInChildren<TeslaGate>() is null &&
-                            room.Name is not RoomName.EzEvacShelter).RandomValue();
+                        Room zoneRoom = Room.List.Where(room => room.Zone == zone && room.GameObject.GetComponentInChildren<TeslaGate>() is null && room.Name is not RoomName.EzEvacShelter).RandomValue();
 
                         if (zoneRoom is null)
                         {
-                            LogManager.Warn(
-                                $"Failed to spawn player {player.Nickname} ({player.PlayerId}) as CustomRole {Role.Name} ({Role.Id}): no valid room found in zone {zone}, keeping the previous position...");
+                            LogManager.Warn($"Failed to spawn player {player.Nickname} ({player.PlayerId}) as CustomRole {Role.Name} ({Role.Id}): no valid room found in zone {zone}, keeping the previous position...");
                             player.Position = BasicPosition;
                             break;
                         }
@@ -195,8 +184,7 @@ internal class SpawnManager
                         player.Position = zoneRoom.Position.AddY(1.5f);
                         break;
                     case SpawnType.CompleteRandomSpawn:
-                        Room randomRoom = Room.List
-                            .Where(room => room.GameObject.GetComponentInChildren<TeslaGate>() is null).RandomValue();
+                        Room randomRoom = Room.List.Where(room => room.GameObject.GetComponentInChildren<TeslaGate>() is null).RandomValue();
 
                         if (randomRoom is null)
                         {
@@ -209,16 +197,14 @@ internal class SpawnManager
                     case SpawnType.RoomsSpawn:
                         if (Role.SpawnSettings.SpawnRooms is null || Role.SpawnSettings.SpawnRooms.Count is 0)
                         {
-                            LogManager.Warn(
-                                $"Failed to spawn player {player.Nickname} ({player.PlayerId}) as CustomRole {Role.Name} ({Role.Id}): spawn is RoomsSpawn but spawn_rooms is empty, keeping the previous position...");
+                            LogManager.Warn($"Failed to spawn player {player.Nickname} ({player.PlayerId}) as CustomRole {Role.Name} ({Role.Id}): spawn is RoomsSpawn but spawn_rooms is empty, keeping the previous position...");
                             player.Position = BasicPosition;
                             break;
                         }
 
                         string roomType = Role.SpawnSettings.SpawnRooms.RandomItem();
 
-                        Room room = Room.List.Where(r =>
-                            r is not null && r.GameObject.name.RemoveBracketsOnEndOfName() == roomType).RandomValue();
+                        Room room = Room.List.Where(r => r is not null && r.GameObject.name.RemoveBracketsOnEndOfName() == roomType).RandomValue();
 
                         if (room is null)
                         {
@@ -231,15 +217,13 @@ internal class SpawnManager
 
                         break;
                     case SpawnType.SpawnPointSpawn:
-                        if (Role.SpawnSettings.SpawnPoints is not null && Role.SpawnSettings.SpawnPoints.Count > 0 &&
-                            SpawnPoint.TryGet(Role.SpawnSettings.SpawnPoints.RandomItem(), out SpawnPoint spawn))
+                        if (Role.SpawnSettings.SpawnPoints is not null && Role.SpawnSettings.SpawnPoints.Count > 0 && SpawnPoint.TryGet(Role.SpawnSettings.SpawnPoints.RandomItem(), out SpawnPoint spawn))
                         {
                             spawn.Spawn(player);
                         }
                         else
                         {
-                            LogManager.Warn(
-                                $"Failed to spawn player {player.Nickname} ({player.PlayerId}) as CustomRole {Role.Name} ({Role.Id}): none of the configured SpawnPoints ({(Role.SpawnSettings.SpawnPoints is null || Role.SpawnSettings.SpawnPoints.Count is 0 ? "none set" : string.Join(", ", Role.SpawnSettings.SpawnPoints))}) exists, keeping the previous position...");
+                            LogManager.Warn($"Failed to spawn player {player.Nickname} ({player.PlayerId}) as CustomRole {Role.Name} ({Role.Id}): none of the configured SpawnPoints ({(Role.SpawnSettings.SpawnPoints is null || Role.SpawnSettings.SpawnPoints.Count is 0 ? "none set" : string.Join(", ", Role.SpawnSettings.SpawnPoints))}) exists, keeping the previous position...");
                             player.Position = BasicPosition;
                         }
 
@@ -250,8 +234,7 @@ internal class SpawnManager
                     case SpawnType.RoleSpawn:
                         if (Role.SpawnSettings.SpawnRoles is null || Role.SpawnSettings.SpawnRoles.Count is 0)
                         {
-                            LogManager.Warn(
-                                $"Failed to spawn player {player.Nickname} ({player.PlayerId}) as CustomRole {Role.Name} ({Role.Id}): spawn is RoleSpawn but spawn_roles is empty, keeping the previous position...");
+                            LogManager.Warn($"Failed to spawn player {player.Nickname} ({player.PlayerId}) as CustomRole {Role.Name} ({Role.Id}): spawn is RoleSpawn but spawn_roles is empty, keeping the previous position...");
                             player.Position = BasicPosition;
                             break;
                         }
@@ -260,7 +243,6 @@ internal class SpawnManager
                         player.Position = roleSpawn != Vector3.zero ? roleSpawn : BasicPosition;
                         break;
                 }
-            }
 
             SummonSubclassApplier(player, Role, true);
         }
@@ -289,26 +271,20 @@ internal class SpawnManager
                 CustomRoleEvents.OnSpawning(spawningArgs);
                 if (!spawningArgs.IsAllowed)
                 {
-                    LogManager.Debug(
-                        $"Spawn of player {Player.Nickname} as CustomRole {Role.Name} ({Role.Id}) denied by an external plugin through CustomRoleEvents.Spawning");
+                    LogManager.Debug($"Spawn of player {Player.Nickname} as CustomRole {Role.Name} ({Role.Id}) denied by an external plugin through CustomRoleEvents.Spawning");
                     return;
                 }
             }
 
             if (Role.CustomInventoryLimits is { Count: > 0 } inventoryLimits)
-            {
                 foreach (KeyValuePair<ItemCategory, sbyte> category in inventoryLimits)
                     Player.SetCategoryLimit(category.Key, category.Value);
-            }
 
             Player.ResetInventory(Role.Inventory);
 
             if (Role.CustomItemsInventory is { Count: > 0 })
-            {
                 foreach (uint itemId in Role.CustomItemsInventory)
-                {
                     if (!Player.IsInventoryFull)
-                    {
                         try
                         {
                             if (UCI.HasCustomItem(itemId, out _))
@@ -326,14 +302,10 @@ internal class SpawnManager
                         {
                             LogManager.Error($"Failed to give the custom item {itemId} to player {Player.PlayerId} ({Player.Nickname})! Exception: {ex}");
                         }
-                    }
-                }
-            }
 
             Player.ClearAmmo();
 
             if (Role.Ammo is { Count: > 0 })
-            {
                 foreach (KeyValuePair<ItemType, ushort> Ammo in Role.Ammo)
                 {
                     if (Ammo.Value > Player.GetAmmoLimit(Ammo.Key))
@@ -341,7 +313,6 @@ internal class SpawnManager
 
                     Player.AddAmmo(Ammo.Key, Ammo.Value);
                 }
-            }
 
             if (PlayerEventHandler.RespawnInventoryQueue.TryRemove(Player.PlayerId, out Tuple<List<ItemType>, Dictionary<ItemType, ushort>, bool> oldInventory))
             {
@@ -379,7 +350,6 @@ internal class SpawnManager
 
             List<IEffect> PermanentEffects = [];
             if (Role.Effects != null && Role.Effects.Any())
-            {
                 foreach (IEffect effect in Role.Effects)
                 {
                     if (effect.Duration < 0)
@@ -394,7 +364,6 @@ internal class SpawnManager
                     LogManager.Debug($"Enabling effect {effect.EffectType} to {Player.Nickname} for {effect.Duration} (i:{effect.Intensity})");
                     Player.ReferenceHub.ForceApplyEffect(effect.EffectType, effect.Intensity, effect.Duration);
                 }
-            }
 
             LogManager.Silent($"Found {PermanentEffects.Count} permament effects");
 
@@ -408,22 +377,17 @@ internal class SpawnManager
                 Player.SendHint(Role.SpawnHint, Role.SpawnHintDuration);
 
             Triplet<string, string, bool>? Badge = null;
-            if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null &&
-                Role.BadgeColor.Length > 2)
+            if (Role.BadgeName is not null && Role.BadgeName.Length > 1 && Role.BadgeColor is not null && Role.BadgeColor.Length > 2)
             {
-                Badge = new Triplet<string, string, bool>(Player.ReferenceHub.serverRoles.Network_myText ?? "",
-                    Player.ReferenceHub.serverRoles.Network_myColor ?? "",
-                    Player.ReferenceHub.serverRoles.HasBadgeHidden);
+                Badge = new Triplet<string, string, bool>(Player.ReferenceHub.serverRoles.Network_myText ?? "", Player.ReferenceHub.serverRoles.Network_myColor ?? "", Player.ReferenceHub.serverRoles.HasBadgeHidden);
                 LogManager.Debug($"Badge detected, putting {Role.BadgeName}@{Role.BadgeColor} to player {Player.PlayerId}");
 
                 Player.ReferenceHub.serverRoles.SetText(Role.BadgeName.Replace("@hidden", ""));
                 Player.ReferenceHub.serverRoles.SetColor(Role.BadgeColor);
 
                 if (Role.BadgeName.Contains("@hidden"))
-                {
                     if (Player.ReferenceHub.serverRoles.TryHideTag())
                         LogManager.Debug("Tag successfully hidden!");
-                }
             }
 
             // Changing nickname if needed
@@ -454,13 +418,11 @@ internal class SpawnManager
             customInfo.UpdateInfo(Player);
 
             if (appliedNick is not null && Plugin.Instance.Config.OverrideRpNames)
-            {
                 roleInstance.NicknameReapplyCoroutine = Timing.CallDelayed(3f, () =>
                 {
                     if (roleInstance.IsValid && SummonedCustomRole.Get(roleInstance.Player) == roleInstance)
                         roleInstance.Player.DisplayName = appliedNick;
                 });
-            }
 
             EscapeController escapeController = Player.GameObject.AddComponent<EscapeController>();
             escapeController.Init(roleInstance);
@@ -503,24 +465,18 @@ internal class SpawnManager
 
                 if (Elements.Length != 4 || Elements[0] is not "cuffed" || Elements[1] is not "by")
                 {
-                    LogManager.Warn(
-                        $"Failed to parse an EscapeRole[key]: syntax should be 'cuffed by <source> <id>' (4 args), found {Elements.Length} args!\nSource: {kvp.Key}");
+                    LogManager.Warn($"Failed to parse an EscapeRole[key]: syntax should be 'cuffed by <source> <id>' (4 args), found {Elements.Length} args!\nSource: {kvp.Key}");
                     continue;
                 }
 
                 if ((Elements[2] is "InternalTeam" || Elements[2] is "IT") && Enum.TryParse(Elements[3], out Team team))
                     AsCuffedByInternalTeam.TryAdd(team, Data);
-                else if ((Elements[2] is "CustomTeam" || Elements[2] is "CT") &&
-                         uint.TryParse(Elements[3], out uint customTeam))
+                else if ((Elements[2] is "CustomTeam" || Elements[2] is "CT") && uint.TryParse(Elements[3], out uint customTeam))
                     AsCuffedByCustomTeam.TryAdd(customTeam, Data);
-                else if ((Elements[2] is "CustomRole" || Elements[2] is "CR") &&
-                         int.TryParse(Elements[3], out int id) && CustomRole.CustomRoles.ContainsKey(id))
+                else if ((Elements[2] is "CustomRole" || Elements[2] is "CR") && int.TryParse(Elements[3], out int id) && CustomRole.CustomRoles.ContainsKey(id))
                     AsCuffedByCustomRole.TryAdd(id, Data);
                 else
-                {
-                    LogManager.Warn(
-                        $"Function SpawnManager::ParseEscapeRole[2](<...>) failed!\nPossible causes can be:\n- The source is not valid. Allowed: InternalTeam / IT / CustomRole / CR. Found: {Elements[2]}\n- The target is not a CustomRole / InternalRole. Found: {Elements[3]}");
-                }
+                    LogManager.Warn($"Function SpawnManager::ParseEscapeRole[2](<...>) failed!\nPossible causes can be:\n- The source is not valid. Allowed: InternalTeam / IT / CustomRole / CR. Found: {Elements[2]}\n- The target is not a CustomRole / InternalRole. Found: {Elements[3]}");
             }
         }
 
@@ -529,13 +485,11 @@ internal class SpawnManager
             return Default;
         if (player.IsDisarmed && player.DisarmedBy is not null)
         {
-            if (player.DisarmedBy.TryGetSummonedInstance(out SummonedCustomRole role) &&
-                AsCuffedByCustomRole.TryGetValue(role.Role.Id, out KeyValuePair<bool, object>? crEscapeRole))
+            if (player.DisarmedBy.TryGetSummonedInstance(out SummonedCustomRole role) && AsCuffedByCustomRole.TryGetValue(role.Role.Id, out KeyValuePair<bool, object>? crEscapeRole))
                 return crEscapeRole;
-            else if (UCT.TryGetCustomTeamId(player.DisarmedBy, out uint uctTeamId) &&
-                     AsCuffedByCustomTeam.TryGetValue(uctTeamId, out KeyValuePair<bool, object>? uctEscapeRole))
+            if (UCT.TryGetCustomTeamId(player.DisarmedBy, out uint uctTeamId) && AsCuffedByCustomTeam.TryGetValue(uctTeamId, out KeyValuePair<bool, object>? uctEscapeRole))
                 return uctEscapeRole;
-            else if (AsCuffedByInternalTeam.TryGetValue(player.DisarmedBy.Team, out KeyValuePair<bool, object>? internalEscapeRole))
+            if (AsCuffedByInternalTeam.TryGetValue(player.DisarmedBy.Team, out KeyValuePair<bool, object>? internalEscapeRole))
                 return internalEscapeRole;
         }
 
@@ -551,8 +505,7 @@ internal class SpawnManager
         List<string> Elements = escape.Split(' ').ToList();
         if (Elements.Count != 2)
         {
-            LogManager.Warn(
-                $"Failed to parse an EscapeString[value]: syntax should be <source> <id> (2 args), found {Elements.Count} args!\nSource: {escape}");
+            LogManager.Warn($"Failed to parse an EscapeString[value]: syntax should be <source> <id> (2 args), found {Elements.Count} args!\nSource: {escape}");
             return new KeyValuePair<bool, object>(false, RoleTypeId.Spectator);
         }
 
@@ -560,8 +513,7 @@ internal class SpawnManager
             return new KeyValuePair<bool, object>(true, customRoleId);
         if ((Elements[0] is "InternalRole" || Elements[0] is "IR") && Enum.TryParse(Elements[1], out RoleTypeId role))
             return new KeyValuePair<bool, object>(false, role);
-        LogManager.Warn(
-            $"Function SpawnManager::ParseEscapeString(string escape) failed!\nPossible causes can be:\n- The source is not valid. Allowed: InternalRole / IR / CustomRole / CR. Found: {Elements[0]}\n- The target is not a CustomRole / InternalRole. Found: {Elements[1]}");
+        LogManager.Warn($"Function SpawnManager::ParseEscapeString(string escape) failed!\nPossible causes can be:\n- The source is not valid. Allowed: InternalRole / IR / CustomRole / CR. Found: {Elements[0]}\n- The target is not a CustomRole / InternalRole. Found: {Elements[1]}");
 
         return new KeyValuePair<bool, object>(false, RoleTypeId.Spectator);
     }
@@ -589,11 +541,7 @@ internal class SpawnManager
         List<ICustomRole> candidates = [];
 
         foreach (ICustomRole Role in CustomRole.CustomRoles.Values)
-        {
-            if (Role.SpawnSettings is not null && !Role.IgnoreSpawnSystem && Role.SpawnSettings.SpawnDelay <= 0 &&
-                Role.SpawnSettings.CanReplaceRoles is { } canReplaceRoles && canReplaceRoles.Contains(NewRole) &&
-                readyPlayers >= Role.SpawnSettings.MinPlayers &&
-                SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
+            if (Role.SpawnSettings is not null && !Role.IgnoreSpawnSystem && Role.SpawnSettings.SpawnDelay <= 0 && Role.SpawnSettings.CanReplaceRoles is { } canReplaceRoles && canReplaceRoles.Contains(NewRole) && readyPlayers >= Role.SpawnSettings.MinPlayers && SummonedCustomRole.Count(Role) < Role.SpawnSettings.MaxPlayers)
             {
                 if (!HasRequiredPermission(player, Role))
                     continue;
@@ -601,7 +549,6 @@ internal class SpawnManager
                 for (int a = 0; a < Role.SpawnSettings.SpawnChance; a++)
                     candidates.Add(Role);
             }
-        }
 
         if (candidates.Count > 0 && Random.Range(0, 100) < candidates.Count)
             return candidates.RandomItem();
@@ -652,8 +599,7 @@ internal class SpawnManager
         if (permsList.All(p => CheckPermission(player, p)))
             return true;
 
-        LogManager.Debug(
-            $"Player {player.PlayerId} doesn't have the required permission(s) to spawn as role {role.Name} ({role.Id}), skipping... Player Permissions: {string.Join(", ", player.GetPermissions())}, Required permission(s): {string.Join(", ", permsList)}");
+        LogManager.Debug($"Player {player.PlayerId} doesn't have the required permission(s) to spawn as role {role.Name} ({role.Id}), skipping... Player Permissions: {string.Join(", ", player.GetPermissions())}, Required permission(s): {string.Join(", ", permsList)}");
         return false;
     }
 
@@ -664,16 +610,12 @@ internal class SpawnManager
         if (string.IsNullOrEmpty(announcement1))
             return;
         foreach (CassieAnnouncement? cassieAnnouncement in CassieAnnouncementDispatcher.AllAnnouncementsPreview)
-        {
-            if (cassieAnnouncement is CassieScpTerminationAnnouncement terminationAnnouncement &&
-                terminationAnnouncement._announcementTts == announcement1 &&
-                SubtitlePart.CheckEqualValues(terminationAnnouncement._subtitles, subtitleParts1))
+            if (cassieAnnouncement is CassieScpTerminationAnnouncement terminationAnnouncement && terminationAnnouncement._announcementTts == announcement1 && SubtitlePart.CheckEqualValues(terminationAnnouncement._subtitles, subtitleParts1))
             {
                 terminationAnnouncement._victims.Add(new Footprint(scp));
                 terminationAnnouncement._remainingWait = 1f;
                 return;
             }
-        }
 
         CassieQueuingScpTerminationEventArgs ev = new(scp, announcement1, subtitleParts1, hit);
         ServerEvents.OnCassieQueuingScpTermination(ev);
@@ -689,10 +631,8 @@ internal class SpawnManager
     {
         List<Player> result = [];
         foreach (Player? player in Player.ReadyList.Where(p => p.PlayerId != target.PlayerId))
-        {
             if (!player.TryGetSummonedInstance(out SummonedCustomRole? role) || !role.HasModule<NotAffectedByAppearance>())
                 result.Add(player);
-        }
 
         return result;
     }

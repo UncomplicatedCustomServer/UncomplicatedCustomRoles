@@ -75,15 +75,10 @@ internal class CommandParent : ParentCommand
 
             if (Command is not null)
             {
-                if (sender.HasPermissions(Command.RequiredPermission))
-                {
-                    return Command.Executor(Arguments, sender, out response);
-                }
-                else
-                {
-                    response = $"You don't have enough permission(s) to execute that command!\nNeeded: {Command.RequiredPermission}";
-                    return false;
-                }
+                if (sender.HasPermissions(Command.RequiredPermission)) return Command.Executor(Arguments, sender, out response);
+
+                response = $"You don't have enough permission(s) to execute that command!\nNeeded: {Command.RequiredPermission}";
+                return false;
             }
 
             response = "Command not found!";

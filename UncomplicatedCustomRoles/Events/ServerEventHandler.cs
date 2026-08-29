@@ -86,18 +86,15 @@ internal class ServerEventHandler : EventHandlerBase
     {
         LogManager.Silent("Respawning wave");
         if (Spawn.DoHandleWave)
-        {
             foreach (Player player in ev.SpawningPlayers)
                 Spawn.SpawnQueue.Add(player.PlayerId);
-        }
         else
             Spawn.DoHandleWave = true;
     }
 
     public void OnWarheadStarting(WarheadStartingEventArgs ev)
     {
-        if (ev.Player?.ReferenceHub is not null &&
-            SummonedCustomRole.TryGetCustomTeam(ev.Player.ReferenceHub) == Team.SCPs)
+        if (ev.Player?.ReferenceHub is not null && SummonedCustomRole.TryGetCustomTeam(ev.Player.ReferenceHub) == Team.SCPs)
             ev.IsAllowed = false;
     }
 }

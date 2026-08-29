@@ -37,12 +37,10 @@ internal static class PluginImportManager
     private static void ImportCustomRoles(Assembly assembly)
     {
         foreach (Type type in assembly.GetTypes())
-        {
             try
             {
                 object[] attribs = type.GetCustomAttributes(typeof(PluginCustomRole), false);
-                if (attribs != null && attribs.Length > 0 && typeof(ICustomRole).IsAssignableFrom(type) &&
-                    !type.IsAbstract && !type.IsInterface)
+                if (attribs != null && attribs.Length > 0 && typeof(ICustomRole).IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface)
                 {
                     ICustomRole Role = Activator.CreateInstance(type) as ICustomRole;
 
@@ -54,7 +52,6 @@ internal static class PluginImportManager
             {
                 LogManager.Error($"Error while registering CustomRole from class by Attribute:\nType: {type.FullName} [{List[assembly]}]\nException: {e}");
             }
-        }
     }
 
     private static void ImportCustomModules(Assembly assembly)

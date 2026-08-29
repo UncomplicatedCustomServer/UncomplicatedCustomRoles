@@ -45,11 +45,7 @@ internal static class RoleValidator
     {
         try
         {
-            return typeof(StatusEffectBase).Assembly.GetTypes()
-                .Where(t => !t.IsAbstract && typeof(StatusEffectBase).IsAssignableFrom(t))
-                .Select(t => t.Name)
-                .OrderBy(n => n)
-                .ToArray();
+            return typeof(StatusEffectBase).Assembly.GetTypes().Where(t => !t.IsAbstract && typeof(StatusEffectBase).IsAssignableFrom(t)).Select(t => t.Name).OrderBy(n => n).ToArray();
         }
         catch (Exception e)
         {
@@ -99,10 +95,7 @@ internal static class RoleValidator
             string sanitized = role.CustomInfo.SanitizeCustomInfo();
 
             if (sanitized != role.CustomInfo)
-            {
-                warnings.Add(
-                    "'custom_info' contains characters the game does not accept in a name tag (square brackets, emoji, ...); they are removed automatically, so the text will be shown without them.");
-            }
+                warnings.Add("'custom_info' contains characters the game does not accept in a name tag (square brackets, emoji, ...); they are removed automatically, so the text will be shown without them.");
 
             if (!NicknameSync.ValidateCustomInfo(sanitized, out string customInfoError))
                 warnings.Add($"'custom_info' will be rejected by the game: {customInfoError}");
@@ -111,8 +104,7 @@ internal static class RoleValidator
         ValidatePlaceholders("nickname", role.Nickname, warnings);
         ValidatePlaceholders("custom_info", role.CustomInfo, warnings);
 
-        if (!string.IsNullOrEmpty(role.Nickname) && role.Nickname.Contains(",") &&
-            role.Nickname.Split(',').Any(string.IsNullOrWhiteSpace))
+        if (!string.IsNullOrEmpty(role.Nickname) && role.Nickname.Contains(",") && role.Nickname.Split(',').Any(string.IsNullOrWhiteSpace))
             warnings.Add("'nickname' contains an empty variant between commas; a player could spawn with an empty name.");
 
         ValidateBadge(role, warnings);
@@ -127,10 +119,7 @@ internal static class RoleValidator
         {
             string name = match.Groups[1].Value;
             if (!KnownPlaceholders.Contains(name))
-            {
-                warnings.Add(
-                    $"'{field}' contains the unknown placeholder '%{name}%'; it will be shown literally. Valid placeholders: {string.Join(", ", KnownPlaceholders.Select(p => $"%{p}%"))}.");
-            }
+                warnings.Add($"'{field}' contains the unknown placeholder '%{name}%'; it will be shown literally. Valid placeholders: {string.Join(", ", KnownPlaceholders.Select(p => $"%{p}%"))}.");
         }
     }
 
@@ -151,12 +140,8 @@ internal static class RoleValidator
                 warnings.Add("'badge_name' is set but 'badge_color' is empty; the badge will not be applied.");
         }
 
-        if (nameUsable && colorUsable && role.BadgeColor is not "default" &&
-            !SpawnManager.ColorMap.ContainsKey(role.BadgeColor))
-        {
-            warnings.Add(
-                $"'badge_color' '{role.BadgeColor}' is not a badge color the game knows, clients may show it as white. Known colors: default, {string.Join(", ", SpawnManager.ColorMap.Keys)}.");
-        }
+        if (nameUsable && colorUsable && role.BadgeColor is not "default" && !SpawnManager.ColorMap.ContainsKey(role.BadgeColor))
+            warnings.Add($"'badge_color' '{role.BadgeColor}' is not a badge color the game knows, clients may show it as white. Known colors: default, {string.Join(", ", SpawnManager.ColorMap.Keys)}.");
     }
 
     private static void ValidateRoles(ICustomRole role, List<string> errors, List<string> warnings)
@@ -201,17 +186,13 @@ internal static class RoleValidator
             if (role.HumeShield.Amount > 0 && role.HumeShield.Maximum < role.HumeShield.Amount)
                 warnings.Add($"'hume_shield.maximum' ({role.HumeShield.Maximum}) is below 'hume_shield.amount' ({role.HumeShield.Amount}).");
             if (role.HumeShield.RegenerationAmount < 0)
-            {
-                warnings.Add(
-                    $"'hume_shield.regeneration_amount' is negative ({role.HumeShield.RegenerationAmount}); the regeneration only runs when it is above 0, so the shield will never regenerate.");
-            }
+                warnings.Add($"'hume_shield.regeneration_amount' is negative ({role.HumeShield.RegenerationAmount}); the regeneration only runs when it is above 0, so the shield will never regenerate.");
 
             if (role.HumeShield.RegenerationDelay < 0)
                 warnings.Add($"'hume_shield.regeneration_delay' is negative ({role.HumeShield.RegenerationDelay}); use 0 for no delay.");
             if (role.HumeShield.RegenerationSpeed < 0)
                 warnings.Add($"'hume_shield.regeneration_speed' is negative ({role.HumeShield.RegenerationSpeed}); use 0 to regenerate every frame.");
-            if (role.HumeShield.Maximum > 0 && role.HumeShield.RegenerationAmount == 0 &&
-                role.HumeShield.Amount < role.HumeShield.Maximum)
+            if (role.HumeShield.Maximum > 0 && role.HumeShield.RegenerationAmount == 0 && role.HumeShield.Amount < role.HumeShield.Maximum)
                 warnings.Add("'hume_shield.regeneration_amount' is 0, so the shield will never regenerate up to its maximum.");
         }
 
@@ -238,16 +219,11 @@ internal static class RoleValidator
                 continue;
             }
 
-            if (string.IsNullOrWhiteSpace(effect.EffectType) ||
-                !EffectNames.Any(n => string.Equals(n, effect.EffectType, StringComparison.InvariantCultureIgnoreCase)))
+            if (string.IsNullOrWhiteSpace(effect.EffectType) || !EffectNames.Any(n => string.Equals(n, effect.EffectType, StringComparison.InvariantCultureIgnoreCase)))
             {
-                string closest = string.IsNullOrWhiteSpace(effect.EffectType)
-                    ? null
-                    : EffectNames.FirstOrDefault(n =>
-                        n.StartsWith(effect.EffectType, StringComparison.InvariantCultureIgnoreCase));
+                string closest = string.IsNullOrWhiteSpace(effect.EffectType) ? null : EffectNames.FirstOrDefault(n => n.StartsWith(effect.EffectType, StringComparison.InvariantCultureIgnoreCase));
 
-                warnings.Add(
-                    $"'effects' entry #{i + 1} has an unknown effect_type '{effect.EffectType}'; it will be skipped.{(closest is null ? string.Empty : $" Did you mean '{closest}'?")} Valid effects: {string.Join(", ", EffectNames)}.");
+                warnings.Add($"'effects' entry #{i + 1} has an unknown effect_type '{effect.EffectType}'; it will be skipped.{(closest is null ? string.Empty : $" Did you mean '{closest}'?")} Valid effects: {string.Join(", ", EffectNames)}.");
             }
 
             if (effect.Intensity == 0)
@@ -270,10 +246,8 @@ internal static class RoleValidator
         }
 
         if (role.Ammo is not null)
-        {
             foreach (ItemType ammo in role.Ammo.Keys.Where(k => !IsAmmo(k)))
                 warnings.Add($"'ammo' contains '{ammo}', which is not an ammo type; only Ammo* values belong here.");
-        }
 
         ValidateInventoryLimits(role, warnings);
     }
@@ -285,17 +259,10 @@ internal static class RoleValidator
 
         try
         {
-            HashSet<ItemCategory> configurable = new(
-                InventoryLimits.StandardCategoryLimits
-                    .Where(kvp => kvp.Value >= 0)
-                    .Select(kvp => kvp.Key));
+            HashSet<ItemCategory> configurable = new(InventoryLimits.StandardCategoryLimits.Where(kvp => kvp.Value >= 0).Select(kvp => kvp.Key));
 
             foreach (ItemCategory category in role.CustomInventoryLimits.Keys.Where(c => !configurable.Contains(c)))
-            {
-                warnings.Add(category is ItemCategory.Ammo
-                    ? "'custom_inventory_limits' contains 'Ammo', which the game does not count in inventory slots; the entry does nothing. Ammo is limited per ammo type, not per category."
-                    : $"'custom_inventory_limits' contains '{category}', which the game does not limit by slot count. UCR still applies the limit server-side, but the client's inventory HUD will not show it. Categories the game limits on its own: {string.Join(", ", configurable.OrderBy(c => c.ToString()))}.");
-            }
+                warnings.Add(category is ItemCategory.Ammo ? "'custom_inventory_limits' contains 'Ammo', which the game does not count in inventory slots; the entry does nothing. Ammo is limited per ammo type, not per category." : $"'custom_inventory_limits' contains '{category}', which the game does not limit by slot count. UCR still applies the limit server-side, but the client's inventory HUD will not show it. Categories the game limits on its own: {string.Join(", ", configurable.OrderBy(c => c.ToString()))}.");
         }
         catch (Exception e)
         {
@@ -318,15 +285,9 @@ internal static class RoleValidator
         if (scale.x != 0 || scale.y != 0 || scale.z != 0)
         {
             if (scale.x < 0 || scale.y < 0 || scale.z < 0)
-            {
-                warnings.Add(
-                    $"'scale' has a negative axis ({scale.x}, {scale.y}, {scale.z}); the model will be turned inside out. Use 1 for the normal size.");
-            }
+                warnings.Add($"'scale' has a negative axis ({scale.x}, {scale.y}, {scale.z}); the model will be turned inside out. Use 1 for the normal size.");
             else if (scale.x == 0 || scale.y == 0 || scale.z == 0)
-            {
-                warnings.Add(
-                    $"'scale' has an axis set to 0 ({scale.x}, {scale.y}, {scale.z}); the model will be flattened on it. Use 1 for the normal size, or 0 on every axis to keep the vanilla one.");
-            }
+                warnings.Add($"'scale' has an axis set to 0 ({scale.x}, {scale.y}, {scale.z}); the model will be flattened on it. Use 1 for the normal size, or 0 on every axis to keep the vanilla one.");
         }
     }
 
@@ -343,12 +304,10 @@ internal static class RoleValidator
             case SpawnType.ZoneSpawn when role.SpawnSettings.SpawnZones is null || !role.SpawnSettings.SpawnZones.Any():
                 errors.Add("'spawn_settings.spawn' is ZoneSpawn but 'spawn_zones' is empty.");
                 break;
-            case SpawnType.RoomsSpawn
-                when role.SpawnSettings.SpawnRooms is null || !role.SpawnSettings.SpawnRooms.Any():
+            case SpawnType.RoomsSpawn when role.SpawnSettings.SpawnRooms is null || !role.SpawnSettings.SpawnRooms.Any():
                 errors.Add("'spawn_settings.spawn' is RoomsSpawn but 'spawn_rooms' is empty.");
                 break;
-            case SpawnType.SpawnPointSpawn
-                when role.SpawnSettings.SpawnPoints is null || !role.SpawnSettings.SpawnPoints.Any():
+            case SpawnType.SpawnPointSpawn when role.SpawnSettings.SpawnPoints is null || !role.SpawnSettings.SpawnPoints.Any():
                 errors.Add("'spawn_settings.spawn' is SpawnPointSpawn but 'spawn_points' is empty.");
                 break;
             case SpawnType.RoleSpawn when role.SpawnSettings.SpawnRoles is null || !role.SpawnSettings.SpawnRoles.Any():
@@ -357,20 +316,12 @@ internal static class RoleValidator
         }
 
         if (role.SpawnSettings.SpawnZones is not null)
-        {
             foreach (FacilityZone zone in role.SpawnSettings.SpawnZones.Where(z => z is FacilityZone.None))
-            {
-                warnings.Add(
-                    $"'spawn_settings.spawn_zones' contains '{zone}', which is not a real facility zone. Valid zones: LightContainment, HeavyContainment, Entrance, Surface.");
-            }
-        }
+                warnings.Add($"'spawn_settings.spawn_zones' contains '{zone}', which is not a real facility zone. Valid zones: LightContainment, HeavyContainment, Entrance, Surface.");
 
         if (role.SpawnSettings.SpawnRoles is not null)
-        {
-            foreach (RoleTypeId spawnRole in role.SpawnSettings.SpawnRoles.Where(r =>
-                         r is RoleTypeId.None || r.GetTeam() is Team.Dead))
+            foreach (RoleTypeId spawnRole in role.SpawnSettings.SpawnRoles.Where(r => r is RoleTypeId.None || r.GetTeam() is Team.Dead))
                 warnings.Add($"'spawn_settings.spawn_roles' contains '{spawnRole}', which is not a spawnable role to take a spawn position from.");
-        }
 
         if (role.IgnoreSpawnSystem)
             return;
@@ -381,41 +332,25 @@ internal static class RoleValidator
     private static void ValidateSpawnEligibility(ICustomRole role, List<string> warnings)
     {
         if (role.SpawnSettings.SpawnChance <= 0)
-        {
-            warnings.Add(
-                $"'spawn_settings.spawn_chance' is {role.SpawnSettings.SpawnChance}; it has to be above 0 or the role will never spawn on its own (only 'ucr spawn' and the API can still hand it out).");
-        }
+            warnings.Add($"'spawn_settings.spawn_chance' is {role.SpawnSettings.SpawnChance}; it has to be above 0 or the role will never spawn on its own (only 'ucr spawn' and the API can still hand it out).");
 
         if (role.SpawnSettings.MaxPlayers < 1)
-        {
-            warnings.Add(
-                $"'spawn_settings.max_players' is {role.SpawnSettings.MaxPlayers}; it is the number of players that can hold this role at the same time, so the role will never spawn on its own.");
-        }
+            warnings.Add($"'spawn_settings.max_players' is {role.SpawnSettings.MaxPlayers}; it is the number of players that can hold this role at the same time, so the role will never spawn on its own.");
 
         bool delayed = role.SpawnSettings.SpawnDelay > 0;
 
         if (role.SpawnSettings.SpawnDelay < 0)
-        {
-            warnings.Add(
-                $"'spawn_settings.spawn_delay' is negative ({role.SpawnSettings.SpawnDelay}); use 0 to spawn the role together with the vanilla role it replaces.");
-        }
+            warnings.Add($"'spawn_settings.spawn_delay' is negative ({role.SpawnSettings.SpawnDelay}); use 0 to spawn the role together with the vanilla role it replaces.");
 
         if (role.SpawnSettings.CanReplaceRoles is not { } canReplaceRoles || !canReplaceRoles.Any())
         {
-            warnings.Add(delayed
-                ? "'spawn_settings.spawn_delay' is set but 'can_replace_roles' is empty; the delayed spawn has nobody to convert. List the roles the players should be taken from, e.g. 'Spectator'."
-                : "'spawn_settings.can_replace_roles' is empty; with no delay the role is handed out by replacing one of these roles at spawn, so an empty list means it never spawns on its own. List the vanilla roles it should replace, e.g. 'ClassD'.");
+            warnings.Add(delayed ? "'spawn_settings.spawn_delay' is set but 'can_replace_roles' is empty; the delayed spawn has nobody to convert. List the roles the players should be taken from, e.g. 'Spectator'." : "'spawn_settings.can_replace_roles' is empty; with no delay the role is handed out by replacing one of these roles at spawn, so an empty list means it never spawns on its own. List the vanilla roles it should replace, e.g. 'ClassD'.");
             return;
         }
 
         if (!delayed)
-        {
             foreach (RoleTypeId replace in canReplaceRoles.Where(r => !SpawnManager.SpawnEvaluatedRoles.Contains(r)))
-            {
-                warnings.Add(
-                    $"'spawn_settings.can_replace_roles' contains '{replace}', which the spawn system never evaluates - it will never trigger a replacement. Usable roles: {string.Join(", ", SpawnManager.SpawnEvaluatedRoles.OrderBy(r => r.ToString()))}. Set 'spawn_delay' if you want the role to be handed out mid-round instead.");
-            }
-        }
+                warnings.Add($"'spawn_settings.can_replace_roles' contains '{replace}', which the spawn system never evaluates - it will never trigger a replacement. Usable roles: {string.Join(", ", SpawnManager.SpawnEvaluatedRoles.OrderBy(r => r.ToString()))}. Set 'spawn_delay' if you want the role to be handed out mid-round instead.");
     }
 
     private static void ValidateRoleAfterEscape(ICustomRole role, List<string> warnings)
@@ -431,12 +366,10 @@ internal static class RoleValidator
                 if (key.Length != 4 || key[0] is not "cuffed" || key[1] is not "by")
                     warnings.Add($"'role_after_escape' key '{kvp.Key}' is invalid; use 'default' or 'cuffed by <InternalTeam|CustomTeam|CustomRole> <id>'.");
                 else
-                {
                     switch (key[2])
                     {
                         case "InternalTeam" or "IT" when !Enum.TryParse(key[3], out Team _):
-                            warnings.Add(
-                                $"'role_after_escape' key '{kvp.Key}': '{key[3]}' is not a valid team. Valid teams: {string.Join(", ", Enum.GetNames(typeof(Team)))}.");
+                            warnings.Add($"'role_after_escape' key '{kvp.Key}': '{key[3]}' is not a valid team. Valid teams: {string.Join(", ", Enum.GetNames(typeof(Team)))}.");
                             break;
                         case "CustomTeam" or "CT" when !uint.TryParse(key[3], out _):
                             warnings.Add($"'role_after_escape' key '{kvp.Key}': '{key[3]}' is not a valid custom team id (a number).");
@@ -445,11 +378,9 @@ internal static class RoleValidator
                             warnings.Add($"'role_after_escape' key '{kvp.Key}': '{key[3]}' is not a valid custom role id (a number).");
                             break;
                         case not ("InternalTeam" or "IT" or "CustomTeam" or "CT" or "CustomRole" or "CR"):
-                            warnings.Add(
-                                $"'role_after_escape' key '{kvp.Key}': unknown source '{key[2]}'; use InternalTeam (IT), CustomTeam (CT) or CustomRole (CR).");
+                            warnings.Add($"'role_after_escape' key '{kvp.Key}': unknown source '{key[2]}'; use InternalTeam (IT), CustomTeam (CT) or CustomRole (CR).");
                             break;
                     }
-                }
             }
 
             if (kvp.Value is "Deny" or "deny" or "DENY")
@@ -457,8 +388,7 @@ internal static class RoleValidator
 
             if (string.IsNullOrWhiteSpace(kvp.Value))
             {
-                warnings.Add(
-                    $"'role_after_escape' value for '{kvp.Key}' is empty; the escaping player would end up as a Spectator. Use 'Deny' to block the escape, or 'InternalRole <role>' / 'CustomRole <id>'.");
+                warnings.Add($"'role_after_escape' value for '{kvp.Key}' is empty; the escaping player would end up as a Spectator. Use 'Deny' to block the escape, or 'InternalRole <role>' / 'CustomRole <id>'.");
                 continue;
             }
 
@@ -466,12 +396,10 @@ internal static class RoleValidator
             if (value.Length != 2)
                 warnings.Add($"'role_after_escape' value '{kvp.Value}' is invalid; use 'Deny', 'InternalRole <role>' or 'CustomRole <id>'.");
             else
-            {
                 switch (value[0])
                 {
                     case "InternalRole" or "IR" when !Enum.TryParse(value[1], out RoleTypeId _):
-                        warnings.Add(
-                            $"'role_after_escape' value '{kvp.Value}': '{value[1]}' is not a valid role. Examples: ClassD, ChaosConscript, NtfPrivate.");
+                        warnings.Add($"'role_after_escape' value '{kvp.Value}': '{value[1]}' is not a valid role. Examples: ClassD, ChaosConscript, NtfPrivate.");
                         break;
                     case "CustomRole" or "CR" when !int.TryParse(value[1], out _):
                         warnings.Add($"'role_after_escape' value '{kvp.Value}': '{value[1]}' is not a valid custom role id (a number).");
@@ -480,7 +408,6 @@ internal static class RoleValidator
                         warnings.Add($"'role_after_escape' value '{kvp.Value}': unknown source '{value[0]}'; use InternalRole (IR) or CustomRole (CR).");
                         break;
                 }
-            }
         }
     }
 
@@ -502,20 +429,15 @@ internal static class RoleValidator
             return;
 
         foreach (uint id in role.CustomItemsInventory)
-        {
             try
             {
                 if (!UCI.HasCustomItem(id, out _))
-                {
-                    LogManager.Warn(
-                        $"[Role Validator] {label}: 'custom_items_inventory' references custom item {id}, which is not registered in UncomplicatedCustomItems; nothing will be given for it.");
-                }
+                    LogManager.Warn($"[Role Validator] {label}: 'custom_items_inventory' references custom item {id}, which is not registered in UncomplicatedCustomItems; nothing will be given for it.");
             }
             catch (Exception e)
             {
                 LogManager.Debug($"[Role Validator] {label}: could not check custom item {id}: {e.Message}");
             }
-        }
     }
 
     private static void ValidateCustomFlags(ICustomRole role, string label)
@@ -536,13 +458,11 @@ internal static class RoleValidator
 
         foreach (KeyValuePair<string, Dictionary<string, object>> flag in flags)
         {
-            Type type = YamlFlagsHandler.Modules.FirstOrDefault(t =>
-                string.Equals(t.Name, flag.Key, StringComparison.OrdinalIgnoreCase));
+            Type type = YamlFlagsHandler.Modules.FirstOrDefault(t => string.Equals(t.Name, flag.Key, StringComparison.OrdinalIgnoreCase));
 
             if (type is null)
             {
-                LogManager.Warn(
-                    $"[Role Validator] {label}: unknown custom flag '{flag.Key}'; it will be ignored. Available flags: {string.Join(", ", YamlFlagsHandler.Modules.Select(t => t.Name).OrderBy(n => n))}.");
+                LogManager.Warn($"[Role Validator] {label}: unknown custom flag '{flag.Key}'; it will be ignored. Available flags: {string.Join(", ", YamlFlagsHandler.Modules.Select(t => t.Name).OrderBy(n => n))}.");
                 continue;
             }
 
@@ -556,8 +476,7 @@ internal static class RoleValidator
                 List<string> missing = module.GetMissingArgs();
                 if (missing.Count > 0)
                 {
-                    LogManager.Warn(
-                        $"[Role Validator] {label}: custom flag '{type.Name}' is missing required setting(s): {string.Join(", ", missing)}; it will be skipped on spawn.");
+                    LogManager.Warn($"[Role Validator] {label}: custom flag '{type.Name}' is missing required setting(s): {string.Join(", ", missing)}; it will be skipped on spawn.");
                     continue;
                 }
 
@@ -579,20 +498,12 @@ internal static class RoleValidator
         foreach (KeyValuePair<string, string> kvp in role.RoleAfterEscape)
         {
             string[] key = kvp.Key.Split(' ');
-            if (key.Length == 4 && key[2] is "CustomRole" or "CR" && int.TryParse(key[3], out int cuffedById) &&
-                !CustomRole.CustomRoles.ContainsKey(cuffedById))
-            {
-                LogManager.Warn(
-                    $"[Role Validator] {label}: 'role_after_escape' key '{kvp.Key}' references custom role {cuffedById}, which is not registered.");
-            }
+            if (key.Length == 4 && key[2] is "CustomRole" or "CR" && int.TryParse(key[3], out int cuffedById) && !CustomRole.CustomRoles.ContainsKey(cuffedById))
+                LogManager.Warn($"[Role Validator] {label}: 'role_after_escape' key '{kvp.Key}' references custom role {cuffedById}, which is not registered.");
 
             string[] value = kvp.Value?.Split(' ') ?? [];
-            if (value.Length == 2 && value[0] is "CustomRole" or "CR" && int.TryParse(value[1], out int targetId) &&
-                !CustomRole.CustomRoles.ContainsKey(targetId))
-            {
-                LogManager.Warn(
-                    $"[Role Validator] {label}: 'role_after_escape' value '{kvp.Value}' references custom role {targetId}, which is not registered - escaping players would go nowhere.");
-            }
+            if (value.Length == 2 && value[0] is "CustomRole" or "CR" && int.TryParse(value[1], out int targetId) && !CustomRole.CustomRoles.ContainsKey(targetId))
+                LogManager.Warn($"[Role Validator] {label}: 'role_after_escape' value '{kvp.Value}' references custom role {targetId}, which is not registered - escaping players would go nowhere.");
         }
     }
 

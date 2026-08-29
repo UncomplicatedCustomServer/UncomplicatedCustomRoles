@@ -93,8 +93,7 @@ public static class DictionaryExtension
         return newDictionary;
     }
 
-    public static ConcurrentDictionary<TKey, TValue> Clone<TKey, TValue>(
-        this ConcurrentDictionary<TKey, TValue> dictionary)
+    public static ConcurrentDictionary<TKey, TValue> Clone<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> dictionary)
     {
         ConcurrentDictionary<TKey, TValue> newDictionary = new();
 

@@ -135,10 +135,7 @@ internal class Plugin : Plugin<Config>
 
         if (_welcomeShown || Config is not { EnableBasicLogs: true }) return;
         _welcomeShown = true;
-        LogManager.Info($"Thanks for using UncomplicatedCustomRoles v{Version} by {Author}!",
-            ConsoleColor.Blue);
-        LogManager.Info(
-            "To receive support and to stay up-to-date, join our official Discord server: https://discord.gg/5StRGu8EJV",
-            ConsoleColor.DarkYellow);
+        LogManager.Info($"Thanks for using UncomplicatedCustomRoles v{Version} by {Author}!", ConsoleColor.Blue);
+        LogManager.Info("To receive support and to stay up-to-date, join our official Discord server: https://discord.gg/5StRGu8EJV", ConsoleColor.DarkYellow);
     }
 }

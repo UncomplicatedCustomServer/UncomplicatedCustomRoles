@@ -51,28 +51,16 @@ internal class YamlFlagsHandler
         List<KeyValuePair<string, Dictionary<string, object>?>> result = [];
 
         foreach (object flag in flags)
-        {
             if (flag is Dictionary<object, object> str)
-            {
                 foreach (KeyValuePair<object, object> res in str)
-                {
                     if (res.Value is Dictionary<object, object> dict)
-                    {
-                        result.Add(new KeyValuePair<string, Dictionary<string, object>?>(res.Key.ToString(),
-                            dict.ConvertKeyToString()));
-                    }
+                        result.Add(new KeyValuePair<string, Dictionary<string, object>?>(res.Key.ToString(), dict.ConvertKeyToString()));
                     else if (res.Value is null)
                         result.Add(new KeyValuePair<string, Dictionary<string, object>?>(res.Key.ToString(), null));
                     else
-                    {
-                        LogManager.Warn(
-                            $"[CM Loader] The custom flag '{res.Key}' has its settings written as '{res.Value}' instead of a list of 'setting: value' lines, so it can't be read and will be ignored.");
-                    }
-                }
-            }
+                        LogManager.Warn($"[CM Loader] The custom flag '{res.Key}' has its settings written as '{res.Value}' instead of a list of 'setting: value' lines, so it can't be read and will be ignored.");
             else
                 result.Add(new KeyValuePair<string, Dictionary<string, object>?>(flag.ToString(), null));
-        }
 
         return result;
     }
@@ -82,8 +70,7 @@ internal class YamlFlagsHandler
         List<Type> types = [];
 
         foreach (Assembly? assembly in ImportManager.AvailableAssemblies)
-        foreach (Type? type in assembly.GetTypes()
-                     .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(CustomModule))))
+        foreach (Type? type in assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(CustomModule))))
             types.Add(type);
 
         return types.ToArray();

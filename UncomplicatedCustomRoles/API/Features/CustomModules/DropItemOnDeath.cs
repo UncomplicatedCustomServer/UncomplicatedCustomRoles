@@ -20,10 +20,7 @@ public class DropItemOnDeath : CustomModule
     public override List<string> RequiredArgs => ["item"];
 
     public ItemType? Item =>
-        StringArgs.TryGetValue("item", out string rawItem) && Enum.TryParse(rawItem, true, out ItemType item) &&
-        item is not ItemType.None
-            ? item
-            : null;
+        StringArgs.TryGetValue("item", out string rawItem) && Enum.TryParse(rawItem, true, out ItemType item) && item is not ItemType.None ? item : null;
 
     public override bool Validate(out string error)
     {
@@ -40,12 +37,10 @@ public class DropItemOnDeath : CustomModule
     public override void OnRemoved()
     {
         if (Item is ItemType item)
-        {
             Timing.CallDelayed(0.5f, () =>
             {
                 Pickup pickup = Pickup.Create(item, CustomRole.Player.Position);
                 pickup?.Spawn();
             });
-        }
     }
 }

@@ -38,8 +38,7 @@ internal static class UcrSpawnContext
 [HarmonyPatch(typeof(PlayerRoleManager), nameof(PlayerRoleManager.InitializeNewRole))]
 internal class SetRolePatch
 {
-    private static void Prefix(PlayerRoleManager __instance, RoleTypeId targetId, RoleChangeReason reason,
-        RoleSpawnFlags spawnFlags = RoleSpawnFlags.All, NetworkReader data = null)
+    private static void Prefix(PlayerRoleManager __instance, RoleTypeId targetId, RoleChangeReason reason, RoleSpawnFlags spawnFlags = RoleSpawnFlags.All, NetworkReader data = null)
     {
         if (SummonedCustomRole.TryGet(__instance.Hub, out SummonedCustomRole role))
             role.Destroy();
@@ -50,8 +49,7 @@ internal class SetRolePatch
         if (!UcrSpawnContext.Active || reason is not RoleChangeReason.Respawn)
             return;
 
-        if (__instance.CurrentRole is HumanRole { UsesUnitNames: true } humanRole
-            && humanRole.Team.TryGetLatestUnitNameId(out byte unitNameId))
+        if (__instance.CurrentRole is HumanRole { UsesUnitNames: true } humanRole && humanRole.Team.TryGetLatestUnitNameId(out byte unitNameId))
             humanRole.UnitNameId = unitNameId;
     }
 }

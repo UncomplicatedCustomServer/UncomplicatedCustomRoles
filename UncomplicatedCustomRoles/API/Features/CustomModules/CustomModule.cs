@@ -64,10 +64,8 @@ public abstract class CustomModule
             _stringArgs = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             if (Args is not null)
-            {
                 foreach (KeyValuePair<string, object> kvp in Args)
                     _stringArgs[kvp.Key] = kvp.Value?.ToString();
-            }
 
             return _stringArgs;
         }
@@ -88,9 +86,7 @@ public abstract class CustomModule
     internal void Initialize(SummonedCustomRole summonedCustomRole, Dictionary<string, object> args)
     {
         CustomRole = summonedCustomRole;
-        Args = args is null
-            ? new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
-            : new Dictionary<string, object>(args, StringComparer.OrdinalIgnoreCase);
+        Args = args is null ? new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase) : new Dictionary<string, object>(args, StringComparer.OrdinalIgnoreCase);
 
         InvalidateArgsCache();
     }
@@ -111,11 +107,8 @@ public abstract class CustomModule
             return missing;
 
         foreach (string arg in RequiredArgs)
-        {
-            if (Args is null || !Args.TryGetValue(arg, out object value) || value is null ||
-                (value is string text && string.IsNullOrWhiteSpace(text)))
+            if (Args is null || !Args.TryGetValue(arg, out object value) || value is null || (value is string text && string.IsNullOrWhiteSpace(text)))
                 missing.Add(arg);
-        }
 
         return missing;
     }
@@ -252,10 +245,8 @@ public abstract class CustomModule
             case IEnumerable nonGenericEnum:
                 List<T> result = nonGenericEnum is ICollection col ? new List<T>(col.Count) : new List<T>();
                 foreach (object o in nonGenericEnum)
-                {
                     if (TryConvertTo(o, out T converted))
                         result.Add(converted);
-                }
 
                 return result;
             default:
@@ -289,10 +280,8 @@ public abstract class CustomModule
         {
             List<string> result = [];
             foreach (object o in enumerable)
-            {
                 if (o is not null)
                     result.Add(o.ToString());
-            }
 
             return result;
         }
@@ -304,10 +293,8 @@ public abstract class CustomModule
     {
         List<string> invalid = [];
         foreach (string raw in GetRawListEntries(param))
-        {
             if (!Enum.TryParse(raw, true, out T _))
                 invalid.Add(raw);
-        }
 
         return invalid;
     }
@@ -340,11 +327,8 @@ public abstract class CustomModule
         List<CustomModule> mods = [];
 
         foreach (KeyValuePair<string, Dictionary<string, object>?> module in data)
-        {
-            if (InitializeCustomModule(module.Key, module.Value, YamlFlagsHandler.Modules, summonedCustomRole) is
-                { } mod)
+            if (InitializeCustomModule(module.Key, module.Value, YamlFlagsHandler.Modules, summonedCustomRole) is { } mod)
                 mods.Add(mod);
-        }
 
         LogManager.Debug($"Successfully loaded {mods.Count} CustomModules for player {summonedCustomRole.Player.Nickname}!");
 
@@ -355,9 +339,7 @@ public abstract class CustomModule
     {
         if (Activator.CreateInstance(type) is not CustomModule module)
         {
-            LogManager.Error(
-                $"Failed to enable CustomModule '{type?.Name}'!\nError: ERR_CUSTOM_MODULE_NULLREFERENCE_OR_NOTMODULE",
-                "CM0003");
+            LogManager.Error($"Failed to enable CustomModule '{type?.Name}'!\nError: ERR_CUSTOM_MODULE_NULLREFERENCE_OR_NOTMODULE", "CM0003");
             return null;
         }
 
@@ -371,8 +353,7 @@ public abstract class CustomModule
         return module;
     }
 
-    private static CustomModule? InitializeCustomModule(string name, Dictionary<string, object>? args, Type[] types,
-        SummonedCustomRole summonedCustomRole)
+    private static CustomModule? InitializeCustomModule(string name, Dictionary<string, object>? args, Type[] types, SummonedCustomRole summonedCustomRole)
     {
         try
         {
@@ -382,17 +363,13 @@ public abstract class CustomModule
 
             if (type is null)
             {
-                LogManager.Error(
-                    $"[CM Loader] Unknown CustomModule '{name}' on role {RoleLabel(summonedCustomRole)} - it will be ignored.\n" +
-                    $"Available flags: {string.Join(", ", types.Select(t => t.Name).OrderBy(n => n))}", "CM0001");
+                LogManager.Error($"[CM Loader] Unknown CustomModule '{name}' on role {RoleLabel(summonedCustomRole)} - it will be ignored.\n" + $"Available flags: {string.Join(", ", types.Select(t => t.Name).OrderBy(n => n))}", "CM0001");
                 return null;
             }
 
             if (Activator.CreateInstance(type) is not CustomModule module)
             {
-                LogManager.Error(
-                    $"[CM Loader] Failed to instantiate CustomModule '{type.Name}' on role {RoleLabel(summonedCustomRole)}.",
-                    "CM0002");
+                LogManager.Error($"[CM Loader] Failed to instantiate CustomModule '{type.Name}' on role {RoleLabel(summonedCustomRole)}.", "CM0002");
                 return null;
             }
 
@@ -421,18 +398,13 @@ public abstract class CustomModule
 
         if (missing.Count > 0)
         {
-            LogManager.Error(
-                $"[CM Loader] CustomModule '{name}' on role {RoleLabel(role)} is missing required setting(s): {string.Join(", ", missing)}.\n" +
-                $"Provided setting(s): {(module.Args.Count == 0 ? "(none)" : string.Join(", ", module.Args.Keys))}.\n" +
-                "This flag will be skipped.", "CM0004");
+            LogManager.Error($"[CM Loader] CustomModule '{name}' on role {RoleLabel(role)} is missing required setting(s): {string.Join(", ", missing)}.\n" + $"Provided setting(s): {(module.Args.Count == 0 ? "(none)" : string.Join(", ", module.Args.Keys))}.\n" + "This flag will be skipped.", "CM0004");
             return false;
         }
 
         if (!module.Validate(out string? error))
         {
-            LogManager.Error(
-                $"[CM Loader] CustomModule '{name}' on role {RoleLabel(role)} has an invalid setting: {error}\n" +
-                "This flag will be skipped.", "CM0005");
+            LogManager.Error($"[CM Loader] CustomModule '{name}' on role {RoleLabel(role)} has an invalid setting: {error}\n" + "This flag will be skipped.", "CM0005");
             return false;
         }
 
@@ -470,8 +442,7 @@ public abstract class CustomModule
         {
             unchecked
             {
-                return ((_param is null ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(_param)) * 397) ^
-                       (_type?.GetHashCode() ?? 0);
+                return ((_param is null ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(_param)) * 397) ^ (_type?.GetHashCode() ?? 0);
             }
         }
     }

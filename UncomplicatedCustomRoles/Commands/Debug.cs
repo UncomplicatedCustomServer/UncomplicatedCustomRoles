@@ -56,17 +56,11 @@ public class Debug : IUCRCommand
             obj = player.GetSummonedInstance();
         else if (args[0] is "current_player" or "cp" && player is not null)
             obj = player;
-        else if (args[0].StartsWith("player_") && int.TryParse(args[0].Replace("player_", string.Empty), out int id) &&
-                 Player.TryGet(id, out Player player3))
+        else if (args[0].StartsWith("player_") && int.TryParse(args[0].Replace("player_", string.Empty), out int id) && Player.TryGet(id, out Player player3))
             obj = player3;
-        else if (args[0].StartsWith("player_scr_") &&
-                 int.TryParse(args[0].Replace("player_scr_", string.Empty), out int id2) &&
-                 Player.TryGet(id2, out Player player4))
+        else if (args[0].StartsWith("player_scr_") && int.TryParse(args[0].Replace("player_scr_", string.Empty), out int id2) && Player.TryGet(id2, out Player player4))
             obj = player4.GetSummonedInstance();
-        else if (args[0].StartsWith("current_player_cm_") && player is not null &&
-                 player.TryGetSummonedInstance(out SummonedCustomRole role) &&
-                 role.CustomModules.FirstOrDefault(cm => cm.Name == args[0].Replace("current_player_cm_", "")) is not
-                     null)
+        else if (args[0].StartsWith("current_player_cm_") && player is not null && player.TryGetSummonedInstance(out SummonedCustomRole role) && role.CustomModules.FirstOrDefault(cm => cm.Name == args[0].Replace("current_player_cm_", "")) is not null)
             obj = role.CustomModules.FirstOrDefault(cm => cm.Name == args[0].Replace("current_player_cm_", ""));
         else if (args[0] is "ref" or "reference")
             obj = ReferenceObject;
@@ -111,10 +105,7 @@ public class Debug : IUCRCommand
         PropertyInfo property;
 
         if (obj is null)
-        {
-            property = target.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-                .FirstOrDefault(p => p.Name == name && p.CanRead);
-        }
+            property = target.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic).FirstOrDefault(p => p.Name == name && p.CanRead);
         else
             property = target.GetProperties().FirstOrDefault(p => p.Name == name && p.CanRead);
 

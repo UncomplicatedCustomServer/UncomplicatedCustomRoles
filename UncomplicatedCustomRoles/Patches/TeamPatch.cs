@@ -91,8 +91,7 @@ internal static class RoleSerializationContext
 }
 
 [HarmonyPatchCategory(TeamPatchManager.Category)]
-[HarmonyPatch(typeof(RoleSyncInfo), MethodType.Constructor, typeof(ReferenceHub), typeof(RoleTypeId),
-    typeof(ReferenceHub), typeof(NetworkWriter))]
+[HarmonyPatch(typeof(RoleSyncInfo), MethodType.Constructor, typeof(ReferenceHub), typeof(RoleTypeId), typeof(ReferenceHub), typeof(NetworkWriter))]
 internal class RoleSyncInfoCtorPatch
 {
     private static void Prefix()
@@ -140,8 +139,7 @@ internal class PlayerRolesUtilsPatch
 
     internal static RoleTypeId GetCombatRoleId(ReferenceHub hub)
     {
-        if (hub != null && DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team team) &&
-            _roleTeam.TryGetValue(team, out RoleTypeId fakeRole))
+        if (hub != null && DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team team) && _roleTeam.TryGetValue(team, out RoleTypeId fakeRole))
             return fakeRole;
 
         return hub.GetRoleId();
@@ -159,10 +157,8 @@ internal class ProcessDamageRolePatch
         MethodInfo replacement = Method(typeof(PlayerRolesUtilsPatch), nameof(PlayerRolesUtilsPatch.GetCombatRoleId));
 
         foreach (CodeInstruction instruction in code)
-        {
             if (instruction.opcode == OpCodes.Call && instruction.operand is MethodInfo method && method == original)
                 instruction.operand = replacement;
-        }
 
         return code;
     }
@@ -174,22 +170,12 @@ internal class TeamFakeContextPatch
 {
     private static IEnumerable<MethodBase> TargetMethods()
     {
-        return Declared(typeof(HitboxIdentity), nameof(HitboxIdentity.IsEnemy))
-            .Concat(Declared(typeof(GeneralKillsHandler), nameof(GeneralKillsHandler.HandleAttackerKill)))
-            .Concat(Declared(typeof(TerminationRewards), nameof(TerminationRewards.EvaluateGainReason)))
-            .Concat(Declared(typeof(MimicryRecorder), nameof(MimicryRecorder.WasKilledByTeammate)))
-            .Concat(Declared(typeof(ExplosionGrenade), nameof(ExplosionGrenade.Explode)))
-            .Concat(Declared(typeof(FlashbangGrenade), nameof(FlashbangGrenade.ServerFuseEnd)))
-            .Concat(Declared(typeof(AttackerDamageHandler), nameof(AttackerDamageHandler.ProcessDamage)))
-            .Concat(Declared(typeof(LastHumanTracker), nameof(LastHumanTracker.IsLastTarget)))
-            .Concat(Declared(typeof(Scp079Recontainer), nameof(Scp079Recontainer.OnServerRoleChanged)));
+        return Declared(typeof(HitboxIdentity), nameof(HitboxIdentity.IsEnemy)).Concat(Declared(typeof(GeneralKillsHandler), nameof(GeneralKillsHandler.HandleAttackerKill))).Concat(Declared(typeof(TerminationRewards), nameof(TerminationRewards.EvaluateGainReason))).Concat(Declared(typeof(MimicryRecorder), nameof(MimicryRecorder.WasKilledByTeammate))).Concat(Declared(typeof(ExplosionGrenade), nameof(ExplosionGrenade.Explode))).Concat(Declared(typeof(FlashbangGrenade), nameof(FlashbangGrenade.ServerFuseEnd))).Concat(Declared(typeof(AttackerDamageHandler), nameof(AttackerDamageHandler.ProcessDamage))).Concat(Declared(typeof(LastHumanTracker), nameof(LastHumanTracker.IsLastTarget))).Concat(Declared(typeof(Scp079Recontainer), nameof(Scp079Recontainer.OnServerRoleChanged)));
     }
 
     private static IEnumerable<MethodBase> Declared(Type type, string name)
     {
-        return type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance |
-                               BindingFlags.Static | BindingFlags.DeclaredOnly)
-            .Where(m => m.Name == name && !m.IsAbstract && !m.ContainsGenericParameters);
+        return type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly).Where(m => m.Name == name && !m.IsAbstract && !m.ContainsGenericParameters);
     }
 
     private static void Prefix()
@@ -228,25 +214,19 @@ internal class GrenadeTranspiler
         int index = -1;
 
         for (int i = 0; i < newInstructions.Count; i++)
-        {
-            if (newInstructions[i].opcode == OpCodes.Call && newInstructions[i].operand is MethodInfo method &&
-                method == Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetRoleId),
-                    [typeof(ReferenceHub)]))
+            if (newInstructions[i].opcode == OpCodes.Call && newInstructions[i].operand is MethodInfo method && method == Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetRoleId), [typeof(ReferenceHub)]))
             {
                 index = i;
                 break;
             }
-        }
 
         if (index is -1 || index + 1 >= newInstructions.Count)
         {
-            LogManager.Error(
-                "GrenadeTranspiler could not find the expected GetRoleId call inside ExplosionGrenade.ExplodeDestructible - the method is left unpatched. Grenade friendly-fire checks may ignore fake teams.");
+            LogManager.Error("GrenadeTranspiler could not find the expected GetRoleId call inside ExplosionGrenade.ExplodeDestructible - the method is left unpatched. Grenade friendly-fire checks may ignore fake teams.");
             return newInstructions;
         }
 
-        newInstructions[index + 1].operand = Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam),
-            [typeof(ReferenceHub)]);
+        newInstructions[index + 1].operand = Method(typeof(PlayerRolesUtils), nameof(PlayerRolesUtils.GetTeam), [typeof(ReferenceHub)]);
         newInstructions.RemoveAt(index);
 
         return newInstructions;
@@ -259,10 +239,8 @@ public class PickupSearchCompletorPatch
 {
     private static bool Prefix(PickupSearchCompletor __instance, ref bool __result)
     {
-        if (!DisguiseTeam.List.TryGetValue(__instance.Hub.PlayerId, out Team team) || team != Team.SCPs ||
-            __instance.Hub.roleManager.CurrentRole.RoleTypeId.GetTeam() == Team.SCPs) return true;
-        __result = !__instance.TargetPickup.Info.Locked && !__instance.Hub.inventory.IsDisarmed() &&
-                   !__instance.Hub.interCoordinator.AnyBlocker(BlockedInteraction.GrabItems);
+        if (!DisguiseTeam.List.TryGetValue(__instance.Hub.PlayerId, out Team team) || team != Team.SCPs || __instance.Hub.roleManager.CurrentRole.RoleTypeId.GetTeam() == Team.SCPs) return true;
+        __result = !__instance.TargetPickup.Info.Locked && !__instance.Hub.inventory.IsDisarmed() && !__instance.Hub.interCoordinator.AnyBlocker(BlockedInteraction.GrabItems);
         return false;
     }
 }
@@ -278,8 +256,7 @@ public class DoorPermissionsPolicyPatch
         ]);
     }
 
-    private static bool Prefix(DoorPermissionsPolicy __instance, ReferenceHub hub, IDoorPermissionRequester requester,
-        out PermissionUsed callback, ref bool __result)
+    private static bool Prefix(DoorPermissionsPolicy __instance, ReferenceHub hub, IDoorPermissionRequester requester, out PermissionUsed callback, ref bool __result)
     {
         callback = null;
         if (__instance.RequiredPermissions == DoorPermissionFlags.None || hub.serverRoles.BypassMode)
@@ -376,15 +353,12 @@ internal class IsHumanPatch
 [HarmonyPatch(typeof(Scp079Recontainer), nameof(Scp079Recontainer.OnServerRoleChanged))]
 public class Scp079RecontainerPatch
 {
-    private static bool Prefix(Scp079Recontainer __instance, ReferenceHub hub, RoleTypeId newRole,
-        RoleChangeReason reason)
+    private static bool Prefix(Scp079Recontainer __instance, ReferenceHub hub, RoleTypeId newRole, RoleChangeReason reason)
     {
         Team team = hub.GetRoleId().GetTeam();
         if (DisguiseTeam.List.TryGetValue(hub.PlayerId, out Team t))
             team = t;
-        if (newRole != RoleTypeId.Spectator || !IsScpButNot079(hub.GetRoleId(), team) ||
-            Scp079Role.ActiveInstances.Count == 0 ||
-            ReferenceHub.AllHubs.Any(x =>
+        if (newRole != RoleTypeId.Spectator || !IsScpButNot079(hub.GetRoleId(), team) || Scp079Role.ActiveInstances.Count == 0 || ReferenceHub.AllHubs.Any(x =>
             {
                 if (x == hub)
                     return false;

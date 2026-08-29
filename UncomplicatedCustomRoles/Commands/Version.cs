@@ -31,9 +31,7 @@ public class Version : IUCRCommand
             return false;
         }
 
-        string source = string.IsNullOrWhiteSpace(VersionManager.VersionInfo.Source)
-            ? "unknown"
-            : VersionManager.VersionInfo.Source;
+        string source = string.IsNullOrWhiteSpace(VersionManager.VersionInfo.Source) ? "unknown" : VersionManager.VersionInfo.Source;
 
         if (!string.IsNullOrWhiteSpace(VersionManager.VersionInfo.SourceLink))
             source += $" - {VersionManager.VersionInfo.SourceLink}";

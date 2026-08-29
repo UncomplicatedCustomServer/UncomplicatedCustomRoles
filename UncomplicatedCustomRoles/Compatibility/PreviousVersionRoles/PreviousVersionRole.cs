@@ -153,10 +153,8 @@ internal class PreviousVersionRole : IPreviousVersionRole
 
         List<object> flags = [];
         foreach (CustomFlags flag in Enum.GetValues(typeof(CustomFlags)))
-        {
             if ((CustomFlags & flag) == flag)
                 flags.Add(flag.ToString());
-        }
 
         flags.Remove("None");
         return flags;

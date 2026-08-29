@@ -17,8 +17,7 @@ namespace UncomplicatedCustomRoles.Integrations;
 
 internal static class ECI
 {
-    internal static object PluginInstance { get; } = DynamicInvoke
-        .GetMethod("Exiled.CustomItems", "Exiled.CustomItems.CustomItems.Instance_get")?.Invoke(null, null);
+    internal static object PluginInstance { get; } = DynamicInvoke.GetMethod("Exiled.CustomItems", "Exiled.CustomItems.CustomItems.Instance_get")?.Invoke(null, null);
 
     public static void GiveCustomItem(uint id, Player player)
     {
@@ -30,9 +29,7 @@ internal static class ECI
                 return;
             }
 
-            MethodInfo tryGiveMethod = DynamicInvoke.GetMethod("Exiled.CustomItems",
-                "Exiled.CustomItems.API.Features.CustomItem.TryGive",
-                false, 3, ["id"]);
+            MethodInfo tryGiveMethod = DynamicInvoke.GetMethod("Exiled.CustomItems", "Exiled.CustomItems.API.Features.CustomItem.TryGive", false, 3, ["id"]);
 
             if (tryGiveMethod is null)
             {
@@ -40,8 +37,7 @@ internal static class ECI
                 return;
             }
 
-            MethodInfo exiledPlayerMethod = DynamicInvoke.GetMethod("Exiled.API", "Exiled.API.Features.Player.Get", false, 1,
-                ["apiPlayer"]);
+            MethodInfo exiledPlayerMethod = DynamicInvoke.GetMethod("Exiled.API", "Exiled.API.Features.Player.Get", false, 1, ["apiPlayer"]);
             if (exiledPlayerMethod is null)
             {
                 LogManager.Error($"Failed to run Exiled.CustomItems.TryGiveCustomItem({id}): Exiled Player.Get method not found!");

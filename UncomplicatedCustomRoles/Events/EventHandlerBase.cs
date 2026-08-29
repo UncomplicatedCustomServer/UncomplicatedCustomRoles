@@ -20,8 +20,7 @@ internal abstract class EventHandlerBase
 {
     private static readonly List<EventHandlerBase> _list = [];
 
-    internal static ConcurrentDictionary<int, Tuple<List<ItemType>, Dictionary<ItemType, ushort>, bool>>
-        RespawnInventoryQueue { get; } = new();
+    internal static ConcurrentDictionary<int, Tuple<List<ItemType>, Dictionary<ItemType, ushort>, bool>> RespawnInventoryQueue { get; } = new();
 
     internal static HashSet<int> RagdollAppearanceQueue { get; } = [];
 

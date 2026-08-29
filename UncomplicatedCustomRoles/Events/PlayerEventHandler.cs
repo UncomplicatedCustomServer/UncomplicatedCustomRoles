@@ -95,10 +95,8 @@ internal class PlayerEventHandler : EventHandlerBase
 
         // Sync role appearance - LabApiExtensions handles it if available
         if (!LabApiExtensions.IsAvailable)
-        {
             foreach (SummonedCustomRole role in SummonedCustomRole.List.Values.Where(role => role.Appearance != RoleTypeId.None))
                 role.Player.ChangeAppearance(role.Appearance, [ev.Player]);
-        }
 
         foreach (SummonedCustomRole role in SummonedCustomRole.List.Values.Where(role => role.Scale != Vector3.one))
             role.Player.Scale = role.Scale;
@@ -113,8 +111,7 @@ internal class PlayerEventHandler : EventHandlerBase
 
         if (SummonedCustomRole.TryGet(ev.Player, out SummonedCustomRole customRole))
         {
-            LogManager.Debug(
-                $"Player {ev.Player.Nickname} ({playerId}) left as CustomRole {customRole.Role.Name} ({customRole.Role.Id}), releasing the instance");
+            LogManager.Debug($"Player {ev.Player.Nickname} ({playerId}) left as CustomRole {customRole.Role.Name} ({customRole.Role.Id}), releasing the instance");
             customRole.DestroyDetached();
         }
 
@@ -138,7 +135,6 @@ internal class PlayerEventHandler : EventHandlerBase
             return;
 
         if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole role))
-        {
             switch (ev.Effect)
             {
                 case CardiacArrest when role.Role.IsFriendOf is not null && role.Role.IsFriendOf.Contains(Team.SCPs):
@@ -146,7 +142,6 @@ internal class PlayerEventHandler : EventHandlerBase
                     ev.IsAllowed = false;
                     break;
             }
-        }
     }
 
     public void OnGenerator(PlayerActivatingGeneratorEventArgs ev)
@@ -180,8 +175,7 @@ internal class PlayerEventHandler : EventHandlerBase
             if (customRole.HasModule<TutorialRagdoll>())
                 RagdollAppearanceQueue.Add(ev.Player.PlayerId);
 
-            if (customRole.TryGetModule(out CustomScpAnnouncer announcer) &&
-                ev.Player.ReferenceHub.GetTeam() is not Team.SCPs)
+            if (customRole.TryGetModule(out CustomScpAnnouncer announcer) && ev.Player.ReferenceHub.GetTeam() is not Team.SCPs)
                 TerminationQueue[ev.Player.PlayerId] = new Tuple<CustomScpAnnouncer, DateTimeOffset>(announcer, DateTimeOffset.Now);
 
             if (customRole.HasModule<DropNothingOnDeath>())
@@ -191,8 +185,7 @@ internal class PlayerEventHandler : EventHandlerBase
 
     public void OnDeath(PlayerDeathEventArgs ev)
     {
-        if (TerminationQueue.TryGetValue(ev.Player.PlayerId, out Tuple<CustomScpAnnouncer, DateTimeOffset> data) &&
-            (DateTimeOffset.Now - data.Item2).TotalMilliseconds < 1300)
+        if (TerminationQueue.TryGetValue(ev.Player.PlayerId, out Tuple<CustomScpAnnouncer, DateTimeOffset> data) && (DateTimeOffset.Now - data.Item2).TotalMilliseconds < 1300)
             SpawnManager.AnnounceScpTermination(ev.Player.ReferenceHub, ev.DamageHandler);
 
         TerminationQueue.TryRemove(ev.Player.PlayerId, out _);
@@ -200,9 +193,7 @@ internal class PlayerEventHandler : EventHandlerBase
         SpawnManager.ClearCustomTypes(ev.Player);
 
         // Try change appearance of the killer
-        if (ev.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole) &&
-            attackerCustomRole.TryGetModule(out ChangeAppearanceOnKill changeAppearanceOnKill) &&
-            !(changeAppearanceOnKill.Forever && changeAppearanceOnKill.AlreadyChanged))
+        if (ev.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole) && attackerCustomRole.TryGetModule(out ChangeAppearanceOnKill changeAppearanceOnKill) && !(changeAppearanceOnKill.Forever && changeAppearanceOnKill.AlreadyChanged))
         {
             changeAppearanceOnKill.AlreadyChanged = true;
 
@@ -213,7 +204,6 @@ internal class PlayerEventHandler : EventHandlerBase
                 attackerCustomRole.Player.ChangeAppearance(changeAppearanceOnKill.NewAppearance);
 
             if (!changeAppearanceOnKill.Forever)
-            {
                 Timing.CallDelayed(changeAppearanceOnKill.Duration, () =>
                 {
                     if (attackerCustomRole.Player is null || !attackerCustomRole.Player.IsAlive)
@@ -222,10 +212,7 @@ internal class PlayerEventHandler : EventHandlerBase
                     if (LabApiExtensions.IsAvailable)
                     {
                         if (attackerCustomRole.Appearance != RoleTypeId.None)
-                        {
-                            LabApiExtensions.AddFakeRole(attackerCustomRole.Player,
-                                attackerCustomRole.Role.RoleAppearance);
-                        }
+                            LabApiExtensions.AddFakeRole(attackerCustomRole.Player, attackerCustomRole.Role.RoleAppearance);
                         else
                             LabApiExtensions.RemoveFakeRole(attackerCustomRole.Player);
                     }
@@ -234,7 +221,6 @@ internal class PlayerEventHandler : EventHandlerBase
                         attackerCustomRole.Player.ChangeAppearance(attackerCustomRole.Role.RoleAppearance);
                     }
                 });
-            }
         }
     }
 
@@ -249,8 +235,7 @@ internal class PlayerEventHandler : EventHandlerBase
         ev.IsAllowed = false;
         RagdollAppearanceQueue.Remove(ev.Player.PlayerId);
 
-        Ragdoll.SpawnRagdoll(RoleTypeId.Tutorial, ev.RagdollPrefab.Position, ev.RagdollPrefab.Rotation,
-            ev.DamageHandler, ev.Player.Nickname);
+        Ragdoll.SpawnRagdoll(RoleTypeId.Tutorial, ev.RagdollPrefab.Position, ev.RagdollPrefab.Rotation, ev.DamageHandler, ev.Player.Nickname);
     }
 
     public void OnChangingRole(PlayerChangingRoleEventArgs ev)
@@ -309,8 +294,7 @@ internal class PlayerEventHandler : EventHandlerBase
         if (!Hurting.IsAllowed)
             return;
 
-        if (Hurting.Player is not null && Hurting.Attacker is not null && Hurting.Player.IsAlive &&
-            Hurting.Attacker.IsAlive)
+        if (Hurting.Player is not null && Hurting.Attacker is not null && Hurting.Player.IsAlive && Hurting.Attacker.IsAlive)
         {
             if (CustomTeam.SameTeam(Hurting.Attacker.ReferenceHub, Hurting.Player.ReferenceHub))
             {
@@ -320,8 +304,7 @@ internal class PlayerEventHandler : EventHandlerBase
 
             if (Hurting.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole))
             {
-                if (attackerCustomRole.Role.IsFriendOf is not null &&
-                    attackerCustomRole.Role.IsFriendOf.Contains(Hurting.Player.ReferenceHub.GetTeam()))
+                if (attackerCustomRole.Role.IsFriendOf is not null && attackerCustomRole.Role.IsFriendOf.Contains(Hurting.Player.ReferenceHub.GetTeam()))
                 {
                     Hurting.IsAllowed = false;
                     LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - FROM ATTACKER");
@@ -338,8 +321,7 @@ internal class PlayerEventHandler : EventHandlerBase
             // Divided because they can be both CR
             if (Hurting.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole))
             {
-                if (playerCustomRole.Role.IsFriendOf is not null &&
-                    playerCustomRole.Role.IsFriendOf.Contains(Hurting.Attacker.ReferenceHub.GetTeam()))
+                if (playerCustomRole.Role.IsFriendOf is not null && playerCustomRole.Role.IsFriendOf.Contains(Hurting.Attacker.ReferenceHub.GetTeam()))
                 {
                     Hurting.IsAllowed = false;
                     LogManager.Silent("Rejected the event request of Hurting because of is_friend_of - FROM HURTED");
@@ -357,10 +339,7 @@ internal class PlayerEventHandler : EventHandlerBase
         if (ev.Player is not null && ev.Player.IsAlive && ev.Player.TryGetSummonedInstance(out SummonedCustomRole playerCustomRole))
             playerCustomRole.LastDamageTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-        if (ev.Attacker is not null && ev.Attacker.IsAlive &&
-            ev.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole) &&
-            attackerCustomRole.TryGetModule(out LifeStealer lifeStealer) &&
-            ev.DamageHandler is StandardDamageHandler standardDamageHandler)
+        if (ev.Attacker is not null && ev.Attacker.IsAlive && ev.Attacker.TryGetSummonedInstance(out SummonedCustomRole attackerCustomRole) && attackerCustomRole.TryGetModule(out LifeStealer lifeStealer) && ev.DamageHandler is StandardDamageHandler standardDamageHandler)
             ev.Attacker.Heal(standardDamageHandler.Damage * (lifeStealer.Percentage / 100f));
     }
 
@@ -380,8 +359,7 @@ internal class PlayerEventHandler : EventHandlerBase
                 return;
             }
 
-            if (summoned.Role.CanEscape &&
-                (summoned.Role.RoleAfterEscape is null || summoned.Role.RoleAfterEscape.Count < 1))
+            if (summoned.Role.CanEscape && (summoned.Role.RoleAfterEscape is null || summoned.Role.RoleAfterEscape.Count < 1))
             {
                 LogManager.Debug($"Player with the role {summoned.Role.Id} ({summoned.Role.Name}) evaluated for a natural respawn!");
                 Escaping.IsAllowed = true;
@@ -427,21 +405,17 @@ internal class PlayerEventHandler : EventHandlerBase
                     Escaping.IsAllowed = false;
                     if (!API.Features.Escape.Bucket.Contains(Escaping.Player.PlayerId))
                     {
-                        LogManager.Silent(
-                            "Successfully activated the call to method SpawnManager::SummonCustomSubclass(<...>) as the player is not inside the Escape::Bucket bucket! - Adding it...");
+                        LogManager.Silent("Successfully activated the call to method SpawnManager::SummonCustomSubclass(<...>) as the player is not inside the Escape::Bucket bucket! - Adding it...");
 
                         bool dropOldInventory = !summoned.TryGetModule(out KeepInventoryOnEscape module) || module.DropItems;
-                        RespawnInventoryQueue[Escaping.Player.PlayerId] = new Tuple<List<ItemType>, Dictionary<ItemType, ushort>, bool>(
-                            [.. Escaping.Player.Items.Select(i => i.Type)],
-                            new Dictionary<ItemType, ushort>(Escaping.Player.Ammo), dropOldInventory);
+                        RespawnInventoryQueue[Escaping.Player.PlayerId] = new Tuple<List<ItemType>, Dictionary<ItemType, ushort>, bool>([.. Escaping.Player.Items.Select(i => i.Type)], new Dictionary<ItemType, ushort>(Escaping.Player.Ammo), dropOldInventory);
 
                         API.Features.Escape.AddBucket(Escaping.Player);
                         SpawnManager.SummonCustomSubclass(Escaping.Player, role.Id);
                     }
                     else
                     {
-                        LogManager.Silent(
-                            "Canceled call to method SpawnManager::SummonCustomSubclass(<...>) due to the presence of the player inside the Escape::Bucket! - Event already fired!");
+                        LogManager.Silent("Canceled call to method SpawnManager::SummonCustomSubclass(<...>) due to the presence of the player inside the Escape::Bucket! - Event already fired!");
                     }
                 }
             }
@@ -450,36 +424,31 @@ internal class PlayerEventHandler : EventHandlerBase
 
     public void OnItemUsed(PlayerUsedItemEventArgs ev)
     {
-        if (ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole summoned) &&
-            ev.UsableItem.Type is ItemType.SCP500)
+        if (ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomRole summoned) && ev.UsableItem.Type is ItemType.SCP500)
             summoned?.InfiniteEffects.RemoveAll(effect => effect is not null && effect.Removable);
     }
 
     public void OnPickingUpItem(PlayerPickingUpItemEventArgs ev)
     {
-        if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) &&
-            summonedInstance.TryGetModule(out ItemBan itemBan))
+        if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) && summonedInstance.TryGetModule(out ItemBan itemBan))
             ev.IsAllowed = !itemBan.Items.Contains(ev.Pickup.Type);
     }
 
     public void OnPickingUpArmor(PlayerPickingUpArmorEventArgs ev)
     {
-        if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) &&
-            summonedInstance.TryGetModule(out ItemBan itemBan))
+        if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) && summonedInstance.TryGetModule(out ItemBan itemBan))
             ev.IsAllowed = !itemBan.Items.Contains(ev.BodyArmorPickup.Type);
     }
 
     public void OnPickingUpScp330(PlayerPickingUpScp330EventArgs ev)
     {
-        if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) &&
-            summonedInstance.TryGetModule(out ItemBan itemBan))
+        if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) && summonedInstance.TryGetModule(out ItemBan itemBan))
             ev.IsAllowed = !itemBan.Items.Contains(ev.CandyPickup.Type);
     }
 
     public void OnInteractingScp330(PlayerInteractingScp330EventArgs ev)
     {
-        if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) &&
-            summonedInstance.TryGetModule(out ItemBan itemBan))
+        if (ev.Player.TryGetSummonedInstance(out SummonedCustomRole summonedInstance) && summonedInstance.TryGetModule(out ItemBan itemBan))
             ev.IsAllowed = !itemBan.Items.Contains(ItemType.SCP330);
     }
 
@@ -491,10 +460,8 @@ internal class PlayerEventHandler : EventHandlerBase
     public void OnPlayerRaPlayerListAddingPlayer(PlayerRaPlayerListAddingPlayerEventArgs ev)
     {
         if (SummonedCustomRole.TryGet(ev.Target.ReferenceHub, out SummonedCustomRole customRole))
-        {
             if (customRole.TryGetModule(out ColorfulRaName colorfulRaName))
                 ev.Body = ev.Body.Replace("{RA_ClassColor}", $"#{colorfulRaName.Color.TrimStart('#')}");
-        }
     }
 
     public void OnChangedNickname(PlayerChangedNicknameEventArgs ev)

@@ -52,8 +52,7 @@ public class ErrorCustomRole
     /// <summary>
     ///     Gets the CustomRole Name
     /// </summary>
-    public string Name => CompatibilityManager.GetRoleFileElement(Content, "name:", false).Replace("'", string.Empty)
-        .Replace("\"", string.Empty);
+    public string Name => CompatibilityManager.GetRoleFileElement(Content, "name:", false).Replace("'", string.Empty).Replace("\"", string.Empty);
 
     /// <summary>
     ///     Gets the CustomRole raw Role

@@ -73,9 +73,7 @@ internal static class FlagMigrator
             foreach (object flag in deprecated)
                 flags.Remove(flag);
 
-            LogManager.Warn(
-                $"[Flag Migrator] Role {role} uses both the new 'InfoTag' flag and the deprecated name-tag flag(s) {used}. " +
-                "The deprecated one(s) were ignored; please remove them from your config.");
+            LogManager.Warn($"[Flag Migrator] Role {role} uses both the new 'InfoTag' flag and the deprecated name-tag flag(s) {used}. " + "The deprecated one(s) were ignored; please remove them from your config.");
             return;
         }
 
@@ -100,12 +98,7 @@ internal static class FlagMigrator
         if (!Migrated.Contains(role))
             Migrated.Add(role);
 
-        LogManager.Warn(
-            $"[Flag Migrator] Role {role} still uses the deprecated name-tag flag(s) {used}. " +
-            "They were automatically migrated to the 'InfoTag' flag.\n" +
-            $"To persist this to the config file automatically run 'ucr update {role.Id}' (or 'ucr update all'), " +
-            "or replace those flags manually in your custom_flags with:\n" +
-            RenderYaml(infoArgs));
+        LogManager.Warn($"[Flag Migrator] Role {role} still uses the deprecated name-tag flag(s) {used}. " + "They were automatically migrated to the 'InfoTag' flag.\n" + $"To persist this to the config file automatically run 'ucr update {role.Id}' (or 'ucr update all'), " + "or replace those flags manually in your custom_flags with:\n" + RenderYaml(infoArgs));
     }
 
     private static string DeprecatedList(bool order, bool color, bool noUnit)
@@ -127,8 +120,7 @@ internal static class FlagMigrator
                 foreach (KeyValuePair<object, object> kv in d)
                 {
                     Dictionary<object, object>? args = kv.Value as Dictionary<object, object>;
-                    return (kv.Key?.ToString(),
-                        args?.ToDictionary(x => x.Key.ToString(), x => x.Value));
+                    return (kv.Key?.ToString(), args?.ToDictionary(x => x.Key.ToString(), x => x.Value));
                 }
 
                 return (null, null);

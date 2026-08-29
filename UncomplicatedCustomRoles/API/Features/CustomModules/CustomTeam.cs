@@ -25,11 +25,7 @@ public class CustomTeam : CustomModule
 
     internal static bool SameTeam(ReferenceHub first, ReferenceHub second)
     {
-        return first is not null && second is not null && first != second &&
-               SummonedCustomRole.TryGet(first, out SummonedCustomRole firstRole) &&
-               firstRole.TryGetModule(out CustomTeam firstTeam) &&
-               SummonedCustomRole.TryGet(second, out SummonedCustomRole secondRole) &&
-               secondRole.TryGetModule(out CustomTeam secondTeam) && firstTeam.IsSameTeam(secondTeam);
+        return first is not null && second is not null && first != second && SummonedCustomRole.TryGet(first, out SummonedCustomRole firstRole) && firstRole.TryGetModule(out CustomTeam firstTeam) && SummonedCustomRole.TryGet(second, out SummonedCustomRole secondRole) && secondRole.TryGetModule(out CustomTeam secondTeam) && firstTeam.IsSameTeam(secondTeam);
     }
 
     public override bool Validate(out string error)

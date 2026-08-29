@@ -49,9 +49,7 @@ internal class LogShare : ParentCommand
 
         bool online = arguments.Count < 1;
 
-        Timing.RunCoroutine(
-            LogManager.SendReport(online, (status, content) => OnReportSent(status, content, online, Start)),
-            "UCR_Http");
+        Timing.RunCoroutine(LogManager.SendReport(online, (status, content) => OnReportSent(status, content, online, Start)), "UCR_Http");
 
         return true;
     }
@@ -80,8 +78,7 @@ internal class LogShare : ParentCommand
         {
             LogManager.Debug($"Received content: {content}");
             Dictionary<string, JsonElement> data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(content);
-            LogManager.Info(
-                $"Successfully shared the UCR logs with the developers!\nSend this Id to the developers: {data["id"].GetString()}\n\nTook {DateTimeOffset.Now.ToUnixTimeMilliseconds() - start}ms");
+            LogManager.Info($"Successfully shared the UCR logs with the developers!\nSend this Id to the developers: {data["id"].GetString()}\n\nTook {DateTimeOffset.Now.ToUnixTimeMilliseconds() - start}ms");
         }
         catch (Exception e)
         {

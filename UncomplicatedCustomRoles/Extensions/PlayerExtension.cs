@@ -69,8 +69,7 @@ public static class PlayerExtension
         return role is not null;
     }
 
-    internal static void ForceApplyEffect(this ReferenceHub hub, string effectName, byte intensity, float duration,
-        bool addDuration = false)
+    internal static void ForceApplyEffect(this ReferenceHub hub, string effectName, byte intensity, float duration, bool addDuration = false)
     {
         if (hub is null || !hub.playerEffectsController.TryGetEffect(effectName, out StatusEffectBase effect))
             return;
@@ -292,29 +291,27 @@ public static class PlayerExtension
     internal static void SetAmmoLimit(this Player player, ItemType type, ushort limit)
     {
         int index = ServerConfigSynchronizer.Singleton.AmmoLimitsSync.FindIndex(x => x.AmmoType == type);
-        MirrorExtensions.SendFakeSyncObject(player, ServerConfigSynchronizer.Singleton.netIdentity,
-            typeof(ServerConfigSynchronizer), writer =>
-            {
-                writer.WriteULong(2ul);
-                writer.WriteUInt(1);
-                writer.WriteByte((byte)SyncList<ServerConfigSynchronizer.AmmoLimit>.Operation.OP_SET);
-                writer.WriteInt(index);
-                writer.WriteAmmoLimit(new ServerConfigSynchronizer.AmmoLimit { Limit = limit, AmmoType = type });
-            });
+        MirrorExtensions.SendFakeSyncObject(player, ServerConfigSynchronizer.Singleton.netIdentity, typeof(ServerConfigSynchronizer), writer =>
+        {
+            writer.WriteULong(2ul);
+            writer.WriteUInt(1);
+            writer.WriteByte((byte)SyncList<ServerConfigSynchronizer.AmmoLimit>.Operation.OP_SET);
+            writer.WriteInt(index);
+            writer.WriteAmmoLimit(new ServerConfigSynchronizer.AmmoLimit { Limit = limit, AmmoType = type });
+        });
     }
 
     // REF https://gitlab.com/exmod-team/EXILED/-/blob/master/EXILED/Exiled.API/Features/Player.cs?ref_type=heads#L2499
     internal static void ResetAmmoLimit(this Player player, ItemType type)
     {
         int index = ServerConfigSynchronizer.Singleton.AmmoLimitsSync.FindIndex(x => x.AmmoType == type);
-        MirrorExtensions.SendFakeSyncObject(player, ServerConfigSynchronizer.Singleton.netIdentity,
-            typeof(ServerConfigSynchronizer), writer =>
-            {
-                writer.WriteULong(2ul);
-                writer.WriteUInt(1);
-                writer.WriteByte((byte)SyncList<ServerConfigSynchronizer.AmmoLimit>.Operation.OP_SET);
-                writer.WriteInt(index);
-                writer.WriteAmmoLimit(ServerConfigSynchronizer.Singleton.AmmoLimitsSync[index]);
-            });
+        MirrorExtensions.SendFakeSyncObject(player, ServerConfigSynchronizer.Singleton.netIdentity, typeof(ServerConfigSynchronizer), writer =>
+        {
+            writer.WriteULong(2ul);
+            writer.WriteUInt(1);
+            writer.WriteByte((byte)SyncList<ServerConfigSynchronizer.AmmoLimit>.Operation.OP_SET);
+            writer.WriteInt(index);
+            writer.WriteAmmoLimit(ServerConfigSynchronizer.Singleton.AmmoLimitsSync[index]);
+        });
     }
 }

@@ -17,8 +17,7 @@ namespace UncomplicatedCustomRoles.Integrations;
 
 internal static class UCI
 {
-    public static readonly Assembly Assembly = DynamicInvoke.GetLabAPIAssembly("UncomplicatedCustomItems") ??
-                                               DynamicInvoke.GetExiledAssembly("UncomplicatedCustomItems");
+    public static readonly Assembly Assembly = DynamicInvoke.GetLabAPIAssembly("UncomplicatedCustomItems") ?? DynamicInvoke.GetExiledAssembly("UncomplicatedCustomItems");
 
     public static readonly Type SummonedCustomItem = Assembly?.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem");
 
@@ -31,15 +30,9 @@ internal static class UCI
 
         try
         {
-            if ((bool?)DynamicInvoke
-                    .GetMethod("UncomplicatedCustomItems", "UncomplicatedCustomItems.API.Utilities.IsCustomItem")
-                    ?.Invoke(null,
-                        [id]) ?? false)
+            if ((bool?)DynamicInvoke.GetMethod("UncomplicatedCustomItems", "UncomplicatedCustomItems.API.Utilities.IsCustomItem")?.Invoke(null, [id]) ?? false)
             {
-                customItem = DynamicInvoke
-                    .GetMethod("UncomplicatedCustomItems", "UncomplicatedCustomItems.API.Utilities.GetCustomItem")
-                    ?.Invoke(null,
-                        [id]);
+                customItem = DynamicInvoke.GetMethod("UncomplicatedCustomItems", "UncomplicatedCustomItems.API.Utilities.GetCustomItem")?.Invoke(null, [id]);
 
                 return customItem is not null;
             }
@@ -60,11 +53,9 @@ internal static class UCI
         try
         {
             if (HasCustomItem(id, out object customItem) && customItem is not null)
-            {
                 SummonedCustomItem?.GetConstructor([
                     Assembly.GetType("UncomplicatedCustomItems.API.Interfaces.ICustomItem"), typeof(Player)
                 ]).Invoke([customItem, player]);
-            }
         }
         catch (Exception e)
         {

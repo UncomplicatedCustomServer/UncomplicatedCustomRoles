@@ -25,8 +25,7 @@ internal static class LabApiExtensions
     {
         try
         {
-            DynamicInvoke.GetMethod(PluginName, "LabApiExtensions.Managers.FakeRoleManager.AddFakeRole", false, 2)
-                ?.Invoke(null, [player, roleType]);
+            DynamicInvoke.GetMethod(PluginName, "LabApiExtensions.Managers.FakeRoleManager.AddFakeRole", false, 2)?.Invoke(null, [player, roleType]);
         }
         catch (Exception e)
         {
@@ -38,8 +37,7 @@ internal static class LabApiExtensions
     {
         try
         {
-            DynamicInvoke.GetMethod(PluginName, "LabApiExtensions.Managers.FakeRoleManager.RemoveFakeRole", false, 1)
-                ?.Invoke(null, [player]);
+            DynamicInvoke.GetMethod(PluginName, "LabApiExtensions.Managers.FakeRoleManager.RemoveFakeRole", false, 1)?.Invoke(null, [player]);
         }
         catch (Exception e)
         {

@@ -27,8 +27,7 @@ internal static class Announcer
     internal static readonly Dictionary<int, string> SavedCustomAnnouncements = new();
 }
 
-[HarmonyPatch(typeof(CassieScpTerminationAnnouncement),
-    nameof(CassieScpTerminationAnnouncement.AnnounceScpTermination))]
+[HarmonyPatch(typeof(CassieScpTerminationAnnouncement), nameof(CassieScpTerminationAnnouncement.AnnounceScpTermination))]
 internal class AnnounceScpTerminationPatch
 {
     private static bool Prefix(ReferenceHub scp, DamageHandlerBase hit)
@@ -66,8 +65,7 @@ internal class OnStartedPlayingPatch
             }
             else
             {
-                CassieScpTerminationAnnouncement.ConvertSCP(__instance.Victims[index].Role, out withoutSpace,
-                    out withSpace);
+                CassieScpTerminationAnnouncement.ConvertSCP(__instance.Victims[index].Role, out withoutSpace, out withSpace);
             }
 
             stringBuilder.Append(index == 0 ? "SCP " : ". SCP ");
@@ -77,8 +75,7 @@ internal class OnStartedPlayingPatch
 
         stringBuilder.Append(__instance._announcementTts);
         subtitlePartList.AddRange(__instance._subtitles);
-        __instance.Payload = new CassieTtsPayload(StringBuilderPool.Shared.ToStringReturn(stringBuilder),
-            subtitlePartList.ToArray());
+        __instance.Payload = new CassieTtsPayload(StringBuilderPool.Shared.ToStringReturn(stringBuilder), subtitlePartList.ToArray());
         return false;
     }
 }

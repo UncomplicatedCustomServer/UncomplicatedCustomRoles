@@ -25,8 +25,7 @@ internal class LogEntry
         Error = error;
     }
 
-    public LogEntry(long time, LogLevel level, string content, string error = null) : this(time, level.ToString(),
-        content, error)
+    public LogEntry(long time, LogLevel level, string content, string error = null) : this(time, level.ToString(), content, error)
     {
     }
 
