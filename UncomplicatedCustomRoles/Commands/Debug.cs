@@ -23,6 +23,7 @@ namespace UncomplicatedCustomRoles.Commands;
 public class Debug : IUCRCommand
 {
     private object ReferenceObject { get; set; }
+
     public string Name { get; } = "debug";
 
     public string Description { get; } = "Debug the plugin by using some specific code";

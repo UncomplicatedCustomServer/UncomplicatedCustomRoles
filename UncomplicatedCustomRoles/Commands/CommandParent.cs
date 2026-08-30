@@ -22,11 +22,6 @@ namespace UncomplicatedCustomRoles.Commands;
 [CommandHandler(typeof(RemoteAdminCommandHandler))]
 internal class CommandParent : ParentCommand
 {
-    public CommandParent()
-    {
-        LoadGeneratedCommands();
-    }
-
     public override string Command { get; } = "ucr";
 
     public override string[] Aliases { get; } = [];
@@ -34,6 +29,11 @@ internal class CommandParent : ParentCommand
     public override string Description { get; } = "Manage the UCR features";
 
     public List<IUCRCommand> RegisteredCommands { get; } = [];
+
+    public CommandParent()
+    {
+        LoadGeneratedCommands();
+    }
 
     public override void LoadGeneratedCommands()
     {

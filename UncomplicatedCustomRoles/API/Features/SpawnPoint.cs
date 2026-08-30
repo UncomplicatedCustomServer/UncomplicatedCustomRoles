@@ -20,26 +20,6 @@ namespace UncomplicatedCustomRoles.API.Features;
 
 public class SpawnPoint
 {
-    [JsonConstructor]
-    internal SpawnPoint(string name, string roomId, Triplet<float, float, float> positionBase, Quadruple<float, float, float, float> rotationBase, Triplet<float, float, float> roomRotationBase, bool sync = true, bool @fixed = false)
-    {
-        Name = name;
-        RoomId = roomId.Replace("Christmas", "").Replace("Halloween", "");
-        PositionBase = positionBase;
-        RotationBase = rotationBase;
-        RoomRotationBase = roomRotationBase;
-        Sync = sync;
-        Fixed = @fixed;
-
-        if (!Sync)
-            UnsyncedList.Add(this);
-        else
-            List.Add(this);
-    }
-
-    internal SpawnPoint(string name, Player player) : this(name, player.Room?.GameObject.name ?? string.Empty, (player.Room is not null ? player.Room.Position - player.Position : player.Position).ToTriplet(), new Quadruple<float, float, float, float>(player.Rotation.x, player.Rotation.y, player.Rotation.z, player.Rotation.w), player.Room?.Rotation.eulerAngles.ToTriplet() ?? new Triplet<float, float, float>(0f, 0f, 0f))
-    { }
-
     /// <summary>
     ///     Gets the list of every stored <see cref="SpawnPoint" /> in the server
     /// </summary>
@@ -117,6 +97,26 @@ public class SpawnPoint
     /// </summary>
     [JsonIgnore]
     public bool HasRoom => Room is not null;
+
+    [JsonConstructor]
+    internal SpawnPoint(string name, string roomId, Triplet<float, float, float> positionBase, Quadruple<float, float, float, float> rotationBase, Triplet<float, float, float> roomRotationBase, bool sync = true, bool @fixed = false)
+    {
+        Name = name;
+        RoomId = roomId.Replace("Christmas", "").Replace("Halloween", "");
+        PositionBase = positionBase;
+        RotationBase = rotationBase;
+        RoomRotationBase = roomRotationBase;
+        Sync = sync;
+        Fixed = @fixed;
+
+        if (!Sync)
+            UnsyncedList.Add(this);
+        else
+            List.Add(this);
+    }
+
+    internal SpawnPoint(string name, Player player) : this(name, player.Room?.GameObject.name ?? string.Empty, (player.Room is not null ? player.Room.Position - player.Position : player.Position).ToTriplet(), new Quadruple<float, float, float, float>(player.Rotation.x, player.Rotation.y, player.Rotation.z, player.Rotation.w), player.Room?.Rotation.eulerAngles.ToTriplet() ?? new Triplet<float, float, float>(0f, 0f, 0f))
+    { }
 
     /// <summary>
     ///     Destroys the <see cref="SpawnPoint" />, removing it from the list

@@ -11,7 +11,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using InventorySystem.Items.Scp1509;
 using LabApi.Events.Arguments.Interfaces;
 using LabApi.Events.Arguments.PlayerEvents;
@@ -51,42 +50,41 @@ internal class DamageResistance : CustomModule
         { ItemType.GunSCP127, DamageType.Scp127 }
     };
 
-    private static readonly Dictionary<DeathTranslation, DamageType> TranslationConversion = new()
+    private static readonly Dictionary<byte, DamageType> TranslationIdConversion = new()
     {
-        { DeathTranslations.Asphyxiated, DamageType.Asphyxiation },
-        { DeathTranslations.Bleeding, DamageType.Bleeding },
-        { DeathTranslations.Crushed, DamageType.Crushed },
-        { DeathTranslations.Decontamination, DamageType.Decontamination },
-        { DeathTranslations.Explosion, DamageType.Explosion },
-        { DeathTranslations.Falldown, DamageType.Falldown },
-        { DeathTranslations.Poisoned, DamageType.Poison },
-        { DeathTranslations.Recontained, DamageType.Recontainment },
-        { DeathTranslations.Scp049, DamageType.Scp049 },
-        { DeathTranslations.Scp096, DamageType.Scp096 },
-        { DeathTranslations.Scp173, DamageType.Scp173 },
-        { DeathTranslations.Scp207, DamageType.Scp207 },
-        { DeathTranslations.Scp939Lunge, DamageType.Scp939 },
-        { DeathTranslations.Scp939Other, DamageType.Scp939 },
-        { DeathTranslations.Scp3114Slap, DamageType.Scp3114 },
-        { DeathTranslations.Tesla, DamageType.Tesla },
-        { DeathTranslations.Unknown, DamageType.Unknown },
-        { DeathTranslations.Warhead, DamageType.Warhead },
-        { DeathTranslations.Zombie, DamageType.Scp0492 },
-        { DeathTranslations.BulletWounds, DamageType.Firearm },
-        { DeathTranslations.PocketDecay, DamageType.PocketDimension },
-        { DeathTranslations.SeveredHands, DamageType.SeveredHands },
-        { DeathTranslations.FriendlyFireDetector, DamageType.FriendlyFireDetector },
-        { DeathTranslations.UsedAs106Bait, DamageType.FemurBreaker },
-        { DeathTranslations.MicroHID, DamageType.MicroHid },
-        { DeathTranslations.Hypothermia, DamageType.Hypothermia },
-        { DeathTranslations.MarshmallowMan, DamageType.Marshmallow },
-        { DeathTranslations.Scp1344, DamageType.SeveredEyes },
-        { DeathTranslations.Scp1509, DamageType.Scp1509 }
+        { DeathTranslations.Asphyxiated.Id, DamageType.Asphyxiation },
+        { DeathTranslations.Bleeding.Id, DamageType.Bleeding },
+        { DeathTranslations.Crushed.Id, DamageType.Crushed },
+        { DeathTranslations.Decontamination.Id, DamageType.Decontamination },
+        { DeathTranslations.Explosion.Id, DamageType.Explosion },
+        { DeathTranslations.Falldown.Id, DamageType.Falldown },
+        { DeathTranslations.Poisoned.Id, DamageType.Poison },
+        { DeathTranslations.Recontained.Id, DamageType.Recontainment },
+        { DeathTranslations.Scp049.Id, DamageType.Scp049 },
+        { DeathTranslations.Scp096.Id, DamageType.Scp096 },
+        { DeathTranslations.Scp173.Id, DamageType.Scp173 },
+        { DeathTranslations.Scp207.Id, DamageType.Scp207 },
+        { DeathTranslations.Scp939Lunge.Id, DamageType.Scp939 },
+        { DeathTranslations.Scp939Other.Id, DamageType.Scp939 },
+        { DeathTranslations.Scp3114Slap.Id, DamageType.Scp3114 },
+        { DeathTranslations.Tesla.Id, DamageType.Tesla },
+        { DeathTranslations.Unknown.Id, DamageType.Unknown },
+        { DeathTranslations.Warhead.Id, DamageType.Warhead },
+        { DeathTranslations.Zombie.Id, DamageType.Scp0492 },
+        { DeathTranslations.BulletWounds.Id, DamageType.Firearm },
+        { DeathTranslations.PocketDecay.Id, DamageType.PocketDimension },
+        { DeathTranslations.SeveredHands.Id, DamageType.SeveredHands },
+        { DeathTranslations.FriendlyFireDetector.Id, DamageType.FriendlyFireDetector },
+        { DeathTranslations.UsedAs106Bait.Id, DamageType.FemurBreaker },
+        { DeathTranslations.MicroHID.Id, DamageType.MicroHid },
+        { DeathTranslations.Hypothermia.Id, DamageType.Hypothermia },
+        { DeathTranslations.MarshmallowMan.Id, DamageType.Marshmallow },
+        { DeathTranslations.Scp1344.Id, DamageType.SeveredEyes },
+        { DeathTranslations.Scp1509.Id, DamageType.Scp1509 }
     };
 
-    private static readonly Dictionary<byte, DamageType> TranslationIdConversion = TranslationConversion.ToDictionary(x => x.Key.Id, x => x.Value);
-
     private Dictionary<DamageType, uint> _damageTypes;
+
     public override List<string> RequiredArgs => ["damages"];
 
     public override List<string> TriggerOnEvents => ["Hurting"];

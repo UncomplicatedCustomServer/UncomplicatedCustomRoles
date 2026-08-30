@@ -22,18 +22,18 @@ public class CustomRoleEventHandler
 {
     private static int _activeListeners;
 
+    public SummonedCustomRole SummonedInstance { get; }
+
+    public ICustomRole Role => SummonedInstance.Role;
+
+    public List<Listener> Listeners { get; } = [];
+
     internal CustomRoleEventHandler(SummonedCustomRole summonedInstance)
     {
         SummonedInstance = summonedInstance;
         LoadListeners();
         _activeListeners += Listeners.Count;
     }
-
-    public SummonedCustomRole SummonedInstance { get; }
-
-    public ICustomRole Role => SummonedInstance.Role;
-
-    public List<Listener> Listeners { get; } = [];
 
     internal void Unload()
     {

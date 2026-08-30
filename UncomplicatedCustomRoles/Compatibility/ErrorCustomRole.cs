@@ -15,14 +15,6 @@ namespace UncomplicatedCustomRoles.Compatibility;
 
 public class ErrorCustomRole
 {
-    internal ErrorCustomRole(string path, string[] content, Exception exception, string message = null)
-    {
-        Path = path;
-        Content = content;
-        Exception = exception;
-        Message = message ?? CompatibilityManager.HandleErrorString(exception, true);
-    }
-
     /// <summary>
     ///     Gets the path of the CustomRole with the error
     /// </summary>
@@ -64,4 +56,12 @@ public class ErrorCustomRole
     ///     <see cref="RoleTypeId.None" /> if not found
     /// </summary>
     public RoleTypeId Role => Enum.TryParse(RawRole, out RoleTypeId role) ? role : RoleTypeId.None;
+
+    internal ErrorCustomRole(string path, string[] content, Exception exception, string message = null)
+    {
+        Path = path;
+        Content = content;
+        Exception = exception;
+        Message = message ?? CompatibilityManager.HandleErrorString(exception, true);
+    }
 }

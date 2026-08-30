@@ -21,16 +21,16 @@ namespace UncomplicatedCustomRoles.Commands;
 [CommandHandler(typeof(GameConsoleCommandHandler))]
 internal class LogShare : ParentCommand
 {
-    public LogShare()
-    {
-        LoadGeneratedCommands();
-    }
-
     public override string Command { get; } = "ucrlogs";
 
     public override string[] Aliases { get; } = [];
 
     public override string Description { get; } = "Share the UCR Debug logs with the developers";
+
+    public LogShare()
+    {
+        LoadGeneratedCommands();
+    }
 
     public override void LoadGeneratedCommands()
     { }

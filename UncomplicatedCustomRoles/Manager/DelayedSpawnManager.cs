@@ -112,7 +112,7 @@ internal static class DelayedSpawnManager
         if (Plugin.Instance.Config.IgnoreNpcs && player.IsNpc)
             return false;
 
-        if (role.SpawnSettings.CanReplaceRoles is not { } canReplaceRoles || !canReplaceRoles.Contains(player.Role))
+        if (role.SpawnSettings?.CanReplaceRoles is not { } canReplaceRoles || !canReplaceRoles.Contains(player.Role))
             return false;
 
         return SpawnManager.HasRequiredPermission(player, role);

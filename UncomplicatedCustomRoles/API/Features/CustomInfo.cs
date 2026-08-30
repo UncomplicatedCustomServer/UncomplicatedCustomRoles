@@ -29,31 +29,6 @@ public class CustomInfo
     private bool _nativeRole = true;
     private bool _nativeUnit = true;
 
-    public CustomInfo(string nickname, string role, string info)
-    {
-        Nickname = nickname;
-        Role = role;
-        Info = info;
-    }
-
-    public CustomInfo(Player player, string info)
-    {
-        Nickname = player.Nickname;
-        Role = player.Role.GetFullName();
-        Info = info;
-
-        UpdateInfo(player);
-    }
-
-    public CustomInfo(Player player, ICustomRole role)
-    {
-        Nickname = player.Nickname;
-        Role = role.OverrideRoleName ? role.Name : role.Role.GetFullName();
-        Info = role.CustomInfo;
-
-        UpdateInfo(player);
-    }
-
     public string Nickname
     {
         get;
@@ -91,6 +66,31 @@ public class CustomInfo
     }
 
     internal static bool SuppressExternalSync { get; set; }
+
+    public CustomInfo(string nickname, string role, string info)
+    {
+        Nickname = nickname;
+        Role = role;
+        Info = info;
+    }
+
+    public CustomInfo(Player player, string info)
+    {
+        Nickname = player.Nickname;
+        Role = player.Role.GetFullName();
+        Info = info;
+
+        UpdateInfo(player);
+    }
+
+    public CustomInfo(Player player, ICustomRole role)
+    {
+        Nickname = player.Nickname;
+        Role = role.OverrideRoleName ? role.Name : role.Role.GetFullName();
+        Info = role.CustomInfo;
+
+        UpdateInfo(player);
+    }
 
     internal void Detach()
     {

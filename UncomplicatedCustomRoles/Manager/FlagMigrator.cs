@@ -21,6 +21,7 @@ internal static class FlagMigrator
 {
     private const string InfoTagDefaultOrder = "%custominfo%%nickname%%rolename%";
     private static readonly Regex RoleNameToken = new("%rolename%", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
     internal static List<ICustomRole> Migrated { get; } = [];
 
     internal static void Migrate(ICustomRole role)

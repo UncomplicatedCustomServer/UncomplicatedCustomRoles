@@ -29,6 +29,7 @@ internal class LogManager
 {
     // We should store the data here
     public static readonly HashSet<LogEntry> History = [];
+
     private static bool DebugEnabled => Plugin.Instance.Config.Debug;
 
     public static void Debug(string message)

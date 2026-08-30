@@ -15,23 +15,6 @@ namespace UncomplicatedCustomRoles.Manager.NET;
 
 internal class VersionInfo
 {
-    [JsonConstructor]
-    public VersionInfo(string name, string source, string? sourceLink, string? customName, int preRelease, int forceDebug, string message, int recall, string? recallTarget, string? recallReason, bool? recallImportant, string hash)
-    {
-        Name = name;
-        Source = source;
-        SourceLink = sourceLink;
-        CustomName = customName;
-        PreRelease = preRelease;
-        ForceDebug = forceDebug;
-        Message = message;
-        Recall = recall;
-        RecallTarget = recallTarget;
-        RecallReason = recallReason;
-        RecallImportant = recallImportant;
-        Hash = hash;
-    }
-
     [JsonPropertyName("name")] public string Name { get; }
 
     [JsonPropertyName("source")] public string Source { get; }
@@ -55,4 +38,21 @@ internal class VersionInfo
     [JsonPropertyName("recall_important")] public bool? RecallImportant { get; }
 
     [JsonPropertyName("hash")] public string Hash { get; }
+
+    [JsonConstructor]
+    public VersionInfo(string name, string source, string? sourceLink, string? customName, int preRelease, int forceDebug, string message, int recall, string? recallTarget, string? recallReason, bool? recallImportant, string hash)
+    {
+        Name = name;
+        Source = source;
+        SourceLink = sourceLink;
+        CustomName = customName;
+        PreRelease = preRelease;
+        ForceDebug = forceDebug;
+        Message = message;
+        Recall = recall;
+        RecallTarget = recallTarget;
+        RecallReason = recallReason;
+        RecallImportant = recallImportant;
+        Hash = hash;
+    }
 }

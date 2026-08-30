@@ -35,17 +35,6 @@ internal class HttpManager
     private const string OwnersEndpoint = "https://api.ucserver.it/v3/owners";
 
     /// <summary>
-    ///     Create a new istance of the HttpManager
-    /// </summary>
-    /// <param name="prefix"></param>
-    public HttpManager(string prefix)
-    {
-        Prefix = prefix;
-        RegisterEvents();
-        LoadCreditTags();
-    }
-
-    /// <summary>
     ///     Gets the prefix of the plugin for our APIs
     /// </summary>
     public string Prefix { get; }
@@ -89,6 +78,17 @@ internal class HttpManager
     ///     Gets whether the running build is a pre-release
     /// </summary>
     public bool IsPreRelease => IsPreReleaseVersion(Plugin.Instance.Version);
+
+    /// <summary>
+    ///     Create a new istance of the HttpManager
+    /// </summary>
+    /// <param name="prefix"></param>
+    public HttpManager(string prefix)
+    {
+        Prefix = prefix;
+        RegisterEvents();
+        LoadCreditTags();
+    }
 
     internal void RegisterEvents()
     {

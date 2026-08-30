@@ -36,6 +36,7 @@ public class CustomKeycard : CustomModule
     private static readonly string ValidKeycardTypes = string.Join(", ", KeycardTypeAliases.Keys.OrderBy(k => k));
 
     private KeycardItem _keycardItem;
+
     public override List<string> RequiredArgs => ["KeycardType"];
 
     internal ItemType KeycardType
@@ -60,11 +61,17 @@ public class CustomKeycard : CustomModule
     internal string CardLabel => PlaceholderManager.ApplyPlaceholders(TryGetStringValue("CardLabel", string.Empty), Player, CustomRole.Role);
 
     internal KeycardLevels Permissions => BuildPermissions();
+
     internal Color KeycardColor => ParseColor("KeycardColor", Color.white);
+
     internal Color PermissionsColor => ParseColor("PermissionsColor", Color.white);
+
     internal Color LabelColor => ParseColor("LabelColor", Color.white);
+
     internal byte WearLevel => TryGetCastedValue<byte>("WearLevel");
+
     internal string SerialLabel => TryGetStringValue("SerialLabel", "000000000000");
+
     internal int RankIndex => TryGetCastedValue("RankIndex", 0);
 
     public override bool Validate(out string error)

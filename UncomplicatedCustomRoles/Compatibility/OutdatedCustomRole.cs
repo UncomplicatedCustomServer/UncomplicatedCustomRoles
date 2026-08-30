@@ -15,16 +15,16 @@ namespace UncomplicatedCustomRoles.Compatibility;
 
 public class OutdatedCustomRole
 {
+    public ICustomRole CustomRole { get; }
+
+    public Version Version { get; }
+
+    public string Path { get; }
+
     internal OutdatedCustomRole(ICustomRole customRole, Version version, string path)
     {
         CustomRole = customRole;
         Version = version;
         Path = path;
     }
-
-    public ICustomRole CustomRole { get; }
-
-    public Version Version { get; }
-
-    public string Path { get; }
 }

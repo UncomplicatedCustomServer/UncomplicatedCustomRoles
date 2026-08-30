@@ -41,73 +41,15 @@ public class SummonedCustomRole
     public const float TickDuration = 0.25f;
 
     // Cache to reduce LINQ usage
-    private static readonly ConcurrentDictionary<int, SummonedCustomRole> _cachedListByPlayerId = new();
+    private static readonly ConcurrentDictionary<int, SummonedCustomRole> CachedListByPlayerId = new();
 
-    private static readonly ConcurrentDictionary<int, int> _cachedCountByRoleId = new();
+    private static readonly ConcurrentDictionary<int, int> CachedCountByRoleId = new();
 
     internal static int EventTriggeredModuleTotal;
 
     private readonly int _playerId;
 
     private int _eventModuleCount;
-
-    internal SummonedCustomRole(Player player, ICustomRole role, Triplet<string, string, bool>? badge, List<IEffect> infiniteEffects, PlayerInfoArea playerInfo, CustomInfo customInfo, bool isCustomNickname = false)
-    {
-        Id = Guid.NewGuid().ToString();
-        Player = player;
-        _playerId = player.PlayerId;
-        Role = role;
-        SpawnTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-        Badge = badge;
-        InfiniteEffects = infiniteEffects;
-        IsCustomNickname = isCustomNickname;
-        PlayerInfoArea = playerInfo;
-        CustomInfo = customInfo;
-        _internalValid = true;
-
-        if (IsDefaultCoroutineRole)
-            GenericCoroutine = Timing.RunCoroutine(RoleTickCoroutine());
-
-        _customModules = CustomModule.Load(Role.CustomFlags ?? [], this);
-        _eventModuleCount = _customModules.Count(m => m.TriggerOnEvents.Count > 0);
-        EventTriggeredModuleTotal += _eventModuleCount;
-
-        if (Role.Team is not null && Role.Team != Role.Role.GetTeam())
-        {
-            EvaluateRoleBase();
-            LogManager.Debug($"EVALUATED ROLEBASE {_roleBase?.GetType().FullName} with team {_roleBase?.Team}");
-        }
-
-        Object.Destroy(Player.GameObject.GetComponent<EscapeController>());
-
-        EventHandler = new CustomRoleEventHandler(this);
-        List[Id] = this;
-        _cachedListByPlayerId[player.PlayerId] = this;
-        if (_cachedCountByRoleId.TryGetValue(role.Id, out int count))
-            _cachedCountByRoleId[role.Id] = count + 1;
-        else
-            _cachedCountByRoleId[role.Id] = 1;
-
-        if (Role is CustomRole customRole)
-            customRole.OnSpawned(this);
-
-        // Appearance handling
-        if (Appearance != RoleTypeId.None)
-            Timing.CallDelayed(0.75f, () =>
-            {
-                if (!_internalValid || Player is null || !Player.IsAlive)
-                    return;
-
-                LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
-
-                if (LabApiExtensions.IsAvailable)
-                    LabApiExtensions.AddFakeRole(Player, Role.RoleAppearance);
-                else
-                    Player.ChangeAppearance(Role.RoleAppearance, SpawnManager.LoadAppearanceAffectedPlayers(Player), true);
-
-                CustomInfo.Role = Role.RoleAppearance.GetFullName();
-            });
-    }
 
     /// <summary>
     ///     Gets every <see cref="SummonedCustomRole" />
@@ -128,11 +70,6 @@ public class SummonedCustomRole
     ///     Gets the <see cref="Player" />'s <see cref="ICustomRole" />
     /// </summary>
     public ICustomRole Role { get; }
-
-    /// <summary>
-    ///     Gets the UNIX timestamp when the player spawned
-    /// </summary>
-    public long SpawnTime { get; }
 
     /// <summary>
     ///     Gets the badge of the player if it has one
@@ -226,8 +163,66 @@ public class SummonedCustomRole
 
     internal Vector3 Scale => Role.Scale != Vector3.one && Role.Scale != Vector3.zero ? Role.Scale : Vector3.one;
 
+    internal SummonedCustomRole(Player player, ICustomRole role, Triplet<string, string, bool>? badge, List<IEffect> infiniteEffects, PlayerInfoArea playerInfo, CustomInfo customInfo, bool isCustomNickname = false)
+    {
+        Id = Guid.NewGuid().ToString();
+        Player = player;
+        _playerId = player.PlayerId;
+        Role = role;
+        DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        Badge = badge;
+        InfiniteEffects = infiniteEffects;
+        IsCustomNickname = isCustomNickname;
+        PlayerInfoArea = playerInfo;
+        CustomInfo = customInfo;
+        _internalValid = true;
+
+        if (IsDefaultCoroutineRole)
+            GenericCoroutine = Timing.RunCoroutine(RoleTickCoroutine());
+
+        _customModules = CustomModule.Load(Role.CustomFlags ?? [], this);
+        _eventModuleCount = _customModules.Count(m => m.TriggerOnEvents.Count > 0);
+        EventTriggeredModuleTotal += _eventModuleCount;
+
+        if (Role.Team is not null && Role.Team != Role.Role.GetTeam())
+        {
+            EvaluateRoleBase();
+            LogManager.Debug($"EVALUATED ROLEBASE {_roleBase?.GetType().FullName} with team {_roleBase?.Team}");
+        }
+
+        Object.Destroy(Player.GameObject.GetComponent<EscapeController>());
+
+        EventHandler = new CustomRoleEventHandler(this);
+        List[Id] = this;
+        CachedListByPlayerId[player.PlayerId] = this;
+        if (CachedCountByRoleId.TryGetValue(role.Id, out int count))
+            CachedCountByRoleId[role.Id] = count + 1;
+        else
+            CachedCountByRoleId[role.Id] = 1;
+
+        if (Role is CustomRole customRole)
+            customRole.OnSpawned(this);
+
+        // Appearance handling
+        if (Appearance != RoleTypeId.None)
+            Timing.CallDelayed(0.75f, () =>
+            {
+                if (!_internalValid || Player is null || !Player.IsAlive)
+                    return;
+
+                LogManager.Debug($"Changing the appearance of the role {Role.Id} [{Role.Name}] to {Role.RoleAppearance}");
+
+                if (LabApiExtensions.IsAvailable)
+                    LabApiExtensions.AddFakeRole(Player, Role.RoleAppearance);
+                else
+                    Player.ChangeAppearance(Role.RoleAppearance, SpawnManager.LoadAppearanceAffectedPlayers(Player), true);
+
+                CustomInfo.Role = Role.RoleAppearance.GetFullName();
+            });
+    }
+
     /// <summary>
-    ///     Try to set <see cref="RoleBase" /> in order to override the current Player.Role.Base to trick the server into
+    ///     Try to set <see cref="PlayerRoleBase" /> in order to override the current Player.Role.Base to trick the server into
     ///     thinking that the player is / is not an Human
     /// </summary>
     private void EvaluateRoleBase()
@@ -305,10 +300,10 @@ public class SummonedCustomRole
     /// <returns></returns>
     private bool EvaluateCustomActions()
     {
-        bool _result = true;
+        bool result = true;
         foreach (Func<SummonedCustomRole, bool> func in CustomActions)
-            _result &= func(this);
-        return _result;
+            result &= func(this);
+        return result;
     }
 
     /// <summary>
@@ -333,16 +328,16 @@ public class SummonedCustomRole
         if (!List.TryRemove(Id, out _))
             return;
 
-        if (_cachedListByPlayerId.TryGetValue(_playerId, out SummonedCustomRole cached) && cached == this)
-            _cachedListByPlayerId.TryRemove(_playerId, out _);
+        if (CachedListByPlayerId.TryGetValue(_playerId, out SummonedCustomRole cached) && cached == this)
+            CachedListByPlayerId.TryRemove(_playerId, out _);
 
-        if (_cachedCountByRoleId.TryGetValue(Role.Id, out int count) && count > 0)
+        if (CachedCountByRoleId.TryGetValue(Role.Id, out int count) && count > 0)
         {
             count--;
             if (count == 0)
-                _cachedCountByRoleId.TryRemove(Role.Id, out _);
+                CachedCountByRoleId.TryRemove(Role.Id, out _);
             else
-                _cachedCountByRoleId[Role.Id] = count;
+                CachedCountByRoleId[Role.Id] = count;
         }
     }
 
@@ -538,10 +533,9 @@ public class SummonedCustomRole
     /// <summary>
     ///     Add a new <see cref="CustomModule" /> to the current <see cref="SummonedCustomRole" /> instance
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     public void AddModule(Type type, Dictionary<string, object>? args = null)
     {
-        if (CustomModule.FastAdd(type, this, args) is CustomModule module)
+        if (CustomModule.FastAdd(type, this, args) is { } module)
         {
             _customModules.Add(module);
             if (module.TriggerOnEvents.Count > 0)
@@ -604,7 +598,7 @@ public class SummonedCustomRole
         if (player is null)
             return null;
 
-        if (_cachedListByPlayerId.TryGetValue(player.PlayerId, out SummonedCustomRole role))
+        if (CachedListByPlayerId.TryGetValue(player.PlayerId, out SummonedCustomRole role))
             return role;
 
         return null;
@@ -620,7 +614,7 @@ public class SummonedCustomRole
         if (player is null)
             return null;
 
-        if (_cachedListByPlayerId.TryGetValue(player.PlayerId, out SummonedCustomRole role))
+        if (CachedListByPlayerId.TryGetValue(player.PlayerId, out SummonedCustomRole role))
             return role;
 
         return null;
@@ -662,7 +656,7 @@ public class SummonedCustomRole
             return false;
         }
 
-        return _cachedListByPlayerId.TryGetValue(player.PlayerId, out role);
+        return CachedListByPlayerId.TryGetValue(player.PlayerId, out role);
     }
 
     /// <summary>
@@ -672,7 +666,7 @@ public class SummonedCustomRole
     /// <returns></returns>
     public static int Count(ICustomRole role)
     {
-        return _cachedCountByRoleId.TryGetValue(role.Id, out int count) ? count : 0;
+        return CachedCountByRoleId.TryGetValue(role.Id, out int count) ? count : 0;
     }
 
     /// <summary>
@@ -682,7 +676,7 @@ public class SummonedCustomRole
     /// <returns></returns>
     public static int Count(int id)
     {
-        return _cachedCountByRoleId.TryGetValue(id, out int count) ? count : 0;
+        return CachedCountByRoleId.TryGetValue(id, out int count) ? count : 0;
     }
 
     /// <summary>
@@ -744,7 +738,8 @@ public class SummonedCustomRole
     ///     <see cref="SummonedCustomRole" /> is equal to the given <see cref="Team" />
     /// </summary>
     /// <param name="player"></param>
-    /// <param name="team"></param>
+    /// <param name="teamCheck"></param>
+    /// <param name="result"></param>
     /// <returns></returns>
     public static bool TryCheckForCustomTeam(ReferenceHub player, Team teamCheck, out bool result)
     {
@@ -805,8 +800,8 @@ public class SummonedCustomRole
             role.DestroyDetached();
 
         List.Clear();
-        _cachedListByPlayerId.Clear();
-        _cachedCountByRoleId.Clear();
+        CachedListByPlayerId.Clear();
+        CachedCountByRoleId.Clear();
         EventTriggeredModuleTotal = 0;
     }
 
@@ -824,10 +819,10 @@ public class SummonedCustomRole
     /// </summary>
     internal static void InfiniteEffectActor()
     {
-        foreach (SummonedCustomRole Role in List.Values)
-            if (Role.InfiniteEffects.Any())
-                foreach (IEffect Effect in Role.InfiniteEffects)
-                    Role.Player.ReferenceHub.ForceApplyEffect(Effect.EffectType, Effect.Intensity, float.MaxValue);
+        foreach (SummonedCustomRole role in List.Values)
+            if (role.InfiniteEffects.Any())
+                foreach (IEffect effect in role.InfiniteEffects)
+                    role.Player.ReferenceHub.ForceApplyEffect(effect.EffectType, effect.Intensity, float.MaxValue);
     }
 
     public override string ToString()

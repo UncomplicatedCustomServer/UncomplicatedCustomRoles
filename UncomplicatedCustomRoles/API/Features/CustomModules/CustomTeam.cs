@@ -16,6 +16,7 @@ namespace UncomplicatedCustomRoles.API.Features.CustomModules;
 public class CustomTeam : CustomModule
 {
     public override List<string> RequiredArgs => ["team"];
+
     internal string Team => TryGetStringValue("team", string.Empty);
 
     internal bool IsSameTeam(CustomTeam other)

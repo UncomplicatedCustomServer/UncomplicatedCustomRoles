@@ -33,6 +33,7 @@ namespace UncomplicatedCustomRoles.Events;
 internal class PlayerEventHandler : EventHandlerBase
 {
     private static Scp079Recontainer _recontainer;
+
     internal static PlayerEventHandler Instance { get; private set; }
 
     internal override void OnRegistered()

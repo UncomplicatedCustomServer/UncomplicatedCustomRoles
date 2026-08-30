@@ -36,6 +36,7 @@ internal class Plugin : Plugin<Config>
     private Harmony _harmony;
 
     private bool _welcomeShown;
+
     public override string Name => "UncomplicatedCustomRoles";
 
     public override string Description => "Customize your SCP:SL server with Custom Roles!";
