@@ -10,29 +10,29 @@
 
 using HarmonyLib;
 using InventorySystem;
+using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.Extensions;
 
-namespace UncomplicatedCustomRoles.Patches
-{
-    [HarmonyPatch(typeof(Inventory), nameof(Inventory.StaminaUsageMultiplier), MethodType.Getter)]
-    public class StaminaUsagePatch
-    {
-        public static void Postfix(Inventory __instance, ref float __result)
-        {
-            if (!__instance._hub.TryGetSummonedInstance(out var role))
-                return;
-            __result *= role.Role.Stamina.Infinite ? 0 : role.Role.Stamina.UsageMultiplier;
-        }
-    }
+namespace UncomplicatedCustomRoles.Patches;
 
-    [HarmonyPatch(typeof(Inventory), nameof(Inventory.StaminaRegenMultiplier), MethodType.Getter)]
-    public class StaminaRegenPatch
+[HarmonyPatch(typeof(Inventory), nameof(Inventory.StaminaUsageMultiplier), MethodType.Getter)]
+public class StaminaUsagePatch
+{
+    public static void Postfix(Inventory __instance, ref float __result)
     {
-        public static void Postfix(Inventory __instance, ref float __result)
-        {
-            if (!__instance._hub.TryGetSummonedInstance(out var role))
-                return;
-            __result *= role.Role.Stamina.RegenMultiplier;
-        }
+        if (!__instance._hub.TryGetSummonedInstance(out SummonedCustomRole role))
+            return;
+        __result *= role.Role.Stamina.Infinite ? 0 : role.Role.Stamina.UsageMultiplier;
+    }
+}
+
+[HarmonyPatch(typeof(Inventory), nameof(Inventory.StaminaRegenMultiplier), MethodType.Getter)]
+public class StaminaRegenPatch
+{
+    public static void Postfix(Inventory __instance, ref float __result)
+    {
+        if (!__instance._hub.TryGetSummonedInstance(out SummonedCustomRole role))
+            return;
+        __result *= role.Role.Stamina.RegenMultiplier;
     }
 }

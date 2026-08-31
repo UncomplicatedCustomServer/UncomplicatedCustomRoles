@@ -13,39 +13,35 @@ using LabApi.Features.Wrappers;
 using PlayerRoles;
 using UncomplicatedCustomRoles.Manager;
 
-namespace UncomplicatedCustomRoles.Integrations
+namespace UncomplicatedCustomRoles.Integrations;
+
+internal static class LabApiExtensions
 {
-    internal static class LabApiExtensions
+    private const string PluginName = "LabApiExtensions";
+
+    public static bool IsAvailable => DynamicInvoke.GetMethod(PluginName, "LabApiExtensions.Managers.FakeRoleManager.AddFakeRole", false, 2) != null;
+
+    public static void AddFakeRole(Player player, RoleTypeId roleType)
     {
-        private const string PluginName = "LabApiExtensions";
-
-        public static bool IsAvailable =>
-            DynamicInvoke.GetMethod(PluginName, "LabApiExtensions.Managers.FakeRoleManager.AddFakeRole", false, 2) != null;
-
-        public static void AddFakeRole(Player player, RoleTypeId roleType)
+        try
         {
-            try
-            {
-                DynamicInvoke.GetMethod(PluginName, "LabApiExtensions.Managers.FakeRoleManager.AddFakeRole", false, 2)
-                    ?.Invoke(null, new object[] { player, roleType });
-            }
-            catch (Exception e)
-            {
-                LogManager.Error($"[LabApiExtensions] Failed to AddFakeRole for {player?.Nickname}: {e}");
-            }
+            DynamicInvoke.GetMethod(PluginName, "LabApiExtensions.Managers.FakeRoleManager.AddFakeRole", false, 2)?.Invoke(null, [player, roleType]);
         }
-
-        public static void RemoveFakeRole(Player player)
+        catch (Exception e)
         {
-            try
-            {
-                DynamicInvoke.GetMethod(PluginName, "LabApiExtensions.Managers.FakeRoleManager.RemoveFakeRole", false, 1)
-                    ?.Invoke(null, new object[] { player });
-            }
-            catch (Exception e)
-            {
-                LogManager.Error($"[LabApiExtensions] Failed to RemoveFakeRole for {player?.Nickname}: {e}");
-            }
+            LogManager.Error($"[LabApiExtensions] Failed to AddFakeRole for {player?.Nickname}: {e}");
+        }
+    }
+
+    public static void RemoveFakeRole(Player player)
+    {
+        try
+        {
+            DynamicInvoke.GetMethod(PluginName, "LabApiExtensions.Managers.FakeRoleManager.RemoveFakeRole", false, 1)?.Invoke(null, [player]);
+        }
+        catch (Exception e)
+        {
+            LogManager.Error($"[LabApiExtensions] Failed to RemoveFakeRole for {player?.Nickname}: {e}");
         }
     }
 }

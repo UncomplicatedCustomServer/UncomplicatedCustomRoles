@@ -9,6 +9,7 @@
  */
 
 using System;
+using System.Reflection;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomRoles.Manager;
 
@@ -27,28 +28,25 @@ internal static class ECI
                 LogManager.Error($"Failed to run Exiled.CustomItems.GiveCustomItem({id}): Instance of the plugin not found!");
                 return;
             }
-            var tryGiveMethod = DynamicInvoke.GetMethod("Exiled.CustomItems", "Exiled.CustomItems.API.Features.CustomItem.TryGive",
-                false, 3, new[] { "id" });
+
+            MethodInfo tryGiveMethod = DynamicInvoke.GetMethod("Exiled.CustomItems", "Exiled.CustomItems.API.Features.CustomItem.TryGive", false, 3, ["id"]);
 
             if (tryGiveMethod is null)
             {
-                LogManager.Error(
-                    $"Failed to run Exiled.CustomItems.TryGiveCustomItem({id}): CustomItems.TryGive method not found!");
+                LogManager.Error($"Failed to run Exiled.CustomItems.TryGiveCustomItem({id}): CustomItems.TryGive method not found!");
                 return;
             }
 
-            var exiledPlayerMethod = DynamicInvoke.GetMethod("Exiled.API", "Exiled.API.Features.Player.Get", false, 1,
-                new[] { "apiPlayer" });
+            MethodInfo exiledPlayerMethod = DynamicInvoke.GetMethod("Exiled.API", "Exiled.API.Features.Player.Get", false, 1, ["apiPlayer"]);
             if (exiledPlayerMethod is null)
             {
-                LogManager.Error(
-                    $"Failed to run Exiled.CustomItems.TryGiveCustomItem({id}): Exiled Player.Get method not found!");
+                LogManager.Error($"Failed to run Exiled.CustomItems.TryGiveCustomItem({id}): Exiled Player.Get method not found!");
                 return;
             }
 
-            var exiledPlayer = exiledPlayerMethod.Invoke(null, new object[] { player });
+            object exiledPlayer = exiledPlayerMethod.Invoke(null, [player]);
 
-            var result = tryGiveMethod.Invoke(PluginInstance, new[] { exiledPlayer, id, true });
+            object result = tryGiveMethod.Invoke(PluginInstance, [exiledPlayer, id, true]);
 
 
             if (result is true)

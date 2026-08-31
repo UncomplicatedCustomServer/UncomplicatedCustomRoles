@@ -8,27 +8,43 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using MEC;
 
-namespace UncomplicatedCustomRoles.API.Features.CustomModules
+namespace UncomplicatedCustomRoles.API.Features.CustomModules;
+
+[Obsolete("This module is deprecated and will be removed in a future version. Use InfoTag instead.")]
+public class ColorfulNickname : CustomModule
 {
-    public class ColorfulNickname : CustomModule
+    public override List<string> RequiredArgs => ["color"];
+
+    internal string Color
     {
-        public override List<string> RequiredArgs => new()
+        get
         {
-            "color"
-        };
-
-        internal string Color => TryGetStringValue("color", string.Empty);
-
-        public override void OnAdded()
-        {
-            Timing.CallDelayed(Timing.WaitForOneFrame, ()  =>
-            {
-                CustomRole.CustomInfo.UpdateInfo(CustomRole.Player);
-            });
-            base.OnAdded();
+            string raw = TryGetStringValue("color", string.Empty).TrimStart('#');
+            return Misc.AcceptedColours.FirstOrDefault(c => string.Equals(c, raw, StringComparison.OrdinalIgnoreCase)) ?? raw;
         }
+    }
+
+    public override bool Validate(out string error)
+    {
+        string raw = TryGetStringValue("color", string.Empty).TrimStart('#');
+        if (!Misc.AcceptedColours.Any(c => string.Equals(c, raw, StringComparison.OrdinalIgnoreCase)))
+        {
+            error = $"'color' '{raw}' is not a color the game allows for nicknames. Allowed colors: {string.Join(", ", Misc.AcceptedColours)}.";
+            return false;
+        }
+
+        error = null;
+        return true;
+    }
+
+    public override void OnAdded()
+    {
+        Timing.CallDelayed(Timing.WaitForOneFrame, () => { CustomRole.CustomInfo.UpdateInfo(CustomRole.Player); });
+        base.OnAdded();
     }
 }

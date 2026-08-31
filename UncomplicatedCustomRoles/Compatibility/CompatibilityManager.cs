@@ -1,19 +1,20 @@
 ﻿/*
  * This file is a part of the UncomplicatedCustomRoles project.
- * 
+ *
  * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
- * 
+ *
  * This file is licensed under the GNU Affero General Public License v3.0.
  * You should have received a copy of the AGPL license along with this file.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using LabApi.Loader.Features.Yaml;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
+using LabApi.Loader.Features.Yaml;
 using NorthwoodLib.Pools;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features;
@@ -22,174 +23,180 @@ using UncomplicatedCustomRoles.Compatibility.PreviousVersionRoles;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
 
-namespace UncomplicatedCustomRoles.Compatibility
+namespace UncomplicatedCustomRoles.Compatibility;
+
+public class CompatibilityManager
 {
-    public class CompatibilityManager
+    private static readonly Dictionary<Type, Version> previousVersionRoles = new()
     {
-        /// <summary>
-        /// Gets the location (path) of every CustomRole.
-        /// </summary>
-        public static Dictionary<ICustomRole, string> RolePaths { get; } = new();
+        { typeof(BonolisCustomRole), new Version(7, 0, 0) },
+        { typeof(FossuonCustomRole), new Version(6, 0, 0) },
+        { typeof(PreviousVersionRole), new Version(5, 0, 0) }
+    };
 
-        private static readonly Dictionary<Type, Version> previousVersionRoles = new()
+    private static readonly Dictionary<ICustomRole, Version> outdatedCustomRoles = new();
+
+    private static readonly string prefix = "[Role Loader] ";
+
+    /// <summary>
+    ///     Gets the location (path) of every CustomRole.
+    /// </summary>
+    public static Dictionary<ICustomRole, string> RolePaths { get; } = new();
+
+    public static void ParseAndLoadCustomRole(string file)
+    {
+        string content = File.ReadAllText(file);
+        CustomRole role = null;
+
+        try
         {
-            { typeof(BonolisCustomRole), new(7, 0, 0) },
-            { typeof(FossuonCustomRole), new(6, 0, 0) },
-            { typeof(PreviousVersionRole), new(5, 0, 0) },
-        };
+            /*if (!TypeCheck(content, out string error))
+                throw new Exception(error);*/
 
-        private static readonly Dictionary<ICustomRole, Version> outdatedCustomRoles = new();
-
-        private static readonly string prefix = "[Role Loader] ";
-
-        public static void ParseAndLoadCustomRole(string file)
+            role = YamlConfigParser.Deserializer.Deserialize<CustomRole>(content);
+        }
+        catch (Exception)
         {
-            string content = File.ReadAllText(file);
-            CustomRole role = null;
-
-            try
-            {
-                /*if (!TypeCheck(content, out string error))
-                    throw new Exception(error);*/
-
-                role = YamlConfigParser.Deserializer.Deserialize<CustomRole>(content);
-            } catch (Exception ex)
-            {
-                // Try to decode older roles in order to make everything work
-                foreach (KeyValuePair<Type, Version> kvp in previousVersionRoles)
-                    try
+            // Try to decode older roles in order to make everything work
+            foreach (KeyValuePair<Type, Version> kvp in previousVersionRoles)
+                try
+                {
+                    object data = YamlConfigParser.Deserializer.Deserialize(content, kvp.Key);
+                    if (data is IPreviousVersionRole prevRole)
                     {
-                        object data = YamlConfigParser.Deserializer.Deserialize(content, kvp.Key);
-                        if (data is IPreviousVersionRole prevRole)
-                        {
-                            role = prevRole.ToCustomRole();
-                            outdatedCustomRoles.Add(role, kvp.Value);
-                            break;
-                        }
-                    } 
-                    catch 
-                    { }
-
-                if (role is null)
-                    throw ex;
-            }
-
-            RolePaths.TryAdd(role, file);
-            RegisterCustomRole(role);
-        }
-
-        public static LoadStatusType RegisterCustomRole(ICustomRole role)
-        {
-            LoadStatusType status = CustomRole.InternalRegister(role);
-            
-            if (status is LoadStatusType.SameId && Plugin.Instance.Config.UseIdFixer && RolePaths.TryGetValue(role, out string rolePath))
-            {
-                string roleId = GetRoleFileElement(File.ReadAllLines(rolePath), "id:");
-                role.Id = int.Parse(roleId);
-                LogManager.Info($"Updated ID for role at {rolePath} - New id: {role.Id} ({roleId})", ConsoleColor.DarkMagenta);
-
-                status = CustomRole.InternalRegister(role);
-            }
-
-            if (status is LoadStatusType.Success)
-                LogManager.Info($"{prefix}Successfully loaded CustomRole {role}!", ConsoleColor.DarkGray);
-            else if (status is LoadStatusType.ValidatorError) 
-            {
-                CustomRole.Validate(role, out string error);
-                LogManager.Error($"{prefix}Failed to load CustomRole {role}: failed to validate the CustomRole\n{error}", "RL0001");
-            } 
-            else if (status is LoadStatusType.SameId)
-            {
-                LogManager.Error($"{prefix}Failed to load CustomRole {role}: there's already another CustomRole with the same Id!", "RL0002");
-
-                if (!RolePaths.TryGetValue(role, out string path))
-                    path = null;
-
-                if (path is not null)
-                    CustomRole.NotLoadedRoles.Add(new(path, File.ReadAllLines(path), null, $"There's already another CustomRole with the Id {role.Id}"));
-            }
-
-            if (status is not LoadStatusType.SameId && outdatedCustomRoles.TryGetValue(role, out Version version))
-                LogManager.Info($"{prefix}The loaded CustomRole is made for UCR v{version.ToString(3)}. Consider updating it :)", ConsoleColor.Gray);
-
-            if (status is LoadStatusType.Success && outdatedCustomRoles.TryGetValue(role, out Version version2) && RolePaths.TryGetValue(role, out string path2))
-                CustomRole.OutdatedRoles.Add(new(role, version2, path2));
-
-            return status;
-        }
-
-        public static string GetRoleFileElement(string content, string rowPart, bool removeSpaces = true) => GetRoleFileElement(content.Split(new string[] { Environment.NewLine }, StringSplitOptions.None), rowPart, removeSpaces);
-
-        public static string GetRoleFileElement(string[] pieces, string rowPart, bool removeSpaces = true)
-        {
-            string el = pieces.FirstOrDefault(l => l.Contains(rowPart)) ?? "N/D";
-
-            if (removeSpaces)
-                el.Replace(" ", string.Empty);
-
-            return el.Replace($"{rowPart} ", string.Empty).Replace(rowPart, string.Empty);
-        }
-
-        public static string HandleErrorString(Exception ex, bool showErrorName = false)
-        {
-            string message = (showErrorName ? $"{ex.GetType().Name} " : string.Empty) + ex.Message;
-
-            if (ex.InnerException is not null)
-                message += $" -> {ex.InnerException.Message}";
-
-            if (ex.InnerException is not null && ex.InnerException.InnerException is not null)
-                message += $" -> {ex.InnerException.InnerException.Message}";
-
-            return message;
-        }
-
-        internal static int GetFirstFreeId(int start = 1)
-        {
-            while (CustomRole.CustomRoles.ContainsKey(start))
-                start++;
-
-            return start;
-        }
-
-        private static bool TypeCheck(string content, out string error)
-        {
-            error = null;
-            Dictionary<string, object> data = YamlConfigParser.Deserializer.Deserialize<Dictionary<string, object>>(content);
-
-            foreach (PropertyInfo property in typeof(CustomRole).GetProperties().Where(p => p.CanWrite && p is not null && p.GetType() is not null))
-            {
-                string snakeCaseName = ToSnakeCase(property.Name);
-                if (!data.ContainsKey(snakeCaseName))
-                    error = $"Given CustomRole doesn't contain the required property '{snakeCaseName}' ({ToSnakeCase(property.PropertyType.Name)})";
-
-                if (error is not null)
-                    break;
-            }
-
-            return error is null;
-        }
-
-        private static string ToSnakeCase(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                return name;
-
-            var result = StringBuilderPool.Shared.Rent();
-            for (int i = 0; i < name.Length; i++)
-            {
-                char c = name[i];
-                if (char.IsUpper(c))
-                {
-                    if (i > 0)
-                        result.Append('_');
-                    result.Append(char.ToLowerInvariant(c));
+                        role = prevRole.ToCustomRole();
+                        outdatedCustomRoles.Add(role, kvp.Value);
+                        break;
+                    }
                 }
-                else
-                {
-                    result.Append(c);
-                }
-            }
-            return StringBuilderPool.Shared.ToStringReturn(result);
+                catch
+                { }
+
+            if (role is null)
+                throw;
         }
+
+        RolePaths.TryAdd(role, file);
+        RegisterCustomRole(role);
+    }
+
+    public static LoadStatusType RegisterCustomRole(ICustomRole role)
+    {
+        LoadStatusType status = CustomRole.InternalRegister(role);
+
+        if (status is LoadStatusType.SameId && Plugin.Instance.Config.UseIdFixer && RolePaths.TryGetValue(role, out string rolePath))
+        {
+            string roleId = GetRoleFileElement(File.ReadAllLines(rolePath), "id:");
+            role.Id = int.Parse(roleId);
+            LogManager.Info($"Updated ID for role at {rolePath} - New id: {role.Id} ({roleId})", ConsoleColor.DarkMagenta);
+
+            status = CustomRole.InternalRegister(role);
+        }
+
+        if (status is LoadStatusType.Success)
+        {
+            LogManager.Info($"{prefix}Successfully loaded CustomRole {role}!", ConsoleColor.DarkGray);
+        }
+        else if (status is LoadStatusType.ValidatorError)
+        {
+            CustomRole.Validate(role, out string error);
+            LogManager.Error($"{prefix}Failed to load CustomRole {role}: failed to validate the CustomRole\n{error}", "RL0001");
+        }
+        else if (status is LoadStatusType.SameId)
+        {
+            LogManager.Error($"{prefix}Failed to load CustomRole {role}: there's already another CustomRole with the same Id!", "RL0002");
+
+            if (!RolePaths.TryGetValue(role, out string path))
+                path = null;
+
+            if (path is not null)
+                CustomRole.NotLoadedRoles.Add(new ErrorCustomRole(path, File.ReadAllLines(path), null, $"There's already another CustomRole with the Id {role.Id}"));
+        }
+
+        if (status is not LoadStatusType.SameId && outdatedCustomRoles.TryGetValue(role, out Version version))
+            LogManager.Info($"{prefix}The loaded CustomRole is made for UCR v{version.ToString(3)}. Consider updating it :)", ConsoleColor.Gray);
+
+        if (status is LoadStatusType.Success && outdatedCustomRoles.TryGetValue(role, out Version version2) && RolePaths.TryGetValue(role, out string path2))
+            CustomRole.OutdatedRoles.Add(new OutdatedCustomRole(role, version2, path2));
+
+        return status;
+    }
+
+    public static string GetRoleFileElement(string content, string rowPart, bool removeSpaces = true)
+    {
+        return GetRoleFileElement(content.Split([Environment.NewLine], StringSplitOptions.None), rowPart, removeSpaces);
+    }
+
+    public static string GetRoleFileElement(string[] pieces, string rowPart, bool removeSpaces = true)
+    {
+        string el = pieces.FirstOrDefault(l => l.Contains(rowPart)) ?? "N/D";
+
+        if (removeSpaces)
+            el = el.Replace(" ", string.Empty);
+
+        return el.Replace($"{rowPart} ", string.Empty).Replace(rowPart, string.Empty);
+    }
+
+    public static string HandleErrorString(Exception ex, bool showErrorName = false)
+    {
+        string message = (showErrorName ? $"{ex.GetType().Name} " : string.Empty) + ex.Message;
+
+        if (ex.InnerException is not null)
+            message += $" -> {ex.InnerException.Message}";
+
+        if (ex.InnerException is not null && ex.InnerException.InnerException is not null)
+            message += $" -> {ex.InnerException.InnerException.Message}";
+
+        return message;
+    }
+
+    internal static int GetFirstFreeId(int start = 1)
+    {
+        while (CustomRole.CustomRoles.ContainsKey(start))
+            start++;
+
+        return start;
+    }
+
+    private static bool TypeCheck(string content, out string error)
+    {
+        error = null;
+        Dictionary<string, object> data = YamlConfigParser.Deserializer.Deserialize<Dictionary<string, object>>(content);
+
+        foreach (PropertyInfo property in typeof(CustomRole).GetProperties().Where(p => p.CanWrite && p is not null && p.GetType() is not null))
+        {
+            string snakeCaseName = ToSnakeCase(property.Name);
+            if (!data.ContainsKey(snakeCaseName))
+                error = $"Given CustomRole doesn't contain the required property '{snakeCaseName}' ({ToSnakeCase(property.PropertyType.Name)})";
+
+            if (error is not null)
+                break;
+        }
+
+        return error is null;
+    }
+
+    private static string ToSnakeCase(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+            return name;
+
+        StringBuilder result = StringBuilderPool.Shared.Rent();
+        for (int i = 0; i < name.Length; i++)
+        {
+            char c = name[i];
+            if (char.IsUpper(c))
+            {
+                if (i > 0)
+                    result.Append('_');
+                result.Append(char.ToLowerInvariant(c));
+            }
+            else
+            {
+                result.Append(c);
+            }
+        }
+
+        return StringBuilderPool.Shared.ToStringReturn(result);
     }
 }

@@ -10,36 +10,45 @@
 
 using System.Collections.Generic;
 using UncomplicatedCustomRoles.API.Features.Controllers;
+using UnityEngine;
 
-namespace UncomplicatedCustomRoles.API.Features.CustomModules
+namespace UncomplicatedCustomRoles.API.Features.CustomModules;
+
+internal class Schematic : CustomModule
 {
-    internal class Schematic : CustomModule
+    public override List<string> RequiredArgs => ["name"];
+
+    private string TargetName => TryGetStringValue("name");
+
+    public override bool Validate(out string error)
     {
-        public override List<string> RequiredArgs => new()
+        if (string.IsNullOrWhiteSpace(TargetName))
         {
-            "name"
-        };
-
-        private string TargetName => TryGetStringValue("name");
-
-        public override void OnAdded()
-        {
-            if (TargetName is null)
-            {
-                ThrowError("Argument 'name' not found!");
-                return;
-            }
-
-            SchematicController controller = CustomRole.Player.GameObject.AddComponent<SchematicController>();
-            controller.Init(TargetName);
+            error = "'name' must be the name of a schematic to spawn; it cannot be empty.";
+            return false;
         }
 
-        public override void OnRemoved()
-        {
-            if (TargetName is null)
-                return;
+        error = null;
+        return true;
+    }
 
-            UnityEngine.Object.Destroy(CustomRole.Player.GameObject.GetComponent<SchematicController>());
+    public override void OnAdded()
+    {
+        if (TargetName is null)
+        {
+            ThrowError("Argument 'name' not found!");
+            return;
         }
+
+        SchematicController controller = CustomRole.Player.GameObject.AddComponent<SchematicController>();
+        controller.Init(TargetName);
+    }
+
+    public override void OnRemoved()
+    {
+        if (TargetName is null)
+            return;
+
+        Object.Destroy(CustomRole.Player.GameObject.GetComponent<SchematicController>());
     }
 }

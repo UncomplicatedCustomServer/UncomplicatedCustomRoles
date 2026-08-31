@@ -12,92 +12,89 @@ using System;
 using HarmonyLib;
 using UncomplicatedCustomRoles.Manager;
 
-namespace UncomplicatedCustomRoles.Patches
+namespace UncomplicatedCustomRoles.Patches;
+
+internal static class TeamPatchManager
 {
-    internal static class TeamPatchManager
+    internal const string Category = "UncomplicatedCustomRoles.DynamicTeamPatch";
+
+    private static readonly object Sync = new();
+
+    private static Harmony _harmony;
+
+    private static bool IsPatched { get; set; }
+
+    internal static void Initialize()
     {
-        internal const string Category = "UncomplicatedCustomRoles.DynamicTeamPatch";
-
-        private static readonly object Sync = new();
-
-        private static Harmony _harmony;
-
-        private static bool IsPatched { get; set; }
-        
-        internal static void Initialize()
+        lock (Sync)
         {
-            lock (Sync)
+            _harmony = new Harmony($"com.ucs.ucr_labapi.teampatch-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+            IsPatched = false;
+        }
+    }
+
+    internal static void EnsurePatched()
+    {
+        if (IsPatched)
+            return;
+
+        lock (Sync)
+        {
+            if (IsPatched || _harmony is null)
+                return;
+
+            try
             {
-                _harmony = new Harmony($"com.ucs.ucr_labapi.teampatch-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+                _harmony.PatchCategory(Plugin.Assembly, Category);
+                IsPatched = true;
+                LogManager.Debug("Dynamic team patches applied - at least one player is now disguised.");
+            }
+            catch (Exception e)
+            {
+                LogManager.Error($"Failed to apply the dynamic team patches: {e}");
+            }
+        }
+    }
+
+    internal static void EnsureUnpatched()
+    {
+        if (!IsPatched)
+            return;
+
+        lock (Sync)
+        {
+            if (!IsPatched || _harmony is null)
+                return;
+
+            try
+            {
+                _harmony.UnpatchCategory(Plugin.Assembly, Category);
                 IsPatched = false;
+                LogManager.Debug("Dynamic team patches removed - nobody is disguised anymore.");
+            }
+            catch (Exception e)
+            {
+                LogManager.Error($"Failed to remove the dynamic team patches: {e}");
             }
         }
-        
-        internal static void EnsurePatched()
+    }
+
+    internal static void Shutdown()
+    {
+        lock (Sync)
         {
-            if (IsPatched)
-                return;
-
-            lock (Sync)
-            {
-                if (IsPatched || _harmony is null)
-                    return;
-
-                try
-                {
-                    _harmony.PatchCategory(Plugin.Assembly, Category);
-                    IsPatched = true;
-                    LogManager.Debug("Dynamic team patches applied - at least one player is now disguised.");
-                }
-                catch (Exception e)
-                {
-                    LogManager.Error($"Failed to apply the dynamic team patches: {e}");
-                }
-            }
-        }
-        
-        internal static void EnsureUnpatched()
-        {
-            if (!IsPatched)
-                return;
-
-            lock (Sync)
-            {
-                if (!IsPatched || _harmony is null)
-                    return;
-
+            if (_harmony is not null && IsPatched)
                 try
                 {
                     _harmony.UnpatchCategory(Plugin.Assembly, Category);
-                    IsPatched = false;
-                    LogManager.Debug("Dynamic team patches removed - nobody is disguised anymore.");
                 }
                 catch (Exception e)
                 {
-                    LogManager.Error($"Failed to remove the dynamic team patches: {e}");
-                }
-            }
-        }
-        
-        internal static void Shutdown()
-        {
-            lock (Sync)
-            {
-                if (_harmony is not null && IsPatched)
-                {
-                    try
-                    {
-                        _harmony.UnpatchCategory(Plugin.Assembly, Category);
-                    }
-                    catch (Exception e)
-                    {
-                        LogManager.Error($"Failed to remove the dynamic team patches during shutdown: {e}");
-                    }
+                    LogManager.Error($"Failed to remove the dynamic team patches during shutdown: {e}");
                 }
 
-                _harmony = null;
-                IsPatched = false;
-            }
+            _harmony = null;
+            IsPatched = false;
         }
     }
 }

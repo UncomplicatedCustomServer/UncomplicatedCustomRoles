@@ -1,22 +1,24 @@
 ﻿/*
  * This file is a part of the UncomplicatedCustomRoles project.
- * 
+ *
  * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
- * 
+ *
  * This file is licensed under the GNU Affero General Public License v3.0.
  * You should have received a copy of the AGPL license along with this file.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using MapGeneration;
 using System.Collections.Generic;
+using MapGeneration;
 using UncomplicatedCustomRoles.Compatibility.PreviousVersionElements.Enums;
 
-namespace UncomplicatedCustomRoles.Extensions
+namespace UncomplicatedCustomRoles.Extensions;
+
+public static class CompatibilityExtension
 {
-    public static class CompatibilityExtension
+    public static ItemType GetItemType(this ExiledAmmoType type)
     {
-        public static ItemType GetItemType(this ExiledAmmoType type) => type switch
+        return type switch
         {
             ExiledAmmoType.None => ItemType.None,
             ExiledAmmoType.Nato556 => ItemType.Ammo556x45,
@@ -24,30 +26,33 @@ namespace UncomplicatedCustomRoles.Extensions
             ExiledAmmoType.Ammo44Cal => ItemType.Ammo44cal,
             ExiledAmmoType.Ammo12Gauge => ItemType.Ammo12gauge,
             ExiledAmmoType.Nato9 => ItemType.Ammo9x19,
-            _ => ItemType.None,
+            _ => ItemType.None
         };
+    }
 
-        public static List<ItemType> GetItemTypes(this IEnumerable<ExiledAmmoType> types)
-        {
-            List<ItemType> items = new();
+    public static List<ItemType> GetItemTypes(this IEnumerable<ExiledAmmoType> types)
+    {
+        List<ItemType> items = [];
 
-            foreach (ExiledAmmoType ammoType in types)
-                items.Add(ammoType.GetItemType());
+        foreach (ExiledAmmoType ammoType in types)
+            items.Add(ammoType.GetItemType());
 
-            return items;
-        }
+        return items;
+    }
 
-        public static Dictionary<ItemType, T> ConvertItemTypes<T>(this Dictionary<ExiledAmmoType, T> data)
-        {
-            Dictionary<ItemType, T> items = new();
+    public static Dictionary<ItemType, T> ConvertItemTypes<T>(this Dictionary<ExiledAmmoType, T> data)
+    {
+        Dictionary<ItemType, T> items = new();
 
-            foreach (KeyValuePair<ExiledAmmoType, T> item in data)
-                items.Add(item.Key.GetItemType(), item.Value);
+        foreach (KeyValuePair<ExiledAmmoType, T> item in data)
+            items.Add(item.Key.GetItemType(), item.Value);
 
-            return items;
-        }
+        return items;
+    }
 
-        public static string GetRoomType(this ExiledRoomType type) => type switch
+    public static string GetRoomType(this ExiledRoomType type)
+    {
+        return type switch
         {
             ExiledRoomType.Pocket => "PocketWorld",
             ExiledRoomType.Surface => "Outside",
@@ -113,18 +118,21 @@ namespace UncomplicatedCustomRoles.Extensions
             ExiledRoomType.HczEzCheckpointB => "HCZ_EZ_Checkpoint Part",
             _ => "Unknown"
         };
+    }
 
-        public static List<string> ConvertRoomTypes(this IEnumerable<ExiledRoomType> types)
-        {
-            List<string> result = new();
+    public static List<string> ConvertRoomTypes(this IEnumerable<ExiledRoomType> types)
+    {
+        List<string> result = [];
 
-            foreach (ExiledRoomType type in types)
-                result.Add(type.GetRoomType());
+        foreach (ExiledRoomType type in types)
+            result.Add(type.GetRoomType());
 
-            return result;
-        }
+        return result;
+    }
 
-        public static FacilityZone GetFacilityZone(this ExiledZoneType zone) => zone switch
+    public static FacilityZone GetFacilityZone(this ExiledZoneType zone)
+    {
+        return zone switch
         {
             ExiledZoneType.Unspecified => FacilityZone.None,
             ExiledZoneType.Other => FacilityZone.Other,
@@ -135,15 +143,15 @@ namespace UncomplicatedCustomRoles.Extensions
             ExiledZoneType.Pocket => FacilityZone.Other,
             _ => FacilityZone.None
         };
+    }
 
-        public static List<FacilityZone> ConvertZoneTypes(this IEnumerable<ExiledZoneType> types)
-        {
-            List<FacilityZone> result = new();
+    public static List<FacilityZone> ConvertZoneTypes(this IEnumerable<ExiledZoneType> types)
+    {
+        List<FacilityZone> result = [];
 
-            foreach (ExiledZoneType type in types)
-                result.Add(type.GetFacilityZone());
+        foreach (ExiledZoneType type in types)
+            result.Add(type.GetFacilityZone());
 
-            return result;
-        }
+        return result;
     }
 }

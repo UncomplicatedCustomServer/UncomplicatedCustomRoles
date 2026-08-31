@@ -1,66 +1,65 @@
 ﻿/*
  * This file is a part of the UncomplicatedCustomRoles project.
- * 
+ *
  * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
- * 
+ *
  * This file is licensed under the GNU Affero General Public License v3.0.
  * You should have received a copy of the AGPL license along with this file.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using MEC;
-using System.Collections.Generic;
-
 #nullable enable
-namespace UncomplicatedCustomRoles.API.Features
+using System.Collections.Generic;
+using MEC;
+
+namespace UncomplicatedCustomRoles.API.Features;
+
+public class InfiniteEffect
 {
-    public class InfiniteEffect
+    /// <summary>
+    ///     Whether the infinite effect coroutine is running or not
+    /// </summary>
+    public static bool IsRunning => CoroutineHandle.IsRunning;
+
+    internal static CoroutineHandle CoroutineHandle { get; private set; }
+
+    internal static bool EffectAssociationAllowed { get; set; }
+
+    /// <summary>
+    ///     Start the coroutine
+    /// </summary>
+    public static void Start()
     {
-        /// <summary>
-        /// Whether the infinite effect coroutine is running or not
-        /// </summary>
-        public static bool IsRunning => CoroutineHandle.IsRunning;
+        if (IsRunning)
+            return;
 
-        internal static CoroutineHandle CoroutineHandle { get; private set; }
+        CoroutineHandle = Timing.RunCoroutine(Actor());
+    }
 
-        internal static bool EffectAssociationAllowed { get; set; } = false;
+    /// <summary>
+    ///     Stop the coroutine
+    /// </summary>
+    public static void Stop()
+    {
+        if (!IsRunning)
+            return;
 
-        /// <summary>
-        /// Start the coroutine
-        /// </summary>
-        public static void Start()
+        Timing.KillCoroutines(CoroutineHandle);
+    }
+
+    internal static IEnumerator<float> Actor()
+    {
+        while (EffectAssociationAllowed)
         {
-            if (IsRunning) 
-                return;
+            SummonedCustomRole.InfiniteEffectActor();
 
-            CoroutineHandle = Timing.RunCoroutine(Actor());
+            yield return Timing.WaitForSeconds(2.5f);
         }
+    }
 
-        /// <summary>
-        /// Stop the coroutine
-        /// </summary>
-        public static void Stop()
-        {
-            if (!IsRunning)
-                return;
-
-            Timing.KillCoroutines(CoroutineHandle);
-        }
-
-        internal static IEnumerator<float> Actor()
-        {
-            while (EffectAssociationAllowed)
-            {
-                SummonedCustomRole.InfiniteEffectActor();
-
-                yield return Timing.WaitForSeconds(2.5f);
-            }
-        }
-
-        internal static void Terminate()
-        {
-            EffectAssociationAllowed = false;
-            Stop();
-        }
+    internal static void Terminate()
+    {
+        EffectAssociationAllowed = false;
+        Stop();
     }
 }

@@ -8,38 +8,42 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
 using LabApi.Features.Permissions;
+using LabApi.Features.Wrappers;
 
-namespace UncomplicatedCustomRoles.API.Features.CustomModules
+namespace UncomplicatedCustomRoles.API.Features.CustomModules;
+
+public class CustomPermissions : CustomModule
 {
-    public class CustomPermissions : CustomModule
+    public override List<string> RequiredArgs => ["permissions"];
+
+    private string[] Permissions => StringArgs.TryGetValue("permissions", out string permissions) ? permissions.Replace(" ", string.Empty).Split([','], StringSplitOptions.RemoveEmptyEntries) : [];
+
+    public override bool Validate(out string error)
     {
-        public override List<string> RequiredArgs => new()
+        if (Permissions.Length == 0)
         {
-            "permissions"
-        };
-
-        private string[] Permissions => StringArgs.TryGetValue("permissions", out string permissions) ? permissions.Replace(" ", string.Empty).Split(',') : new string[] { };
-        
-        public override void OnAdded()
-        {
-            var player = CustomRole.Player;
-            foreach (var permission in Permissions)
-            {
-                player?.AddPermissions(permission);
-            }
-            base.OnAdded();
+            error = "'permissions' must list at least one permission node, e.g. 'myplugin.command' or 'a.b, c.d'.";
+            return false;
         }
 
-        public override void OnRemoved()
-        {
-            var player = CustomRole.Player;
-            foreach (var permission in Permissions)
-            {
-                player?.RemovePermissions(permission);
-            }
-            base.OnRemoved();
-        }
+        error = null;
+        return true;
+    }
+
+    public override void OnAdded()
+    {
+        Player player = CustomRole.Player;
+        foreach (string permission in Permissions) player?.AddPermissions(permission);
+        base.OnAdded();
+    }
+
+    public override void OnRemoved()
+    {
+        Player player = CustomRole.Player;
+        foreach (string permission in Permissions) player?.RemovePermissions(permission);
+        base.OnRemoved();
     }
 }

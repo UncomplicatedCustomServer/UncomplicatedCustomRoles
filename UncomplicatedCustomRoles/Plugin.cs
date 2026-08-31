@@ -1,8 +1,8 @@
 /*
  * This file is a part of the UncomplicatedCustomRoles project.
- * 
+ *
  * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
- * 
+ *
  * This file is licensed under the GNU Affero General Public License v3.0.
  * You should have received a copy of the AGPL license along with this file.
  * If not, see <https://www.gnu.org/licenses/>.
@@ -10,130 +10,133 @@
 
 using System;
 using System.Collections.Generic;
-using UncomplicatedCustomRoles.Integrations;
-using UncomplicatedCustomRoles.Manager;
-using UncomplicatedCustomRoles.API.Features;
+using System.Reflection;
 using HarmonyLib;
-using UncomplicatedCustomRoles.Manager.NET;
-using UncomplicatedCustomRoles.Patches;
-using System.Threading.Tasks;
+using LabApi.Features;
+using LabApi.Features.Wrappers;
 using LabApi.Loader.Features.Plugins;
 using LabApi.Loader.Features.Plugins.Enums;
-using LabApi.Features.Wrappers;
-using System.Reflection;
-using LabApi.Features;
 using MEC;
-using UncomplicatedCustomRoles.Events;
+using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Features.Controllers;
+using UncomplicatedCustomRoles.Events;
+using UncomplicatedCustomRoles.Integrations;
+using UncomplicatedCustomRoles.Manager;
+using UncomplicatedCustomRoles.Manager.NET;
+using UncomplicatedCustomRoles.Patches;
 
-namespace UncomplicatedCustomRoles
+namespace UncomplicatedCustomRoles;
+
+internal class Plugin : Plugin<Config>
 {
-    internal class Plugin : Plugin<Config>
+    internal static Plugin Instance;
+
+    internal static HttpManager HttpManager;
+
+    private Harmony _harmony;
+
+    private bool _welcomeShown;
+
+    public override string Name => "UncomplicatedCustomRoles";
+
+    public override string Description => "Customize your SCP:SL server with Custom Roles!";
+
+    public override string Author => "FoxWorn3365, Dr.Agenda, MedveMarci";
+
+    public override Version Version { get; } = new(9, 6, 0);
+
+    public override Version RequiredApiVersion => new(LabApiProperties.CompiledVersion);
+
+    public override LoadPriority Priority => LoadPriority.High;
+
+    public static Assembly Assembly => Assembly.GetExecutingAssembly();
+
+    public override void Enable()
     {
-        public override string Name => "UncomplicatedCustomRoles";
+        Instance = this;
 
-        public override string Description => "Customize your SCP:SL server with Custom Roles!";
+        // QoL things
+        LogManager.History.Clear();
+        API.Features.Escape.Bucket.Clear();
 
-        public override string Author => "FoxWorn3365, Dr.Agenda, MedveMarci";
+        HttpManager = new HttpManager("ucr");
 
-        public override Version Version { get; } = new(9, 5, 1, 0);
+        CustomRole.CustomRoles.Clear();
+        CustomRole.NotLoadedRoles.Clear();
+        FlagMigrator.Migrated.Clear();
 
-        public override Version RequiredApiVersion => new(LabApiProperties.CompiledVersion);
-
-        public override LoadPriority Priority => LoadPriority.High;
-
-        public static Assembly Assembly => Assembly.GetExecutingAssembly();
-
-        internal static Plugin Instance;
-
-        internal static HttpManager HttpManager;
-
-        private Harmony _harmony;
-
-        public override void Enable()
+        EventHandlerBase.Register(new List<EventHandlerBase>
         {
-            Instance = this;
+            new ServerEventHandler(),
+            new PlayerEventHandler(),
+            new ScpEventHandler()
+        });
 
-            // QoL things
-            LogManager.History.Clear();
-            API.Features.Escape.Bucket.Clear();
+        Timing.RunCoroutine(VersionManager.Init(), "UCR_Http");
 
-            HttpManager = new("ucr");
+        ImportManager.Unload();
 
-            CustomRole.CustomRoles.Clear();
-            CustomRole.NotLoadedRoles.Clear();
+        FileConfigs.Welcome();
+        FileConfigs.Welcome(Server.Port.ToString());
+        FileConfigs.LoadAll();
+        FileConfigs.LoadAll(Server.Port.ToString());
 
-            EventHandlerBase.Register(new List<EventHandlerBase>()
-            {
-                new ServerEventHandler(),
-                new PlayerEventHandler(),
-                new ScpEventHandler()
-            });
+        SpawnPointManager.Init();
 
-            Task.Run(delegate
-            {
-                if (HttpManager.LatestVersion.CompareTo(Version) > 0)
-                    LogManager.Warn($"You are NOT using the latest version of UncomplicatedCustomRoles!\nCurrent: v{Version} | Latest available: v{HttpManager.LatestVersion}\nDownload it from GitHub: https://github.com/FoxWorn3365/UncomplicatedCustomRoles/releases/latest");
+        DisguiseTeam.Clear();
 
-                VersionManager.Init();
-            });
+        TeamPatchManager.Initialize();
 
-            ImportManager.Unload();
+        _harmony = new Harmony($"com.ucs.ucr_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+        _harmony.PatchAllUncategorized();
 
-            FileConfigs.Welcome();
-            FileConfigs.Welcome(Server.Port.ToString());
-            FileConfigs.LoadAll();
-            FileConfigs.LoadAll(Server.Port.ToString());
+        PlayerEventPrefix.Patch(_harmony);
 
-            SpawnPointApiCommunicator.Init();
+        // Add presence
+        if (Config.EnableTelemetry)
+            Timing.RunCoroutine(Presence.PresenceCoroutine(), "UCR_Presence");
+    }
 
-            DisguiseTeam.Clear();
-            
-            TeamPatchManager.Initialize();
+    public override void Disable()
+    {
+        Timing.KillCoroutines("UCR_Presence");
+        Timing.KillCoroutines("UCR_Http");
 
-            _harmony = new($"com.ucs.ucr_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
-            _harmony.PatchAllUncategorized();
+        ScriptedEvents.UnregisterCustomActions();
 
-            PlayerEventPrefix.Patch(_harmony);
-
-            // Add presence
-            if (Config.EnableTelemetry)
-                Timing.RunCoroutine(Presence.PresenceCoroutine(), "UCR_Presence");
-        }
-
-        public override void Disable()
+        if (_harmony is not null)
         {
-            Timing.KillCoroutines("UCR_Presence");
-
-            ScriptedEvents.UnregisterCustomActions();
-
             PlayerEventPrefix.Unpatch(_harmony);
-
-            _harmony.UnpatchAll();
-
-            TeamPatchManager.Shutdown();
-
-            EventHandlerBase.UnregisterAll();
-
-            HttpManager.UnregisterEvents();
-
-            Instance = null;
+            _harmony.UnpatchAll(_harmony.Id);
+            _harmony = null;
         }
 
-        /// <summary>
-        /// Invoked after the server finish to load every plugin
-        /// </summary>
-        public void OnFinishedLoadingPlugins()
-        {
-            // Register ScriptedEvents integration
-            ScriptedEvents.RegisterCustomActions();
+        PendingUnitNames.Clear();
 
-            // Run the import managet
-            ImportManager.Init();
+        TeamPatchManager.Shutdown();
 
-            if (Config is not { EnableBasicLogs: true }) return;
-            LogManager.Info($"Thanks for using UncomplicatedCustomRoles v{Version.ToString(3)} by {Author}!", ConsoleColor.Blue);
-            LogManager.Info("To receive support and to stay up-to-date, join our official Discord server: https://discord.gg/5StRGu8EJV", ConsoleColor.DarkYellow);
-        }
+        EventHandlerBase.UnregisterAll();
+
+        HttpManager?.UnregisterEvents();
+        HttpManager = null;
+
+        Instance = null;
+    }
+
+    /// <summary>
+    ///     Invoked after the server finish to load every plugin
+    /// </summary>
+    public void OnFinishedLoadingPlugins()
+    {
+        // Register ScriptedEvents integration
+        ScriptedEvents.RegisterCustomActions();
+
+        // Run the import manager
+        ImportManager.Init();
+
+        if (_welcomeShown || Config is not { EnableBasicLogs: true }) return;
+        _welcomeShown = true;
+        LogManager.Info($"Thanks for using UncomplicatedCustomRoles v{Version} by {Author}!", ConsoleColor.Blue);
+        LogManager.Info("To receive support and to stay up-to-date, join our official Discord server: https://discord.gg/5StRGu8EJV", ConsoleColor.DarkYellow);
     }
 }

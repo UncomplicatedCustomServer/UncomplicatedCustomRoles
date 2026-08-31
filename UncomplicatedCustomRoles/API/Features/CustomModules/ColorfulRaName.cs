@@ -9,16 +9,28 @@
  */
 
 using System.Collections.Generic;
+using UnityEngine;
 
-namespace UncomplicatedCustomRoles.API.Features.CustomModules
+namespace UncomplicatedCustomRoles.API.Features.CustomModules;
+
+public class ColorfulRaName : CustomModule
 {
-    public class ColorfulRaName : CustomModule
-    {
-        public override List<string> RequiredArgs => new()
-        {
-            "color"
-        };
+    public override List<string> RequiredArgs => ["color"];
 
-        internal string Color => TryGetStringValue("color", string.Empty);
+    internal string Color => TryGetStringValue("color", string.Empty);
+
+    public override bool Validate(out string error)
+    {
+        string raw = TryGetStringValue("color", string.Empty);
+        string hex = raw.StartsWith("#") ? raw : "#" + raw;
+
+        if (!ColorUtility.TryParseHtmlString(hex, out _))
+        {
+            error = $"'color' '{raw}' is not a valid hex color. Use a hex value like FF0000 or #FF0000.";
+            return false;
+        }
+
+        error = null;
+        return true;
     }
 }

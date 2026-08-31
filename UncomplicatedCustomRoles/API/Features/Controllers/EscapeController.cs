@@ -8,31 +8,46 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+using LabApi.Events.Arguments.PlayerEvents;
 using PlayerRoles;
 using UncomplicatedCustomRoles.Events;
 using UnityEngine;
 
-namespace UncomplicatedCustomRoles.API.Features.Controllers
+namespace UncomplicatedCustomRoles.API.Features.Controllers;
+
+internal class EscapeController : MonoBehaviour
 {
-    internal class EscapeController : MonoBehaviour
+    private SummonedCustomRole _role;
+
+    private bool _wasInEscapeZone;
+
+    private void Update()
     {
-        private SummonedCustomRole _role;
+        if (_role is null || PlayerEventHandler.Instance is null)
+            return;
 
-        public void Init(SummonedCustomRole role)
-        {
-            _role = role;
-        }
+        bool inZone = false;
+        foreach (Bounds escapeZone in global::Escape.EscapeZones)
+            if (escapeZone.Contains(_role.Player.Position))
+            {
+                inZone = true;
 
-        private void Update()
-        {
-            foreach (Bounds escapeZone in global::Escape.EscapeZones)
-                if (escapeZone.Contains(_role.Player.Position))
-                    PlayerEventHandler.Instance.OnEscaping(new(_role.Player.ReferenceHub, _role.Player.Role, RoleTypeId.ChaosConscript, global::Escape.EscapeScenarioType.Custom, escapeZone));
-        }
+                if (!_wasInEscapeZone)
+                    PlayerEventHandler.Instance.OnEscaping(new PlayerEscapingEventArgs(_role.Player.ReferenceHub, _role.Player.Role, RoleTypeId.ChaosConscript, global::Escape.EscapeScenarioType.Custom, escapeZone));
 
-        private void OnDestroy()
-        {
-            _role = null;
-        }
+                break;
+            }
+
+        _wasInEscapeZone = inZone;
+    }
+
+    private void OnDestroy()
+    {
+        _role = null;
+    }
+
+    public void Init(SummonedCustomRole role)
+    {
+        _role = role;
     }
 }

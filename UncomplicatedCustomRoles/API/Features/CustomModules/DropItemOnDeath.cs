@@ -8,30 +8,39 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using LabApi.Features.Wrappers;
-using MEC;
 using System;
 using System.Collections.Generic;
+using LabApi.Features.Wrappers;
+using MEC;
 
-namespace UncomplicatedCustomRoles.API.Features.CustomModules
+namespace UncomplicatedCustomRoles.API.Features.CustomModules;
+
+public class DropItemOnDeath : CustomModule
 {
-    public class DropItemOnDeath : CustomModule
+    public override List<string> RequiredArgs => ["item"];
+
+    public ItemType? Item =>
+        StringArgs.TryGetValue("item", out string rawItem) && Enum.TryParse(rawItem, true, out ItemType item) && item is not ItemType.None ? item : null;
+
+    public override bool Validate(out string error)
     {
-        public override List<string> RequiredArgs => new()
+        if (Item is null)
         {
-            "item"
-        };
-
-        public ItemType? Item => StringArgs.TryGetValue("item", out string rawItem) && Enum.TryParse(rawItem, out ItemType item) && item is not ItemType.None ? item : null;
-
-        public override void OnRemoved()
-        {
-            if (Item is ItemType item)
-                Timing.CallDelayed(0.5f, () =>
-                {
-                    var pickup = Pickup.Create(item, CustomRole.Player.Position);
-                    pickup?.Spawn();
-                });
+            error = $"'item' value '{TryGetStringValue("item")}' is not a valid ItemType. Examples: Medkit, KeycardScientist, GunCOM15, Coin.";
+            return false;
         }
+
+        error = null;
+        return true;
+    }
+
+    public override void OnRemoved()
+    {
+        if (Item is ItemType item)
+            Timing.CallDelayed(0.5f, () =>
+            {
+                Pickup pickup = Pickup.Create(item, CustomRole.Player.Position);
+                pickup?.Spawn();
+            });
     }
 }

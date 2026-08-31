@@ -1,82 +1,77 @@
 ﻿/*
  * This file is a part of the UncomplicatedCustomRoles project.
- * 
+ *
  * Copyright (c) 2023-present FoxWorn3365 (Federico Cosma) <me@fcosma.it>
- * 
+ *
  * This file is licensed under the GNU Affero General Public License v3.0.
  * You should have received a copy of the AGPL license along with this file.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-using PlayerRoles;
 using System.Collections.Generic;
-using UncomplicatedCustomRoles.API.Interfaces;
-using UncomplicatedCustomRoles.API.Enums;
 using MapGeneration;
+using PlayerRoles;
+using UncomplicatedCustomRoles.API.Enums;
+using UncomplicatedCustomRoles.API.Interfaces;
 
-namespace UncomplicatedCustomRoles.API.Features.Behaviour
-{
+namespace UncomplicatedCustomRoles.API.Features.Behaviour;
 #nullable enable
-    public class SpawnBehaviour
-    {
-        /// <summary>
-        /// Gets or sets a <see cref="List{T}"/> of <see cref="RoleTypeId"/> that this role can override
-        /// </summary>
-        public List<RoleTypeId> CanReplaceRoles { get; set; } = new()
-        {
-            RoleTypeId.ClassD
-        };
+public class SpawnBehaviour
+{
+    /// <summary>
+    ///     Gets or sets a <see cref="List{T}" /> of <see cref="RoleTypeId" /> that this role can override
+    /// </summary>
+    public List<RoleTypeId> CanReplaceRoles { get; set; } = [RoleTypeId.ClassD];
 
-        /// <summary>
-        /// Gets or sets the maximum number of the given <see cref="ICustomRole"/> can be alive at the same time
-        /// </summary>
-        public int MaxPlayers { get; set; } = 10;
+    /// <summary>
+    ///     Gets or sets the maximum number of the given <see cref="ICustomRole" /> can be alive at the same time
+    /// </summary>
+    public int MaxPlayers { get; set; } = 10;
 
-        /// <summary>
-        /// Gets or sets the minimum number of players that are required by the given <see cref="ICustomRole"/> to spawn
-        /// </summary>
-        public int MinPlayers { get; set; } = 1;
+    /// <summary>
+    ///     Gets or sets the minimum number of players on the server that are required by the given <see cref="ICustomRole" />
+    ///     to spawn
+    /// </summary>
+    public int MinPlayers { get; set; } = 1;
 
-        /// <summary>
-        /// Gets or sets the spawn chance of the role.<br></br>
-        /// 0 is 0% and 100 is 100%
-        /// </summary>
-        public float SpawnChance { get; set; } = 60;
+    /// <summary>
+    ///     Gets or sets the spawn chance of the role.<br></br>
+    ///     0 is 0% and 100 is 100%
+    /// </summary>
+    public float SpawnChance { get; set; } = 60;
 
-        /// <summary>
-        /// Gets or sets the <see cref="SpawnType"/> of the role
-        /// </summary>
-        public SpawnType Spawn { get; set; } = SpawnType.RoomsSpawn;
+    /// <summary>
+    ///     Gets or sets how many seconds after the round starts the role is spawned.
+    /// </summary>
+    public float SpawnDelay { get; set; } = 0;
 
-        /// <summary>
-        /// Gets or sets a <see cref="List{T}"/> of zones that will be evaluated as spawnpoints
-        /// </summary>
-        public List<FacilityZone> SpawnZones { get; set; } = new();
+    /// <summary>
+    ///     Gets or sets the <see cref="SpawnType" /> of the role
+    /// </summary>
+    public SpawnType Spawn { get; set; } = SpawnType.RoomsSpawn;
 
-        /// <summary>
-        /// Gets or sets a <see cref="List{T}"/> of rooms that will be evaluated as spawnpoints
-        /// </summary>
-        public List<string> SpawnRooms { get; set; } = new()
-        {
-            "LCZ_ClassDSpawn"
-        };
+    /// <summary>
+    ///     Gets or sets a <see cref="List{T}" /> of zones that will be evaluated as spawnpoints
+    /// </summary>
+    public List<FacilityZone> SpawnZones { get; set; } = [];
 
-        /// <summary>
-        /// Gets or sets a <see cref="List{T}"/> of roles that will be evaluated as spawnpoints
-        /// </summary>
-        public List<RoleTypeId> SpawnRoles { get; set; } = new()
-        {
-            RoleTypeId.ClassD
-        };
+    /// <summary>
+    ///     Gets or sets a <see cref="List{T}" /> of rooms that will be evaluated as spawnpoints
+    /// </summary>
+    public List<string> SpawnRooms { get; set; } = ["LCZ_ClassDSpawn"];
 
-        /// <summary>
-        /// Gets or sets a <see cref="List{T}"/> of SpawnPoints that will be evaluated as spawnpoints
-        /// </summary>
-        public List<string> SpawnPoints { get; set; } = new();
+    /// <summary>
+    ///     Gets or sets a <see cref="List{T}" /> of roles that will be evaluated as spawnpoints
+    /// </summary>
+    public List<RoleTypeId> SpawnRoles { get; set; } = [RoleTypeId.ClassD];
 
-        /// <summary>
-        /// Gets or sets the required PlayerPermission to spawn as the given <see cref="ICustomRole"/>
-        /// </summary>
-        public object RequiredPermission { get; set; } = new();
-    }
+    /// <summary>
+    ///     Gets or sets a <see cref="List{T}" /> of SpawnPoints that will be evaluated as spawnpoints
+    /// </summary>
+    public List<string> SpawnPoints { get; set; } = [];
+
+    /// <summary>
+    ///     Gets or sets the required PlayerPermission to spawn as the given <see cref="ICustomRole" />
+    /// </summary>
+    public object RequiredPermission { get; set; } = new();
 }

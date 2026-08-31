@@ -1,37 +1,23 @@
-﻿using LabApi.Features.Wrappers;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+using LabApi.Features.Wrappers;
 
-namespace UncomplicatedCustomRoles.API.Features.Messages
+namespace UncomplicatedCustomRoles.API.Features.Messages;
+
+internal class PresenceMessage
 {
-    internal class PresenceMessage
-    {
-        [JsonPropertyName("server_port")]
-        public int Port { get; set; } = Server.Port;
+    [JsonPropertyName("server_port")] public int Port { get; set; } = Server.Port;
 
-        [JsonPropertyName("player_count")]
-        public int PlayerCount { get; set; } = Server.PlayerCount;
+    [JsonPropertyName("player_count")] public int PlayerCount { get; set; } = Server.PlayerCount;
 
-        [JsonPropertyName("max_players")]
-        public int MaxPlayers { get; set; } = Server.MaxPlayers;
+    [JsonPropertyName("max_players")] public int MaxPlayers { get; set; } = Server.MaxPlayers;
 
-        [JsonPropertyName("name")]
-        public string Name { get; set; } = Server.ServerListName;
+    [JsonPropertyName("name")] public string Name { get; set; } = Server.ServerListName;
 
-        [JsonPropertyName("max_tps")]
-        public int MaxTps { get; set; } = Server.MaxTps;
+    [JsonPropertyName("max_tps")] public int MaxTps { get; set; } = Server.MaxTps;
 
-        [JsonPropertyName("tps")]
-        public double Tps { get; set; } = Server.Tps;
+    [JsonPropertyName("tps")] public double Tps { get; set; } = Server.Tps;
 
-        [JsonPropertyName("plugin")]
-        public string PluginName => "UCR";
+    [JsonPropertyName("plugin")] public string PluginName => "UCR";
 
-        [JsonPropertyName("version")]
-        public string Version { get; set; } = Plugin.Instance.Version.ToString(4);
-
-
-
-        public PresenceMessage()
-        { }
-    }
+    [JsonPropertyName("version")] public string Version { get; set; } = Plugin.Instance.Version.ToString();
 }
