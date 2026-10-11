@@ -53,9 +53,7 @@ internal static class UCI
         try
         {
             if (HasCustomItem(id, out object customItem) && customItem is not null)
-                SummonedCustomItem?.GetConstructor([
-                    Assembly.GetType("UncomplicatedCustomItems.API.Interfaces.ICustomItem"), typeof(Player)
-                ]).Invoke([customItem, player]);
+                SummonedCustomItem?.GetConstructor([Assembly.GetType("UncomplicatedCustomItems.API.Interfaces.ICustomItem"), typeof(Player)]).Invoke([customItem, player]);
         }
         catch (Exception e)
         {
