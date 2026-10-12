@@ -13,6 +13,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomRoles.API.Features.CustomModules;
+using UncomplicatedCustomRoles.API.Interfaces;
 
 namespace UncomplicatedCustomRoles.Events;
 
@@ -27,6 +28,8 @@ internal abstract class EventHandlerBase
     internal static HashSet<int> FirstRoundPlayers { get; } = [];
 
     internal static ConcurrentDictionary<int, Tuple<CustomScpAnnouncer, DateTimeOffset>> TerminationQueue { get; } = new();
+
+    internal static ConcurrentDictionary<int, Tuple<ICustomRole, bool>> Scp1509ResurrectQueue { get; } = new();
 
     internal static bool Started { get; set; } = false;
 
