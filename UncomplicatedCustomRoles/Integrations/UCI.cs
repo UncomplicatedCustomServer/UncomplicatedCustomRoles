@@ -21,6 +21,8 @@ internal static class UCI
 
     public static readonly Type SummonedCustomItem = Assembly?.GetType("UncomplicatedCustomItems.API.Features.SummonedCustomItem");
 
+    public static readonly Type CustomItem = Assembly?.GetType("UncomplicatedCustomItems.API.Interfaces.ICustomItem") ?? Assembly?.GetType("UncomplicatedCustomItems.API.Features.CustomItem");
+
     public static bool HasCustomItem(uint id, out object customItem)
     {
         customItem = null;
@@ -52,8 +54,24 @@ internal static class UCI
 
         try
         {
-            if (HasCustomItem(id, out object customItem) && customItem is not null)
-                SummonedCustomItem?.GetConstructor([Assembly.GetType("UncomplicatedCustomItems.API.Interfaces.ICustomItem"), typeof(Player)]).Invoke([customItem, player]);
+            if (!HasCustomItem(id, out object customItem) || customItem is null)
+                return;
+
+            if (SummonedCustomItem is null || CustomItem is null)
+            {
+                LogManager.Warn("Failed to locate SummonedCustomItem or ICustomItem/CustomItem type!");
+                return;
+            }
+
+            ConstructorInfo constructor = SummonedCustomItem.GetConstructor([CustomItem, typeof(Player)]);
+
+            if (constructor is null)
+            {
+                LogManager.Warn($"Failed to locate a SummonedCustomItem constructor accepting ({CustomItem.FullName}, {typeof(Player).FullName})!");
+                return;
+            }
+
+            constructor.Invoke([customItem, player]);
         }
         catch (Exception e)
         {
