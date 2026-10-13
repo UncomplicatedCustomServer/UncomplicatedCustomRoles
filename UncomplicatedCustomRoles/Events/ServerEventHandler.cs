@@ -72,6 +72,7 @@ internal class ServerEventHandler : EventHandlerBase
         SummonedCustomRole.ClearAll();
         DisguiseTeam.Clear();
         RespawnInventoryQueue.Clear();
+        Scp1509ResurrectQueue.Clear();
         RagdollAppearanceQueue.Clear();
         TerminationQueue.Clear();
         FirstRoundPlayers.Clear();
