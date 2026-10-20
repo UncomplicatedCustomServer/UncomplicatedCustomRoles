@@ -19,19 +19,11 @@ internal class SchematicController : MonoBehaviour
 {
     private MonoBehaviour _schematic;
 
-    private void LateUpdate()
-    {
-        if (_schematic is null)
-            return;
-
-        // This should reference to the player
-        _schematic.transform.position = gameObject.transform.position;
-        _schematic.transform.rotation = gameObject.transform.rotation;
-    }
-
     private void OnDestroy()
     {
-        Destroy(_schematic);
+        if (_schematic is not null)
+            Destroy(_schematic.gameObject);
+
         _schematic = null;
     }
 
@@ -50,7 +42,7 @@ internal class SchematicController : MonoBehaviour
             return;
         }
 
-        if (method is null)
+        if (schematic is null)
         {
             LogManager.Error($"[MER Extension] Failed to import MER or ProjectMER schematic {schematicName}!\nSchematic not found!");
             Destroy(this);
@@ -65,5 +57,10 @@ internal class SchematicController : MonoBehaviour
         }
 
         _schematic = monoSchematic;
+
+        Transform schematicTransform = monoSchematic.transform;
+        schematicTransform.SetParent(transform, false);
+        schematicTransform.localPosition = Vector3.zero;
+        schematicTransform.localRotation = Quaternion.identity;
     }
 }

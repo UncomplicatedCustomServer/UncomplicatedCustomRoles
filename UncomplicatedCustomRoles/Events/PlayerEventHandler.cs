@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CustomPlayerEffects;
+using InventorySystem;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
@@ -59,6 +60,8 @@ internal class PlayerEventHandler : EventHandlerBase
         PlayerEvents.PickingUpArmor += OnPickingUpArmor;
         PlayerEvents.PickingUpScp330 += OnPickingUpScp330;
         PlayerEvents.InteractingScp330 += OnInteractingScp330;
+        PlayerEvents.Scp1509Resurrecting += OnScp1509Resurrecting;
+        PlayerEvents.Scp1509Resurrected += OnScp1509Resurrected;
 
         Instance = this;
     }
@@ -88,6 +91,8 @@ internal class PlayerEventHandler : EventHandlerBase
         PlayerEvents.PickingUpArmor -= OnPickingUpArmor;
         PlayerEvents.PickingUpScp330 -= OnPickingUpScp330;
         PlayerEvents.InteractingScp330 -= OnInteractingScp330;
+        PlayerEvents.Scp1509Resurrecting -= OnScp1509Resurrecting;
+        PlayerEvents.Scp1509Resurrected -= OnScp1509Resurrected;
     }
 
     public void OnJoined(PlayerJoinedEventArgs ev)
@@ -120,6 +125,7 @@ internal class PlayerEventHandler : EventHandlerBase
         RagdollAppearanceQueue.Remove(playerId);
         TerminationQueue.TryRemove(playerId, out _);
         RespawnInventoryQueue.TryRemove(playerId, out _);
+        Scp1509ResurrectQueue.TryRemove(playerId, out _);
         Spawn.SpawnQueue.Remove(playerId);
         Spawn.Spawning.Remove(playerId);
         API.Features.Escape.Bucket.Remove(playerId);
@@ -258,6 +264,14 @@ internal class PlayerEventHandler : EventHandlerBase
 
         if (Spawn.Spawning.Contains(ev.Player.PlayerId))
             return;
+
+        if (Scp1509ResurrectQueue.ContainsKey(ev.Player.PlayerId))
+        {
+            if (ev.ChangeReason is RoleChangeReason.Resurrected)
+                return;
+
+            Scp1509ResurrectQueue.TryRemove(ev.Player.PlayerId, out _);
+        }
 
         if (ev.Player.HasCustomRole())
             return;
@@ -420,6 +434,54 @@ internal class PlayerEventHandler : EventHandlerBase
                     }
                 }
             }
+        }
+    }
+
+    public void OnScp1509Resurrecting(PlayerScp1509ResurrectingEventArgs ev)
+    {
+        if (!ev.IsAllowed || ev.RevivedPlayer is null)
+            return;
+
+        if (!ev.Player.TryGetSummonedInstance(out SummonedCustomRole customRole) || !customRole.TryGetModule(out Scp1509Resurrection module))
+            return;
+
+        if (!module.TryPickRole(out RoleTypeId role, out ICustomRole resurrectRole))
+        {
+            LogManager.Warn($"[Scp1509Resurrection] CustomRole {customRole.Role.Name} ({customRole.Role.Id}) has no valid role to resurrect {ev.RevivedPlayer.Nickname} as, keeping the default one ({ev.RespawnRole})");
+            return;
+        }
+
+        LogManager.Debug($"[Scp1509Resurrection] Resurrecting {ev.RevivedPlayer.Nickname} ({ev.RevivedPlayer.PlayerId}) as {(resurrectRole is null ? role.ToString() : $"CustomRole {resurrectRole.Name} ({resurrectRole.Id})")}");
+
+        ev.RespawnRole = role;
+        Scp1509ResurrectQueue[ev.RevivedPlayer.PlayerId] = new Tuple<ICustomRole, bool>(resurrectRole, module.GiveStartingItems);
+    }
+
+    public void OnScp1509Resurrected(PlayerScp1509ResurrectedEventArgs ev)
+    {
+        if (ev.RevivedPlayer is null || !Scp1509ResurrectQueue.TryRemove(ev.RevivedPlayer.PlayerId, out Tuple<ICustomRole, bool> data))
+            return;
+
+        Player player = ev.RevivedPlayer;
+        ICustomRole customRole = data.Item1;
+        bool giveStartingItems = data.Item2;
+
+        if (customRole is not null)
+        {
+            if (player.Role != customRole.Role)
+            {
+                LogManager.Debug($"[Scp1509Resurrection] {player.Nickname} has been resurrected as {player.Role} instead of {customRole.Role}, CustomRole {customRole.Name} ({customRole.Id}) won't be applied");
+                return;
+            }
+
+            SpawnManager.SummonSubclassApplier(player, customRole);
+
+            if (!giveStartingItems)
+                player.ClearInventory();
+        }
+        else if (giveStartingItems)
+        {
+            InventoryItemProvider.ServerGrantLoadout(player.ReferenceHub, player.RoleBase);
         }
     }
 
