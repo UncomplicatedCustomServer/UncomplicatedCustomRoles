@@ -18,6 +18,8 @@ using MEC;
 using PlayerRoles;
 using PlayerRoles.FirstPersonControl;
 using PlayerRoles.PlayableScps;
+using PlayerRoles.PlayableScps.HumeShield;
+using PlayerStatsSystem;
 using Respawning.Objectives;
 using UncomplicatedCustomRoles.API.Events;
 using UncomplicatedCustomRoles.API.Features.Controllers;
@@ -184,6 +186,13 @@ public class SummonedCustomRole
         _eventModuleCount = _customModules.Count(m => m.TriggerOnEvents.Count > 0);
         EventTriggeredModuleTotal += _eventModuleCount;
 
+        List[Id] = this;
+        CachedListByPlayerId[player.PlayerId] = this;
+        if (CachedCountByRoleId.TryGetValue(role.Id, out int count))
+            CachedCountByRoleId[role.Id] = count + 1;
+        else
+            CachedCountByRoleId[role.Id] = 1;
+
         if (Role.Team is not null && Role.Team != Role.Role.GetTeam())
         {
             EvaluateRoleBase();
@@ -193,12 +202,6 @@ public class SummonedCustomRole
         Object.Destroy(Player.GameObject.GetComponent<EscapeController>());
 
         EventHandler = new CustomRoleEventHandler(this);
-        List[Id] = this;
-        CachedListByPlayerId[player.PlayerId] = this;
-        if (CachedCountByRoleId.TryGetValue(role.Id, out int count))
-            CachedCountByRoleId[role.Id] = count + 1;
-        else
-            CachedCountByRoleId[role.Id] = 1;
 
         if (Role is CustomRole customRole)
             customRole.OnSpawned(this);
@@ -271,6 +274,7 @@ public class SummonedCustomRole
                     VisibilityController = originalRole.VisibilityController,
                     VoiceModule = originalRole.VoiceModule,
                     VariantsModule = originalRole.VariantsModule,
+                    HumeShieldModule = (originalRole as IHumeShieldedRole)?.HumeShieldModule ?? new NoHumeShieldModule { HsStat = Player.GetStatModule<HumeShieldStat>() },
                     _lastOwner = Player.ReferenceHub,
                     Ragdoll = originalRole.Ragdoll,
                     RoleAvatar = originalRole.RoleAvatar,
@@ -351,6 +355,8 @@ public class SummonedCustomRole
 
     private void RemoveInternal(bool detached)
     {
+        DisguiseTeam.Remove(_playerId);
+
         try
         {
             foreach (CustomModule module in _customModules.ToArray())
@@ -380,8 +386,6 @@ public class SummonedCustomRole
 
                 Player.IsDisarmed = false;
             }
-
-            DisguiseTeam.Remove(_playerId);
 
             if (detached)
             {
@@ -828,5 +832,17 @@ public class SummonedCustomRole
     public override string ToString()
     {
         return $"Player {Player.Nickname} ({Player.PlayerId}) - CustomRole {Role.Id} ({Role.Nickname})";
+    }
+
+    
+    private class NoHumeShieldModule : HumeShieldModuleBase
+    {
+        public override float HsMax => 0f;
+
+        public override float HsRegeneration => 0f;
+
+        public override Color? HsWarningColor => null;
+
+        public override bool HideWhenEmpty => true;
     }
 }
