@@ -49,6 +49,9 @@ internal class PlayerRoleManagerPatch
         if (RoleSerializationContext.Active)
             return true;
 
+        if (__instance._curRole is null || __instance._curRole.RoleTypeId != role.RoleTypeId)
+            return true;
+
         __result = role;
         return false;
     }

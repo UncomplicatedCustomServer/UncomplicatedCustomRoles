@@ -35,17 +35,12 @@ internal static class SLWardobe
             return;
         }
 
-        MethodInfo exiledPlayerMethod = DynamicInvoke.GetMethod("Exiled.API", "Exiled.API.Features.Player.Get", false, 1, ["apiPlayer"]);
+        MethodInfo playerMethod = DynamicInvoke.GetMethod("Exiled.API", "Exiled.API.Features.Player.Get", false, 1, ["apiPlayer"]);
 
-        if (exiledPlayerMethod is null)
-        {
-            LogManager.Error("Failed to run SLWardrobe.ApplySuit(): Exiled Player.Get method not found!");
-            return;
-        }
+        object playerObject = playerMethod?.Invoke(null, [player]) ?? player;
 
-        object exiledPlayer = exiledPlayerMethod.Invoke(null, [player]);
-        LogManager.Silent($"ArgsCounter_ {method.GetParameters().Length} for 2 - expected: {string.Join(", ", method.GetParameters().Select(p => p.ParameterType.FullName))} - found: {exiledPlayer?.GetType().FullName}, {suitName.GetType().FullName}");
-        method.Invoke(PluginInstance, [exiledPlayer, suitName]);
+        LogManager.Silent($"ArgsCounter_ {method.GetParameters().Length} for 2 - expected: {string.Join(", ", method.GetParameters().Select(p => p.ParameterType.FullName))} - found: {playerObject?.GetType().FullName}, {suitName.GetType().FullName}");
+        method.Invoke(PluginInstance, [playerObject, suitName]);
     }
 
     public static void RemoveSuit(Player player)
@@ -64,16 +59,10 @@ internal static class SLWardobe
             return;
         }
 
-        MethodInfo exiledPlayerMethod = DynamicInvoke.GetMethod("Exiled.API", "Exiled.API.Features.Player.Get", false, 1, ["apiPlayer"]);
-
-        if (exiledPlayerMethod is null)
-        {
-            LogManager.Error("Failed to run SLWardrobe.RemoveSuit(): Exiled Player.Get method not found!");
-            return;
-        }
-
-        object exiledPlayer = exiledPlayerMethod.Invoke(null, [player]);
-        LogManager.Silent($"ArgsCounter_ {method.GetParameters().Length} for 1 - expected: {string.Join(", ", method.GetParameters().Select(p => p.ParameterType.FullName))} - found: {exiledPlayer?.GetType().FullName}");
-        method.Invoke(PluginInstance, [exiledPlayer]);
+        MethodInfo playerMethod = DynamicInvoke.GetMethod("Exiled.API", "Exiled.API.Features.Player.Get", false, 1, ["apiPlayer"]);
+        object playerObject = playerMethod.Invoke(null, [player]) ?? player;
+        
+        LogManager.Silent($"ArgsCounter_ {method.GetParameters().Length} for 1 - expected: {string.Join(", ", method.GetParameters().Select(p => p.ParameterType.FullName))} - found: {playerObject?.GetType().FullName}");
+        method.Invoke(PluginInstance, [playerObject]);
     }
 }
